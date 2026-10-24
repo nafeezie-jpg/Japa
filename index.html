@@ -1355,7 +1355,7 @@ const padaScene = () => { const c = C(), when = s => s.landing===1 && (s.peace <
 
 /* ---------- Stranded at arrivals ---------- */
 const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the airport', uk:'Heathrow', ca: T()==='Toronto' ? 'Pearson' : 'the airport'}[R.key];
-  return {day:1, when: s => s.landing===1 && pickV('air',3)===1, text:`You land at ${port}. The man who arranged your trip said someone would pick you up. He is not picking up his calls. The people you know are hours away, and the only person in ${T()} is at work until 6pm.`,
+  return {day:0, label:'Arrival day', when: s => s.landing===1 && pickV('air',3)===1, text:`You land at ${port}. The man who arranged your trip said someone would pick you up. He is not picking up his calls. The people you know are hours away, and the only person in ${T()} is at work until 6pm.`,
   choices:[
    {l:"Wait for your friend", fx:{peace:-6, home:2}, r:"Three hours on an airport bench with two suitcases and a dying phone. When she arrives, you hug her like family."},
    {l:`Take a taxi, ${M(A(85))}`, fx:{cash:-A(85), peace:3}, r:"The driver plays Afrobeats when he hears your accent. It is the best money you will spend this month."},
@@ -1363,23 +1363,25 @@ const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the air
 
 /* ---------- Real stories: the host who vanished, and the guest who stayed ---------- */
 const TOLD = 'Nafeezie';
-const barNight = () => ({day:1, credit:TOLD, told:1, when: s => s.landing===1 && pickV('air',3)===2,
-  text:`For weeks, a family friend in ${T()} planned your arrival with you on WhatsApp. He picks you up himself, and you see that his home is one small room shared with his children. "No wahala, we will manage," he says. That evening he takes you to a bar for welcome drinks, steps out to make a call, and never comes back. E be like film trick.`,
+// the host and the guest match the player: a woman player gets a woman host and a female cousin
+const PRO = () => S.gender==='woman' ? {he:'she', He:'She', his:'her', him:'her'} : {he:'he', He:'He', his:'his', him:'him'};
+const barNight = () => { const p = PRO(); return {day:0, label:'Arrival day', credit:TOLD, told:1, when: s => s.landing===1 && pickV('air',3)===2,
+  text:`For weeks, a family friend in ${T()} planned your arrival with you on WhatsApp. ${p.He} picks you up, and you see that ${p.his} home is one small room shared with ${p.his} children. "No wahala, we will manage," ${p.he} says. That evening ${p.he} takes you out for welcome drinks, steps out to make a call, and never comes back. E be like film trick.`,
   choices:[
-   {l:"Wait. He must be coming back", fx:{peace:-12}, r:"Everywhere first blur. You sleep on a bench in the bar with your suitcase between your knees. In the morning, reality wakes you up, and you start figuring things out from zero."},
+   {l:`Wait. ${p.He} must be coming back`, fx:{peace:-12}, r:"Everywhere first blur. You sleep on a bench in the bar with your suitcase between your knees. In the morning, reality wakes you up, and you start figuring things out from zero."},
    {l:"Call everyone you know", fx:{cash:-A(60), peace:-5, home:2}, r:"At 1am, a friend of a friend picks up and sends you an address. You arrive by taxi with your suitcase and a very long story."},
-   {l:"Book the cheapest room nearby", fx:{cash:-A(90), peace:-2, future:2}, r:"A tired receptionist gives you a room above a takeaway. You lie awake and finally understand what \"we will manage\" meant."}]});
-const guestStay = () => { const c = C(), host = s => pickV('HOST',2)===0; return [
- {day:30, label:'Two months later', ask:1, credit:TOLD, told:1, when: host, from:c.friend, sub:"Secondary school friend", text:`You have finally found your feet in ${T()}. Then a message comes in. "${c.please}, my cousin just landed and he has nowhere to stay. Can he stay with you for one month? Just one month, while he finds his feet."`,
+   {l:"Book the cheapest room nearby", fx:{cash:-A(90), peace:-2, future:2}, r:"A tired receptionist gives you a room above a takeaway. You lie awake and finally understand what \"we will manage\" meant."}]}; };
+const guestStay = () => { const c = C(), p = PRO(), host = s => pickV('HOST',2)===0; return [
+ {day:30, label:'Two months later', ask:1, credit:TOLD, told:1, when: host, from:c.friend, sub:"Secondary school friend", text:`You have finally found your feet in ${T()}. Then a message comes in. "${c.please}, my cousin just landed and ${p.he} has nowhere to stay. Can ${p.he} stay with you for one month? Just one month, while ${p.he} finds ${p.his} feet."`,
   choices:[
-   {l:"Say yes. One month only", fx:{cash:-A(100), home:4, peace:-4}, set:{guest:'yes'}, r:"He arrives with two Ghana Must Go bags and a big smile. He eats well, sleeps well, and thanks you every single day."},
-   {l:"Say yes, with an end date", fx:{home:2, peace:-1, future:2}, set:{guest:'dated'}, r:"He signs your note like a contract. It feels awkward, and it also feels safe."},
+   {l:"Say yes. One month only", fx:{cash:-A(100), home:4, peace:-4}, set:{guest:'yes'}, r:`${p.He} arrives with two Ghana Must Go bags and a big smile. ${p.He} eats well, sleeps well, and thanks you every single day.`},
+   {l:"Say yes, with an end date", fx:{home:2, peace:-1, future:2}, set:{guest:'dated'}, r:`${p.He} signs your note like a contract. It feels awkward, and it also feels safe.`},
    {l:"Say no. No space", fx:{home:-5, peace:3}, r:"Your friend says he understands. Then he tells two people that abroad has changed you."}]},
- {day:30, label:'Three months later', credit:TOLD, told:1, when: s => host(s) && s.f.guest==='yes', text:"It has been a month. Your guest has his own side of the wardrobe now, your food budget has doubled, and he has not mentioned moving out once.",
+ {day:30, label:'Three months later', credit:TOLD, told:1, when: s => host(s) && s.f.guest==='yes', text:`It has been a month. Your guest has ${p.his} own side of the wardrobe now, your food budget has doubled, and ${p.he} has not mentioned moving out once.`,
   choices:[
-   {l:"Give him two weeks' notice", fx:{peace:4, home:-3}, set:{guest:'notice'}, r:"He looks hurt for one evening. By the end of the week, he has viewed three rooms."},
+   {l:`Give ${p.him} two weeks' notice`, fx:{peace:4, home:-3}, set:{guest:'notice'}, r:`${p.He} looks hurt for one evening. By the end of the week, ${p.he} has viewed three rooms.`},
    {l:"Let it slide. Maybe next month", fx:{cash:-A(150), peace:-8}, set:{guest:'stayed'}, r:"Next month becomes the month after. The host who told us this story had a one-month guest who stayed for eight."},
-   {l:"Pay his deposit elsewhere", fx:{cash:-A(300), peace:6, home:3}, set:{guest:'moved'}, r:"You find him a room and pay the deposit to buy your space back. Expensive, but you can finally walk around in your own house."}]}
+   {l:`Pay ${p.his} deposit elsewhere`, fx:{cash:-A(300), peace:6, home:3}, set:{guest:'moved'}, r:`You find ${p.him} a room and pay the deposit to buy your space back. Expensive, but you can finally walk around in your own house.`}]}
 ]; };
 
 function scenes(){
@@ -1494,7 +1496,7 @@ function header(day){
   shown = {cash:S.cash, peace:S.peace, home:S.home, future:S.future};
   const b = v => `<div class="bar"><i style="width:${v}%"></i></div>`;
   return `<div class="pass">
-    <div class="pass-top"><div class="brand">${getName() ? getName().toUpperCase()+' HAS LANDED' : 'LANDED'}</div><div class="day">DAY ${String(day).padStart(2,'0')} / 30</div></div>
+    <div class="pass-top"><div class="brand">${getName() ? getName().toUpperCase()+' HAS LANDED' : 'LANDED'}</div><div class="day">${day===0 ? 'ARRIVAL DAY' : `DAY ${String(day).padStart(2,'0')} / 30`}</div></div>
     <div class="route">${S.trail.map(t=>t.code).join(' → ')} → ${R.country} · ${L.town===L.name?L.name:L.town+', '+L.name}</div>
     <div class="stats">
       <div class="stat${c.cash}"><span>Cash</span><b>${money(S.cash)}</b></div>
@@ -1686,7 +1688,7 @@ function render(){
   if(phase==='scene'){
     const list = typeof sc.choices==='function' ? sc.choices(S) : sc.choices;
     const ord = list.map((c,i)=>i).sort((a,b)=> hashStr((S.seed||0)+'|'+sc.day+'|'+list[a].l) - hashStr((S.seed||0)+'|'+sc.day+'|'+list[b].l));
-    const note = sc.day===1 && !sc.from && idx===nextIndex(0) ? `${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
+    const note = sc.day<=1 && !sc.from && idx===nextIndex(0) ? `${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
     app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}${glossLink()}</div>`;
     wireBack();
     if(sc.from && !(S.landing===1 && sc.day===1)) setTimeout(()=> isCall(sc) ? SFX.ring() : SFX.ping(), 150);
@@ -1716,7 +1718,7 @@ function render(){
 function artKind(sc){
   if(sc.auto==='roof') return S.f.sibling==='sent' && ((S.v&&S.v.B)||0)===0 ? 'goat' : 'phone';
   if(sc.auto) return 'coins';
-  if(sc.day===1) return 'plane';
+  if(sc.day<=1) return 'plane';
   if(sc.day===17) return 'star';
   if(sc.from){
     const f = sc.from, c = C();
