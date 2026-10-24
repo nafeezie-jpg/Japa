@@ -176,6 +176,10 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .mbar em{position:absolute;left:60%;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.5}
 .bench{margin:0;font-size:14px;color:var(--muted)}
 .lesson{background:var(--bubble);border-radius:12px;padding:12px 14px;font-weight:600}
+.a-wave{animation:wave 1s ease-in-out infinite;transform-origin:center;transform-box:fill-box}
+@keyframes wave{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1.2)}}
+.a-pop{animation:popin .7s cubic-bezier(.2,1.6,.4,1) both;transform-origin:80px 44px}
+@keyframes popin{from{transform:scale(0) rotate(-30deg)}to{transform:none}}
 .foot{font-size:13px;color:var(--muted);text-align:center}
 .fade{animation:fade .35s ease both}
 @keyframes fade{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -520,6 +524,35 @@ const mishap = () => { const c = C(), workplace = STU() ? 'class' : 'work'; retu
    {l:"Host a potluck and start a jollof war", fx:{cash:-A(25), peace:8, home:2}, r:"Six people, nine pots, and two hours of arguing about whose jollof is best. It feels like home."}]}
 ][pickV('G',4)]; };
 
+
+const smallWin = () => { const c = C(), workplace = STU() ? 'class' : 'work'; return [
+ {day:17, text:`At the bus stop, a man hears you on the phone and says, "You be Naija?" He is from ${c.home}. He runs a small logistics company in ${T()} and he is hiring.`,
+  choices:[
+   {l:"Swap numbers. Networking, Naija style", fx:{peace:4, future:8}, r:"He calls the next day. It is a real job, with a real contract. Bus stops are the new LinkedIn."},
+   {l:"Invite him for jollof on Saturday", fx:{peace:6, home:2, future:5}, r:"He brings his wife, three kids, and a cooler of zobo. You now have family in this city."},
+   {l:"Smile and keep it moving. Stranger danger", fx:{peace:2}, r:"He waves you off kindly. Two weeks later you see his company van and wonder."}]},
+ {day:17, from:"Former boss", sub:O(), text:`We have a short remote project and we need someone who knows the work. ${M(A(400))} for two weeks. Interested?`,
+  choices:[
+   {l:`Accept the ${M(A(400))}. ${O()} money, abroad address`, fx:{cash:A(400), future:6, peace:-2}, r:"You work evenings for two weeks. The payment lands, and so does a reminder that your skills still matter."},
+   {l:"Negotiate. You are abroad now, after all", fx:{cash:A(550), future:4, peace:-1}, r:"They agree faster than expected. You wonder how long you have been undercharging."},
+   {l:"Decline politely. Rest is also a strategy", fx:{peace:5}, r:"They say the door is always open. It feels good to be wanted."}]},
+ {day:17, text:`A refund you forgot about lands in your account. ${M(A(180))}, just like that.`,
+  choices:[
+   {l:"Save every penny. Future you is watching", fx:{cash:A(180), future:4}, r:"You move it to savings and feel like a responsible adult for an entire afternoon."},
+   {l:"Treat yourself. You deserve one nice thing", fx:{cash:A(90), peace:9}, r:"Proper restaurant, no calculator. It tastes like freedom."},
+   {l:"Send it home before anyone asks", fx:{home:9, peace:2}, r:`${c.mum} calls just to say thank you, with no follow-up request. Historic.`}]},
+ {day:17, text:`Someone from ${workplace} invites you to dinner with their family. Their mum has made rice "with a bit of spice" in your honour.`,
+  choices:[
+   {l:"Go and praise the rice generously", fx:{peace:8, future:2}, r:"It is not jollof. But it is warm, and so are they. You leave with leftovers and a friend."},
+   {l:"Bring your own jollof as a gift", fx:{peace:6, future:3}, r:"Their whole family goes quiet after the first bite. You have started a cultural exchange programme."},
+   {l:"Bring jollof and do not share the recipe", fx:{peace:7}, r:"They beg for it. You say it is a family secret. It is mostly patience and pepper."}]},
+ {day:17, from:c.mum, sub:`${c.home} · voice note`, text:`No request today, ${c.endear}. I just want to say I am proud of you. I pray for you every day. That is all.`,
+  choices:[
+   {l:"Replay it ten times", fx:{peace:10}, r:"By the tenth time, you are crying in the kitchen. The good kind."},
+   {l:"Call her back immediately", fx:{peace:6, home:6}, r:"You talk for an hour about nothing. It is the best hour of the month."},
+   {l:"Save it for hard days", fx:{peace:5, future:2}, r:"You star the voice note. On bad days, it will be there."}]}
+][pickV('H',5)]; };
+
 const doubt = (day, where, extra) => ({day, text: STU() ? `You sit in the library after a long day. Your lecturer still cannot pronounce your name, and your account balance is lower than your GPA. You start asking yourself why you came.` : `${where} You had staff in ${O()}. Today someone half your age told you the role needs "someone more entry level". You start asking yourself why you left.`,
   choices:[
    {l:`Call a friend still in ${O()}`, fx:{home:3, peace:6}, r:"She says the office misses you and that fuel is now unbelievable. You hang up feeling missed and very sure about the fuel."},
@@ -790,7 +823,7 @@ function pathScenes(){
 
 function scenes(){
   const base = R.key==='us' ? US() : R.key==='uk' ? UK() : CA();
-  return base.concat(pathScenes(), [familyGroup(), mishap()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  return base.concat(pathScenes(), [familyGroup(), mishap(), smallWin()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -1011,7 +1044,18 @@ function artKind(sc){
   if(sc.auto==='roof') return S.f.sibling==='sent' && ((S.v&&S.v.B)||0)===0 ? 'goat' : 'phone';
   if(sc.auto) return 'coins';
   if(sc.day===1) return 'plane';
-  if(sc.from) return 'phone';
+  if(sc.day===17) return 'star';
+  if(sc.from){
+    const f = sc.from, c = C();
+    if(/WhatsApp group/.test(f)) return 'group';
+    if(/Student Finance/.test(f)) return 'school';
+    if(/Town union|Class of/.test(f)) return 'hall';
+    if(f===c.farmer) return 'farm';
+    if(f===c.mum) return 'voice';
+    if(f===c.sib) return ['house','card','pin','plane','car'][(S.v&&S.v.B)||0];
+    if(f===c.friend || /colleague|boss/i.test(f)) return 'chat';
+    return 'phone';
+  }
   const t = sc.text||'';
   if(/snow|minus|winter|cold front|parka/i.test(t)) return 'snow';
   if(/rain/i.test(t)) return 'rain';
@@ -1038,6 +1082,13 @@ const ART = {
   car:`<line x1="0" y1="78" x2="160" y2="78" class="s-line a-road" stroke-width="3" stroke-dasharray="14 10"/><g class="a-bob"><rect x="44" y="40" width="72" height="26" rx="6" class="f-gold"/><rect x="52" y="30" width="48" height="16" rx="5" class="f-gold"/><rect x="56" y="33" width="18" height="10" rx="2" class="f-paper"/><rect x="78" y="33" width="18" height="10" rx="2" class="f-paper"/><circle cx="62" cy="68" r="8" class="f-ink"/><circle cx="100" cy="68" r="8" class="f-ink"/></g>`,
   house:`<path d="M44 46 L80 18 L116 46 Z" class="f-green"/><rect x="50" y="46" width="60" height="32" class="f-line"/><rect x="74" y="56" width="12" height="22" class="f-ink"/><rect x="56" y="52" width="12" height="10" class="f-gold a-pulse"/><rect x="92" y="52" width="12" height="10" class="f-gold a-pulse"/>`,
   work:`<g class="a-bob"><rect x="46" y="32" width="68" height="44" rx="6" class="f-green"/><rect x="68" y="22" width="24" height="12" rx="3" class="s-green" fill="none" stroke-width="4"/><rect x="46" y="48" width="68" height="6" class="f-ink" opacity=".35"/><rect x="74" y="46" width="12" height="10" rx="2" class="f-gold"/></g>`,
+  voice:`<rect x="34" y="24" width="92" height="40" rx="20" class="f-green"/><circle cx="54" cy="44" r="9" class="f-paper"/><path d="M51 39 v10 l8 -5 z" class="f-green"/>${[70,78,86,94,102,110].map((x,i)=>`<rect x="${x}" y="${36+(i%3)*3}" width="4" height="${16-(i%3)*6}" rx="2" class="f-paper a-wave" style="animation-delay:${i*0.12}s"/>`).join('')}`,
+  group:`<rect x="30" y="16" width="70" height="20" rx="8" class="f-line a-drop1"/><rect x="60" y="40" width="70" height="20" rx="8" class="f-green a-drop2"/><rect x="30" y="64" width="60" height="18" rx="8" class="f-line a-drop3"/><circle cx="22" cy="26" r="6" class="f-gold"/><circle cx="138" cy="50" r="6" class="f-ink"/><circle cx="22" cy="73" r="6" class="f-gold"/>`,
+  chat:`<path d="M34 20 h60 a10 10 0 0 1 10 10 v18 a10 10 0 0 1 -10 10 h-46 l-10 10 v-10 h-4 a10 10 0 0 1 -10 -10 v-18 a10 10 0 0 1 10 -10z" class="f-green a-drop1"/><path d="M126 38 h-36 a8 8 0 0 0 -8 8 v14 a8 8 0 0 0 8 8 h22 l8 8 v-8 h6 a8 8 0 0 0 8 -8 v-14 a8 8 0 0 0 -8 -8z" class="f-gold a-drop2"/><circle cx="52" cy="39" r="3" class="f-paper a-pulse"/><circle cx="64" cy="39" r="3" class="f-paper a-pulse"/><circle cx="76" cy="39" r="3" class="f-paper a-pulse"/>`,
+  farm:`<path d="M44 44 L80 20 L116 44 Z" class="f-bad"/><rect x="50" y="44" width="60" height="34" class="f-bad" opacity=".85"/><path d="M70 78 v-20 h20 v20 M70 58 l20 20 M90 58 l-20 20" class="s-paper" stroke-width="2.5" fill="none"/><line x1="10" y1="78" x2="150" y2="78" class="s-line" stroke-width="3"/><g class="a-bob"><ellipse cx="132" cy="70" rx="9" ry="7" class="f-paper"/><circle cx="139" cy="62" r="4.5" class="f-paper"/><path d="M142 62 l4 1 l-4 2z" class="f-gold"/></g>`,
+  hall:`<path d="M36 34 L80 14 L124 34 Z" class="f-green"/><rect x="40" y="34" width="80" height="6" class="f-ink"/>${[46,62,78,94,110].map(x=>`<rect x="${x}" y="42" width="6" height="30" class="f-line"/>`).join('')}<rect x="36" y="72" width="88" height="6" class="f-ink"/><rect x="98" y="16" width="20" height="10" class="f-gold a-pulse"/>`,
+  pin:`<path d="M20 70 q30 -14 60 0 t60 0" class="s-line" stroke-width="3" fill="none" stroke-dasharray="6 6"/><g class="a-bob"><path d="M80 14 a18 18 0 0 1 18 18 c0 14 -18 34 -18 34 s-18 -20 -18 -34 a18 18 0 0 1 18 -18z" class="f-bad"/><circle cx="80" cy="32" r="7" class="f-paper"/></g>`,
+  star:`${[[40,24],[120,22],[30,66],[132,64],[80,12]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="3" class="f-gold a-pulse" style="animation-delay:${i*0.2}s"/>`).join('')}<g class="a-pop"><path d="M80 22 l7 15 l16 2 l-12 11 l3 16 l-14 -8 l-14 8 l3 -16 l-12 -11 l16 -2z" class="f-gold"/></g>`,
   globe:`<g class="a-spin" style="transform-origin:80px 45px"><circle cx="80" cy="45" r="26" class="f-green"/><path d="M62 34 q10 6 6 14 q-6 6 2 14 M92 26 q-6 10 4 16 q8 4 4 14" class="s-paper" stroke-width="3" fill="none"/></g>`
 };
 function art(sc){ return `<div class="art" aria-hidden="true"><svg viewBox="0 0 160 90">${ART[artKind(sc)]}</svg></div>`; }
