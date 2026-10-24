@@ -293,6 +293,14 @@ details.custom summary{font-weight:700}
 .j-row b{display:block;font-size:15px}
 .j-row span{font-size:12px;color:var(--muted)}
 .j-nums{font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+.streak{display:flex;gap:12px;align-items:center;background:var(--bubble);border-radius:14px;padding:12px 14px;margin:12px 0}
+.streak .fire{font-size:26px;line-height:1}
+.streak b{display:block;font-size:16px}
+.streak span{font-size:13px;color:var(--muted)}
+.remind{margin:16px 0;padding:14px;border:1.5px dashed var(--line);border-radius:14px}
+.remind p{font-size:14px;color:var(--muted);margin:4px 0 10px}
+.remind .row .ghost{box-sizing:border-box;min-width:0;text-align:center;padding:12px 10px;font-size:15px}
+.remind .row a.ghost{display:flex;align-items:center;justify-content:center;text-decoration:none;color:inherit}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1509,6 +1517,7 @@ function render(){
         </div>
       </details>
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
+      ${streakHTML('intro')}
       ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
       <details class="how">
         <summary>Naija words in this game</summary>
@@ -1895,6 +1904,40 @@ function openJournal(){
   o.hidden = false; track('journal');
 }
 
+
+/* ---------- Streaks and a daily reminder (no login) ---------- */
+const dayKey = t => { const d = new Date(t); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); };
+function streakInfo(){
+  const days = new Set(loadHistory().map(g=>dayKey(g.t)));
+  const today = dayKey(Date.now()), playedToday = days.has(today);
+  let n = 0, d = new Date(); if(!playedToday) d.setDate(d.getDate()-1);
+  while(days.has(dayKey(d))){ n++; d.setDate(d.getDate()-1); }
+  return {n, playedToday};
+}
+function streakHTML(where){
+  const {n, playedToday} = streakInfo(); if(!n) return '';
+  const msg = playedToday ? (where==='end' ? 'Come back tomorrow for a new Today\'s Landing.' : 'You have landed today. See you tomorrow.') : 'Play today to keep it going.';
+  return `<div class="streak"><span class="fire" aria-hidden="true">🔥</span><div><b>${n}-day streak</b><span>${msg}</span></div></div>`;
+}
+function remindIcs(){
+  const d = new Date(); d.setDate(d.getDate()+1);
+  const p = n => String(n).padStart(2,'0'), ymd = `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;
+  const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Now You Have Landed//EN','BEGIN:VEVENT',`UID:nyhl-${Date.now()}@nowyouhavelanded.com`,`DTSTAMP:${stamp}`,
+    `DTSTART:${ymd}T200000`,`DTEND:${ymd}T201000`,'RRULE:FREQ=DAILY','SUMMARY:Today\'s Landing ✈️','DESCRIPTION:A new game is waiting. Play at https://nowyouhavelanded.com',
+    'URL:https://nowyouhavelanded.com','BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Today\'s Landing','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+}
+function remindHTML(){
+  const g = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent("Today's Landing ✈️") + '&details=' + encodeURIComponent('A new game is waiting. Play at https://nowyouhavelanded.com') + '&recur=' + encodeURIComponent('RRULE:FREQ=DAILY');
+  return `<div class="remind"><div class="when">Never miss Today's Landing</div><p>Add a daily 8pm reminder to your calendar. You can change the time there.</p>
+    <div class="row"><button class="ghost" type="button" id="remind-ics">Apple or Outlook</button><a class="ghost" id="remind-g" href="${g}" target="_blank" rel="noopener">Google Calendar</a></div></div>`;
+}
+function wireRemind(){
+  const b = document.getElementById('remind-ics');
+  if(b) b.onclick = () => { track('remind-ics'); try{ const blob = new Blob([remindIcs()], {type:'text/calendar'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'todays-landing.ics'; document.body.appendChild(a); a.click(); a.remove(); }catch(e){} };
+  const g = document.getElementById('remind-g'); if(g) g.addEventListener('click', ()=>track('remind-google'));
+}
+
 function loadVerdicts(){ try{ return JSON.parse(localStorage.getItem('nyhl-verdicts')||'[]'); }catch(e){ return []; } }
 function saveVerdict(t){ const v = loadVerdicts(); const isNew = !v.includes(t); if(isNew){ v.push(t); try{ localStorage.setItem('nyhl-verdicts', JSON.stringify(v)); }catch(e){} } return isNew; }
 function collectionHTML(current, isNew){
@@ -1935,6 +1978,7 @@ function renderEnd(app){
       <p class="bench">Healthy marks: Peace ${MARKS.peace[1]}, Future ${MARKS.future[1]} (you started at 20), and Home between ${MARKS.home[1]} and ${HOME_CAP}. Above ${HOME_CAP}, home may be loving you at your own expense. For cash, healthy is three months' rent saved.</p>
       <div class="lesson">${lesson()}</div>
     </div>
+    ${streakHTML('end')}
     ${collectionHTML(title, isNewVerdict)}
     <div class="cardwrap"><img id="cardimg" alt="Your result card" hidden></div>
     <button class="primary" id="sharecard">Share my result card</button>
@@ -1955,11 +1999,13 @@ function renderEnd(app){
     </div>
     <div id="movebox" hidden class="routes"></div>
     <div id="padabox" hidden class="result padabox"></div>
+    ${remindHTML()}
     <a class="storylink" href="https://tally.so/r/q5480d" target="_blank" rel="noopener">Have a japa story? Share it and it could become a scene in the game →</a>
     <div class="toast" id="toast" role="status"></div>
     <div class="foot">Everybody wants to japa. Nobody tells you what happens after you land.</div>
     <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
   </div>`;
+  wireRemind();
   document.getElementById('pada').onclick = ()=>{
     track('japada'); SFX.land();
     const box = document.getElementById('padabox'), c = C(), rent = RENT();
