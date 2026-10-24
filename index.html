@@ -302,6 +302,11 @@ details.custom summary{font-weight:700}
 .remind .row .ghost{box-sizing:border-box;min-width:0;text-align:center;padding:12px 10px;font-size:15px}
 .remind .row a.ghost{display:flex;align-items:center;justify-content:center;text-decoration:none;color:inherit}
 .foot.credit{font-size:14px;margin-top:14px}
+.art.vn{width:100%;border:0;font:inherit;color:inherit;cursor:pointer;position:relative}
+.art.vn .vn-hint{position:absolute;right:10px;bottom:8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.art.vn.playing .a-wave{animation-duration:.25s}
+#ftoast{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;background:var(--green);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;max-width:min(88vw,380px);text-align:center;z-index:60;transition:opacity .2s,transform .2s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+#ftoast.on{opacity:1;transform:translate(-50%,0)}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1436,6 +1441,12 @@ const SFX = (() => {
     coinOut(){ tone(740, 0.12, {type:'triangle', vol:0.16}); tone(523, 0.14, {type:'triangle', vol:0.16, at:0.1}); tone(392, 0.26, {type:'triangle', vol:0.14, at:0.2, to:300}); },
     good(){ tone(523, 0.14, {type:'triangle', vol:0.14}); tone(659, 0.14, {type:'triangle', vol:0.14, at:0.08}); tone(784, 0.28, {type:'triangle', vol:0.14, at:0.16}); },
     ouch(){ tone(110, 0.35, {vol:0.4, to:70}); noise(0.12, {vol:0.08, from:600, to:200}); },
+    crackle(){
+      // a muffled voice that breaks up, then static: the network has cut
+      [0, 0.12, 0.22, 0.36, 0.48, 0.6].forEach((t, i) => tone(170 + (i*37 % 90), 0.11, {type:'sawtooth', vol:0.05, at:t, to:140 + (i*53 % 120)}));
+      noise(0.5, {at:0.7, vol:0.12, from:2400, to:900, q:0.4});
+      tone(440, 0.08, {type:'square', vol:0.05, at:1.25}); tone(330, 0.12, {type:'square', vol:0.05, at:1.34});
+    },
     meh(){ tone(392, 0.12, {type:'triangle', vol:0.1}); tone(370, 0.22, {type:'triangle', vol:0.1, at:0.11}); },
     verdict(happy){
       [0, 0.14, 0.28, 0.36, 0.44].forEach((t, i) => drum(t, i % 2 ? 160 : 120, i % 2 ? 100 : 170, 0.45));
@@ -1647,7 +1658,18 @@ const ART = {
   star:`${[[40,24],[120,22],[30,66],[132,64],[80,12]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="3" class="f-gold a-pulse" style="animation-delay:${i*0.2}s"/>`).join('')}<g class="a-pop"><path d="M80 22 l7 15 l16 2 l-12 11 l3 16 l-14 -8 l-14 8 l3 -16 l-12 -11 l16 -2z" class="f-gold"/></g>`,
   globe:`<g class="a-spin" style="transform-origin:80px 45px"><circle cx="80" cy="45" r="26" class="f-green"/><path d="M62 34 q10 6 6 14 q-6 6 2 14 M92 26 q-6 10 4 16 q8 4 4 14" class="s-paper" stroke-width="3" fill="none"/></g>`
 };
-function art(sc){ return `<div class="art" aria-hidden="true"><svg viewBox="0 0 160 90">${ART[artKind(sc)]}</svg></div>`; }
+function art(sc){ const k = artKind(sc);
+  if(k==='voice') return `<button class="art vn" type="button" onclick="playVN(this)" aria-label="Play the voice note"><svg viewBox="0 0 160 90" aria-hidden="true">${ART.voice}</svg><span class="vn-hint">Tap to play</span></button>`;
+  return `<div class="art" aria-hidden="true"><svg viewBox="0 0 160 90">${ART[k]}</svg></div>`; }
+const VN_LINES = ["Network don cut 😅 Read am below.", "Your data finished halfway. The message is written below.", "Na so the network be. Read the message below 😅", "The voice note will not load. Somebody in the family group is using all the data."];
+function playVN(el){
+  SFX.crackle(); track('voicenote-tap');
+  el.classList.add('playing'); setTimeout(()=>el.classList.remove('playing'), 1400);
+  let t = document.getElementById('ftoast');
+  if(!t){ t = document.createElement('div'); t.id = 'ftoast'; t.setAttribute('role','status'); document.body.appendChild(t); }
+  t.textContent = VN_LINES[Math.floor(Math.random()*VN_LINES.length)];
+  t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), 2600);
+}
 
 
 /* ---------- What the scores mean ---------- */
