@@ -211,7 +211,8 @@ const ROUTES = {
   ca:{key:'ca', country:'Canada', cur:'C$', k:1.35, start:4000, rent:1100, label:'Canada', ask:'Which province or territory?', sub:'Basement apartments and minus 30', def:'Ontario'}
 };
 
-const ORIGINS = {"Abuja":"ABV","Lagos":"LOS","Ibadan":"IBA","Port Harcourt":"PHC","Kano":"KAN","Enugu":"ENU","Benin City":"BNI","Abeokuta":"ABK","Ilorin":"ILR","Kaduna":"KAD"};
+const ORIGIN_LIST = [["Abia","Aba"],["Adamawa","Yola","YOL"],["Akwa Ibom","Uyo","QUO"],["Anambra","Onitsha"],["Bauchi","Bauchi","BCU"],["Bayelsa","Yenagoa"],["Benue","Makurdi","MDI"],["Borno","Maiduguri","MIU"],["Cross River","Calabar","CBQ"],["Delta","Asaba","ABB"],["Ebonyi","Abakaliki"],["Edo","Benin City","BNI"],["Ekiti","Ado-Ekiti"],["Enugu","Enugu","ENU"],["FCT","Abuja","ABV"],["Gombe","Gombe","GMO"],["Imo","Owerri","QOW"],["Jigawa","Dutse"],["Kaduna","Kaduna","KAD"],["Kano","Kano","KAN"],["Katsina","Katsina","DKA"],["Kebbi","Birnin Kebbi"],["Kogi","Lokoja"],["Kwara","Ilorin","ILR"],["Lagos","Lagos","LOS"],["Nasarawa","Lafia"],["Niger","Minna","MXJ"],["Ogun","Abeokuta"],["Ondo","Akure","AKR"],["Osun","Osogbo"],["Oyo","Ibadan","IBA"],["Plateau","Jos","JOS"],["Rivers","Port Harcourt","PHC"],["Sokoto","Sokoto","SKO"],["Taraba","Jalingo"],["Yobe","Damaturu"],["Zamfara","Gusau"]];
+const ORIGINS = Object.fromEntries(ORIGIN_LIST.map(([st,city,code])=>[city, code || city.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()]));
 let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", state:"Oyo", culture:"yoruba"};
 const O = () => S.origin;
 const MULT = [0, .75, 1, 1.35];
@@ -637,8 +638,8 @@ function render(){
       <select id="state" class="select">${STATES.map(st=>`<option${st===pick.state?' selected':''}>${st}</option>`).join('')}</select>
       <label class="when" for="culture">Whose voice should your family speak in?</label>
       <select id="culture" class="select">${Object.entries(CULTURES).map(([k,v])=>`<option value="${k}"${k===pick.culture?' selected':''}>${v.label}</option>`).join('')}</select>
-      <label class="when" for="origin">Which city are you leaving from?</label>
-      <select id="origin" class="select">${Object.keys(ORIGINS).map(o=>`<option${o===pick.origin?' selected':''}>${o}</option>`).join('')}</select>
+      <label class="when" for="origin">Which state are you leaving from?</label>
+      <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
       <div class="when">Where are you landing?</div>
       <div class="routes">
         ${Object.values(ROUTES).map(r=>`<button class="route-btn${rk===r.key?' on':''}" data-r="${r.key}" aria-pressed="${rk===r.key}"><b>${r.label}</b><span>${r.sub}</span></button>`).join('')}
