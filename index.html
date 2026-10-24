@@ -1200,12 +1200,19 @@ const routeAlts = () => { const c = C(), k = R.key, out = [];
 };
 
 /* ---------- Japada: running back home ---------- */
-const padaScene = () => { const c = C();
-  return {day:26, when: s => s.landing===1 && (s.peace < 50 || s.cash < RENT()), from:"Old classmate", sub:`Back in ${O()}`, text:`I don do japada o! Six months abroad was enough for me. I am back in ${O()}, eating ${c.food} and sleeping with both eyes closed. Peace of mind is wealth. You, how far?`,
+const padaScene = () => { const c = C(), when = s => s.landing===1 && (s.peace < 50 || s.cash < RENT());
+  return [
+  {day:26, when, from:"Old classmate", sub:`Back in ${O()}`, text:`I don do japada o! One year abroad was enough for me. I am back in ${O()}, eating ${c.food} and sleeping with both eyes closed. Peace of mind is wealth. You, how far?`,
   choices:[
    {l:"Start pricing tickets home. Quietly", fx:{peace:5, future:-6}, set:{pada:true}, r:"You check flights at 2am and do not book. But now you know the price, and that is a kind of comfort."},
    {l:"Call him and ask how it really is", fx:{peace:3, home:2}, r:"He says the first month back is sweet and the third month is hard. Nobody tells you that part either."},
-   {l:"Face it head on. Give it everything", fx:{peace:-2, future:7}, r:"You close the chat, make tea, and send two more applications. You did not come this far to only come this far."}]}; };
+   {l:"Face it head on. Give it everything", fx:{peace:-2, future:7}, r:"You close the chat, make tea, and send two more applications. You did not come this far to only come this far."}]},
+  {day:26, when, text:`Late at night you scroll through old photos from ${O()}. Your car, your office, your house help, and a Sunday lunch with everybody laughing. You were comfortable there. Here, you are starting from zero.`,
+  choices:[
+   {l:"Say it out loud. Maybe I should go back", fx:{peace:4, future:-5}, set:{pada:true}, r:"Saying it does not make it a plan. But it lets some of the pressure out, and you finally fall asleep."},
+   {l:"Remember why you came", fx:{peace:2, future:6}, r:"For some it was the children, for some it was safety, for some it was a future. Whatever yours was, it will still be there tomorrow."},
+   {l:"Call someone who started from zero too", fx:{peace:6, home:2}, r:"She tells you her first year was the hardest year of her life, and that it did not stay that way."}]}
+  ][pickV('PD',2)]; };
 
 /* ---------- Stranded at arrivals ---------- */
 const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the airport', uk:'Heathrow', ca: T()==='Toronto' ? 'Pearson' : 'the airport'}[R.key];
@@ -1863,7 +1870,7 @@ function renderEnd(app){
     </div>
     <div class="row">
       <button class="ghost" id="move">Japa again to another country</button>
-      <button class="ghost" id="pada">${S.f.pada ? 'Japada. Go back home' : 'Japada. What if you went back home?'}</button>
+      <button class="ghost" id="pada">${S.f.pada ? 'Japada. You went back a year later' : 'Japada. What if you went back after a year?'}</button>
       <button class="ghost" id="again">Start a new life</button>
     </div>
     <div id="movebox" hidden class="routes"></div>
@@ -1876,12 +1883,12 @@ function renderEnd(app){
   document.getElementById('pada').onclick = ()=>{
     track('japada'); SFX.land();
     const box = document.getElementById('padabox'), c = C(), rent = RENT();
-    const lines = [`You land back in ${O()} after ${S.landing>1 ? 'more than one japa' : 'thirty days abroad'}.`];
-    lines.push(S.cash >= rent*3 ? `You come home with ${money(S.cash)} saved, which is more than most people expected.` : S.cash >= 0 ? `You come home with ${money(S.cash)} and a lot of stories.` : `You come home owing ${money(-S.cash)}, and the first person to ask "where is our own?" gets a very long silence.`);
-    lines.push(S.home >= 50 ? `${c.mum} cooks ${c.food} and tells everyone you are "on holiday".` : `Half the family is happy to see you. The other half wants to know what happened.`);
-    lines.push(S.future >= 40 ? "You bring back skills, contacts, and a clearer head. This time you know exactly what you want." : "You sleep through the night for the first time in a month. The plan can wait until you are rested.");
+    const lines = [`One year later, you land back in ${O()}. The habits from your first month followed you all the way home.`];
+    lines.push(S.cash >= rent*3 ? "The saving habit you started in month one paid off. You come home with something real to start with." : S.cash >= 0 ? "You come home with stories, small savings, and a suitcase full of gifts you could not really afford." : `You come home still paying off what you owed abroad, and the first person to ask "where is our own?" gets a very long silence.`);
+    lines.push(S.home >= 50 ? `${c.mum} cooks ${c.food} and tells everyone you are "on holiday".` : "Half the family is happy to see you. The other half wants to know what happened.");
+    lines.push(S.future >= 40 ? "You bring back skills, contacts, and a clearer head. This time you know exactly what you want." : "You sleep through the night for the first time in a year. The plan can wait until you are rested.");
     lines.push("Japada is not failure. Sometimes the plan changes, and coming home is the bravest part.");
-    box.innerHTML = `<div class="when">Japada · Back in ${O()}</div>${lines.map(l=>`<p>${l}</p>`).join('')}`;
+    box.innerHTML = `<div class="when">Japada · One year later · Back in ${O()}</div>${lines.map(l=>`<p>${l}</p>`).join('')}`;
     box.hidden = false; box.scrollIntoView({behavior:'smooth', block:'nearest'});
   };
   document.getElementById('again').onclick = ()=>{ fresh(); pick.route=null; pick.qroute=null; pick.daily=false; pick.duo=0; render(); scrollTo(0,0); };
