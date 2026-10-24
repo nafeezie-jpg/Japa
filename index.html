@@ -567,10 +567,10 @@ const friend = () => { const c = C(); return [
    {l:"Call him for an hour. Talk is cheap, literally", fx:{home:4, peace:4}, r:"You laugh about secondary school until 2am. He does not mention money once. You feel richer anyway."},
    {l:"Explain that abroad has not changed your account balance", fx:{home:-3, peace:2}, r:"He says your account is just shy. You tell him your account is in therapy."}]}
 ,
- {day:28, from:c.cousin, sub:"Cousin", text:`You sent ${c.cousin} ${NG(60)} for school books. The reply comes in two seconds. "Thank you o. So na only ${M(A(60))} be this?" That ${M(A(60))} is ${HRS(60)} hours of your work.`,
+ {day:28, from:c.cousin, sub:"Cousin", text:`You sent ${c.cousin} ${NG(27)} for school books. The reply comes in two seconds. "Thank you o. So na only ${M(A(27))} be this?" That ${M(A(27))} is ${HRS(27)} hours of your work.`,
   choices:[
    {l:"Reply with your hourly rate and a calculator emoji", fx:{peace:3, home:-3}, r:"You get left on read. Time is money, and you just sent the invoice."},
-   {l:`Explain that ${HRS(60)} hours of work is not small`, fx:{peace:2, home:1}, r:"They say sorry. They do not fully understand, but they say sorry, and you will take it."},
+   {l:`Explain that ${HRS(27)} hours of work is not small`, fx:{peace:2, home:1}, r:"They say sorry. They do not fully understand, but they say sorry, and you will take it."},
    {l:"Say nothing. Next time, send naira without the receipt", fx:{peace:-3, home:2}, r:"You swallow it. Abroad has taught you that every naira you send home has your hours inside it."}]}
 ][pickV('E',6)]; };
 
@@ -648,10 +648,10 @@ const smallWin = () => { const c = C(), workplace = STU() ? 'class' : 'work'; re
    {l:"Call her back immediately", fx:{peace:6, home:6}, r:"You talk for an hour about nothing. It is the best hour of the month."},
    {l:"Save it for hard days", fx:{peace:5, future:2}, r:"You star the voice note. On bad days, it will be there."}]}
 ,
- {day:17, from:c.mum, sub:`${c.home} · bank alert`, text:`${c.mum} sends you ${NG(25)} "for your upkeep". It lands as ${M(A(25))}, which is about ${HRS(25)} hours of your pay. You know she sold something to send it.`,
+ {day:17, from:c.mum, sub:`${c.home} · bank alert`, text:`${c.mum} sends you ${NG(667)} "to support you small". Back home, that is serious money and a real sacrifice. Here it lands as ${M(A(667))}, which is about ${HRS(667)} hours of your pay. It barely touches your rent.`,
   choices:[
-   {l:"Accept it with both hands. It is love, not maths", fx:{cash:A(25), home:6, peace:6}, r:"You thank her properly. Some money is measured in sacrifice, and hers just outweighed your salary."},
-   {l:`Send it back with ${M(A(50))} on top`, fx:{cash:-A(50), home:8, peace:2}, r:"She calls you stubborn and then tells the whole family. You gain respect and lose money, which is how abroad works."},
+   {l:"Accept it with both hands. It is love, not maths", fx:{cash:A(667), home:6, peace:6}, r:"You thank her properly. The rent is paid, and the voice note you send her makes her cry happy tears."},
+   {l:"Send it back. She needs it more than your landlord", fx:{home:7, peace:2}, r:"She insists, you insist, and the money flies back and forth until the bank charges eat a piece of it."},
    {l:"Tell her to keep it. The exchange rate already ate it", fx:{home:-4, peace:-3}, r:"She goes quiet. You meant well, but she heard that her help is useless. Exchange rates hurt feelings too."}]}
 ][pickV('H',6)]; };
 
