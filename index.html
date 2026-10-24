@@ -324,6 +324,20 @@ details.custom summary{font-weight:700}
 .road p{font-size:13px;color:var(--muted);margin:8px 0 0}
 .pass .brand{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62%}
 #pname{font:inherit}
+.lbbox{display:grid;gap:10px;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:var(--card)}
+.lbbox p{margin:0;font-size:15px}
+.lb-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
+.lb-tab{background:var(--bubble);border:1.5px solid transparent;border-radius:12px;padding:10px;text-align:left;display:grid;gap:2px}
+.lb-tab b{font-family:var(--display);font-size:15px;color:var(--green2)}
+.lb-tab span{font-size:12px;color:var(--muted);line-height:1.3}
+.lb-tab.on{border-color:var(--green2);background:var(--card)}
+.lb-list{display:grid;gap:8px}
+.lb-row{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:8px}
+.lb-rank{font-family:var(--display);font-weight:800;font-size:18px;color:var(--accent);text-align:center}
+.lb-row b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-row small{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-val{font-weight:800;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.lb-row.me{background:var(--bubble);border-radius:10px;padding:8px 6px}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -452,6 +466,7 @@ function begin(rk, pname, prev){
   const start = Math.round(ROUTES[rk].start * PATHS[path].mult * ({savings:1, sold:1.4, borrowed:1.3, kept:0.9}[fund]||1) / 50) * 50;
   S = prev ? {cash:start, start, path, sold, fund, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture, gender, daily, seed, duo, duoDay}
            : {cash:start, start, path, sold, fund, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture, gender, daily, seed, duo, duoDay};
+  S.st = {r:0, s:0, g:0};   // requests refused, money sent home (USD), traps fallen for
   shown = null;
   history = [];
   idx = nextIndex(0); phase = 'scene';
@@ -490,6 +505,7 @@ function dayLabel(ds){ const [y,m,d]=ds.split('-').map(Number); return d+' '+['J
 
 /* ---------- Shared scenes (each has several versions, picked at random per game) ---------- */
 const cap = t => t[0].toUpperCase()+t.slice(1);
+const ASK = o => (o.ask = 1, o);   // a request from home: counts toward the leaderboard hearts
 const mummyThanks = () => { const c = C(); return [
  {day:3, from:c.mum, sub:`${c.home} · 6:42am`, text:`${c.greet}! Thank God you landed safely, ${c.endear}. The family is doing a small celebration for your safe arrival. Your uncle said you should send something. Everybody will be there.`,
   choices:[
@@ -516,7 +532,7 @@ const mummyThanks = () => { const c = C(); return [
    {l:`Buy the iPhone for ${M(A(900))}. Rent can wait`, fx:{cash:-A(900), home:14, peace:2}, r:"She video calls you the next morning at 5am, just to test the camera. The picture is very clear. So are her questions about when you are getting married."},
    {l:`Send a "nearly iPhone" for ${M(A(250))}`, fx:{cash:-A(250), home:6}, r:"She likes it, but tells everyone it is \"almost an iPhone\"."},
    {l:"Blame the network. It is always the network", fx:{home:-4, peace:3}, r:`"${c.exclaim} So it is the network that is not sending money too?" she asks.`}]}
-][pickV('A',5)]; };
+].map(ASK)[pickV('A',5)]; };
 
 const sibling = () => { const c = C(); return [
  {day:12, from:c.sib, sub:`Your brother · ${c.home}`, text:`${c.please}, our building don reach roofing o. We need ${N(1500)} for zinc and carpenter. Send am before Friday so the price no go up.`,
@@ -544,7 +560,7 @@ const sibling = () => { const c = C(); return [
    {l:`Send the ${N(2500)}. Uber mogul in the family`, fx:{cash:-A(2500), home:12}, set:{sibling:'sent'}, r:`${c.sib} posts the car with the caption "God did". The first weekly return is "next week".`},
    {l:"Ask for the car papers. All of them", fx:{home:-3}, set:{sibling:'video'}, r:"He sends a photo of the steering wheel and says that is the important part."},
    {l:`Pay a mechanic ${N(40)} to tell you the truth`, fx:{cash:-A(40), home:-5, future:6}, set:{sibling:'checked'}, r:"The mechanic says the \"2020 Corolla\" is a 2004 with a new face. You keep your money and ask for a better deal."}]}
-][pickV('B',5)]; };
+].map(ASK)[pickV('B',5)]; };
 
 const contribution = () => { const c = C(); return [
  {day:16, from:c.mum, sub:`${c.home} · 7:05am`, text:"Your aunty's daughter is getting married next month. The family has put you down for ₦200,000. I already told them you said yes.",
@@ -577,7 +593,7 @@ const contribution = () => { const c = C(); return [
    {l:"Promise \"next week\". Buy yourself time", fx:{home:2}, set:{promise:true}, r:"The group admin tags you every morning for a week."},
    {l:"Send ₦20,000 and many motivational words", fx:{cash:-A(14), home:1}, r:"Your former class captain replies, \"Every little helps.\" He has never said anything little in his life."},
    {l:"Leave the alumni group like a ninja", fx:{home:-6, peace:6}, r:"Ten minutes later, three people message you privately to ask if you are okay."}]}
-][pickV('C',5)]; };
+].map(ASK)[pickV('C',5)]; };
 
 const farm = () => { const c = C(); return [
  {day:21, from:c.farmer, sub:`Farm manager · ${c.home}`, text:`Good evening boss. The cold weather killed 300 birds. We need ${N(400)} to restock before the festive season.`,
@@ -605,9 +621,9 @@ const farm = () => { const c = C(); return [
    {l:`Send the ${N(250)}. Fast snails are expensive`, fx:{cash:-A(250)}, set:{farm:'sent'}, r:"You send it, then spend the evening wondering how fast snails can run."},
    {l:"Ask how exactly snails escape", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"He says, \"Boss, these ones are special. Very fast.\""},
    {l:"Send your neighbour to supervise the snails", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:"Your neighbour confirms that snails do not run. They are exactly where you left them."}]}
-][pickV('D',5)]; };
+].map(ASK)[pickV('D',5)]; };
 
-const promise = () => ({day:22, when: s => s.f.promise, from:C().mum, sub:`${C().home} · 6:30am`, text:"It is next week.",
+const promise = () => ({day:22, ask:1, when: s => s.f.promise, from:C().mum, sub:`${C().home} · 6:30am`, text:"It is next week.",
   choices:[
    {l:"Send it now", fx:{cash:-A(135), home:4}, r:"She replies with a single prayer emoji. Peace is restored."},
    {l:"Tell her you can't afford it", fx:{home:-10, peace:3}, r:"She says she will tell them herself. You know she will tell them it was your fault."}]});
@@ -615,12 +631,12 @@ const promise = () => ({day:22, when: s => s.f.promise, from:C().mum, sub:`${C()
 const friend = () => { const c = C(); return [
  {day:28, from:c.friend, sub:"Secondary school friend", text:`${c.please}, how you take japa? Help me with proof of funds. Just show ${M(A(10000))} in your account for one week, I go return am.`,
   choices:[
-   {l:"Lend him your account. What is a fraud alert?", fx:{peace:-10, home:2, future:-10}, r:"This is how people get flagged. You lie awake checking your banking app every hour."},
+   {l:"Lend him your account. What is a fraud alert?", g:1, fx:{peace:-10, home:2, future:-10}, r:"This is how people get flagged. You lie awake checking your banking app every hour."},
    {l:"Send him the real guide. Free of charge", fx:{future:3, home:3}, r:"You send a long voice note with every step. He says, \"I owe you.\" He does."},
    {l:"Leave him on read. Abroad is busy", fx:{home:-4, peace:2}, r:"He posts a status about fake friends abroad. You know it is for you."}]},
  {day:28, from:c.friend, sub:"Secondary school friend", text:"Buy me the latest iPhone over there. I go pay you in naira at good rate when you come home.",
   choices:[
-   {l:`Buy the iPhone for ${M(A(1100))}. "Good rate" loading`, fx:{cash:-A(1100), home:4, peace:-6}, r:"He receives the phone and posts it immediately. The naira payment is \"coming\"."},
+   {l:`Buy the iPhone for ${M(A(1100))}. "Good rate" loading`, g:1, fx:{cash:-A(1100), home:4, peace:-6}, r:"He receives the phone and posts it immediately. The naira payment is \"coming\"."},
    {l:"Send him the link. He has fingers", fx:{home:-2, peace:3, future:2}, r:"He says the link does not work in Nigeria. You both know it does."},
    {l:"Say phones are expensive here too. He will not believe you", fx:{home:-4, peace:2}, r:"He does not believe you. Nobody at home believes anything is expensive abroad."}]},
  {day:28, from:c.friend, sub:"Secondary school friend", text:`Your old laptop, ${c.please} send am give me. Even if e slow, I fit use am for my online class.`,
@@ -644,7 +660,7 @@ const friend = () => { const c = C(); return [
    {l:"Reply with your hourly rate and a calculator emoji", fx:{peace:3, home:-3}, r:"You get left on read. Time is money, and you just sent the invoice."},
    {l:`Explain that ${HRS(27)} hours of work is not small`, fx:{peace:2, home:1}, r:"They say sorry. They do not fully understand, but they say sorry, and you will take it."},
    {l:"Say nothing. Next time, send naira without the receipt", fx:{peace:-3, home:2}, r:"You swallow it. Abroad has taught you that every naira you send home has your hours inside it."}]}
-][pickV('E',6)]; };
+].map((o,i)=>i<5?ASK(o):o)[pickV('E',6)]; };
 
 const familyGroup = () => { const c = C(); return [
  {day:13, from:"Family WhatsApp group", sub:`${c.aunty} posted`, text:`${c.exclaim} See our person abroad! Proud of you o! [A photo of you from your first week, standing beside a bus stop like it is the Eiffel Tower.]`,
@@ -667,7 +683,7 @@ const familyGroup = () => { const c = C(); return [
    {l:"Pay for drinks you will never drink", fx:{cash:-A(200), home:10}, r:"You are listed as \"Chief Drinks Sponsor\". You will not be there to drink any of it."},
    {l:"Offer small chops only. Small is in the name", fx:{cash:-A(80), home:4}, r:"They accept, then quietly add puff-puff, samosa, spring rolls, and asun to small chops."},
    {l:"Announce you are not coming home in December", fx:{home:-6, peace:4}, r:"Your phone rings eleven times. Not coming is not the same as not paying, apparently."}]}
-][pickV('F',4)]; };
+].map((o,i)=>i>=2?ASK(o):o)[pickV('F',4)]; };
 
 const mishap = () => { const c = C(), workplace = STU() ? 'class' : 'work'; return [
  {day:26, text:"Your bank blocks your card for \"suspicious activity\" right after you send money home. You are at the checkout with a full basket.",
@@ -961,12 +977,12 @@ function pathScenes(){
        {l:"Pause your studies. A \"strategic break\"", fx:{peace:4, future:-12}, set:{fees:'paused'}, r:"You breathe again, even though you know pausing puts your visa and your plans at risk. You promise yourself it is only for now."}]});
   }
   if(p==='scholar'){
-    out.push({day:10, when: s => pickV('sch10',2)===0, from:c.mum, sub:`${c.home} · 8:15pm`, text:`${End}, your younger brother's school fees are due. Since your scholarship money is coming every month, you can help, abi?`,
+    out.push({day:10, ask:1, when: s => pickV('sch10',2)===0, from:c.mum, sub:`${c.home} · 8:15pm`, text:`${End}, your younger brother's school fees are due. Since your scholarship money is coming every month, you can help, abi?`,
       choices:[
        {l:`Send ${N(400)} from your stipend. Who needs groceries?`, fx:{cash:-A(400), home:10, peace:-4}, set:{stipendHome:true}, r:"Your brother sends a photo in his school uniform. Your fridge has three eggs and a lemon."},
        {l:`Send ${N(100)} and explain what "stipend" means`, fx:{cash:-A(100), home:2, peace:2}, r:"She says she understands. Then she asks your aunty to call and explain it again from her side."},
        {l:"Explain that scholarship does not mean rich", fx:{home:-8, peace:4}, r:"\"But they said it is a scholarship,\" she says. To her, the word means you are being paid to be rich."}]});
-    out.push({day:10, when: s => pickV('sch10',2)===1, from:c.aunty, sub:`Family elder · ${c.home}`, text:`I heard the university is paying you every month. Your cousin wants to start a fashion business and needs ${N(300)} for sewing machines. Since you are earning now.`,
+    out.push({day:10, ask:1, when: s => pickV('sch10',2)===1, from:c.aunty, sub:`Family elder · ${c.home}`, text:`I heard the university is paying you every month. Your cousin wants to start a fashion business and needs ${N(300)} for sewing machines. Since you are earning now.`,
       choices:[
        {l:`Send the ${N(300)}. Fashion is the future`, fx:{cash:-A(300), home:9, peace:-4}, set:{stipendHome:true}, r:"Your cousin sends a photo of the machines and a dress with your name stitched inside. Your rent is now a prayer point."},
        {l:`Send ${N(80)} for one machine`, fx:{cash:-A(80), home:3, peace:1}, r:"She says thank you, and that the other machines are \"loading\"."},
@@ -995,10 +1011,10 @@ function pathScenes(){
        {l:"Tell him papers are just permission to start", fx:{peace:5, home:-2, future:2}, r:"He goes quiet, then says, \"So papers no be money?\" No. Papers are permission to start."},
        {l:"Send a selfie in your work uniform. Reality check", fx:{peace:3, home:2}, r:`He replies, "Even with ${papers}, you still dey hustle?" Yes. Especially with ${papers}.`},
        {l:`Send ${M(A(50))} to keep up appearances`, fx:{cash:-A(50), home:4, peace:-4}, r:"He tells four friends you are now very rich. Your phone starts ringing."}]}
-    ][pickV('W',3)]);
+    ].map((o,i)=>i>=1?ASK(o):o)[pickV('W',3)]);
   }
   if(p==='lottery'){
-    out.push({day:12, from:c.aunty, sub:`Family elder · ${c.home}`, text:`Congratulations on your lottery o! How much did they give you? We have fixed a family meeting for Sunday.`,
+    out.push({day:12, ask:1, from:c.aunty, sub:`Family elder · ${c.home}`, text:`Congratulations on your lottery o! How much did they give you? We have fixed a family meeting for Sunday.`,
       choices:[
        {l:"Explain that it is a visa lottery, not money", fx:{home:-3, peace:4}, r:"She listens patiently, then asks, \"So they gave you America but no money?\" Exactly."},
        {l:`Send ${N(100)} so the meeting goes well`, fx:{cash:-A(100), home:6, peace:-3}, r:"The meeting goes well. Your name is mentioned with respect, and with a follow-up request."},
@@ -1016,7 +1032,7 @@ function pathScenes(){
        {l:"Go home and sit quietly for an hour", fx:{peace:-6}, r:"Nothing happened. Your body did not get the message until midnight."},
        {l:"Call a friend who has been through it", fx:{peace:5, home:2}, r:"He laughs gently and says he still flinches at blue lights after twelve years. You feel less alone."},
        {l:"Promise yourself to stay out of all wahala", fx:{peace:2, future:3}, r:"No parties that end late, no arguments in car parks, and indicator on for everything. You become the most law-abiding person in the country."}]});
-    out.push({day:21, from:c.mum, sub:`${c.home} · 7:00pm`, text:`${cap(c.endear)}, your cousin's wedding is next month. Everybody is asking when you are coming home.`,
+    out.push({day:21, ask:1, from:c.mum, sub:`${c.home} · 7:00pm`, text:`${cap(c.endear)}, your cousin's wedding is next month. Everybody is asking when you are coming home.`,
       choices:[
        {l:`Send ${N(150)} and a long video message`, fx:{cash:-A(150), home:5, peace:-4}, r:"They play your video at the reception. You watch the livestream alone and cry at the part where they mention you."},
        {l:"Tell her the truth about your papers", fx:{home:-3, peace:7, future:2}, r:"She is quiet for a long time. Then she says, \"Stay there and do it properly. We will be here.\""},
@@ -1078,7 +1094,7 @@ const fundScenes = () => { const c = C(), out = [], f = FUND();
        {l:`Pay the light bill, ${N(60)}. Family first`, fx:{cash:-A(60), home:6, peace:-2}, set:{house:'brother'}, r:"He sends a photo from your sitting room. He is using your good cups."},
        {l:"Ask him to pay rent or move out", fx:{home:-8, peace:4, future:4}, set:{house:'firm'}, r:"The family meeting lasts four hours. In the end he agrees to pay something. Something is better than nothing."},
        {l:"Rent it out properly through an agent", fx:{cash:-A(80), future:8, home:-4}, set:{house:'managed'}, r:"Your brother moves back to his own place, offended but alive. A new tenant moves in, and the rent starts flowing again."}]}
-    ][pickV('K',2)]);
+    ].map((o,i)=>i===1?ASK(o):o)[pickV('K',2)]);
   }
   return out;
 };
@@ -1144,7 +1160,7 @@ const routeAlts = () => { const c = C(), k = R.key, out = [];
      choices:[
       {l:`Drop your bags with ${STU() ? 'a classmate' : 'a friend'} and go to ${far}`, fx:{peace:-3, home:3}, set:{stay:'cousin'}, r:`Free food and a free bed, five hours away from every viewing. You beg friends in ${T()} to go and see rooms for you on video call.`},
       {l:`Extend the Airbnb and keep hunting, ${M(A(450))}`, fx:{cash:-A(450)-RENT(), peace:3, future:3}, set:{stay:'room'}, r:"Expensive, but you can see rooms with your own eyes. On day eleven you sign for one, and the landlord asks for a deposit, first month, and your life story."},
-      {l:`Take the first room you can get, unseen`, fx:{cash:-Math.round(RENT()*0.78/10)*10, peace:-6}, set:{stay:'shared'}, r:"The photos were taken years ago by a very optimistic person. The mould was not in any of them."}]}); }
+      {l:`Take the first room you can get, unseen`, g:1, fx:{cash:-Math.round(RENT()*0.78/10)*10, peace:-6}, set:{stay:'shared'}, r:"The photos were taken years ago by a very optimistic person. The mould was not in any of them."}]}); }
   if(k==='us') out.push({day:2, when: s => pickV('us2',2)===1, text:"Your first grocery run. A small bag of garri costs $9 at the African store, and the cashier at the supermarket asks if you would like to donate a dollar to charity.",
     choices:[
      {l:"Buy the garri anyway. Some things are not negotiable", fx:{cash:-30, peace:6}, r:"You drink garri at midnight with ice water and groundnuts. Home, briefly."},
@@ -1179,7 +1195,7 @@ const routeAlts = () => { const c = C(), k = R.key, out = [];
   if(k==='us') out.push(L.car
    ? {day:5, when: s => pickV('us5',2)===1, text:`Someone in the ${T()} Nigerians WhatsApp group is selling a 2012 Camry for $3,000. "Very clean, just small AC issue." Everybody says the same thing. Get a car first, then a job.`,
       choices:[
-       {l:"Buy the Camry with your ajo money", fx:{cash:-3000, peace:9, future:8}, set:{car:'bought'}, r:"The small AC issue is that there is no AC. It still gets you to every interview, and you love it anyway."},
+       {l:"Buy the Camry with your ajo money", g:1, fx:{cash:-3000, peace:9, future:8}, set:{car:'bought'}, r:"The small AC issue is that there is no AC. It still gets you to every interview, and you love it anyway."},
        {l:"Pay a mechanic $60 to check it first", fx:{cash:-60, peace:2, future:3}, set:{car:'bus'}, r:"He finds three problems the seller forgot to mention. You keep your ajo money and learn the bus routes instead."},
        {l:"Beg for rides from the group chat", fx:{cash:-90, peace:-3, home:3}, set:{car:'uber'}, r:"Everybody offers a ride. Everybody also asks for fuel money and a full update on your life."}]}
    : {day:5, when: s => pickV('us5',2)===1, text:`Every apartment in ${T()} is a trade-off. The good rooms are near the train, and the cheap ones are three buses away.`,
@@ -1551,6 +1567,7 @@ function render(){
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
       ${streakHTML('intro')}
       ${roadHTML()}
+      <button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>
       ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
       <details class="how">
         <summary>Naija words in this game</summary>
@@ -1610,7 +1627,7 @@ function render(){
     app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
       const c = list[+btn.dataset.i]; SFX.tap(); setTimeout(()=>SFX.result(c.fx), 90);
       history.push(JSON.stringify({S, idx}));
-      apply(c.fx||{}); Object.assign(S.f, c.set||{});
+      apply(c.fx||{}); Object.assign(S.f, c.set||{}); tally(sc, c);
       last = {r:c.r, fx:c.fx||{}, picked:c.l}; phase='result'; render(); scrollTo(0,0);
     });
     return;
@@ -1988,6 +2005,95 @@ function wireRemind(){
 }
 
 
+/* ---------- Weekly leaderboard (Supabase) ---------- */
+const SB_URL = 'https://mydzixaknqldrcfakirn.supabase.co';
+const SB_KEY = 'sb_publishable_lCKhdnVQ7-z5mv1iC565ow_EQr3H2Mk';   // publishable key: safe in the browser, the table only allows reading and adding
+const BAD_NAME = /f+u+c+k|sh[i1]t|b[i1]tch|cunt|n[i1]gg|whore|slut|pussy|porn|ashawo|olosho/i;
+const esc = t => String(t).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+// count what each choice says about you, for the leaderboard titles
+function tally(sc, c){
+  const st = S.st || (S.st = {r:0, s:0, g:0}), fx = c.fx||{}, set = c.set||{};
+  const checked = set.sibling==='checked' || set.farm==='counted';
+  if(sc.ask){
+    if((fx.cash||0) < 0 && !checked) st.s += Math.round(-fx.cash / R.k);
+    else if(!set.promise) st.r++;
+  }
+  if(c.g || set.sibling==='sent' || set.farm==='sent' || set.status==='scam') st.g++;
+}
+const BOARDS = [
+  {key:'score', title:'Best landing', sub:'Highest Landing Score', val:r=>r.score, show:r=>`${r.score}/100`},
+  {key:'refused', title:'Hardest heart', sub:'Said no to home the most', val:r=>r.refused, show:r=>`${r.refused} no${r.refused===1?'':'s'}`},
+  {key:'sent', title:'Softest heart', sub:'The Family ATM award', val:r=>r.sent, show:r=>NGN0(r.sent)},
+  {key:'fooled', title:'Most gullible', sub:'Fell for the most traps', val:r=>r.fooled, show:r=>`${r.fooled} trap${r.fooled===1?'':'s'}`}
+];
+const NGN0 = usd => '₦' + (Math.round(usd*NGN_PER_USD/5000)*5000).toLocaleString('en-GB');
+function weekStart(){ const d = new Date(); d.setUTCHours(0,0,0,0); d.setUTCDate(d.getUTCDate() - (d.getUTCDay()+6)%7); return d; }
+let boardRows = null, boardTab = 'score', myPostAt = 0;
+async function loadBoard(force){
+  if(boardRows && !force) return boardRows;
+  const q = '/rest/v1/landings?select=name,route,town,verdict,score,refused,sent,fooled,created_at&created_at=gte.' + encodeURIComponent(weekStart().toISOString()) + '&order=created_at.desc&limit=1000';
+  const res = await fetch(SB_URL + q, {headers:{apikey:SB_KEY}});
+  if(!res.ok) throw new Error('board ' + res.status);
+  return (boardRows = await res.json());
+}
+function boardHTML(){
+  if(!boardRows) return `<p>Loading this week's board...</p>`;
+  const b = BOARDS.find(x=>x.key===boardTab);
+  const rows = boardRows.filter(r=>b.val(r) > 0).sort((x,y)=> b.val(y)-b.val(x) || (b.key==='fooled' ? x.score-y.score : y.score-x.score)).slice(0,10);
+  const flag = {us:'🇺🇸', uk:'🇬🇧', ca:'🇨🇦'};
+  const list = rows.length ? rows.map((r,i)=>`<div class="lb-row${myPostAt && Date.parse(r.created_at)===myPostAt ? ' me' : ''}"><span class="lb-rank">${i+1}</span><div><b>${esc(r.name)}</b><small>${flag[r.route]||''} ${esc(r.town)} · ${esc(r.verdict)}</small></div><span class="lb-val">${b.show(r)}</span></div>`).join('')
+    : `<p>Nobody is on this board yet this week. Finish a game and post your landing to be the first.</p>`;
+  return `<div class="lb-tabs">${BOARDS.map(x=>`<button class="lb-tab${x.key===boardTab?' on':''}" type="button" data-t="${x.key}"><b>${x.title}</b><span>${x.sub}</span></button>`).join('')}</div>
+    <div class="lb-list">${list}</div>
+    <p class="small" style="color:var(--muted);font-size:13px">The board resets every Monday. ${boardRows.length} landing${boardRows.length===1?'':'s'} posted this week.</p>`;
+}
+function openBoard(){
+  let o = document.getElementById('boardover');
+  if(!o){ o = document.createElement('div'); o.id='boardover'; o.className='overlay'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-label','Weekly leaderboard');
+    document.body.appendChild(o); o.addEventListener('click', e=>{ if(e.target===o) o.hidden=true; }); }
+  const paint = () => {
+    o.innerHTML = `<div class="sheet-panel journal"><div class="sheet-head"><b>This week's leaderboard</b><button class="xbtn" id="boardclose" aria-label="Close">✕</button></div><div id="boardbody">${boardHTML()}</div></div>`;
+    o.querySelector('#boardclose').onclick = ()=>{ o.hidden=true; };
+    o.querySelectorAll('.lb-tab').forEach(t=>t.onclick=()=>{ boardTab = t.dataset.t; paint(); track('leaderboard-tab-'+boardTab); });
+  };
+  paint(); o.hidden = false; track('leaderboard-open');
+  loadBoard(true).then(paint).catch(()=>{ const bb = o.querySelector('#boardbody'); if(bb) bb.innerHTML = `<p>The board could not load. Check your connection and try again.</p>`; });
+}
+function postBoxHTML(){
+  const st = S.st || {r:0, s:0, g:0};
+  const facts = `<p>This game you said no to home <b>${st.r}</b> time${st.r===1?'':'s'}, sent <b>${NGN0(st.s)}</b> home, and fell for <b>${st.g}</b> trap${st.g===1?'':'s'}.</p>`;
+  if(S.posted) return `<div class="lbbox"><div class="when">Weekly leaderboard</div>${facts}<p><b>You are on this week's board.</b></p><button class="ghost" type="button" onclick="openBoard()">See this week's board</button></div>`;
+  return `<div class="lbbox" id="lbbox"><div class="when">Weekly leaderboard</div>${facts}
+    <label class="when" for="lbname">Name on the board</label>
+    <input id="lbname" class="select" type="text" maxlength="20" autocomplete="nickname" placeholder="Anonymous lander" value="${esc(getName())}">
+    <button class="primary" id="lbgo" type="button">Post my landing</button>
+    <button class="ghost" type="button" onclick="openBoard()">See this week's board</button>
+    <div class="toast" id="lbtoast" role="status"></div></div>`;
+}
+function wirePost(title){
+  const go = document.getElementById('lbgo'); if(!go) return;
+  go.onclick = async () => {
+    const t = document.getElementById('lbtoast'), raw = document.getElementById('lbname').value;
+    const nm = setName(raw);
+    if(BAD_NAME.test(nm)){ t.style.color = 'var(--bad)'; t.textContent = 'Please pick a different name for the board.'; return; }
+    const st = S.st || {r:0, s:0, g:0};
+    const body = {name: nm || 'Anonymous lander', route:R.key, town:String(L.town).slice(0,40), verdict:String(title).slice(0,40), score:Math.max(0, Math.min(100, nowScore())),
+      refused:Math.min(30, st.r), sent:Math.min(20000, Math.max(0, st.s)), fooled:Math.min(10, st.g), daily:!!S.daily};
+    go.disabled = true; go.textContent = 'Posting...'; t.style.color = ''; t.textContent = '';
+    try{
+      const res = await fetch(SB_URL + '/rest/v1/landings?select=created_at', {method:'POST', headers:{apikey:SB_KEY, 'Content-Type':'application/json', Prefer:'return=representation'}, body:JSON.stringify(body)});
+      if(!res.ok) throw new Error('post ' + res.status);
+      try{ const out = await res.json(); myPostAt = Date.parse(out[0].created_at); }catch(e){}
+      S.posted = true; track('leaderboard-post'); SFX.good();
+      document.getElementById('lbbox').outerHTML = postBoxHTML();
+      openBoard();
+    }catch(e){
+      go.disabled = false; go.textContent = 'Post my landing';
+      t.style.color = 'var(--bad)'; t.textContent = 'That did not go through. Check your connection and try again.';
+    }
+  };
+}
+
 /* ---------- Your name, your score, your road to making it ---------- */
 function getName(){ try{ return (localStorage.getItem('nyhl-name')||'').slice(0,20); }catch(e){ return ''; } }
 function setName(v){ v = (v||'').replace(/[^\p{L}\p{M} '\-.]/gu,'').replace(/\s+/g,' ').trim().slice(0,20); try{ localStorage.setItem('nyhl-name', v); }catch(e){} return v; }
@@ -2062,6 +2168,7 @@ function renderEnd(app){
       <div class="lesson">${lesson()}</div>
     </div>
     <div class="score"><div><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div><p>100 means all four meters are healthy at the same time.</p></div>
+    ${postBoxHTML()}
     ${roadHTML()}
     ${streakHTML('end')}
     ${collectionHTML(title, isNewVerdict)}
@@ -2091,7 +2198,7 @@ function renderEnd(app){
     <div class="foot credit">Created by <b>Nafeezie</b> · © 2026</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
   </div>`;
-  wireRemind();
+  wireRemind(); wirePost(title);
   document.getElementById('pada').onclick = ()=>{
     track('japada'); SFX.land();
     const box = document.getElementById('padabox'), c = C(), rent = RENT();
