@@ -272,7 +272,7 @@ details.custom summary{font-weight:700}
 .padabox p{margin:8px 0}
 .journalbtn{margin-top:10px}
 .sheet-panel.journal{max-height:86vh;overflow:auto}
-.j-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 12px}
+.j-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:6px 0 12px}
 .j-tiles div{background:var(--bubble);border-radius:12px;padding:10px;display:grid;gap:2px;align-content:start}
 .j-tiles b{font-family:var(--display);font-size:17px;line-height:1.15}
 .j-tiles span{font-size:12px;color:var(--muted)}
@@ -308,6 +308,22 @@ details.custom summary{font-weight:700}
 #ftoast{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;background:var(--green);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;max-width:min(88vw,380px);text-align:center;z-index:60;transition:opacity .2s,transform .2s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.2)}
 #ftoast.on{opacity:1;transform:translate(-50%,0)}
 .mirror{background:var(--bubble);border-radius:12px;padding:12px 14px;font-size:15px}
+.score{display:flex;gap:14px;align-items:center;background:var(--green);color:#fff;border-radius:14px;padding:14px 16px;margin:14px 0}
+.score .when{color:var(--gold);display:block;white-space:nowrap}
+.score b{font-family:var(--display);font-size:40px;line-height:1;color:#fff}
+.score small{font-size:16px;opacity:.7;margin-left:2px}
+.score p{margin:0;font-size:13px;opacity:.85}
+.road{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin:12px 0;background:var(--card)}
+.road-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:2px 0 8px}
+.road-top b{font-family:var(--display);font-size:20px}
+.road-top span{font-size:13px;color:var(--muted)}
+.road-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px}
+.road-steps i{height:6px;border-radius:3px;background:var(--line)}
+.road-steps i.done{background:var(--green2)}
+.road-steps i.on{background:var(--gold)}
+.road p{font-size:13px;color:var(--muted);margin:8px 0 0}
+.pass .brand{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62%}
+#pname{font:inherit}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1372,7 +1388,7 @@ function header(day){
   shown = {cash:S.cash, peace:S.peace, home:S.home, future:S.future};
   const b = v => `<div class="bar"><i style="width:${v}%"></i></div>`;
   return `<div class="pass">
-    <div class="pass-top"><div class="brand">LANDED</div><div class="day">DAY ${String(day).padStart(2,'0')} / 30</div></div>
+    <div class="pass-top"><div class="brand">${getName() ? getName().toUpperCase()+' HAS LANDED' : 'LANDED'}</div><div class="day">DAY ${String(day).padStart(2,'0')} / 30</div></div>
     <div class="route">${S.trail.map(t=>t.code).join(' → ')} → ${R.country} · ${L.town===L.name?L.name:L.town+', '+L.name}</div>
     <div class="stats">
       <div class="stat${c.cash}"><span>Cash</span><b>${money(S.cash)}</b></div>
@@ -1487,6 +1503,8 @@ function render(){
       <p class="mirror"><b>More than a game.</b> A 5-minute reality check on your money, your peace of mind, your standing at home, and the future you came to build.</p>
       <label class="when" for="origin">Leaving from</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
+      <label class="when" for="pname">Your name (optional)</label>
+      <input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="So the game knows who landed" value="${getName().replace(/"/g,'&quot;')}">
       <div class="when quick-ask">Tap where you are landing</div>
       <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select"><option value="">Surprise me</option>${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
       <label class="check daily quickdaily" for="qdaily"><input type="checkbox" id="qdaily"${pick.daily?' checked':''}> <span><b>Today's Landing · ${dayLabel(todayStr())}</b> Same game as everyone today</span></label>
@@ -1532,6 +1550,7 @@ function render(){
       </details>
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
       ${streakHTML('intro')}
+      ${roadHTML()}
       ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
       <details class="how">
         <summary>Naija words in this game</summary>
@@ -1547,6 +1566,7 @@ function render(){
       document.getElementById('culture').value = pick.culture;
     };
     document.getElementById('culture').onchange = e => { pick.culture = e.target.value; };
+    const pn = document.getElementById('pname'); if(pn) pn.onchange = e => { e.target.value = setName(e.target.value); };
     const qd = document.getElementById('qdaily'); if(qd) qd.onchange = e => { pick.daily = e.target.checked; const d2 = document.getElementById('daily'); if(d2) d2.checked = pick.daily; };
     const cu = app.querySelector('details.custom'); if(cu) cu.ontoggle = () => { pick.custom = cu.open; };
     app.querySelectorAll('.quick-btn').forEach(b=>b.onclick=()=>{
@@ -1828,7 +1848,7 @@ async function drawCard(title, line, journey, rec){
   x.fillStyle=gold; x.font="700 30px 'DM Sans', sans-serif"; x.fillText(S.daily ? `NOW YOU HAVE LANDED · TODAY'S LANDING ${dayLabel(S.daily).toUpperCase()}` : 'NOW YOU HAVE LANDED', 80, 110);
   x.fillStyle='rgba(255,255,255,.85)'; x.font="600 34px 'DM Sans', sans-serif";
   wrapText(x, journey, 900).slice(0,2).forEach((l,i)=>x.fillText(l, 80, 168+i*44));
-  x.fillStyle=gold; x.font="700 28px 'DM Sans', sans-serif"; x.fillText('MY DAY 30 VERDICT', 80, 300);
+  x.fillStyle=gold; x.font="700 28px 'DM Sans', sans-serif"; x.fillText(`${getName() ? getName().toUpperCase()+"'S" : 'MY'} DAY 30 VERDICT · SCORE ${nowScore()}/100`, 80, 300);
   x.fillStyle='#FFFFFF'; x.font="800 88px 'Playfair Display', Georgia, serif";
   let y=400; wrapText(x, title, 920).slice(0,3).forEach(l=>{ x.fillText(l, 80, y); y+=100; });
   x.fillStyle='rgba(255,255,255,.92)'; x.font="600 40px 'DM Sans', sans-serif"; y+=10;
@@ -1885,7 +1905,7 @@ function saveGame(title){
   if(S.savedGame) return; S.savedGame = true;
   const h = loadHistory();
   h.push({t:Date.now(), r:R.key, trip:S.trail.map(x=>x.town).concat([L.town]).join(' → '), path:P(), v:title,
-    cash:Math.round(S.cash), cur:R.cur, rent:+(S.cash/RENT()).toFixed(1), peace:S.peace, home:S.home, future:S.future, daily:!!S.daily});
+    cash:Math.round(S.cash), cur:R.cur, rent:+(S.cash/RENT()).toFixed(1), name:getName(), peace:S.peace, home:S.home, future:S.future, daily:!!S.daily});
   try{ localStorage.setItem('nyhl-history', JSON.stringify(h.slice(-200))); }catch(e){}
 }
 function spark(vals, mark, cap, max){
@@ -1915,13 +1935,13 @@ function journalHTML(){
     : "Across your games, you keep all four meters healthy on average. That is rare.";
   const meter = (n,k) => `<div class="j-meter"><div class="j-top"><b>${n}</b><span class="j-avg">avg ${avg(k)}</span>${trend(k)}</div>${spark(last.map(g=>g[k]), MARKS[k][1], k==='home'?HOME_CAP:0)}</div>`;
   const date = t => new Date(t).toLocaleDateString('en-GB',{day:'numeric', month:'short'});
-  return `<div class="j-tiles"><div><b>${h.length}</b><span>games</span></div><div><b>${avgRent}</b><span>months of rent saved, on average</span></div><div><b>${top[0]}</b><span>your most common verdict</span></div></div>
+  return `${roadHTML()}<div class="j-tiles"><div><b>${Math.max(...h.map(scoreOf))}</b><span>best score</span></div><div><b>${h.length}</b><span>games</span></div><div><b>${avgRent}</b><span>months of rent saved, on average</span></div><div><b>${top[0]}</b><span>your most common verdict</span></div></div>
     <div class="lesson">${tip}</div>
     ${meter('Peace','peace')}${meter('Home','home')}${meter('Future','future')}
     <div class="j-meter"><div class="j-top"><b>Cash</b><span class="j-avg">avg ${avgRent} months of rent</span>${h.length>=4?trend('rent'):''}</div>${spark(last.map(g=>g.rent), 3, 0, Math.max(6, ...last.map(g=>g.rent)))}</div>
     <p class="small">The line on each chart is the healthy mark. Charts show your last ${last.length} game${last.length>1?'s':''}.</p>
     <div class="when">Every game</div>
-    <div class="j-list">${h.slice().reverse().map(g=>`<div class="j-row"><div><b>${g.v}</b><span>${date(g.t)} · ${g.trip}${g.daily?' · Today\'s Landing':''}</span></div><div class="j-nums">${g.cur}${g.cash.toLocaleString('en-GB')} · P${g.peace} H${g.home} F${g.future}</div></div>`).join('')}</div>
+    <div class="j-list">${h.slice().reverse().map(g=>`<div class="j-row"><div><b>${g.v}</b><span>${date(g.t)} · ${g.trip}${g.daily?' · Today\'s Landing':''}</span></div><div class="j-nums"><b>${scoreOf(g)}</b>/100<br>${g.cur}${g.cash.toLocaleString('en-GB')} · P${g.peace} H${g.home} F${g.future}</div></div>`).join('')}</div>
     <p class="small">Saved on this phone only. Clearing your browser data deletes it.</p>`;
 }
 function openJournal(){
@@ -1967,6 +1987,40 @@ function wireRemind(){
   const g = document.getElementById('remind-g'); if(g) g.addEventListener('click', ()=>track('remind-google'));
 }
 
+
+/* ---------- Your name, your score, your road to making it ---------- */
+function getName(){ try{ return (localStorage.getItem('nyhl-name')||'').slice(0,20); }catch(e){ return ''; } }
+function setName(v){ v = (v||'').replace(/[^\p{L}\p{M} '\-.]/gu,'').replace(/\s+/g,' ').trim().slice(0,20); try{ localStorage.setItem('nyhl-name', v); }catch(e){} return v; }
+// 100 means every meter healthy: Peace 60+, Future 40+, Home 50 to 85, and 3 months' rent saved
+function scoreOf(g){
+  const cash = g.rent < 0 ? 0 : Math.min(g.rent/3, 1)*25;
+  const peace = Math.min(g.peace/MARKS.peace[1], 1)*25, future = Math.min(g.future/MARKS.future[1], 1)*25;
+  const home = g.home > HOME_CAP ? Math.max(10, 25-(g.home-HOME_CAP)) : Math.min(g.home/MARKS.home[1], 1)*25;
+  return Math.round(cash + peace + future + home);
+}
+const nowScore = () => scoreOf({rent:S.cash/RENT(), peace:S.peace, home:S.home, future:S.future});
+const LEVELS = [[0,'Just landed','Every story starts at arrivals.'],[40,'Finding your feet','You are learning the rules.'],[60,'Settling in','The ground is getting firmer.'],[75,'Thriving','You are building, not just surviving.'],[90,'Made it','Money, peace, home, and future, all at once.']];
+function roadInfo(){
+  const h = loadHistory(); if(!h.length) return null;
+  const recent = h.slice(-5).map(scoreOf), avg = Math.round(recent.reduce((a,b)=>a+b,0)/recent.length);
+  let i = LEVELS.length-1; while(i>0 && avg < LEVELS[i][0]) i--;
+  const needMore = i===LEVELS.length-1 && h.length < 5;
+  if(needMore) i--;
+  const next = LEVELS[i+1], best = Math.max(...h.map(scoreOf));
+  const pct = next ? Math.max(4, Math.min(100, Math.round((avg-LEVELS[i][0])/(next[0]-LEVELS[i][0])*100))) : 100;
+  return {avg, best, level:LEVELS[i], next, pct, games:h.length, needMore};
+}
+function roadHTML(){
+  const r = roadInfo(); if(!r) return '';
+  const tip = !r.next ? 'You made it. Now help the next person through arrivals.' : r.needMore ? `Your scores are there. Finish ${5-r.games} more game${5-r.games>1?'s':''} to prove it.` : `Average ${r.next[0]} across your last five games to reach ${r.next[1]}.`;
+  const li = LEVELS.indexOf(r.level);
+  return `<div class="road"><div class="when">Your road to making it</div>
+    <div class="road-top"><b>${r.level[1]}</b><span>avg ${r.avg} · best ${r.best}</span></div>
+    <div class="road-steps">${LEVELS.map((l,j)=>`<i class="${j===li?'on':j<li?'done':''}" title="${l[1]}"></i>`).join('')}</div>
+    <div class="coll-bar"><i style="width:${r.pct}%"></i></div>
+    <p>${r.level[2]} ${tip}</p></div>`;
+}
+
 function loadVerdicts(){ try{ return JSON.parse(localStorage.getItem('nyhl-verdicts')||'[]'); }catch(e){ return []; } }
 function saveVerdict(t){ const v = loadVerdicts(); const isNew = !v.includes(t); if(isNew){ v.push(t); try{ localStorage.setItem('nyhl-verdicts', JSON.stringify(v)); }catch(e){} } return isNew; }
 function collectionHTML(current, isNew){
@@ -2007,6 +2061,8 @@ function renderEnd(app){
       <p class="bench">Healthy marks: Peace ${MARKS.peace[1]}, Future ${MARKS.future[1]} (you started at 20), and Home between ${MARKS.home[1]} and ${HOME_CAP}. Above ${HOME_CAP}, home may be loving you at your own expense. For cash, healthy is three months' rent saved.</p>
       <div class="lesson">${lesson()}</div>
     </div>
+    <div class="score"><div><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div><p>100 means all four meters are healthy at the same time.</p></div>
+    ${roadHTML()}
     ${streakHTML('end')}
     ${collectionHTML(title, isNewVerdict)}
     <div class="cardwrap"><img id="cardimg" alt="Your result card" hidden></div>
