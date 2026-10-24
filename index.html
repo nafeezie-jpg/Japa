@@ -340,6 +340,12 @@ details.custom summary{font-weight:700}
 .lb-val{font-weight:800;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .lb-rankline{font-size:17px!important}
 .lb-rankline b{font-family:var(--display);font-size:22px;color:var(--accent)}
+.lb-crown{background:var(--bubble);border-left:4px solid var(--gold);border-radius:6px 12px 12px 6px;padding:10px 12px;font-size:15px;margin-bottom:12px}
+.crownwin{display:grid;gap:4px;background:var(--green);color:#fff;border-radius:14px;padding:14px 16px}
+.crownwin b{font-family:var(--display);font-size:20px;color:var(--gold)}
+.crownwin span{font-size:15px}
+.vbadge.got.crown{background:var(--gold)}
+.vbadge.got.crown b,.vbadge.got.crown small{color:#1B332B}
 .lb-row.me{background:var(--bubble);border-radius:10px;padding:8px 6px}
 /* dark mode: green text on dark green is unreadable, so headings switch to gold */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) :is(.how summary,.route-btn b,.local b,.journey-line,.lb-tab b,.gloss dt,.storylink,.vbadge.got b){color:var(--gold)}}
@@ -1962,7 +1968,8 @@ const VERDICTS = [
  ['Scholar and Sponsor','Go on a full scholarship and send your stipend home.'],
  ['Fees Still Pending','Go as a student and leave your fees unpaid.'],
  ['Owing the Cooperative','Borrow money for the move and ignore the repayment.'],
- ['Stronger Than The Agent','Take the UK care visa route and report the fake agent.']
+ ['Stronger Than The Agent','Take the UK care visa route and report the fake agent.'],
+ ['Best Landing','Top Shine Eye on the leaderboard when the week closes. The weekly crown.']
 ];
 
 /* ---------- My games: a personal journal kept on this device ---------- */
@@ -2070,14 +2077,46 @@ function tally(sc, c){
   if(c.g || set.sibling==='sent' || set.farm==='sent' || set.status==='scam') st.g++;
 }
 const BOARDS = [
-  {key:'score', title:'Best landing', sub:'Highest Landing Score', val:r=>r.score, show:r=>`${r.score}/100`},
+  {key:'score', title:'Shine Eye', sub:'Highest Landing Score', val:r=>r.score, show:r=>`${r.score}/100`},
   {key:'refused', title:'Hardest heart', sub:'Said no to home the most', val:r=>r.refused, show:r=>`${r.refused} time${r.refused===1?'':'s'}`},
   {key:'sent', title:'Softest heart', sub:'The Family ATM award', val:r=>r.sent, show:r=>NGN0(r.sent)},
   {key:'fooled', title:'Most gullible', sub:'Fell for the most traps', val:r=>r.fooled, show:r=>`${r.fooled} trap${r.fooled===1?'':'s'}`}
 ];
 const NGN0 = usd => '₦' + (Math.round(usd*NGN_PER_USD/5000)*5000).toLocaleString('en-GB');
-function weekStart(){ const d = new Date(); d.setUTCHours(0,0,0,0); d.setUTCDate(d.getUTCDate() - (d.getUTCDay()+6)%7); return d; }
-let boardRows = null, boardTab = 'score', myPostAt = 0;
+function weekStart(at){ const d = at ? new Date(at) : new Date(); d.setUTCHours(0,0,0,0); d.setUTCDate(d.getUTCDate() - (d.getUTCDay()+6)%7); return d; }
+const boardSort = b => (x,y) => b.val(y)-b.val(x) || (b.key==='fooled' ? x.score-y.score : y.score-x.score) || (Date.parse(x.created_at||0) - Date.parse(y.created_at||0));
+/* ---------- Best Landing: the weekly crown for whoever leads Shine Eye when the week closes ---------- */
+const crownCache = {};
+async function crownFor(from){   // the top score of the week starting at 'from', earliest first on a tie
+  const k = from.toISOString(); if(k in crownCache) return crownCache[k];
+  const to = new Date(from.getTime() + 7*864e5);
+  const q = '/rest/v1/landings?select=name,route,town,score,created_at&created_at=gte.' + encodeURIComponent(k) + '&created_at=lt.' + encodeURIComponent(to.toISOString()) + '&order=score.desc,created_at.asc&limit=1';
+  const res = await fetch(SB_URL + q, {headers:{apikey:SB_KEY}}); if(!res.ok) throw new Error('crown ' + res.status);
+  return (crownCache[k] = (await res.json())[0] || null);
+}
+const lastWeekStart = () => { const d = weekStart(); d.setUTCDate(d.getUTCDate() - 7); return d; };
+function loadMyPosts(){ try{ return JSON.parse(localStorage.getItem('nyhl-posts')||'[]'); }catch(e){ return []; } }
+function rememberPost(at){ const p = loadMyPosts(); p.push(at); try{ localStorage.setItem('nyhl-posts', JSON.stringify(p.slice(-300))); }catch(e){} }
+// on each visit, check finished weeks this phone posted in, and award the crown if one of its results won
+async function checkCrowns(){
+  let done = []; try{ done = JSON.parse(localStorage.getItem('nyhl-crown-checked')||'[]'); }catch(e){}
+  const now = weekStart().getTime(), weeks = [...new Set(loadMyPosts().map(a=>weekStart(a).getTime()))].filter(w => w < now && !done.includes(w)).slice(-4);
+  let won = null;
+  for(const w of weeks){
+    try{
+      const c = await crownFor(new Date(w));
+      if(c && loadMyPosts().some(a => Date.parse(a) === Date.parse(c.created_at))) won = c;
+      done.push(w);
+    }catch(e){ break; }
+  }
+  try{ localStorage.setItem('nyhl-crown-checked', JSON.stringify(done.slice(-60))); }catch(e){}
+  if(won && saveVerdict('Best Landing')){
+    track('crown-won');
+    const app = document.getElementById('app'), intro = app && app.querySelector('.intro');
+    if(intro){ const d = document.createElement('div'); d.className = 'crownwin fade'; d.innerHTML = `<b>👑 You were Best Landing for the week!</b><span>${won.score}/100 put you top of Shine Eye when the week closed. Your gold badge is in your verdict collection.</span>`; intro.insertBefore(d, intro.children[1]); SFX.good(); }
+  }
+}
+let boardRows = null, boardTab = 'score', myPostAt = 0, boardCrown = null;
 async function loadBoard(force){
   if(boardRows && !force) return boardRows;
   const q = '/rest/v1/landings?select=name,route,town,verdict,score,refused,sent,fooled,created_at&created_at=gte.' + encodeURIComponent(weekStart().toISOString()) + '&order=created_at.desc&limit=1000';
@@ -2088,11 +2127,12 @@ async function loadBoard(force){
 function boardHTML(){
   if(!boardRows) return `<p>Loading this week's board...</p>`;
   const b = BOARDS.find(x=>x.key===boardTab);
-  const rows = boardRows.filter(r=>b.val(r) > 0).sort((x,y)=> b.val(y)-b.val(x) || (b.key==='fooled' ? x.score-y.score : y.score-x.score)).slice(0,10);
+  const rows = boardRows.filter(r=>b.val(r) > 0).sort(boardSort(b)).slice(0,10);
   const flag = {us:'🇺🇸', uk:'🇬🇧', ca:'🇨🇦'};
   const list = rows.length ? rows.map((r,i)=>`<div class="lb-row${myPostAt && Date.parse(r.created_at)===myPostAt ? ' me' : ''}"><span class="lb-rank">${i+1}</span><div><b>${esc(r.name)}</b><small>${flag[r.route]||''} ${esc(r.town)} · ${esc(r.verdict)}</small></div><span class="lb-val">${b.show(r)}</span></div>`).join('')
     : `<p>Nobody is on this board yet this week. Finish a game and post your landing to be the first.</p>`;
-  return `<div class="lb-tabs">${BOARDS.map(x=>`<button class="lb-tab${x.key===boardTab?' on':''}" type="button" data-t="${x.key}"><b>${x.title}</b><span>${x.sub}</span></button>`).join('')}</div>
+  const cr = boardCrown ? `<div class="lb-crown">👑 Last week's Best Landing: <b>${esc(boardCrown.name)}</b>, ${boardCrown.score}/100</div>` : '';
+  return `${cr}<div class="lb-tabs">${BOARDS.map(x=>`<button class="lb-tab${x.key===boardTab?' on':''}" type="button" data-t="${x.key}"><b>${x.title}</b><span>${x.sub}</span></button>`).join('')}</div>
     <div class="lb-list">${list}</div>
     <p class="small" style="color:var(--muted);font-size:13px">The board resets every Monday. ${boardRows.length} landing${boardRows.length===1?'':'s'} posted this week.</p>`;
 }
@@ -2106,6 +2146,7 @@ function openBoard(){
     o.querySelectorAll('.lb-tab').forEach(t=>t.onclick=()=>{ boardTab = t.dataset.t; paint(); track('leaderboard-tab-'+boardTab); });
   };
   paint(); o.hidden = false; track('leaderboard-open');
+  crownFor(lastWeekStart()).then(c => { boardCrown = c; if(!o.hidden && boardRows) paint(); }).catch(()=>{});
   loadBoard(true).then(paint).catch(()=>{ const bb = o.querySelector('#boardbody'); if(bb) bb.innerHTML = `<p>The board could not load. Check your connection and try again.</p>`; });
 }
 function postBoxHTML(){
@@ -2129,7 +2170,7 @@ async function autoPost(title, onRank){
     if(res.status>=400 && res.status<500){ S.postFail = 'The board is busy right now, so this game was not added.'; paint(); return; }
     if(!res.ok) throw new Error('post ' + res.status);
     S.posted = true; track('leaderboard-post');
-    try{ const out = await res.json(); myPostAt = Date.parse(out[0].created_at); }catch(e){}
+    try{ const out = await res.json(); myPostAt = Date.parse(out[0].created_at); rememberPost(out[0].created_at); }catch(e){}
     const rows = await loadBoard(true);
     S.rank = 1 + rows.filter(r=>r.score > score).length; S.rankOf = rows.length;
     paint(); if(onRank) onRank(S.rank);
@@ -2147,10 +2188,10 @@ async function renderWinners(app){
   app.innerHTML = `<div class="scene fade"><div class="when">Weekly winners · ${range}</div><p>Drawing the winners card...</p></div>`;
   let rows = [];
   try{
-    const q = '/rest/v1/landings?select=name,route,town,verdict,score,refused,sent,fooled&created_at=gte.' + encodeURIComponent(from.toISOString()) + '&created_at=lt.' + encodeURIComponent(to.toISOString()) + '&limit=5000';
+    const q = '/rest/v1/landings?select=name,route,town,verdict,score,refused,sent,fooled,created_at&created_at=gte.' + encodeURIComponent(from.toISOString()) + '&created_at=lt.' + encodeURIComponent(to.toISOString()) + '&limit=5000';
     const res = await fetch(SB_URL + q, {headers:{apikey:SB_KEY}}); if(!res.ok) throw 0; rows = await res.json();
   }catch(e){ app.innerHTML = `<div class="scene fade"><p>The winners could not load. Check your connection and refresh.</p></div>`; return; }
-  const wins = BOARDS.map(b => ({b, r: rows.filter(r=>b.val(r)>0).sort((x,y)=> b.val(y)-b.val(x) || (b.key==='fooled' ? x.score-y.score : y.score-x.score))[0]})).filter(w=>w.r);
+  const wins = BOARDS.map(b => ({b, r: rows.filter(r=>b.val(r)>0).sort(boardSort(b))[0]})).filter(w=>w.r);
   if(!wins.length){ app.innerHTML = `<div class="scene fade"><div class="when">Weekly winners · ${range}</div><p>Nobody posted a landing that week.${thisWeek?'':' Try <a href="?winners=this">this week so far</a>.'}</p></div>`; return; }
   try{ await Promise.all(["800 80px 'Playfair Display'","600 40px 'DM Sans'","800 40px 'DM Sans'"].map(f=>document.fonts.load(f))); }catch(e){}
   const W=1080, H=1350, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d');
@@ -2163,15 +2204,15 @@ async function renderWinners(app){
   wins.forEach((w,i)=>{ const y = top + i*(bh+gap);
     x.fillStyle='rgba(255,255,255,.08)'; x.fillRect(80, y, W-160, bh);
     x.fillStyle=gold; x.fillRect(80, y, 8, bh);
-    x.fillStyle=gold; x.font="800 36px 'Playfair Display', Georgia, serif"; x.fillText(w.b.title, 116, y+56);
-    x.fillStyle='rgba(255,255,255,.6)'; x.font="600 24px 'DM Sans', sans-serif"; x.fillText(w.b.sub.toUpperCase(), 116, y+92);
+    x.fillStyle=gold; x.font="800 36px 'Playfair Display', Georgia, serif"; x.fillText(w.b.key==='score' ? (thisWeek ? 'Shine Eye' : '👑 Best Landing') : w.b.title, 116, y+56);
+    x.fillStyle='rgba(255,255,255,.6)'; x.font="600 24px 'DM Sans', sans-serif"; x.fillText((w.b.key==='score' && !thisWeek ? 'Top of Shine Eye this week' : w.b.sub).toUpperCase(), 116, y+92);
     x.fillStyle='#FFFFFF'; x.font="800 52px 'DM Sans', sans-serif"; let nm = w.r.name; while(x.measureText(nm).width > 560 && nm.length>3) nm = nm.slice(0,-2)+'…'; x.fillText(nm, 116, y+bh-40);
     x.textAlign='right'; x.fillStyle=gold; x.font="800 46px 'DM Sans', sans-serif"; x.fillText(w.b.show(w.r), W-116, y+bh-40);
     x.fillStyle='rgba(255,255,255,.7)'; x.font="600 24px 'DM Sans', sans-serif"; x.fillText(`${String(w.r.town).toUpperCase().slice(0,22)}, ${flagTxt[w.r.route]||''}`, W-116, y+56); x.textAlign='left'; });
   x.fillStyle=gold; x.font="800 40px 'Playfair Display', Georgia, serif"; x.fillText('Can you top the board this week?', 80, H-96);
   x.fillStyle='#FFFFFF'; x.font="600 32px 'DM Sans', sans-serif"; x.fillText('Play free at nowyouhavelanded.com', 80, H-48);
   x.fillStyle='rgba(255,255,255,.6)'; x.font="500 24px 'DM Sans', sans-serif"; x.textAlign='right'; x.fillText('Created by Nafeezie', W-80, H-48); x.textAlign='left';
-  const caption = `This week's winners on Now You Have Landed 🏆 ${wins.map(w=>`${w.b.title}: ${w.r.name} (${w.b.show(w.r)})`).join(', ')}. ${rows.length} people landed. Can you top the board? Play free at nowyouhavelanded.com`;
+  const caption = `This week's winners on Now You Have Landed 🏆 ${wins.map(w=>`${w.b.key==='score' && !thisWeek ? '👑 Best Landing' : w.b.title}: ${w.r.name} (${w.b.show(w.r)})`).join(', ')}. ${rows.length} people landed. Can you top the board? Play free at nowyouhavelanded.com`;
   app.innerHTML = `<div class="scene fade"><div class="when">Weekly winners · ${range}</div>
     <div class="cardwrap"><img id="wimg" alt="Weekly winners card" src="${cv.toDataURL('image/png')}"></div>
     <button class="primary" id="wshare">Share or save the card</button>
@@ -2229,7 +2270,7 @@ function collectionHTML(current, isNew){
     <div class="coll-head"><div class="when">Your verdict collection</div><b>${got.length} of ${VERDICTS.length} unlocked</b></div>
     <div class="coll-bar"><i style="width:${Math.round(got.length/VERDICTS.length*100)}%"></i></div>
     <div class="coll-grid">${VERDICTS.map(([t,h])=>{ const has=got.includes(t), cur=t===current;
-      return `<div class="vbadge ${has?'got':'locked'}${cur?' cur':''}"><b>${has ? t : '? ? ?'}</b>${cur && isNew ? '<span class="newtag">New!</span>' : ''}<small>${has ? (cur ? 'Just unlocked this game' : 'Unlocked') : 'Hint: '+h}</small></div>`; }).join('')}</div>
+      return `<div class="vbadge ${has?'got':'locked'}${cur?' cur':''}${has && t==='Best Landing'?' crown':''}"><b>${has ? t : '? ? ?'}</b>${cur && isNew ? '<span class="newtag">New!</span>' : ''}<small>${has ? (cur ? 'Just unlocked this game' : 'Unlocked') : 'Hint: '+h}</small></div>`; }).join('')}</div>
   </div>`;
 }
 
@@ -2364,6 +2405,7 @@ function renderEnd(app){
 
 function start(data){
   fresh();
+  setTimeout(()=>checkCrowns().catch(()=>{}), 600);
   if(/[?&]winners/.test(location.search)){ renderWinners(document.getElementById('app')); return; }
   if(data && data.rk && data.pn){ R = ROUTES[data.rk]; L = places(data.rk).find(p=>p.name===data.pn); S = data.S; idx = data.idx; phase = data.phase; last = data.last; history = data.history||[]; }
   render();
