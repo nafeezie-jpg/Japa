@@ -1531,6 +1531,10 @@ const SFX = (() => {
       noise(0.5, {at:0.7, vol:0.12, from:2400, to:900, q:0.4});
       tone(440, 0.08, {type:'square', vol:0.05, at:1.25}); tone(330, 0.12, {type:'square', vol:0.05, at:1.34});
     },
+    ring(){
+      [0, 0.75].forEach(b => { for(let k = 0; k < 12; k++) tone(k % 2 ? 1180 : 940, 0.045, {vol:0.11, at: b + k*0.035, attack:0.002}); });
+      try{ if(navigator.vibrate) navigator.vibrate([380, 370, 380]); }catch(e){}
+    },
     meh(){ tone(392, 0.12, {type:'triangle', vol:0.1}); tone(370, 0.22, {type:'triangle', vol:0.1, at:0.11}); },
     verdict(happy){
       [0, 0.14, 0.28, 0.36, 0.44].forEach((t, i) => drum(t, i % 2 ? 160 : 120, i % 2 ? 100 : 170, 0.45));
@@ -1558,7 +1562,9 @@ function soundButton(){
   b.title = SFX.on ? 'Mute' : 'Sound on';
 }
 
+const isCall = sc => /call/i.test(sc.sub||'') || /\bcalls\b|phone rings/.test(sc.text||'');
 function render(){
+  try{ if(window.speechSynthesis && speechSynthesis.speaking) speechSynthesis.cancel(); }catch(e){}
   soundButton();
   const app = document.getElementById('app');
   if(phase==='intro'){
@@ -1573,7 +1579,7 @@ function render(){
       <label class="when" for="pname">Your name for the leaderboard (optional)</label>
       <input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="So the game knows who landed" value="${getName().replace(/"/g,'&quot;')}">
       <div class="when quick-ask">Tap where you are landing</div>
-      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select"><option value="">Surprise me</option>${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
+      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select">${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
       <label class="check daily quickdaily" for="qdaily"><input type="checkbox" id="qdaily"${pick.daily?' checked':''}> <span><b>Today's Landing · ${dayLabel(todayStr())}</b> Same game as everyone today</span></label>
       <div class="foot">Pick, tap, and land. Anything you skip is a surprise. About 5 minutes.</div>
       <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-intro')">Have a japa story? Tell us, and it could become a scene →</a>
@@ -1644,7 +1650,8 @@ function render(){
     const note = sc.day===1 && !sc.from && idx===nextIndex(0) ? `${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
     app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}${glossLink()}</div>`;
     wireBack();
-    if(sc.from && !(S.landing===1 && sc.day===1)) setTimeout(()=>SFX.ping(), 150);
+    if(sc.from && !(S.landing===1 && sc.day===1)) setTimeout(()=> isCall(sc) ? SFX.ring() : SFX.ping(), 150);
+    else if(!sc.from && /\bcalls\b|phone rings/.test(sc.text||'')) setTimeout(()=>SFX.ring(), 150);
     app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
       const c = list[+btn.dataset.i]; SFX.tap(); setTimeout(()=>SFX.result(c.fx), 90);
       history.push(JSON.stringify({S, idx}));
@@ -1720,16 +1727,36 @@ const ART = {
   globe:`<g class="a-spin" style="transform-origin:80px 45px"><circle cx="80" cy="45" r="26" class="f-green"/><path d="M62 34 q10 6 6 14 q-6 6 2 14 M92 26 q-6 10 4 16 q8 4 4 14" class="s-paper" stroke-width="3" fill="none"/></g>`
 };
 function art(sc){ const k = artKind(sc);
-  if(k==='voice') return `<button class="art vn" type="button" onclick="playVN(this)" aria-label="Play the voice note"><svg viewBox="0 0 160 90" aria-hidden="true">${ART.voice}</svg><span class="vn-hint">Tap to play</span></button>`;
+  if(k==='voice') return `<button class="art vn" type="button" onclick="playVN(this)" data-say="${esc(String(sc.text).replace(/<[^>]+>/g,''))}" aria-label="Play the voice note"><svg viewBox="0 0 160 90" aria-hidden="true">${ART.voice}</svg><span class="vn-hint">Tap to play</span></button>`;
   return `<div class="art" aria-hidden="true"><svg viewBox="0 0 160 90">${ART[k]}</svg></div>`; }
 const VN_LINES = ["Network don cut 😅 Read am below.", "Your data finished halfway. The message is written below.", "Na so the network be. Read the message below 😅", "The voice note will not load. Somebody in the family group is using all the data."];
-function playVN(el){
-  SFX.crackle(); track('voicenote-tap');
-  el.classList.add('playing'); setTimeout(()=>el.classList.remove('playing'), 1400);
+function vnToast(msg){
   let t = document.getElementById('ftoast');
   if(!t){ t = document.createElement('div'); t.id = 'ftoast'; t.setAttribute('role','status'); document.body.appendChild(t); }
-  t.textContent = VN_LINES[Math.floor(Math.random()*VN_LINES.length)];
-  t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), 2600);
+  t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), 2600);
+}
+function pickVoice(){
+  const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
+  return vs.find(v=>/en[-_]NG/i.test(v.lang)) || vs.find(v=>/en[-_](GB|ZA|KE|GH)/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+}
+try{ if(window.speechSynthesis) speechSynthesis.getVoices(); }catch(e){}   // some browsers load voices late
+function playVN(el){
+  track('voicenote-tap');
+  const say = (el.dataset.say||'').replace(/\s+/g,' ').trim(), synth = window.speechSynthesis;
+  if(!SFX.on){ vnToast('Turn the sound on to hear voice notes.'); return; }
+  if(!say || !synth || typeof SpeechSynthesisUtterance === 'undefined'){
+    SFX.crackle(); el.classList.add('playing'); setTimeout(()=>el.classList.remove('playing'), 1400);
+    vnToast(VN_LINES[Math.floor(Math.random()*VN_LINES.length)]); return;
+  }
+  const hint = el.querySelector('.vn-hint');
+  if(synth.speaking){ synth.cancel(); el.classList.remove('playing'); if(hint) hint.textContent = 'Tap to play'; return; }
+  const u = new SpeechSynthesisUtterance(say), v = pickVoice();
+  if(v){ u.voice = v; u.lang = v.lang; } u.rate = 0.95; u.pitch = 1.1;
+  const stop = () => { el.classList.remove('playing'); if(hint) hint.textContent = 'Tap to play'; };
+  u.onend = stop; u.onerror = stop;
+  el.classList.add('playing'); if(hint) hint.textContent = 'Playing · tap to stop';
+  track('voicenote-play' + (v && /NG/i.test(v.lang) ? '-ng' : ''));
+  synth.speak(u);
 }
 
 
