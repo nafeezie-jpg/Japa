@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Everybody wants to japa. Nobody tells you what happens after you land. A free 30-day game about your first month abroad.">
+<meta property="og:title" content="JAPA: You Have Landed">
+<meta property="og:description" content="Everybody wants to japa. Nobody tells you what happens after you land. Play free in your browser.">
+<meta name="theme-color" content="#0E5A3A">
+<title>JAPA: You Have Landed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+/* Layout: one phone-width column styled like a boarding pass and a WhatsApp thread, passport green and stamp gold */
+:root{
+  --paper:#F2F5F0; --card:#FFFFFF; --ink:#10231A; --muted:#5B6D63; --line:#D5DDD6;
+  --green:#0E5A3A; --green-ink:#FFFFFF; --gold:#B8901A; --bubble:#E3F1E7;
+  --good:#1F7A4A; --bad:#B3412E;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0B1611; --card:#12211A; --ink:#E7EFE9; --muted:#8FA398; --line:#233429;
+  --green:#2E9A68; --green-ink:#06130D; --gold:#E0BD4C; --bubble:#173326;
+  --good:#4CC385; --bad:#E77A64; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0B1611; --card:#12211A; --ink:#E7EFE9; --muted:#8FA398; --line:#233429;
+  --green:#2E9A68; --green-ink:#06130D; --gold:#E0BD4C; --bubble:#173326;
+  --good:#4CC385; --bad:#E77A64; color-scheme:dark}
+html,body{background:var(--paper);color:var(--ink)}
+body{font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* Pass header */
+.pass{background:var(--green);color:var(--green-ink);border-radius:14px;padding:14px 16px;display:grid;gap:10px;position:relative;overflow:hidden}
+.pass::after{content:"";position:absolute;right:-18px;top:50%;width:36px;height:36px;border-radius:50%;background:var(--paper);transform:translateY(-50%)}
+.pass-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-right:22px}
+.brand{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:.04em}
+.day{font-family:var(--mono);font-size:13px;letter-spacing:.08em;opacity:.9}
+.route{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-right:22px}
+.stat{display:grid;gap:3px;min-width:0}
+.stat b{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stat span{font-size:10px;text-transform:uppercase;letter-spacing:.1em;opacity:.8}
+.bar{height:4px;border-radius:2px;background:color-mix(in srgb,var(--green-ink) 22%,transparent);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);transition:width .5s ease}
+.progress{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--gold);transition:width .5s ease}
+
+/* Scene */
+.scene{display:grid;gap:14px}
+.when{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.narr{font-size:18px;line-height:1.55;text-wrap:pretty}
+.thread{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px}
+.who{display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--green);color:var(--green-ink);display:grid;place-items:center;font-family:var(--display);font-size:13px;font-weight:800}
+.who b{font-weight:700}
+.who small{display:block;color:var(--muted);font-size:12px}
+.bubble{background:var(--bubble);border-radius:4px 14px 14px 14px;padding:10px 12px;font-size:16px;max-width:92%}
+.choices{display:grid;gap:10px}
+.choice{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-weight:600;font-size:16px;display:flex;gap:12px;align-items:center;transition:border-color .15s,transform .1s}
+.choice:hover{border-color:var(--green)}
+.choice:active{transform:scale(.99)}
+.choice .k{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:700;flex:none}
+.result{background:var(--card);border-left:3px solid var(--gold);border-radius:4px 12px 12px 4px;padding:12px 14px;font-size:16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:12px;padding:3px 8px;border-radius:999px;border:1px solid currentColor}
+.chip.up{color:var(--good)} .chip.down{color:var(--bad)}
+.primary{background:var(--green);color:var(--green-ink);border:0;border-radius:12px;padding:14px 18px;font-weight:700;font-size:16px;width:100%}
+.ghost{background:transparent;border:1.5px solid var(--line);border-radius:12px;padding:13px 18px;font-weight:600;width:100%}
+
+/* Intro */
+.intro{display:grid;gap:18px;padding-top:8px}
+.stamp{justify-self:start;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);border:1.5px solid var(--gold);padding:4px 10px;border-radius:4px;transform:rotate(-3deg)}
+.intro h1{font-family:var(--display);font-weight:800;font-size:clamp(40px,13vw,58px);line-height:.95;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.intro h1 em{font-style:normal;color:var(--green);display:block;font-size:.5em;letter-spacing:.02em;margin-top:8px}
+.intro p{margin:0;font-size:17px;color:var(--muted);max-width:38ch}
+.kit{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kit div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:2px}
+.kit b{font-family:var(--mono);font-size:15px}
+.kit span{font-size:12px;color:var(--muted)}
+
+/* Ending */
+.verdict{background:var(--green);color:var(--green-ink);border-radius:16px;padding:20px 18px;display:grid;gap:12px}
+.verdict .label{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.verdict h2{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.05;margin:0;text-wrap:balance}
+.verdict p{margin:0;font-size:17px}
+.receipts{display:grid;gap:6px;border-top:1px dashed color-mix(in srgb,var(--green-ink) 40%,transparent);padding-top:12px;font-size:15px}
+.receipts div::before{content:"› ";color:var(--gold);font-weight:700}
+.final{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-family:var(--mono);font-size:13px}
+.final div{display:grid;gap:2px}
+.final span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toast{font-size:14px;color:var(--good);min-height:20px;text-align:center}
+.routes{display:grid;gap:10px}
+.route-btn{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:2px}
+.route-btn:hover{border-color:var(--green)}
+.route-btn b{font-family:var(--display);font-size:17px;color:var(--green)}
+.route-btn span{font-size:14px;color:var(--muted)}
+.route-btn.on{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+.select{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;width:100%}
+.local{background:var(--bubble);border-radius:12px;padding:10px 12px;font-size:15px;display:grid;gap:2px}
+.local b{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--green)}
+.journey-line{font-family:var(--mono);font-size:13px;color:var(--green);font-weight:700}
+.foot.small{font-size:11px;opacity:.85}
+.foot{font-size:13px;color:var(--muted);text-align:center}
+.fade{animation:fade .35s ease both}
+@keyframes fade{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}.bar i,.progress i{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ---------- Places ---------- */
+// [name, costTier 1-3, coldTier 0-2, needsCar 1/0, town, note]
+const US_PLACES = [
+ ["Alabama",1,0,1],["Alaska",3,2,1],["Arizona",2,0,1],["Arkansas",1,0,1],
+ ["California",3,0,1,"","California rent will humble you before your first job does."],
+ ["Colorado",2,1,1],["Connecticut",3,2,1],["Delaware",2,1,1],
+ ["District of Columbia",3,1,0,"Washington","DC is full of policy people. Your Nigerian experience finally makes sense to somebody."],
+ ["Florida",2,0,1,"","Florida is warm like home. The hurricanes are not."],
+ ["Georgia",2,0,1,"","Atlanta's Nigerian churches have better sound systems than most concerts."],
+ ["Hawaii",3,0,1],["Idaho",1,2,1],
+ ["Illinois",2,2,1,"","Chicago wind has strong opinions about your choices."],
+ ["Indiana",1,2,1],["Iowa",1,2,1],["Kansas",1,1,1],["Kentucky",1,1,1],["Louisiana",1,0,1],["Maine",2,2,1],
+ ["Maryland",3,1,1,"","Half the Nigerians you know already live here. The aunties will find you before your mail does."],
+ ["Massachusetts",3,2,1,"","Boston has many universities and many very cold mornings."],
+ ["Michigan",2,2,1],
+ ["Minnesota",2,2,1,"","Minnesota cold is not weather. It is a personality test."],
+ ["Mississippi",1,0,1],["Missouri",1,1,1],["Montana",1,2,1],["Nebraska",1,2,1],
+ ["Nevada",2,0,1,"","In Nevada the desert heat is free and everything else costs money."],
+ ["New Hampshire",2,2,1],
+ ["New Jersey",3,1,1,"","Close enough to New York to pay New York prices."],
+ ["New Mexico",1,1,1],
+ ["New York",3,2,0,"","Nobody needs a car here. Everybody needs patience on the subway."],
+ ["North Carolina",2,1,1],["North Dakota",1,2,1],["Ohio",1,2,1],["Oklahoma",1,1,1],["Oregon",2,1,1],
+ ["Pennsylvania",2,2,1],["Rhode Island",2,2,1],["South Carolina",2,0,1],["South Dakota",1,2,1],["Tennessee",1,1,1],
+ ["Texas",2,0,1,"","Houston has so many Nigerians that you will hear Yoruba at the grocery store before you hear English."],
+ ["Utah",2,1,1],["Vermont",2,2,1],["Virginia",2,1,1],["Washington",3,1,1],["West Virginia",1,1,1],["Wisconsin",1,2,1],["Wyoming",1,2,1]
+];
+const UK_GROUPS = {
+ "England":["Bedfordshire","Berkshire","Bristol","Buckinghamshire","Cambridgeshire","Cheshire","City of London","Cornwall","Cumbria","Derbyshire","Devon","Dorset","Durham","East Riding of Yorkshire","East Sussex","Essex","Gloucestershire","Greater London","Greater Manchester","Hampshire","Herefordshire","Hertfordshire","Isle of Wight","Kent","Lancashire","Leicestershire","Lincolnshire","Merseyside","Norfolk","North Yorkshire","Northamptonshire","Northumberland","Nottinghamshire","Oxfordshire","Rutland","Shropshire","Somerset","South Yorkshire","Staffordshire","Suffolk","Surrey","Tyne and Wear","Warwickshire","West Midlands","West Sussex","West Yorkshire","Wiltshire","Worcestershire"],
+ "Scotland":["Aberdeen City","Aberdeenshire","Angus","Argyll and Bute","City of Edinburgh","Clackmannanshire","Dumfries and Galloway","Dundee City","East Ayrshire","East Dunbartonshire","East Lothian","East Renfrewshire","Falkirk","Fife","Glasgow City","Highland","Inverclyde","Midlothian","Moray","Na h-Eileanan Siar","North Ayrshire","North Lanarkshire","Orkney Islands","Perth and Kinross","Renfrewshire","Scottish Borders","Shetland Islands","South Ayrshire","South Lanarkshire","Stirling","West Dunbartonshire","West Lothian"],
+ "Wales":["Clwyd","Dyfed","Gwent","Gwynedd","Mid Glamorgan","Powys","South Glamorgan","West Glamorgan"],
+ "Northern Ireland":["Antrim","Armagh","Down","Fermanagh","Londonderry","Tyrone"]
+};
+const UK_COST3 = ["Greater London","City of London","Surrey","Berkshire","Oxfordshire","Hertfordshire","Buckinghamshire","Cambridgeshire","City of Edinburgh"];
+const UK_COST1 = ["Durham","Tyne and Wear","Northumberland","Cumbria","Lincolnshire","Na h-Eileanan Siar","Orkney Islands","Shetland Islands","Dumfries and Galloway","Antrim","Armagh","Down","Fermanagh","Londonderry","Tyrone","Dyfed","Powys","Gwynedd","Mid Glamorgan"];
+const UK_TOWN = {"Greater London":"London","City of London":"London","Greater Manchester":"Manchester","West Midlands":"Birmingham","Norfolk":"Norwich","West Yorkshire":"Leeds","South Yorkshire":"Sheffield","Merseyside":"Liverpool","Tyne and Wear":"Newcastle","City of Edinburgh":"Edinburgh","Glasgow City":"Glasgow","South Glamorgan":"Cardiff","Antrim":"Belfast","Bristol":"Bristol","Leicestershire":"Leicester","Nottinghamshire":"Nottingham","Aberdeen City":"Aberdeen","Dundee City":"Dundee"};
+const UK_NOTE = {
+ "Greater London":"London rent costs a pound per breath, and the Nigerian parties never end.",
+ "Greater Manchester":"Manchester rain is not weather. It is a lifestyle.",
+ "West Midlands":"Birmingham has jollof, Nigerian churches, and a bus network you will learn the hard way.",
+ "Essex":"Essex has a Nigerian Sunday-service economy of its own.",
+ "Kent":"Kent is close enough to London for the prices and far enough for the train fares.",
+ "Norfolk":"Norwich is quiet, green, and very far from any jollof.",
+ "West Yorkshire":"Leeds is friendly, rainy, and full of students who all seem to be named Josh.",
+ "City of Edinburgh":"Edinburgh is beautiful, hilly, and windy enough to remove your gele.",
+ "Glasgow City":"Glasgow is warm in spirit and nothing else.",
+ "South Glamorgan":"Cardiff is calm and kind, and every road sign is in two languages.",
+ "Antrim":"Belfast is small, friendly, and you will meet the same three Nigerians everywhere."
+};
+const CA_PLACES = [
+ ["Alberta",2,2,1,"Calgary","Calgary has a Nigerian community big enough to throw an owambe at minus 30."],
+ ["British Columbia",3,1,0,"Vancouver","Vancouver rain will remind you of the UK. The rent will remind you of nothing you can afford."],
+ ["Manitoba",1,2,1,"Winnipeg","Winnipeg cold makes Maryland look like Lagos."],
+ ["New Brunswick",1,2,1],["Newfoundland and Labrador",1,2,1],["Northwest Territories",2,2,1],
+ ["Nova Scotia",2,2,1,"Halifax","Halifax is friendly, coastal, and windy enough to steal your cap."],
+ ["Nunavut",3,2,1,"","Groceries in Nunavut cost more than your flight."],
+ ["Ontario",3,2,0,"Toronto","Toronto and Brampton rents will make you miss your duplex back home."],
+ ["Prince Edward Island",1,2,1],
+ ["Quebec",2,2,0,"Montreal","Your French stops at bonjour, which gets you exactly one sentence into every conversation."],
+ ["Saskatchewan",1,2,1],["Yukon",2,2,1]
+];
+function placeFrom(arr){ const [name,cost,cold,car,town,note] = arr; return {name, cost, cold, car:!!car, town: town||name, note: note||''}; }
+function places(key){
+  if(key==='us') return US_PLACES.map(placeFrom);
+  if(key==='ca') return CA_PLACES.map(placeFrom);
+  const out = [];
+  for(const g in UK_GROUPS) for(const n of UK_GROUPS[g]){
+    const cost = UK_COST3.includes(n)?3:UK_COST1.includes(n)?1:2;
+    out.push({name:n, group:g, cost, cold:1, car:false, town:UK_TOWN[n]||n, note:UK_NOTE[n]||''});
+  }
+  return out;
+}
+
+const ROUTES = {
+  us:{key:'us', country:'USA', cur:'$', k:1, start:5000, rent:700, label:'United States', ask:'Which state?', sub:'Cars, credit scores, and "US experience"', def:'Maryland'},
+  uk:{key:'uk', country:'UK', cur:'£', k:0.8, start:2500, rent:520, label:'United Kingdom', ask:'Which county?', sub:'Rain, tiny houses, and cars from the wrong side', def:'Norfolk'},
+  ca:{key:'ca', country:'Canada', cur:'C$', k:1.35, start:4000, rent:1100, label:'Canada', ask:'Which province or territory?', sub:'Basement apartments and minus 30', def:'Ontario'}
+};
+
+const ORIGINS = {"Abuja":"ABV","Lagos":"LOS","Ibadan":"IBA","Port Harcourt":"PHC","Kano":"KAN","Enugu":"ENU","Benin City":"BNI","Abeokuta":"ABK","Ilorin":"ILR","Kaduna":"KAD"};
+let R, L, S, idx, phase, last, pick = {route:null, place:null, origin:"Abuja"};
+const O = () => S.origin;
+const MULT = [0, .75, 1, 1.35];
+const A = x => Math.round(x*R.k/5)*5;                 // shared amounts, converted to local currency
+const RENT = () => Math.round(R.rent*MULT[L.cost]/10)*10;
+const M = x => R.cur + Math.abs(Math.round(x)).toLocaleString('en-GB');
+const T = () => L.town;
+
+function fresh(){ R=null; L=null; S=null; idx=0; phase='intro'; last=null; }
+function begin(rk, pname, prev){
+  const origin = prev ? prev.origin : pick.origin;
+  const trail = prev ? prev.trail.concat([{code:L.town.slice(0,3).toUpperCase(), town:L.town, country:R.country}]) : [{code:ORIGINS[origin]||'NGA', town:origin, country:'Nigeria'}];
+  R = ROUTES[rk]; L = places(rk).find(p=>p.name===pname);
+  // trail now holds every place before this landing
+  S = prev ? {cash:R.start, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1}
+           : {cash:R.start, peace:70, home:60, future:20, f:{}, origin, trail, landing:1};
+  idx = nextIndex(0); phase = 'scene';
+}
+function localNote(){
+  if(L.note) return L.note;
+  const bits = [];
+  if(L.cost===3) bits.push("Rent here will humble you.");
+  else if(L.cost===1) bits.push("Rent is kinder here than in the big cities.");
+  if(L.cold===2) bits.push("The winters are serious.");
+  if(L.cold===0) bits.push("The weather is closer to home.");
+  if(L.car) bits.push("You will need a car."); else bits.push("You can survive without a car.");
+  return bits.join(' ');
+}
+
+/* ---------- Shared scenes ---------- */
+const mummyThanks = () => ({day:3, from:"Mummy", sub:"Lagos · 11:42pm", text:"Thank God you landed safely. Your uncle said you should send something small for the thanksgiving service on Sunday. Everybody will be there.",
+  choices:[
+   {l:`Send ${M(A(200))}`, fx:{cash:-A(200), home:12}, r:"Mummy sends six voice notes of prayer, and your uncle announces your name in church. You have not seen a paycheck yet."},
+   {l:`Send ${M(A(50))} and a long voice note`, fx:{cash:-A(50), home:4, peace:2}, r:"She says, \"God bless you, my child.\" Your uncle says nothing, which is louder."},
+   {l:"Tell her the truth. No work yet.", fx:{home:-8, peace:6}, r:"There is a long silence on the line. Then she says, \"Okay. We will pray.\" You feel lighter and guilty at the same time."}]});
+const brotherRoof = () => ({day:12, from:"Tunde", sub:"Your brother · Ibadan", text:`Our building don reach roofing o. We need ${M(A(1500))} for zinc and carpenter. Send am before Friday so the price no go up.`,
+  choices:[
+   {l:`Send the ${M(A(1500))}`, fx:{cash:-A(1500), home:10}, set:{roof:'sent'}, r:"Tunde sends three thumbs up and a heart. Then nothing for four days."},
+   {l:"Ask for a video call from the site", fx:{home:-3}, set:{roof:'video'}, r:"He says network is bad at the site and sends a photo instead. The photo has a watermark from a website."},
+   {l:`Pay a neutral person ${M(A(40))} to check`, fx:{cash:-A(40), home:-6, future:5}, set:{roof:'checked'}, r:`Your old classmate visits. The walls stop at window level, so no roof is needed yet. You just saved ${M(A(1460))}.`}]});
+const mummyWedding = () => ({day:16, from:"Mummy", sub:"Lagos · 7:05am", text:"Your aunty's daughter is getting married next month. The family has put you down for ₦200,000. I already told them you said yes.",
+  choices:[
+   {l:"Send the full ₦200,000", fx:{cash:-A(135), home:8}, r:"Your name is read out at the family meeting. Applause, apparently."},
+   {l:"Promise to send it next week", fx:{home:2}, set:{promise:true}, r:"Mummy says, \"Next week is not far.\" It sounds like a warning."},
+   {l:"Switch off your phone", fx:{home:-12, peace:4}, r:"You get 23 missed calls. Two are from numbers you don't know, and one is the bride."},
+   {l:"Send ₦5,000 and pray", fx:{cash:-A(4), home:-4}, r:"The family WhatsApp group goes quiet. Someone posts a sticker of a man laughing."}]});
+const farm = () => ({day:21, from:"Mr. Emeka", sub:"Farm manager · Ibadan", text:`Good evening boss. The cold weather killed 300 birds. We need ${M(A(400))} to restock before Christmas.`,
+  choices:[
+   {l:`Send the ${M(A(400))}`, fx:{cash:-A(400)}, set:{birds:'sent'}, r:"You later remember that it was 31°C in Ibadan that week."},
+   {l:"Ask for the vet report and photos", fx:{home:-2, future:3}, set:{birds:'asked'}, r:"He sends a photo of ten birds and a feed receipt from 2024. You ask more questions, and he goes quiet."},
+   {l:"Ask your neighbour to count the birds", fx:{cash:-A(20), future:6}, set:{birds:'counted'}, r:"Your neighbour counts 412 birds, very alive and very loud. Mr. Emeka says it was \"a small mistake\"."}]});
+const promise = () => ({day:22, when: s => s.f.promise, from:"Mummy", sub:"Lagos · 6:30am", text:"It is next week.",
+  choices:[
+   {l:"Send it now", fx:{cash:-A(135), home:4}, r:"She replies with a single prayer emoji. Peace is restored."},
+   {l:"Tell her you can't afford it", fx:{home:-10, peace:3}, r:"She says she will tell them herself. You know she will tell them it was your fault."}]});
+const seun = () => ({day:28, from:"Seun", sub:"Secondary school friend", text:`Abeg how you take japa? Help me with proof of funds. Just show ${M(A(10000))} in your account for one week, I go return am.`,
+  choices:[
+   {l:"Let him use your account", fx:{peace:-10, home:2, future:-10}, r:"This is how people get flagged. You lie awake checking your banking app every hour."},
+   {l:"Send him the guide you used", fx:{future:3, home:3}, r:"You send a long voice note with every step. He says, \"I owe you.\" He does."},
+   {l:"Leave him on read", fx:{home:-4, peace:2}, r:"He posts a status about fake friends abroad. You know it is for you."}]});
+const doubt = (day, where, extra) => ({day, text:`${where} You had staff in ${O()}. Today someone half your age told you the role needs "someone more entry level". You start asking yourself why you left.`,
+  choices:[
+   {l:`Call a friend still in ${O()}`, fx:{home:3, peace:6}, r:"She says the office misses you and that fuel is now unbelievable. You hang up feeling missed and very sure about the fuel."},
+   {l:`Check flights back to ${O()}`, fx:{peace:-6, future:-4}, r:`One way is ${M(A(780))}. You close the tab, open it again, and close it again.`},
+   {l:"Write down the three reasons you came", fx:{peace:6, future:8}, r:extra}]});
+const finalCall = () => ({day:30, from:"Mummy", sub:"Video call", text:"Let me see your face. How is abroad?",
+  choices: s => [
+   {l:"Tell her the truth, all of it", fx:{home:6, peace:8}, r:"She cries a little, then laughs at your new accent. \"You are still my child,\" she says."},
+   {l:"Smile and say \"Abroad is sweet\"", fx:{peace:-6, home:3}, r:"She is so proud. You end the call and sit in the dark for a while."},
+   R.key==='uk'
+     ? {l:"Show her the rain outside your window", fx:{peace:5, home:4}, r:"She asks if it rains like this every day. You say yes. She says, \"Ah, so they don't have sun?\" You laugh for the first time in a week."}
+     : R.key==='ca'
+     ? {l:"Show her the snow outside", fx:{peace:5, home:4}, r:"She screams. \"Is that sugar?\" Then she asks why you are wearing three jackets indoors."}
+     : {l: L.car ? "Show her your car" : "Show her the city from your window", fx:{peace:5, home:4}, r: s.f.car==='bought' ? "She inspects the Corolla like a quality control officer and approves it. \"So this is where the ajo went.\"" : "She says, \"God will provide a car.\" You say amen with your whole chest."}]});
+
+/* ---------- United States ---------- */
+const US = () => [
+ {day:1, text:`You resign from a good job in ${O()} and land in ${T()} with ${M(5000)}, which is your ajo payout plus everything you sold before leaving, and a Nigerian passport. Your cousin Bisi says you can stay with her until you find your feet. She has a husband, three children, and two bedrooms.`,
+  choices:[
+   {l:"Stay with Bisi", fx:{peace:-10}, set:{stay:'cousin'}, r:"You sleep on the couch. Her last born uses your back as a trampoline at 6am. Rent is free, but every plate you eat is counted in her eyes."},
+   {l:`Pay four months' rent upfront, ${M(RENT()*4)}`, fx:{cash:-RENT()*4, peace:10, future:6}, set:{stay:'prepaid'}, r:"The landlord has never seen anyone pay four months upfront. Your room is small, but nobody can tell you to leave."},
+   {l:`Cheap motel for now, ${M(Math.round(560*MULT[L.cost]))}`, fx:{cash:-Math.round(560*MULT[L.cost]), peace:-5}, set:{stay:'motel'}, r:"Two weeks at a motel off the highway. The heater rattles like a danfo, and you are paying money just to think."}]},
+ {day:2, text:`In ${O()} you had a driver, a cleaner, and someone to stand in the bank queue for you. Here, the laundry is in the basement, the dishes are yours, and nobody is coming.`,
+  choices:[
+   {l:"Roll up your sleeves and do it all", fx:{peace:-5, future:3}, r:"You wash, cook, clean, and carry. By evening your hands know things your degrees never taught them."},
+   {l:"Pay $40 for a laundry service", fx:{cash:-40, peace:3}, r:"Forty dollars to wash clothes. Your former house help earned less than that in a week."},
+   {l:"Call Mummy to complain", fx:{home:4, peace:2}, r:"She laughs and says, \"Abroad wan teach you work.\" She is not wrong."}]},
+ mummyThanks(),
+ L.car
+ ? {day:5, text:`${T()} without a car is a long walk and three buses. Everybody says the same thing. Get a car first, then a job.`,
+    choices:[
+     {l:"Spend $2,500 of your ajo money on a 2011 Corolla", fx:{cash:-2500, peace:10, future:8}, set:{car:'bought'}, r:"The ajo you contributed to for two years becomes a silver Corolla with 140,000 miles. It coughs in the morning, and you love it anyway."},
+     {l:"Take the bus and protect your savings", fx:{peace:-8}, set:{car:'bus'}, r:"Your savings stay untouched. You also spend two hours a day at bus stops learning patience."},
+     {l:"Uber everywhere until you decide", fx:{cash:-320, peace:2}, set:{car:'uber'}, r:"Three hundred and twenty dollars later, the drivers know you by name."}]}
+ : {day:5, text:`In ${T()} a car is more trouble than help. Parking alone costs more than your first rent in ${O()}.`,
+    choices:[
+     {l:"Buy a monthly transit pass", fx:{cash:-130, peace:4, future:3}, set:{car:'transit'}, r:"You learn every train line in a week and start giving tourists directions."},
+     {l:"Walk everywhere and save money", fx:{peace:-6, future:2}, r:"Your legs are strong. Your shoes are finished."},
+     {l:"Keep your ajo money for emergencies", fx:{peace:3, future:2}, set:{car:'saved'}, r:"Two years of ajo sit in the bank as your safety net. You feel rich for about one day."}]},
+ {day:7, text:`You apply for jobs with a first degree, a master's, and ten years in ${O()}. Every employer asks the same question. Do you have US experience?`,
+  choices:[
+   {l:"Take a warehouse night shift, $17 an hour", fx:{peace:-6, future:-2}, set:{job:'warehouse'}, r:"You start Monday at 10pm. Your supervisor is 23 and calls you \"buddy\"."},
+   {l:"Home care job through Aunty's connect", fx:{peace:-2, home:3}, set:{job:'care'}, r:"Aunty says you must thank her properly. The client is a sweet old man who calls you \"Nigeria\"."},
+   {l:"Get your degrees evaluated and hold out", fx:{cash:-200, future:12, peace:-4}, set:{job:'field'}, r:"A credential evaluation costs $200 and says your master's equals a US master's. Employers still want US experience."}]},
+ L.cold>0
+ ? {day:9, text: L.cold===2 ? `Winter arrives in ${T()} like it has a personal problem with you. Your ${O()} jacket was always decorative.` : `The first cold front reaches ${T()}. Your ${O()} jacket was always decorative, and now everybody knows.`,
+    choices:[
+     {l:"Buy a proper coat for $180", fx:{cash:-180, peace:8}, set:{coat:'proper'}, r:"Warm at last. You walk slowly past the bus stop, just to enjoy it."},
+     {l:"Thrift store coat for $25", fx:{cash:-25, peace:4}, set:{coat:'thrift'}, r:"It smells a little like someone's grandmother. It is warm, and you wear it with pride."},
+     {l:"Naija blood dey my body", fx:{peace: L.cold===2?-20:-15}, set:{coat:'none'}, r:"You catch a cold that lasts eleven days and learn the word \"layering\" the hard way."}]}
+ : {day:9, text:`Winter in ${T()} is gentle. The electricity bill is not. The AC has been running since the day you landed.`,
+    choices:[
+     {l:"Pay the $160 bill and keep the AC on", fx:{cash:-160, peace:6}, r:"Cool air and peace of mind. Your NEPA trauma is slowly healing."},
+     {l:"Switch to a standing fan", fx:{peace:-6, cash:-40}, r:`It feels exactly like ${O()} during a power cut. Except you are paying for it.`},
+     {l:"Open the windows like home", fx:{peace:-3}, r:"A neighbour asks if you are okay. In America, open windows mean something is wrong."}]},
+ brotherRoof(),
+ {day:15, auto:'pay1'},
+ mummyWedding(),
+ doubt(19, "You sit in your car outside Walmart after another rejection email.", "You write them on a Walmart receipt and put it in the glove box. You will read it many times."),
+ farm(), promise(),
+ {day:25, auto:'pay2'},
+ {day:27, when: s => s.f.roof==='sent' || s.f.roof==='video', auto:'roof'},
+ seun(), finalCall()
+];
+
+/* ---------- United Kingdom ---------- */
+const UK = () => [
+ {day:1, text:`You land at Heathrow for your PhD in ${T()} with £2,500, two boxes of Indomie, and a Nigerian passport. You chose the UK because it is closer to home, flights are shorter, and everybody said you will find a Nigerian spouse there easily. It is raining.`,
+  choices:[
+   {l:`Take a student room, ${M(RENT())} a month`, fx:{cash:-RENT(), peace:4, future:6}, set:{stay:'room'}, r:"The room is clean and close to campus. It is also so small that you can open the window from your bed."},
+   {l:"Stay with your cousin two hours away", fx:{peace:-8}, set:{stay:'cousin'}, r:"Free rent, but every lecture costs you four hours on trains."},
+   {l:`Share a house with four strangers, ${M(Math.round(RENT()*0.78/10)*10)}`, fx:{cash:-Math.round(RENT()*0.78/10)*10, peace:-4}, set:{stay:'shared'}, r:"One housemate labels his milk. Another cooks fish at midnight. You are the only one who cleans the bathroom."}]},
+ mummyThanks(),
+ {day:4, text:`You step off the pavement and look left, the way you have done your whole life. A car comes from the right and the driver says something very British through the window.`,
+  choices:[
+   {l:"Follow the locals and cross when they cross", fx:{peace:3, future:2}, r:"You attach yourself to an old lady with a shopping trolley. She crosses safely, and so do you."},
+   {l:"Press the button and wait for the green man", fx:{peace:2}, r:"You wait four minutes on an empty road while everyone else crosses. But you are alive."},
+   {l:`Use your ${O()} instincts and run`, fx:{peace:-10}, r:"A cyclist, a bus, and a taxi all honk at once. You make it across, shaking and slightly proud."}]},
+ {day:6, text:`There is no car, the bus costs money every single time, and the supermarket in ${T()} is 25 minutes away on foot. In the rain.`,
+  choices:[
+   {l:"Walk everywhere and save money", fx:{peace:-6, future:2}, r:"You walk 14,000 steps a day. Your legs are strong, your shoes are finished, and your umbrella died on day two."},
+   {l:"Buy a second-hand bike for £60", fx:{cash:-60, peace:3, future:3}, r:"You buy a bike. Then you remember the cars come from the wrong side, and you push it more than you ride it."},
+   {l:"Take the bus and stop counting", fx:{cash:-40, peace:4}, r:"Forty pounds in a week on buses. But you arrive dry."}]},
+ {day:8, text:"Your PhD stipend has not arrived yet, and the university says it will take \"a few more weeks\". You need work, but your visa limits your hours during term.",
+  choices:[
+   {l:"Pick up care home shifts", fx:{peace:-5, home:2}, set:{job:'care'}, r:"Twenty hours a week of lifting, feeding, and smiling. The residents love your accent and ask if you know the King."},
+   {l:"Become a research assistant on campus", fx:{future:10, peace:-2}, set:{job:'field'}, r:"Less money, but your supervisor notices you. That matters more than you know yet."},
+   {l:"Work a warehouse shift at the weekend", fx:{peace:-7}, set:{job:'warehouse'}, r:"Saturdays and Sundays packing boxes. Your PhD reading happens on the bus."}]},
+ brotherRoof(),
+ {day:14, from:"Aunty Folake", sub:"Family elder · Abuja", text:"So how far? Have you found someone serious in that UK? You know you are not getting younger o.",
+  choices:[
+   {l:"Go to the Nigerian fellowship this Sunday", fx:{peace:3, home:5, future:3}, set:{spouse:'looked'}, r:"Everyone is lovely. Every single man you meet is married, engaged, or \"focusing on himself\"."},
+   {l:"Tell her you are focusing on your PhD", fx:{home:-4, peace:4, future:4}, r:"She replies with a voice note that is four minutes long. You do not play it."},
+   {l:"Tell her you will join a dating app", fx:{peace:-4, home:4}, r:`Your first match lives in ${T()==='Birmingham'?'Manchester':'Birmingham'} and wants to know your salary before your name.`}]},
+ {day:15, auto:'pay1'},
+ mummyWedding(),
+ {day:18, text:"Your cousin's wedding is in Lagos next month. You chose the UK so flights home would be easy. Easy turns out to mean £780.",
+  choices:[
+   {l:"Book the flight and go", fx:{cash:-780, home:10, peace:4}, r:"You dance until 3am, eat three plates of jollof, and come back broke and very happy."},
+   {l:"Send money instead", fx:{cash:-120, home:4}, r:"Your aunty says they understand. Nobody in your family has ever understood anything."},
+   {l:"Join on video call", fx:{home:-3, peace:2}, r:"The network drops during the vows. You watch the rest on someone's Instagram story."}]},
+ {day:20, text:`It has rained in ${T()} for nineteen of your first twenty days. The houses are small, the sky is grey, and you start asking yourself whether you have made the same mistake twice.`,
+  choices:[
+   {l:"Buy vitamin D and a proper raincoat", fx:{cash:-60, peace:8}, r:"The raincoat changes everything. The vitamin D might be doing something too."},
+   {l:"Complain in the Nigerians-in-UK group chat", fx:{peace:5, home:2}, r:"Three hundred people reply that they also have not seen the sun since August. You feel less alone."},
+   {l:"Write down why you came", fx:{peace:6, future:8}, r:"Closer to home, a PhD, a fresh start. You stick the note on your tiny wall, which is the only wall you have."}]},
+ farm(), promise(),
+ {day:25, auto:'pay2'},
+ {day:27, when: s => s.f.roof==='sent' || s.f.roof==='video', auto:'roof'},
+ seun(), finalCall()
+];
+
+/* ---------- Canada ---------- */
+const CA = () => [
+ {day:1, text:`Your permanent residence came through, so you land in ${T()} with C$4,000, a winter jacket from Balogun market, and a Nigerian passport. Everybody back home says Canada is the new America. Everybody here says, "Welcome, it gets colder."`,
+  choices:[
+   {l:`Rent a basement apartment, ${M(RENT())} a month`, fx:{cash:-RENT(), peace:4, future:5}, set:{stay:'basement'}, r:"Your window is at ground level. You can see the feet of everyone who walks past, and soon you will see snow piled against the glass."},
+   {l:"Stay with a family from church", fx:{peace:-6, home:3}, set:{stay:'host'}, r:"They are kind and generous. They also wake up at 5am for prayer, and so do you now."},
+   {l:`Airbnb for two weeks, ${M(Math.round(900*MULT[L.cost]))}`, fx:{cash:-Math.round(900*MULT[L.cost]), peace:-3}, set:{stay:'airbnb'}, r:"Two weeks of someone else's furniture and a long list of house rules taped to the fridge."}]},
+ mummyThanks(),
+ {day:4, text:`You get your SIN, open a bank account, and walk into a phone shop. The cheapest decent plan costs more than your entire data budget in ${O()} for a year.`,
+  choices:[
+   {l:"Pay C$75 a month for a proper plan", fx:{cash:-75, peace:4}, r:"You have data everywhere. Your bank account felt that."},
+   {l:"Get a cheap prepaid plan", fx:{cash:-30, peace:-2}, r:"It works well, except in buildings, basements, and anywhere you actually are."},
+   {l:"Survive on library and Tim Hortons Wi-Fi", fx:{peace:-6, future:2}, r:"You become a regular. The staff know your double-double before you order it."}]},
+ {day:6, text: L.cold===2 ? `The forecast for ${T()} says minus 18, feels like minus 27. Your Balogun jacket was designed for Lagos harmattan.` : `${T()} is milder than the rest of Canada. It is also wet in a way that gets into your bones.`,
+  choices:[
+   {l:"Buy a real parka and boots, C$320", fx:{cash:-320, peace:10}, set:{coat:'proper'}, r:"You look like a sleeping bag with legs, and you have never been happier."},
+   {l:"Thrift store parka, C$40", fx:{cash:-40, peace:5}, set:{coat:'thrift'}, r:"One zip is broken, but it has survived worse winters than this one, and so will you."},
+   {l:"Naija blood dey my body", fx:{peace: L.cold===2?-22:-12}, set:{coat:'none'}, r:"Your nostrils freeze when you breathe. A stranger hands you their scarf and says, \"Oh honey, no.\""}]},
+ {day:8, text:"Every interview ends with the same sentence. \"We are looking for someone with Canadian experience.\" You ask how you get Canadian experience without a Canadian job. Nobody answers.",
+  choices:[
+   {l:"Take a warehouse survival job", fx:{peace:-6, future:-2}, set:{job:'warehouse'}, r:"Twelve-hour shifts with three engineers and a former bank manager. Everybody is \"just doing this for now\"."},
+   {l:"Personal support worker shifts", fx:{peace:-3, home:3}, set:{job:'care'}, r:"Hard work, kind patients, and a coworker from Ibadan who adopts you immediately."},
+   {l:"Join a bridging program and volunteer", fx:{future:12, peace:-4, cash:-150}, set:{job:'field'}, r:"Unpaid hours and a C$150 course fee. But now your CV has a Canadian line on it."}]},
+ brotherRoof(),
+ L.car
+ ? {day:14, text:`Your Nigerian driver's licence gets you a polite smile in ${T()}. You need to pass the local road test, in snow.`,
+    choices:[
+     {l:"Pay for lessons and take the test", fx:{cash:-400, future:6, peace:-2}, set:{car:'licence'}, r:"Your instructor says you drive \"very confidently\". He does not mean it as a compliment. You pass on the second try."},
+     {l:"Buy a winter beater and drive carefully", fx:{cash:-1800, peace:4}, set:{car:'bought'}, r:"A 2009 Civic with four snow tires and a heater that only works on full blast."},
+     {l:"Stick to the bus for now", fx:{peace:-6}, r:"You wait at a bus stop at minus 20 and question every decision you have ever made."}]}
+ : {day:14, text:`In ${T()} the transit system is good, but the cold at the bus stop is personal.`,
+    choices:[
+     {l:"Buy a monthly transit pass", fx:{cash:-155, peace:4, future:2}, r:"The train becomes your office, your library, and your nap room."},
+     {l:"Walk to save money", fx:{peace:-8}, r:"Two kilometres in the snow. Your toes file a formal complaint."},
+     {l:"Carpool with your coworker from Ibadan", fx:{cash:-60, peace:6, home:2}, r:"Afrobeats in the car at 6am. It feels like home on wheels."}]},
+ {day:15, auto:'pay1'},
+ mummyWedding(),
+ {day:18, from:"Chioma", sub:"Nigerian association · "+L.town, text:"Owambe this Saturday! Dress code is gold and green. Don't tell me it's too cold, everybody is coming.",
+  choices:[
+   {l:"Go in full aso ebi over your parka", fx:{peace:8, home:3, future:4}, set:{network:true}, r:"Fifty Nigerians, jollof in steel trays, and a DJ who plays Wizkid until midnight. Someone offers you a job lead between the small chops and the cake."},
+   {l:"Stay home and save the money", fx:{peace:-3}, r:"You watch the party on Instagram stories from your basement. The jollof looks warm."},
+   {l:"Work an extra shift instead", fx:{cash:A(220), peace:-6}, r:"Time and a half for working Saturday. Your aso ebi stays in the bag."}]},
+ doubt(20, "You sit in your basement watching snow pile up against the window.", "You write them on the back of your PR card envelope. Opportunity, safety, and a future for your children."),
+ farm(), promise(),
+ {day:25, auto:'pay2'},
+ {day:27, when: s => s.f.roof==='sent' || s.f.roof==='video', auto:'roof'},
+ seun(), finalCall()
+];
+
+let SCENES = [];
+function scenes(){ return R.key==='us' ? US() : R.key==='uk' ? UK() : CA(); }
+
+function autoEvent(kind){
+  const f = S.f, k = R.key; let text = '', fx = {};
+  if(kind==='pay1'){
+    if(k==='us'){
+      if(f.job==='warehouse'){ text = "First paycheck. $1,100 after tax. You stare at the tax line for a long time."; fx = {cash:1100, peace:-3}; }
+      else if(f.job==='care'){ text = "First paycheck. $900. Aunty asks how much you got before you have even opened the app."; fx = {cash:900}; }
+      else { text = "No paycheck. Your savings are now your salary, and they are not getting a raise."; fx = {cash:0, peace:-5}; }
+      if(f.stay==='motel'){ const m = Math.round(280*MULT[L.cost]); text += ` The motel wants ${M(m)} for another week.`; fx.cash -= m; }
+    } else if(k==='uk'){
+      if(f.job==='warehouse'){ text = "First weekend pay. £360. You spend £4 on a meal deal to celebrate."; fx = {cash:360, peace:-3}; }
+      else if(f.job==='care'){ text = "First care home pay. £640. Your back sends its regards."; fx = {cash:640}; }
+      else { text = "Your research assistant pay arrives. £300. Your stipend is still \"processing\"."; fx = {cash:300}; }
+    } else {
+      if(f.job==='warehouse'){ text = "First pay. C$1,350 after deductions. You learn the words CPP and EI the expensive way."; fx = {cash:1350, peace:-3}; }
+      else if(f.job==='care'){ text = "First pay. C$1,200. Your coworker from Ibadan takes you for suya to celebrate."; fx = {cash:1200, peace:3}; }
+      else { text = "No pay yet. Your bridging program says the investment is in your future. Your landlord says rent is in the present."; fx = {cash:0, peace:-5}; }
+      if(f.stay==='airbnb'){ const m = Math.round(450*MULT[L.cost]); text += ` The Airbnb wants ${M(m)} for another week.`; fx.cash -= m; }
+    }
+  }
+  if(kind==='pay2'){
+    if(k==='us'){
+      if(f.job==='warehouse'){ text = "Second paycheck, $1,100. Your body has stopped asking questions."; fx = {cash:1100, peace:-3}; }
+      else if(f.job==='care'){ text = "Second paycheck, $900. The old man gives you a $50 tip and calls you his favourite."; fx = {cash:950, peace:3}; }
+      else { text = "A Nigerian uncle from church refers you. You land a contract role in your field with a $1,600 advance. US experience, finally."; fx = {cash:1600, future:18, peace:6}; }
+      if(f.stay==='cousin'){ text += " Bisi's husband asks if you will \"contribute to bills\". $300."; fx.cash -= 300; }
+      if(f.stay==='motel'){ text += ` You finally move into a room. ${M(RENT()*2)} for deposit and first month.`; fx.cash -= RENT()*2; }
+      if(f.stay==='prepaid'){ text += " Rent is already paid. You sleep like a baby."; fx.peace = (fx.peace||0) + 4; }
+      if(f.car==='bought'){ text += " Car insurance is $180, which feels like a personal insult."; fx.cash -= 180; }
+    } else if(k==='uk'){
+      text = "Your PhD stipend finally lands. £1,450. You check the app three times to be sure.";
+      fx = {cash:1450, peace:6, future:4};
+      if(f.job==='care'){ text += " Plus £640 from the care home."; fx.cash += 640; }
+      if(f.job==='warehouse'){ text += " Plus £360 from weekend shifts."; fx.cash += 360; }
+      if(f.stay==='room'){ text += ` Rent is due. ${M(RENT())}.`; fx.cash -= RENT(); }
+      if(f.stay==='shared'){ const r = Math.round(RENT()*0.78/10)*10; text += ` Rent is due. ${M(r)}, and someone has used your milk.`; fx.cash -= r; }
+      if(f.stay==='cousin'){ text += " Your cousin asks for £150 \"for light\". You pay it gladly."; fx.cash -= 150; }
+    } else {
+      if(f.job==='warehouse'){ text = "Second pay, C$1,350. You now own thermal underwear and you are not ashamed."; fx = {cash:1350, peace:-3}; }
+      else if(f.job==='care'){ text = "Second pay, C$1,200. A patient's daughter writes your manager a thank-you card about you."; fx = {cash:1200, peace:4, future:3}; }
+      else if(f.network){ text = "The job lead from the owambe calls back. A contract role in your field, with a C$2,000 signing advance. Canadian experience, finally."; fx = {cash:2000, future:18, peace:6}; }
+      else { text = "The bridging program connects you to a paid placement. C$600 for now and a reference letter later."; fx = {cash:600, future:8}; }
+      if(f.stay==='basement'){ text += ` Basement rent is due. ${M(RENT())}.`; fx.cash -= RENT(); }
+      if(f.stay==='host'){ text += " You give your host family C$400 for food and gratitude."; fx.cash -= 400; }
+      if(f.stay==='airbnb'){ text += ` You finally rent a basement. ${M(RENT()*2)} for deposit and first month.`; fx.cash -= RENT()*2; }
+    }
+  }
+  if(kind==='roof'){
+    if(f.roof==='sent'){ text = "Your neighbour sends a photo of the building. There is no roof. There is a goat."; fx = {peace:-10, future:-5}; }
+    else { text = "Your neighbour mentions, casually, that Tunde just bought a new phone."; fx = {peace:-4}; }
+  }
+  return {text, fx};
+}
+
+function apply(fx){ for(const k in fx){ S[k] += fx[k]; if(k!=='cash') S[k] = Math.max(0, Math.min(100, S[k])); } }
+function money(n){ return (n<0?'-':'') + M(n); }
+function chips(fx){
+  const names = {cash:'Cash', peace:'Peace', home:'Home', future:'Future'};
+  return Object.keys(fx).filter(k=>fx[k]).map(k=>{
+    const v = fx[k], up = v>0;
+    const val = k==='cash' ? (up?'+':'-')+M(v) : (up?'+':'')+v;
+    return `<span class="chip ${up?'up':'down'}">${names[k]} ${val}</span>`;
+  }).join('');
+}
+function header(day){
+  const pct = Math.min(100, (day/30)*100);
+  const b = v => `<div class="bar"><i style="width:${v}%"></i></div>`;
+  return `<div class="pass">
+    <div class="pass-top"><div class="brand">JAPA</div><div class="day">DAY ${String(day).padStart(2,'0')} / 30</div></div>
+    <div class="route">${S.trail.map(t=>t.code).join(' → ')} → ${R.country} · ${L.town===L.name?L.name:L.town+', '+L.name}</div>
+    <div class="stats">
+      <div class="stat"><span>Cash</span><b>${money(S.cash)}</b></div>
+      <div class="stat"><span>Peace</span><b>${S.peace}</b>${b(S.peace)}</div>
+      <div class="stat"><span>Home</span><b>${S.home}</b>${b(S.home)}</div>
+      <div class="stat"><span>Future</span><b>${S.future}</b>${b(S.future)}</div>
+    </div>
+  </div>
+  <div class="progress" aria-hidden="true"><i style="width:${pct}%"></i></div>`;
+}
+function nextIndex(from){
+  SCENES = scenes();
+  let i = from;
+  while(i < SCENES.length && SCENES[i].when && !SCENES[i].when(S)) i++;
+  return i;
+}
+
+function placeOptions(rk){
+  const list = places(rk), def = ROUTES[rk].def;
+  if(rk!=='uk') return list.map(p=>`<option${p.name===def?' selected':''}>${p.name}</option>`).join('');
+  let html = '';
+  for(const g in UK_GROUPS){
+    html += `<optgroup label="${g}">` + list.filter(p=>p.group===g).map(p=>`<option${p.name===def?' selected':''}>${p.name}</option>`).join('') + `</optgroup>`;
+  }
+  return html;
+}
+
+function render(){
+  const app = document.getElementById('app');
+  if(phase==='intro'){
+    const rk = pick.route;
+    app.innerHTML = `<div class="intro fade">
+      <div class="stamp">Arrived · Day 01</div>
+      <h1>JAPA<em>You Have Landed</em></h1>
+      <p>Everybody wants to japa. Nobody tells you what happens after you land.</p>
+      <p>You have 30 days. Find work, pay rent, survive the weather, and decide who back home gets your money and who gets your questions.</p>
+      <label class="when" for="origin">Where are you leaving from?</label>
+      <select id="origin" class="select">${Object.keys(ORIGINS).map(o=>`<option${o===pick.origin?' selected':''}>${o}</option>`).join('')}</select>
+      <div class="when">Where are you landing?</div>
+      <div class="routes">
+        ${Object.values(ROUTES).map(r=>`<button class="route-btn${rk===r.key?' on':''}" data-r="${r.key}" aria-pressed="${rk===r.key}"><b>${r.label}</b><span>${r.sub}</span></button>`).join('')}
+      </div>
+      ${rk ? `<label class="when" for="place">${ROUTES[rk].ask}</label>
+        <select id="place" class="select">${placeOptions(rk)}</select>
+        <button class="primary" id="go">Land in ${ROUTES[rk].label}</button>` : ''}
+      <div class="foot">About 5 minutes. Every choice follows you.</div>
+      <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
+    </div>`;
+    document.getElementById('origin').onchange = e => { pick.origin = e.target.value; };
+    app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = b.dataset.r; render(); });
+    const go = document.getElementById('go');
+    if(go) go.onclick = ()=>{ begin(rk, document.getElementById('place').value); render(); scrollTo(0,0); };
+    return;
+  }
+  if(phase==='end'){ return renderEnd(app); }
+  SCENES = scenes();
+  const sc = SCENES[idx];
+  if(phase==='scene' && sc.auto){
+    const ev = autoEvent(sc.auto);
+    apply(ev.fx); last = {r:ev.text, fx:ev.fx, auto:true}; phase = 'result';
+  }
+  if(phase==='scene'){
+    const list = typeof sc.choices==='function' ? sc.choices(S) : sc.choices;
+    const note = sc.day===1 && !sc.from ? `${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
+    app.innerHTML = header(sc.day) + `<div class="scene fade">${intro(sc)}${note}<div class="choices">${list.map((c,i)=>`<button class="choice" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span>${c.l}</span></button>`).join('')}</div></div>`;
+    app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
+      const c = list[+btn.dataset.i];
+      apply(c.fx||{}); Object.assign(S.f, c.set||{});
+      last = {r:c.r, fx:c.fx||{}, picked:c.l}; phase='result'; render(); scrollTo(0,0);
+    });
+    return;
+  }
+  const picked = last.picked ? `<div class="when">You chose · ${last.picked}</div>` : '';
+  const body = (last.auto ? `<div class="when">Day ${sc.day}</div>` : intro(sc,true)) + picked +
+    `<div class="result">${last.r}</div><div class="chips">${chips(last.fx)}</div>
+     <button class="primary" id="next">${nextIndex(idx+1)>=SCENES.length?'See how your 30 days went':'Continue'}</button>`;
+  app.innerHTML = header(sc.day) + `<div class="scene fade">${body}</div>`;
+  document.getElementById('next').onclick = ()=>{
+    idx = nextIndex(idx+1);
+    phase = idx>=SCENES.length ? 'end' : 'scene';
+    render(); scrollTo(0,0);
+  };
+}
+function intro(sc, compact){
+  if(sc.from){
+    return `<div class="when">Day ${sc.day} · New message</div>
+      <div class="thread"><div class="who"><div class="avatar">${sc.from[0]}</div><div><b>${sc.from}</b><small>${sc.sub||''}</small></div></div>
+      <div class="bubble">${sc.text}</div></div>`;
+  }
+  return `<div class="when">Day ${sc.day}</div>${compact?'':`<div class="narr">${sc.text}</div>`}`;
+}
+
+function verdict(){
+  const f = S.f, low = A(300), mid = A(900);
+  if(f.roof==='sent' && S.home>=65 && S.cash<mid) return ["The Family ATM", `Everybody at home is thriving. You are eating Indomie in ${T()}.`];
+  if(S.cash<low) return ["Running on Prayers","You made it to day 30 on faith, leftover jollof, and a very patient bank."];
+  if(S.peace<35) return ["Hustle Without Peace","The money is coming in. Your body has filed a formal complaint."];
+  if(S.home<35) return ["Ghost Mode Activated","Your account is healthy. The family WhatsApp group thinks you have died."];
+  if(S.landing>1 && S.future>=40) return ["Serial Japa Champion",`${S.landing} landings and still standing. You have started over more times than most people have moved house.`];
+  if(S.future>=45) return ["Abroad Strategist","You protected your money, your peace, and your future. Your mates are taking notes."];
+  return ["Still Finding Your Feet","Thirty days in, and you are still standing. That counts for more than people at home will ever know."];
+}
+function receipts(){
+  const f = S.f, out = [];
+  if(f.roof==='sent') out.push("Your brother is still at roofing. The goat is doing well.");
+  if(f.roof==='checked') out.push(`You checked the building before paying. ${M(A(1460))} stayed in your pocket.`);
+  if(f.roof==='video') out.push("The roof photo had a watermark. You noticed.");
+  if(f.car==='bought' && R.key==='us') out.push("Two years of ajo became a Corolla that coughs every morning.");
+  if(f.birds==='sent') out.push("300 birds died of cold in 31°C weather. You paid for it.");
+  if(f.birds==='counted') out.push("412 birds alive and loud. Mr. Emeka is now very careful.");
+  if(f.spouse==='looked') out.push("Every Nigerian man at the fellowship was married or focusing on himself.");
+  if(f.network && R.key==='ca') out.push("An owambe at minus 20 got you your first real job lead.");
+  if(f.coat==='none') out.push("Naija blood was not enough for the cold.");
+  return out.slice(0,4);
+}
+function renderEnd(app){
+  const [title, line] = verdict(), rec = receipts();
+  const where = `${L.town}, ${R.country}`;
+  const journey = S.trail.map(t=>t.town).concat([L.town]).join(' → ');
+  const share = `I played JAPA: You Have Landed (${journey}) and I am "${title}". ${line} Finished 30 days with ${money(S.cash)}, Peace ${S.peace}, Home ${S.home}, Future ${S.future}. Wetin be your own?`;
+  app.innerHTML = `<div class="scene fade">
+    <div class="when">Day 30 · Your result</div>
+    <div class="journey-line">${journey}</div>
+    <div class="verdict">
+      <div class="label">JAPA · You Have Landed</div>
+      <h2>${title}</h2>
+      <p>${line}</p>
+      <div class="final">
+        <div><span>Cash</span><b>${money(S.cash)}</b></div>
+        <div><span>Peace</span><b>${S.peace}</b></div>
+        <div><span>Home</span><b>${S.home}</b></div>
+        <div><span>Future</span><b>${S.future}</b></div>
+      </div>
+      ${rec.length?`<div class="receipts">${rec.map(r=>`<div>${r}</div>`).join('')}</div>`:''}
+    </div>
+    <button class="primary" id="copy">Share my result</button>
+    <div class="row">
+      <button class="ghost" id="move">Japa again from here</button>
+      <button class="ghost" id="again">Start a new life</button>
+    </div>
+    <div id="movebox" hidden class="routes"></div>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="foot">Everybody wants to japa. Nobody tells you what happens after you land.</div>
+    <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
+  </div>`;
+  document.getElementById('again').onclick = ()=>{ fresh(); pick.route=null; render(); scrollTo(0,0); };
+  const url = /^https?:/.test(location.href) && !/claude\.ai|claudeusercontent/.test(location.href) ? location.href : '';
+  document.getElementById('copy').onclick = async ()=>{
+    const t = document.getElementById('toast'), text = share + (url ? ' ' + url : '');
+    try{
+      if(navigator.share){ await navigator.share({title:'JAPA: You Have Landed', text}); t.textContent = "Shared."; return; }
+    }catch(e){ if(e && e.name==='AbortError') return; }
+    navigator.clipboard.writeText(text).then(()=>{ t.textContent = "Copied. Paste it in the family group chat."; })
+    .catch(()=>{ t.textContent = text; });
+  };
+  document.getElementById('move').onclick = ()=>{
+    const box = document.getElementById('movebox'); box.hidden = false;
+    box.innerHTML = `<div class="when">Where are you moving next?</div>` +
+      Object.values(ROUTES).filter(r=>r.key!==R.key).map(r=>`<button class="route-btn" data-r="${r.key}"><b>${r.label}</b><span>${r.sub}</span></button>`).join('');
+    box.querySelectorAll('.route-btn').forEach(btn=>btn.onclick=()=>{
+      const rk = btn.dataset.r;
+      box.innerHTML = `<label class="when" for="place2">${ROUTES[rk].ask}</label><select id="place2" class="select">${placeOptions(rk)}</select><button class="primary" id="go2">Land in ${ROUTES[rk].label}</button>`;
+      document.getElementById('go2').onclick = ()=>{
+        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing};
+        const pl = document.getElementById('place2').value;
+        begin(rk, pl, prev); render(); scrollTo(0,0);
+      };
+    });
+  };
+}
+
+function start(data){
+  fresh();
+  if(data && data.rk && data.pn){ R = ROUTES[data.rk]; L = places(data.rk).find(p=>p.name===data.pn); S = data.S; idx = data.idx; phase = data.phase; last = data.last; }
+  render();
+}
+window.claude?.hot?.snapshot?.(()=>({rk:R&&R.key, pn:L&&L.name, S, idx, phase, last}));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+
+</body>
+</html>
