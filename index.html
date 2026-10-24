@@ -256,6 +256,15 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 #soundbtn{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));right:14px;z-index:50;width:42px;height:42px;border-radius:50%;border:1px solid var(--line, rgba(0,0,0,.12));background:var(--card);font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.12)}
 body{padding-bottom:64px}
 #soundbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.quick{display:grid;gap:10px;margin:6px 0 4px}
+.quick-btn{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--green);color:#fff;border:0;border-radius:14px;padding:18px;font:inherit;cursor:pointer;box-shadow:0 6px 18px rgba(16,47,40,.18);transition:transform .12s ease}
+.quick-btn:active{transform:scale(.98)}
+.quick-btn .flag{font-size:26px;line-height:1}
+.quick-btn b{font-family:var(--display);font-size:20px;flex:1;color:#fff}
+.quick-btn .go{font-size:20px;color:var(--gold)}
+.quick-ask{margin-top:18px}
+.quickdaily{margin-top:8px;font-size:13px}
+details.custom summary{font-weight:700}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -354,7 +363,7 @@ const ROUTES = {
 
 const ORIGIN_LIST = [["Abia","Aba"],["Adamawa","Yola","YOL"],["Akwa Ibom","Uyo","QUO"],["Anambra","Onitsha"],["Bauchi","Bauchi","BCU"],["Bayelsa","Yenagoa"],["Benue","Makurdi","MDI"],["Borno","Maiduguri","MIU"],["Cross River","Calabar","CBQ"],["Delta","Asaba","ABB"],["Ebonyi","Abakaliki"],["Edo","Benin City","BNI"],["Ekiti","Ado-Ekiti"],["Enugu","Enugu","ENU"],["FCT","Abuja","ABV"],["Gombe","Gombe","GMO"],["Imo","Owerri","QOW"],["Jigawa","Dutse"],["Kaduna","Kaduna","KAD"],["Kano","Kano","KAN"],["Katsina","Katsina","DKA"],["Kebbi","Birnin Kebbi"],["Kogi","Lokoja"],["Kwara","Ilorin","ILR"],["Lagos","Lagos","LOS"],["Nasarawa","Lafia"],["Niger","Minna","MXJ"],["Ogun","Abeokuta"],["Ondo","Akure","AKR"],["Osun","Osogbo"],["Oyo","Ibadan","IBA"],["Plateau","Jos","JOS"],["Rivers","Port Harcourt","PHC"],["Sokoto","Sokoto","SKO"],["Taraba","Jalingo"],["Yobe","Damaturu"],["Zamfara","Gusau"]];
 const ORIGINS = Object.fromEntries(ORIGIN_LIST.map(([st,city,code])=>[city, code || city.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()]));
-let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work", fund:"savings", gender:"woman", daily:false, duo:0};
+let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work", fund:"savings", gender:"any", daily:false, duo:0, custom:false};
 let shown = null;
 const O = () => S.origin;
 const MULT = [0, .75, 1, 1.35];
@@ -766,7 +775,7 @@ const UK = () => [
  sibling(),
  {day:14, when: s => pickV('uk14',2)===0, from:C().aunty, sub:`Family elder · ${C().home}`, text:"So how far? Have you found someone serious in that UK? You know you are not getting younger o.",
   choices:[
-   {l:"Go to the Nigerian community meet-up and scout", fx:{peace:3, home:5, future:3}, set:{spouse:'looked'}, r: S.gender==='man' ? "Everyone is lovely. Every single woman you meet is engaged, married, or \"not ready for anything serious\"." : "Everyone is lovely. Every single man you meet is married, engaged, or \"focusing on himself\"."},
+   {l:"Go to the Nigerian community meet-up and scout", fx:{peace:3, home:5, future:3}, set:{spouse:'looked'}, r: S.gender==='any' ? "Everyone is lovely. Every single person you meet is married, engaged, or \"focusing on themselves\"." : S.gender==='man' ? "Everyone is lovely. Every single woman you meet is engaged, married, or \"not ready for anything serious\"." : "Everyone is lovely. Every single man you meet is married, engaged, or \"focusing on himself\"."},
    {l: P()==='scholar' ? "Tell her you are focusing on your PhD" : STU() ? "Tell her you are focusing on your studies" : "Tell her you are focusing on your career", fx:{home:-4, peace:4, future:4}, r:"She replies with a voice note that is four minutes long. You do not play it."},
    {l:"Join a dating app. What could go wrong?", fx:{peace:-4, home:4}, r:`Your first match lives in ${T()==='Birmingham'?'Manchester':'Birmingham'} and wants to know your salary before your name.`}]},
  {day:15, auto:'pay1'},
@@ -1335,25 +1344,19 @@ function render(){
     app.innerHTML = `<div class="intro fade">
       <div class="stamp">Arrived · Day 01</div>
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
-      <p>Everybody wants to japa. Nobody tells you what happens after you land.</p>
-      <p>You have 30 days. Home thinks you are rich. Your bank account would like a word.</p>
-      <details class="how">
-        <summary>How it works</summary>
+      <p>Everybody wants to japa. Nobody tells you what happens after you land. Home thinks you are rich. Your bank account would like a word.</p>
+      <div class="when quick-ask">Tap where you are landing</div>
+      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">→</span></button>`).join('')}</div>
+      <label class="check daily quickdaily" for="qdaily"><input type="checkbox" id="qdaily"${pick.daily?' checked':''}> <span><b>Today's Landing · ${dayLabel(todayStr())}</b> Same game as everyone today</span></label>
+      <div class="foot">One tap and you are in. Your visa, city, and money are a surprise. About 5 minutes.</div>
+      <details class="how custom"${pick.custom?' open':''}>
+        <summary>Make it your story</summary>
         <div class="how-body">
-          <p>Life abroad asks questions. Your phone asks more. Every answer moves four meters.</p>
-          <dl>
-            <dt>Cash</dt><dd>Whatever survives "just send something small".</dd>
-            <dt>Peace</dt><dd>Your sanity. It drops when your mouth says yes and your heart says no.</dd>
-            <dt>Home</dt><dd>Family ratings. Money pushes it up. Voice notes do absolutely nothing.</dd>
-            <dt>Future</dt><dd>What you are really building. Nobody at home can see it, which is why it grows.</dd>
-          </dl>
-          <p>Each meter is out of 100, and 60 or more is healthy. There are no right answers. Every choice follows you to the end of the game.</p>
-        </div>
-      </details>
+      <p>Choose your state, your family's voice, your city, and how you japa'd.</p>
       <label class="when" for="origin">Which state are you leaving from?</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
       <label class="when" for="gender">I am a</label>
-      <select id="gender" class="select"><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select>
+      <select id="gender" class="select"><option value="any"${pick.gender==='any'?' selected':''}>Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select>
       <label class="when" for="culture">Whose voice should your family speak in?</label>
       <select id="culture" class="select">${Object.entries(CULTURES).map(([k,v])=>`<option value="${k}"${k===pick.culture?' selected':''}>${v.label}</option>`).join('')}</select>
       <div class="when">Where are you landing?</div>
@@ -1370,8 +1373,22 @@ function render(){
         <div class="foot small" style="text-align:left;margin-top:-4px">One of you picks Player 1 and the other picks Player 2, so your stories go differently.</div>
         <button class="primary" id="go">Land in ${ROUTES[rk].label}</button></div>` : ''}`).join('')}
       </div>
+        </div>
+      </details>
+      <details class="how">
+        <summary>How it works</summary>
+        <div class="how-body">
+          <p>Life abroad asks questions. Your phone asks more. Every answer moves four meters.</p>
+          <dl>
+            <dt>Cash</dt><dd>Whatever survives "just send something small".</dd>
+            <dt>Peace</dt><dd>Your sanity. It drops when your mouth says yes and your heart says no.</dd>
+            <dt>Home</dt><dd>Family ratings. Money pushes it up. Voice notes do absolutely nothing.</dd>
+            <dt>Future</dt><dd>What you are really building. Nobody at home can see it, which is why it grows.</dd>
+          </dl>
+          <p>Each meter is out of 100, and 60 or more is healthy. There are no right answers. Every choice follows you to the end of the game.</p>
+        </div>
+      </details>
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
-      <div class="foot">About 5 minutes. Every choice follows you.</div>
       <details class="how">
         <summary>Naija words in this game</summary>
         <div class="how-body">${glossaryHTML()}</div>
@@ -1385,6 +1402,17 @@ function render(){
       document.getElementById('culture').value = pick.culture;
     };
     document.getElementById('culture').onchange = e => { pick.culture = e.target.value; };
+    const qd = document.getElementById('qdaily'); if(qd) qd.onchange = e => { pick.daily = e.target.checked; const d2 = document.getElementById('daily'); if(d2) d2.checked = pick.daily; };
+    const cu = app.querySelector('details.custom'); if(cu) cu.ontoggle = () => { pick.custom = cu.open; };
+    app.querySelectorAll('.quick-btn').forEach(b=>b.onclick=()=>{
+      const rk = b.dataset.q, any = a => a[Math.floor(Math.random()*a.length)];
+      SFX.land();
+      pick.path = any(pathOptions(rk))[0];
+      pick.fund = any(['savings','savings','sold','borrowed','kept']);
+      pick.duo = 0;
+      track('quick-'+rk);
+      begin(rk, any(places(rk)).name); render(); scrollTo(0,0);
+    });
     document.getElementById('gender').onchange = e => { pick.gender = e.target.value; };
     app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = (pick.route===b.dataset.r ? null : b.dataset.r); render(); const rp=document.getElementById('routepanel'); if(rp) rp.scrollIntoView({behavior:'smooth', block:'nearest'}); });
     const go = document.getElementById('go');
