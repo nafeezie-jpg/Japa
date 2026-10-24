@@ -1820,6 +1820,7 @@ function verdict(){
   if((P()==='study' || P()==='partial') && (S.f.fees==='pending' || S.f.fees==='paused')) return ["Fees Still Pending","Student by day, worker by night, and negotiator with the finance office in between."];
   if((SOLD() || P()==='care' || P()==='visitor') && S.future>=30) return ["Making It By Force","There is no going back, so you are going forward. Slowly, stubbornly, and with your whole chest."];
   if(FUND()==='borrowed' && S.f.loan==='late') return ["Owing the Cooperative","You borrowed to japa, and the japa is now borrowing your peace. One repayment at a time."];
+  if(nowScore()>=90) return ["Abroad Strategist","You protected your money, your peace, and your future. Your mates are taking notes."];
   if(S.cash<low) return ["Running on Prayers","You made it to day 30 on faith, leftover jollof, and a very patient bank."];
   if(S.peace<35) return ["Hustle Without Peace","The money is coming in. Your body has filed a formal complaint."];
   if(S.home<35) return ["Ghost Mode Activated","Your account is healthy. The family WhatsApp group thinks you have died."];
@@ -1905,7 +1906,7 @@ async function drawCard(title, line, journey, rec){
 
 /* ---------- Verdict collection ---------- */
 const VERDICTS = [
- ['Abroad Strategist','Protect your money, your peace, and your future at the same time.'],
+ ['Abroad Strategist','Score 90 or more, or protect your money, peace, and future at once.'],
  ['The Family ATM','Send the big money home and keep your family very, very happy.'],
  ['Running on Prayers','Finish the month with almost nothing left.'],
  ['Hustle Without Peace','Chase the money until your peace runs out.'],
