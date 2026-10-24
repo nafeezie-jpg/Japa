@@ -270,6 +270,29 @@ details.custom summary{font-weight:700}
 .introstory{display:block;margin:6px 0 14px}
 .padabox{margin-top:12px}
 .padabox p{margin:8px 0}
+.journalbtn{margin-top:10px}
+.sheet-panel.journal{max-height:86vh;overflow:auto}
+.j-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 12px}
+.j-tiles div{background:var(--bubble);border-radius:12px;padding:10px;display:grid;gap:2px;align-content:start}
+.j-tiles b{font-family:var(--display);font-size:17px;line-height:1.15}
+.j-tiles span{font-size:12px;color:var(--muted)}
+.j-meter{margin:12px 0}
+.j-top{display:flex;gap:8px;align-items:baseline}
+.j-top b{flex:0 0 auto}
+.j-avg{color:var(--muted);font-size:14px;flex:1}
+.j-top .up{color:var(--ink);font-weight:600;font-size:13px}
+.j-top .down{color:var(--ink);font-weight:600;font-size:13px}
+.j-top span:last-child:not(.j-avg){font-size:13px}
+.spark{width:100%;height:56px;display:block}
+.sp-line{fill:none;stroke:var(--green2);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.sp-dot{fill:var(--gold)}
+.sp-mark{stroke:var(--good);stroke-width:1.5;stroke-dasharray:4 4;opacity:.8}
+.sp-cap{stroke:var(--bad);stroke-width:1.5;stroke-dasharray:4 4;opacity:.6}
+.j-list{display:grid;gap:8px;margin:6px 0 10px}
+.j-row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.j-row b{display:block;font-size:15px}
+.j-row span{font-size:12px;color:var(--muted)}
+.j-nums{font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1486,6 +1509,7 @@ function render(){
         </div>
       </details>
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
+      ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
       <details class="how">
         <summary>Naija words in this game</summary>
         <div class="how-body">${glossaryHTML()}</div>
@@ -1816,6 +1840,61 @@ const VERDICTS = [
  ['Owing the Cooperative','Borrow money for the move and ignore the repayment.'],
  ['Stronger Than The Agent','Take the UK care visa route and report the fake agent.']
 ];
+
+/* ---------- My games: a personal journal kept on this device ---------- */
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem('nyhl-history')||'[]'); }catch(e){ return []; } }
+function saveGame(title){
+  if(S.savedGame) return; S.savedGame = true;
+  const h = loadHistory();
+  h.push({t:Date.now(), r:R.key, trip:S.trail.map(x=>x.town).concat([L.town]).join(' → '), path:P(), v:title,
+    cash:Math.round(S.cash), cur:R.cur, rent:+(S.cash/RENT()).toFixed(1), peace:S.peace, home:S.home, future:S.future, daily:!!S.daily});
+  try{ localStorage.setItem('nyhl-history', JSON.stringify(h.slice(-200))); }catch(e){}
+}
+function spark(vals, mark, cap, max){
+  const w = 280, hgt = 56, n = vals.length, hi = max || 100;
+  const x = i => n<2 ? w/2 : 8 + i*(w-16)/(n-1), y = v => hgt - 6 - Math.max(0, Math.min(hi, v))/hi*(hgt-12);
+  const pts = vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${w} ${hgt}" role="img" aria-label="Trend over your games">
+    <line x1="0" x2="${w}" y1="${y(mark)}" y2="${y(mark)}" class="sp-mark"/>${cap?`<line x1="0" x2="${w}" y1="${y(cap)}" y2="${y(cap)}" class="sp-cap"/>`:''}
+    ${n>1?`<polyline points="${pts}" class="sp-line"/>`:''}${vals.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" class="sp-dot"/>`).join('')}</svg>`;
+}
+function journalHTML(){
+  const h = loadHistory();
+  if(!h.length) return `<p>You have not finished a game yet. Play one, and your results will start showing here.</p>`;
+  const avg = k => Math.round(h.reduce((a,g)=>a+g[k],0)/h.length);
+  const avgRent = (h.reduce((a,g)=>a+g.rent,0)/h.length).toFixed(1);
+  const last = h.slice(-20);
+  const trend = k => { if(h.length < 4) return ''; const half = Math.floor(h.length/2);
+    const a = h.slice(0,half).reduce((s,g)=>s+g[k],0)/half, b = h.slice(half).reduce((s,g)=>s+g[k],0)/(h.length-half);
+    return b - a >= 5 ? '<span class="up">rising</span>' : a - b >= 5 ? '<span class="down">falling</span>' : '<span>steady</span>'; };
+  const counts = {}; h.forEach(g=>counts[g.v]=(counts[g.v]||0)+1);
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  const weakest = [['Peace','peace'],['Home','home'],['Future','future']].map(([n,k])=>[n, avg(k) - MARKS[k][1]]).sort((a,b)=>a[1]-b[1])[0];
+  const tip = avg('home') > HOME_CAP ? "Across your games, home is often very happy with you. Watch what your savings and peace pay for it."
+    : avgRent < 1 ? "Across your games, you usually finish with less than one month's rent saved. Try protecting a small amount first, then giving."
+    : weakest[1] < 0 ? `Across your games, ${weakest[0]} is the meter you protect least. Try one game where you guard it on purpose.`
+    : avgRent < 3 ? "Across your games, Peace, Home, and Future stay healthy on average. Your savings rarely reach three months' rent, so that is your next goal."
+    : "Across your games, you keep all four meters healthy on average. That is rare.";
+  const meter = (n,k) => `<div class="j-meter"><div class="j-top"><b>${n}</b><span class="j-avg">avg ${avg(k)}</span>${trend(k)}</div>${spark(last.map(g=>g[k]), MARKS[k][1], k==='home'?HOME_CAP:0)}</div>`;
+  const date = t => new Date(t).toLocaleDateString('en-GB',{day:'numeric', month:'short'});
+  return `<div class="j-tiles"><div><b>${h.length}</b><span>games</span></div><div><b>${avgRent}</b><span>months of rent saved, on average</span></div><div><b>${top[0]}</b><span>your most common verdict</span></div></div>
+    <div class="lesson">${tip}</div>
+    ${meter('Peace','peace')}${meter('Home','home')}${meter('Future','future')}
+    <div class="j-meter"><div class="j-top"><b>Cash</b><span class="j-avg">avg ${avgRent} months of rent</span>${h.length>=4?trend('rent'):''}</div>${spark(last.map(g=>g.rent), 3, 0, Math.max(6, ...last.map(g=>g.rent)))}</div>
+    <p class="small">The line on each chart is the healthy mark. Charts show your last ${last.length} game${last.length>1?'s':''}.</p>
+    <div class="when">Every game</div>
+    <div class="j-list">${h.slice().reverse().map(g=>`<div class="j-row"><div><b>${g.v}</b><span>${date(g.t)} · ${g.trip}${g.daily?' · Today\'s Landing':''}</span></div><div class="j-nums">${g.cur}${g.cash.toLocaleString('en-GB')} · P${g.peace} H${g.home} F${g.future}</div></div>`).join('')}</div>
+    <p class="small">Saved on this phone only. Clearing your browser data deletes it.</p>`;
+}
+function openJournal(){
+  let o = document.getElementById('journalover');
+  if(!o){ o = document.createElement('div'); o.id='journalover'; o.className='overlay'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-label','My games');
+    document.body.appendChild(o); o.addEventListener('click', e=>{ if(e.target===o) o.hidden=true; }); }
+  o.innerHTML = `<div class="sheet-panel journal"><div class="sheet-head"><b>My games</b><button class="xbtn" id="journalclose" aria-label="Close">✕</button></div>${journalHTML()}</div>`;
+  o.querySelector('#journalclose').onclick = ()=>{ o.hidden=true; };
+  o.hidden = false; track('journal');
+}
+
 function loadVerdicts(){ try{ return JSON.parse(localStorage.getItem('nyhl-verdicts')||'[]'); }catch(e){ return []; } }
 function saveVerdict(t){ const v = loadVerdicts(); const isNew = !v.includes(t); if(isNew){ v.push(t); try{ localStorage.setItem('nyhl-verdicts', JSON.stringify(v)); }catch(e){} } return isNew; }
 function collectionHTML(current, isNew){
@@ -1831,7 +1910,7 @@ function collectionHTML(current, isNew){
 function renderEnd(app){
   const [title, line] = verdict(), rec = receipts();
   track('finish-'+title.toLowerCase().replace(/[^a-z]+/g,'-'));
-  const isNewVerdict = saveVerdict(title);
+  const isNewVerdict = saveVerdict(title); saveGame(title);
   setTimeout(()=>SFX.verdict(S.cash > 0 && (S.peace + S.home + S.future) / 3 >= 50), 250);
   const where = `${L.town}, ${R.country}`;
   const journey = S.trail.map(t=>t.town).concat([L.town]).join(' → ');
@@ -1872,6 +1951,7 @@ function renderEnd(app){
       <button class="ghost" id="move">Japa again to another country</button>
       <button class="ghost" id="pada">${S.f.pada ? 'Japada. You went back a year later' : 'Japada. What if you went back after a year?'}</button>
       <button class="ghost" id="again">Start a new life</button>
+      <button class="ghost" type="button" onclick="openJournal()">My games and averages</button>
     </div>
     <div id="movebox" hidden class="routes"></div>
     <div id="padabox" hidden class="result padabox"></div>
