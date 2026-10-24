@@ -1298,6 +1298,21 @@ const routeAlts = () => { const c = C(), k = R.key, out = [];
   return out;
 };
 
+/* ---------- WhatsApp survival ---------- */
+const whatsapp = () => { const c = C(); return [
+ {day:10, text:`You finally take a fine picture in ${T()}, with good light, a new outfit, and a face that says abroad is treating you well. It belongs on your WhatsApp status. The trouble is that home reads every status as a signal for billing.`,
+  choices:[
+   {l:"Post it for everyone. You look too good to hide", fx:{home:4, peace:-7}, r:"Within ten minutes, five people reply. One says abroad don show for your body. The other four start with \"Hope you are good\" and end with an amount."},
+   {l:"Post it, but hide it from the usual suspects", fx:{peace:5, home:-2, future:1}, r:"Before you post, you untick eleven aunties, two uncles, and one secondary school friend. The likes come only from people who want nothing, and it feels like a holiday."},
+   {l:"Keep it in your gallery. Billing season is open", fx:{peace:2}, r:"Nobody bills you, and nobody sees how fine you looked. You decide it is a fair trade, mostly."}]},
+ {day:10, ask:1, from:c.aunty, sub:`Family elder · ${c.home}`, text:`"Good morning dear. How is abroad? Please, there is something I want to discuss with you." The preview sits on your lock screen, and everybody knows what "something" means.`,
+  choices:[
+   {l:"Read it with your read receipts off. Quiet peace", fx:{peace:6, home:-2}, r:"You read every word, and no blue tick appears. She waits, you think, and the matter waits with her."},
+   {l:"Read it, show the blue ticks, and say nothing", fx:{peace:3, home:-6}, r:"She knows you saw it, and you know she knows. Nobody says a word, and somehow the silence is very loud."},
+   {l:"Leave it unopened. Two grey ticks of hope", fx:{peace:-4, home:-1}, r:"You never tap it. The message sits at the top of your chats, and you think about it every time you open WhatsApp."},
+   {l:`Reply and ask what she needs`, fx:{cash:-A(120), home:7, peace:-4}, r:`The something is school fees for her son, ${N(120)}. You pay it, and she says you are the only one who picks her calls.`}]}
+][pickV('WA',2)]; };
+
 /* ---------- Japada: running back home ---------- */
 const padaScene = () => { const c = C(), when = s => s.landing===1 && (s.peace < 50 || s.cash < RENT());
   return [
@@ -1323,7 +1338,7 @@ const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the air
 
 function scenes(){
   const base = [arrival()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : CA());
-  return base.concat(routeAlts(), pathScenes(), fundScenes(), [familyGroup(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  return base.concat(routeAlts(), pathScenes(), fundScenes(), [familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -1692,6 +1707,7 @@ function artKind(sc){
     return 'phone';
   }
   const t = sc.text||'';
+  if(/WhatsApp status/.test(t)) return 'phone';
   if(/snow|minus|winter|cold front|parka/i.test(t)) return 'snow';
   if(/rain/i.test(t)) return 'rain';
   if(/AC |electricity|heat/i.test(t)) return 'sun';
@@ -1806,6 +1822,8 @@ const GLOSSARY = [
  ['Ugu','Fluted pumpkin leaves. Spinach is not a substitute, no matter what anyone says.'],
  ['Amala · Ofe onugbu · Tuwo','Comfort food from Yoruba, Igbo, and Hausa kitchens.'],
  ['Sallah','The Eid celebrations, a big family time in Hausa and other Muslim homes.'],
+ ['Blue ticks','WhatsApp\'s sign that you have read a message. A powerful weapon in family politics.'],
+ ['Status','WhatsApp\'s 24-hour photo updates. At home, also read as a request for an invoice.'],
  ['Cooperative society','A members\' savings and loan group. Very patient, until they visit your mother.']
 ];
 function glossaryHTML(){ return `<dl class="gloss">${GLOSSARY.map(([w,m])=>`<dt>${w}</dt><dd>${m}</dd>`).join('')}</dl>`; }
