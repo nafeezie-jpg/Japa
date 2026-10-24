@@ -993,6 +993,7 @@ const SOLD = () => !!S.sold;
 const FUND = () => S.fund || (S.sold ? 'sold' : 'savings');
 const soldLine = () => SOLD() ? `You sold your car, your shop, and your land in ${O()} to come, so there is nothing to go back to. ` : FUND()==='borrowed' ? `You borrowed ₦5 million from your cooperative society to make this move. ` : FUND()==='kept' ? `You rented out your house in ${O()} to help pay for this move. ` : '';
 const FEES = () => A(6000);
+const FUNDS = [['savings','From my savings'],['sold','Sold everything to come'],['borrowed','Borrowed money to come'],['kept','Rented out my house back home']];
 
 function pathScenes(){
   const p = P(), c = C(), out = [];
@@ -1572,35 +1573,11 @@ function render(){
       <label class="when" for="pname">Your name for the leaderboard (optional)</label>
       <input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="So the game knows who landed" value="${getName().replace(/"/g,'&quot;')}">
       <div class="when quick-ask">Tap where you are landing</div>
-      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select"><option value="">Surprise me</option>${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
+      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select"><option value="">Surprise me</option>${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
       <label class="check daily quickdaily" for="qdaily"><input type="checkbox" id="qdaily"${pick.daily?' checked':''}> <span><b>Today's Landing · ${dayLabel(todayStr())}</b> Same game as everyone today</span></label>
       <div class="foot">Pick, tap, and land. Anything you skip is a surprise. About 5 minutes.</div>
       <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-intro')">Have a japa story? Tell us, and it could become a scene →</a>
       <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-edition')">Not from Nigeria? Help us build your country's edition →</a>
-      <details class="how custom"${pick.custom?' open':''}>
-        <summary>Make it your story</summary>
-        <div class="how-body">
-      <p>Choose your family's voice, how you funded the move, and more.</p>
-      <label class="when" for="gender">I am a</label>
-      <select id="gender" class="select"><option value="any"${pick.gender==='any'?' selected':''}>Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select>
-      <label class="when" for="culture">Whose voice should your family speak in?</label>
-      <select id="culture" class="select">${Object.entries(CULTURES).map(([k,v])=>`<option value="${k}"${k===pick.culture?' selected':''}>${v.label}</option>`).join('')}</select>
-      <div class="when">Where are you landing?</div>
-      <div class="routes">
-        ${Object.values(ROUTES).map(r=>`<button class="route-btn${rk===r.key?' on':''}" data-r="${r.key}" aria-pressed="${rk===r.key}"><b>${r.label}</b><span>${r.sub}</span></button>${rk===r.key ? `<div class="route-panel" id="routepanel"><label class="when" for="place">${ROUTES[rk].ask}</label>
-        <select id="place" class="select">${placeOptions(rk)}</select>
-        <label class="when" for="path">How did you japa?</label>
-        <select id="path" class="select">${pathOptions(rk).map(([k,l])=>`<option value="${k}"${k===pick.path?' selected':''}>${l}</option>`).join('')}</select>
-        <label class="when" for="fund">How did you fund the move?</label>
-        <select id="fund" class="select">${[['savings','From my savings'],['sold','Sold everything to come'],['borrowed','Borrowed money to come'],['kept','Rented out my house back home']].map(([k,l])=>`<option value="${k}"${k===pick.fund?' selected':''}>${l}</option>`).join('')}</select>
-        <label class="check daily" for="daily"><input type="checkbox" id="daily"${pick.daily?' checked':''}> <span><b>Play Today's Landing · ${dayLabel(todayStr())}</b><br>Everyone playing today gets the same requests from home. Compare verdicts with friends.</span></label>
-        <label class="when" for="duo">Playing at the same time as someone?</label>
-        <select id="duo" class="select">${[['0','No, just me'],['1','Yes, I am Player 1'],['2','Yes, I am Player 2']].map(([k,l])=>`<option value="${k}"${String(pick.duo)===k?' selected':''}>${l}</option>`).join('')}</select>
-        <div class="foot small" style="text-align:left;margin-top:-4px">One of you picks Player 1 and the other picks Player 2, so your stories go differently.</div>
-        <button class="primary" id="go">Land in ${ROUTES[rk].label}</button></div>` : ''}`).join('')}
-      </div>
-        </div>
-      </details>
       <details class="how">
         <summary>How it works</summary>
         <div class="how-body">
@@ -1630,12 +1607,9 @@ function render(){
       pick.origin = e.target.value;
       const st = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0];
       pick.culture = STATE_CULTURE[st] || 'general';
-      document.getElementById('culture').value = pick.culture;
     };
-    document.getElementById('culture').onchange = e => { pick.culture = e.target.value; };
     const pn = document.getElementById('pname'); if(pn) pn.onchange = e => { e.target.value = setName(e.target.value); };
-    const qd = document.getElementById('qdaily'); if(qd) qd.onchange = e => { pick.daily = e.target.checked; const d2 = document.getElementById('daily'); if(d2) d2.checked = pick.daily; };
-    const cu = app.querySelector('details.custom'); if(cu) cu.ontoggle = () => { pick.custom = cu.open; };
+    const qd = document.getElementById('qdaily'); if(qd) qd.onchange = e => { pick.daily = e.target.checked; };
     app.querySelectorAll('.quick-btn').forEach(b=>b.onclick=()=>{
       SFX.tap(); pick.qroute = (pick.qroute===b.dataset.q ? null : b.dataset.q); render();
       const qp = document.getElementById('qpanel'); if(qp) qp.scrollIntoView({behavior:'smooth', block:'nearest'});
@@ -1646,18 +1620,15 @@ function render(){
       const pl = document.getElementById('qplace').value, pa = document.getElementById('qpath').value;
       SFX.land();
       pick.path = pa || any(pathOptions(rk))[0];
-      pick.fund = any(['savings','savings','sold','borrowed','kept']);
+      const fu = document.getElementById('qfund').value, ge = document.getElementById('qgender').value, cv = document.getElementById('qculture').value;
+      pick.fund = fu || any(['savings','savings','sold','borrowed','kept']);
+      pick.gender = ge || 'any';
+      const st = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0];
+      pick.culture = cv || STATE_CULTURE[st] || 'general';
       pick.duo = 0;
       track('quick-'+rk);
       begin(rk, pl || any(places(rk)).name); render(); scrollTo(0,0);
     };
-    document.getElementById('gender').onchange = e => { pick.gender = e.target.value; };
-    app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = (pick.route===b.dataset.r ? null : b.dataset.r); render(); const rp=document.getElementById('routepanel'); if(rp) rp.scrollIntoView({behavior:'smooth', block:'nearest'}); });
-    const go = document.getElementById('go');
-    if(go) go.onclick = ()=>{ SFX.land(); pick.path = document.getElementById('path').value; pick.fund = document.getElementById('fund').value; pick.daily = document.getElementById('daily').checked; pick.duo = +document.getElementById('duo').value; begin(rk, document.getElementById('place').value); render(); scrollTo(0,0); };
-    const ps = document.getElementById('path'); if(ps) ps.onchange = e => { pick.path = e.target.value; };
-    const fb = document.getElementById('fund'); if(fb) fb.onchange = e => { pick.fund = e.target.value; };
-    const db = document.getElementById('daily'); if(db) db.onchange = e => { pick.daily = e.target.checked; };
     return;
   }
   if(phase==='end'){ return renderEnd(app); }
