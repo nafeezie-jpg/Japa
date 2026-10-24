@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Everybody wants to japa. Nobody tells you what happens after you land. A free 30-day game about your first month abroad.">
+<meta name="description" content="Everybody wants to japa. Nobody tells you what happens after you land. More than a game. A free 5-minute reality check on money, family, and peace of mind in your first month abroad.">
 <meta property="og:title" content="Now You Have Landed">
-<meta property="og:description" content="Everybody wants to japa. Nobody tells you what happens after you land. Play free in your browser.">
+<meta property="og:description" content="Everybody wants to japa. Nobody tells you what happens after you land. More than a game: a 5-minute reality check on life abroad.">
 <meta property="og:url" content="https://nowyouhavelanded.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Now You Have Landed">
@@ -307,6 +307,7 @@ details.custom summary{font-weight:700}
 .art.vn.playing .a-wave{animation-duration:.25s}
 #ftoast{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;background:var(--green);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;max-width:min(88vw,380px);text-align:center;z-index:60;transition:opacity .2s,transform .2s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.2)}
 #ftoast.on{opacity:1;transform:translate(-50%,0)}
+.mirror{background:var(--bubble);border-radius:12px;padding:12px 14px;font-size:15px}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1483,6 +1484,7 @@ function render(){
       <div class="stamp">Arrived · Day 01</div>
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
       <p>Everybody wants to japa. Nobody tells you what happens after you land. Home thinks you are rich. Your bank account would like a word.</p>
+      <p class="mirror"><b>More than a game.</b> A 5-minute reality check on your money, your peace of mind, your standing at home, and the future you came to build.</p>
       <label class="when" for="origin">Leaving from</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
       <div class="when quick-ask">Tap where you are landing</div>
@@ -1681,7 +1683,7 @@ const healthy = (k, v) => v >= MARKS[k][1] && !(k==='home' && v > HOME_CAP);
 function band(k, v){
   if(k==='cash'){
     const rent = RENT();
-    if(v < 0) return {cls:'low', label:'In debt', meaning:'You owe more than you have. Generosity without a budget turned into debt.'};
+    if(v < 0) return {cls:'low', label:'In debt', meaning: ['study','partial','visitor','care'].includes(P()) ? 'You owe more than you have. Fees, papers, and a hard route did a lot of this, even if you were careful.' : 'You owe more than you have. Generosity without a budget turned into debt.'};
     if(v < rent) return {cls:'low', label:'One bad week from trouble', meaning:"You have less than one month's rent saved."};
     if(v < rent*3) return {cls:'mid', label:'Breathing room', meaning:"You have one to three months' rent saved. Not rich, but not panicking."};
     return {cls:'high', label:'Proper safety net', meaning:"You have more than three months' rent saved. Abroad experts call this sleeping well."};
@@ -1697,7 +1699,9 @@ function band(k, v){
 }
 function lesson(){
   const rent = RENT();
-  if(S.cash < 0) return "Your lesson: you gave more than you had. Generosity without a budget becomes debt, and debt follows you everywhere.";
+  if(S.cash < 0) return ['study','partial','visitor','care'].includes(P())
+    ? "Your lesson: some of this debt was never about your choices. Your route came with costs you could not control. Being careful still matters, because it decides how deep the hole gets and how fast you climb out."
+    : "Your lesson: you gave more than you had. Generosity without a budget becomes debt, and debt follows you everywhere.";
   if(S.home > HOME_CAP && (S.cash < rent*3 || S.peace < MARKS.peace[1])) return "Your lesson: home is very happy with you, and your savings or your peace paid for it. You cannot give from an empty cup.";
   const m = [['peace',S.peace],['home',S.home],['future',S.future]].map(([k,v])=>[k, v - MARKS[k][1]]).sort((a,b)=>a[1]-b[1])[0];
   if(m[1] >= 0 && S.cash >= rent) return "Your lesson: you kept all four meters healthy at once. That is rare. Teach the rest of us.";
