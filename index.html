@@ -356,9 +356,10 @@ function begin(rk, pname, prev){
   const path = prev ? 'work' : (pathOptions(rk).some(o=>o[0]===pick.path) ? pick.path : 'work');
   const fund = prev ? prev.fund : (pick.fund||'savings'), sold = fund==='sold';
   const daily = prev ? (prev.daily||null) : (pick.daily ? todayStr() : null);
+  const seed = daily ? hashStr(daily) : Math.floor(Math.random()*1e9);
   const start = Math.round(ROUTES[rk].start * PATHS[path].mult * ({savings:1, sold:1.4, borrowed:1.3, kept:0.9}[fund]||1) / 50) * 50;
-  S = prev ? {cash:start, start, path, sold, fund, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture, gender, daily}
-           : {cash:start, start, path, sold, fund, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture, gender, daily};
+  S = prev ? {cash:start, start, path, sold, fund, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture, gender, daily, seed}
+           : {cash:start, start, path, sold, fund, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture, gender, daily, seed};
   shown = null;
   history = [];
   idx = nextIndex(0); phase = 'scene';
@@ -640,12 +641,12 @@ const finalCall = () => ({day:30, from:C().mum, sub:"Video call", text:`Let me s
 
 /* ---------- United States ---------- */
 const US = () => [
- {day:1, text:`${soldLine()}${({work:`You resign from a good job in ${O()} and land in ${T()} with ${M(S.start)}${SOLD()?'':', which is your ajo payout plus everything you sold before leaving,'} and a Nigerian passport.`,scholar:`You land in ${T()} on a full scholarship with a teaching assistantship. Your stipend starts next month, and everybody at home has already budgeted it. You have ${M(S.start)} until then.`,partial:`You land in ${T()} with a scholarship that covers half your tuition. The other half, and everything else, is on you. You have ${M(S.start)}.`,study:`You land in ${T()} on a student visa. Part of your tuition is paid, and your family has promised the rest "before the deadline". You have ${M(S.start)} for everything else.`})[P()]} Your cousin ${C().cousin} says you can stay with her until you find your feet. She has a husband, three children, and two bedrooms.`,
+ {day:1, when: s => pickV('us1',2)===0, text:`${soldLine()}${({work:`You resign from a good job in ${O()} and land in ${T()} with ${M(S.start)}${SOLD()?'':', which is your ajo payout plus everything you sold before leaving,'} and a Nigerian passport.`,scholar:`You land in ${T()} on a full scholarship with a teaching assistantship. Your stipend starts next month, and everybody at home has already budgeted it. You have ${M(S.start)} until then.`,partial:`You land in ${T()} with a scholarship that covers half your tuition. The other half, and everything else, is on you. You have ${M(S.start)}.`,study:`You land in ${T()} on a student visa. Part of your tuition is paid, and your family has promised the rest "before the deadline". You have ${M(S.start)} for everything else.`})[P()]} Your cousin ${C().cousin} says you can stay with her until you find your feet. She has a husband, three children, and two bedrooms.`,
   choices:[
    {l:`Stay with ${C().cousin}. Free rent, zero privacy`, fx:{peace:-10}, set:{stay:'cousin'}, r:"You sleep on the couch. Her last born uses your back as a trampoline at 6am. Rent is free, but every plate you eat is counted in her eyes."},
    {l:`Pay four months' rent upfront, ${M(RENT()*4)}`, fx:{cash:-RENT()*4, peace:10, future:6}, set:{stay:'prepaid'}, r:"The landlord has never seen anyone pay four months upfront. Your room is small, but nobody can tell you to leave."},
    {l:`Cheap motel for now, ${M(Math.round(560*MULT[L.cost]))}`, fx:{cash:-Math.round(560*MULT[L.cost]), peace:-5}, set:{stay:'motel'}, r:"Two weeks at a motel off the highway. The heater rattles like a danfo, and you are paying money just to think."}]},
- {day:2, text:`In ${O()} you had a driver, a cleaner, and someone to stand in the bank queue for you. Here, the laundry is in the basement, the dishes are yours, and nobody is coming.`,
+ {day:2, when: s => pickV('us2',2)===0, text:`In ${O()} you had a driver, a cleaner, and someone to stand in the bank queue for you. Here, the laundry is in the basement, the dishes are yours, and nobody is coming.`,
   choices:[
    {l:"Do it all yourself. Welcome to abroad", fx:{peace:-5, future:3}, r:"You wash, cook, clean, and carry. By evening your hands know things your degrees never taught them."},
    {l:"Pay $40 for laundry like royalty", fx:{cash:-40, peace:3}, r:"Forty dollars to wash clothes. Your former house help earned less than that in a week."},
@@ -673,12 +674,12 @@ const US = () => [
    {l:"Home care job through Aunty's connect. Thank her properly", fx:{peace:-2, home:3}, set:{job:'care'}, r:"Aunty says you must thank her properly. The client is a sweet old man who calls you \"Nigeria\"."},
    {l:"Get your degrees evaluated and hold out for your field", fx:{cash:-200, future:12, peace:-4}, set:{job:'field'}, r:"A credential evaluation costs $200 and says your master's equals a US master's. Employers still want US experience."}]},
  L.cold>0
- ? {day:9, text: L.cold===2 ? `Winter arrives in ${T()} like it has a personal problem with you. Your ${O()} jacket was always decorative.` : `The first cold front reaches ${T()}. Your ${O()} jacket was always decorative, and now everybody knows.`,
+ ? {day:9, when: s => pickV('us9',2)===0, text: L.cold===2 ? `Winter arrives in ${T()} like it has a personal problem with you. Your ${O()} jacket was always decorative.` : `The first cold front reaches ${T()}. Your ${O()} jacket was always decorative, and now everybody knows.`,
     choices:[
      {l:"Buy a proper coat for $180. Survival first", fx:{cash:-180, peace:8}, set:{coat:'proper'}, r:"Warm at last. You walk slowly past the bus stop, just to enjoy it."},
      {l:"Thrift store coat for $25. \"Vintage\"", fx:{cash:-25, peace:4}, set:{coat:'thrift'}, r:"It smells a little like someone's grandmother. It is warm, and you wear it with pride."},
      {l:"Naija blood dey my body", fx:{peace: L.cold===2?-20:-15}, set:{coat:'none'}, r:"You catch a cold that lasts eleven days and learn the word \"layering\" the hard way."}]}
- : {day:9, text:`Winter in ${T()} is gentle. The electricity bill is not. The AC has been running since the day you landed.`,
+ : {day:9, when: s => pickV('us9',2)===0, text:`Winter in ${T()} is gentle. The electricity bill is not. The AC has been running since the day you landed.`,
     choices:[
      {l:"Pay $160 and keep the AC blasting", fx:{cash:-160, peace:6}, r:"Cool air and peace of mind. Your NEPA trauma is slowly healing."},
      {l:"Switch to a standing fan. Nostalgia", fx:{peace:-6, cash:-40}, r:`It feels exactly like ${O()} during a power cut. Except you are paying for it.`},
@@ -695,18 +696,18 @@ const US = () => [
 
 /* ---------- United Kingdom ---------- */
 const UK = () => [
- {day:1, text: soldLine() + ({work:`You land at Heathrow on a skilled worker visa with ${M(S.start)}. Your new job in ${T()} starts in two weeks, and everyone at home thinks you are already rich. It is raining.`,scholar:`You land at Heathrow for your PhD in ${T()} with ${M(S.start)}, a full scholarship, and two boxes of Indomie. You chose the UK because it is closer to home, flights are shorter, and everybody said you will find a Nigerian spouse there easily. It is raining.`,partial:`You land at Heathrow for your master's in ${T()} with ${M(S.start)}. Your scholarship covers half your fees. The other half is your problem. It is raining.`,study:`You land at Heathrow for your master's in ${T()} with ${M(S.start)} and only part of your tuition paid. Your family promised the rest "before the deadline". It is raining.`,care:`You land at Heathrow on a care worker visa with ${M(S.start)}. You paid an agent ₦12 million for your Certificate of Sponsorship, and the care home in ${T()} said a job is waiting for you. It is raining.`})[P()],
+ {day:1, when: s => pickV('uk1',2)===0, text: soldLine() + ({work:`You land at Heathrow on a skilled worker visa with ${M(S.start)}. Your new job in ${T()} starts in two weeks, and everyone at home thinks you are already rich. It is raining.`,scholar:`You land at Heathrow for your PhD in ${T()} with ${M(S.start)}, a full scholarship, and two boxes of Indomie. You chose the UK because it is closer to home, flights are shorter, and everybody said you will find a Nigerian spouse there easily. It is raining.`,partial:`You land at Heathrow for your master's in ${T()} with ${M(S.start)}. Your scholarship covers half your fees. The other half is your problem. It is raining.`,study:`You land at Heathrow for your master's in ${T()} with ${M(S.start)} and only part of your tuition paid. Your family promised the rest "before the deadline". It is raining.`,care:`You land at Heathrow on a care worker visa with ${M(S.start)}. You paid an agent ₦12 million for your Certificate of Sponsorship, and the care home in ${T()} said a job is waiting for you. It is raining.`})[P()],
   choices:[
    {l: STU() ? `Take a student room, ${M(RENT())} a month` : `Rent a small studio, ${M(RENT())} a month`, fx:{cash:-RENT(), peace:4, future:6}, set:{stay:'room'}, r: STU() ? "The room is clean and close to campus. It is also so small that you can open the window from your bed." : "The studio is clean and close to the bus stop. It is also so small that you can open the window from your bed."},
    {l:"Stay with your cousin two hours away", fx:{peace:-8}, set:{stay:'cousin'}, r: STU() ? "Free rent, but every lecture costs you four hours on trains." : "Free rent, but every shift costs you four hours on trains."},
    {l:`Share a house with four strangers, ${M(Math.round(RENT()*0.78/10)*10)}`, fx:{cash:-Math.round(RENT()*0.78/10)*10, peace:-4}, set:{stay:'shared'}, r:"One housemate labels his milk. Another cooks fish at midnight. You are the only one who cleans the bathroom."}]},
  mummyThanks(),
- {day:4, text:`You step off the pavement and look left, the way you have done your whole life. A car comes from the right and the driver says something very British through the window.`,
+ {day:4, when: s => pickV('uk4',2)===0, text:`You step off the pavement and look left, the way you have done your whole life. A car comes from the right and the driver says something very British through the window.`,
   choices:[
    {l:"Follow an old lady across. She knows things", fx:{peace:3, future:2}, r:"You attach yourself to an old lady with a shopping trolley. She crosses safely, and so do you."},
    {l:"Wait for the green man like a model citizen", fx:{peace:2}, r:"You wait four minutes on an empty road while everyone else crosses. But you are alive."},
    {l:`Use your ${O()} instincts and run`, fx:{peace:-10}, r:"A cyclist, a bus, and a taxi all honk at once. You make it across, shaking and slightly proud."}]},
- {day:6, text:`There is no car, the bus costs money every single time, and the supermarket in ${T()} is 25 minutes away on foot. In the rain.`,
+ {day:6, when: s => pickV('uk6',2)===0, text:`There is no car, the bus costs money every single time, and the supermarket in ${T()} is 25 minutes away on foot. In the rain.`,
   choices:[
    {l:"Walk everywhere. Free cardio", fx:{peace:-6, future:2}, r:"You walk 14,000 steps a day. Your legs are strong, your shoes are finished, and your umbrella died on day two."},
    {l:"Buy a £60 bike. Brave, on these roads", fx:{cash:-60, peace:3, future:3}, r:"You buy a bike. Then you remember the cars come from the wrong side, and you push it more than you ride it."},
@@ -752,18 +753,18 @@ const UK = () => [
 
 /* ---------- Canada ---------- */
 const CA = () => [
- {day:1, text:`${soldLine()}${({work:`Your permanent residence came through, so you land in ${T()} with ${M(S.start)}, a winter jacket from Balogun market, and a Nigerian passport.`,scholar:`You land in ${T()} on a full scholarship with ${M(S.start)}, a winter jacket from Balogun market, and a stipend that everybody at home has already budgeted.`,partial:`You land in ${T()} with half your tuition covered, ${M(S.start)}, and a winter jacket from Balogun market. The other half of the fees is on you.`,study:`Your study permit came through, so you land in ${T()} with ${M(S.start)}, part of your tuition paid, and a winter jacket from Balogun market.`})[P()]} Everybody back home says Canada is the new America. Everybody here says, "Welcome, it gets colder."`,
+ {day:1, when: s => pickV('ca1',2)===0, text:`${soldLine()}${({work:`Your permanent residence came through, so you land in ${T()} with ${M(S.start)}, a winter jacket from Balogun market, and a Nigerian passport.`,scholar:`You land in ${T()} on a full scholarship with ${M(S.start)}, a winter jacket from Balogun market, and a stipend that everybody at home has already budgeted.`,partial:`You land in ${T()} with half your tuition covered, ${M(S.start)}, and a winter jacket from Balogun market. The other half of the fees is on you.`,study:`Your study permit came through, so you land in ${T()} with ${M(S.start)}, part of your tuition paid, and a winter jacket from Balogun market.`})[P()]} Everybody back home says Canada is the new America. Everybody here says, "Welcome, it gets colder."`,
   choices:[
    {l:`Rent a basement apartment, ${M(RENT())} a month`, fx:{cash:-RENT(), peace:4, future:5}, set:{stay:'basement'}, r:"Your window is at ground level. You can see the feet of everyone who walks past, and soon you will see snow piled against the glass."},
    {l:"Stay with a family from the community. 5am prayers included", fx:{peace:-6, home:3}, set:{stay:'host'}, r:"They are kind and generous. They also wake up at 5am for prayer, and so do you now."},
    {l:`Airbnb for two weeks, ${M(Math.round(900*MULT[L.cost]))}`, fx:{cash:-Math.round(900*MULT[L.cost]), peace:-3}, set:{stay:'airbnb'}, r:"Two weeks of someone else's furniture and a long list of house rules taped to the fridge."}]},
  mummyThanks(),
- {day:4, text:`You get your SIN, open a bank account, and walk into a phone shop. The cheapest decent plan costs more than your entire data budget in ${O()} for a year.`,
+ {day:4, when: s => pickV('ca4',2)===0, text:`You get your SIN, open a bank account, and walk into a phone shop. The cheapest decent plan costs more than your entire data budget in ${O()} for a year.`,
   choices:[
    {l:"Pay C$75 a month for data. A tax on breathing", fx:{cash:-75, peace:4}, r:"You have data everywhere. Your bank account felt that."},
    {l:"Cheap prepaid plan. Works everywhere except where you are", fx:{cash:-30, peace:-2}, r:"It works well, except in buildings, basements, and anywhere you actually are."},
    {l:"Survive on library and Tim Hortons Wi-Fi", fx:{peace:-6, future:2}, r:"You become a regular. The staff know your double-double before you order it."}]},
- {day:6, text: L.cold===2 ? `The forecast for ${T()} says minus 18, feels like minus 27. Your Balogun jacket was designed for Lagos harmattan.` : `${T()} is milder than the rest of Canada. It is also wet in a way that gets into your bones.`,
+ {day:6, when: s => pickV('ca6',2)===0, text: L.cold===2 ? `The forecast for ${T()} says minus 18, feels like minus 27. Your Balogun jacket was designed for Lagos harmattan.` : `${T()} is milder than the rest of Canada. It is also wet in a way that gets into your bones.`,
   choices:[
    {l:"Buy a real parka and boots, C$320", fx:{cash:-320, peace:10}, set:{coat:'proper'}, r:"You look like a sleeping bag with legs, and you have never been happier."},
    {l:"Thrift store parka, C$40", fx:{cash:-40, peace:5}, set:{coat:'thrift'}, r:"One zip is broken, but it has survived worse winters than this one, and so will you."},
@@ -959,9 +960,61 @@ const countryMoment = () => { const k = R.key; const pool = {
      {l:"Taxes? You just got here", fx:{peace:-3, future:-4}, r:"Next year you discover you missed money you were owed. Lesson learned."}]}]
   }[k]; return pool[pickV('X'+k, pool.length)]; };
 
+/* ---------- Alternate versions of route scenes ---------- */
+const routeAlts = () => { const c = C(), k = R.key, out = [];
+  const open = {
+    us: `${soldLine()}You land in ${T()} with ${M(S.start)} and two suitcases that are definitely overweight. ${STU() ? 'Your student housing is not ready for another three weeks.' : 'Your first week is a blur of jet lag and forms.'} Your aunty's friend, Aunty Ronke, offers a spare room in her townhouse.`,
+    uk: `${soldLine()}You land at Heathrow with ${M(S.start)}. The room an agent found for you in ${T()} turns out to be a converted living room with a curtain for a door. It is raining, obviously.`,
+    ca: `${soldLine()}You land in ${T()} with ${M(S.start)}. A Nigerian family offers you their basement. It is warm, cheap, and directly under their teenage son's drum kit.`
+  }[k];
+  if(k==='us') out.push({day:1, when: s => pickV('us1',2)===1, text: open, choices:[
+     {l:`Take Aunty Ronke's room, ${M(Math.round(RENT()*0.7/10)*10)} a month. Rules included`, fx:{cash:-Math.round(RENT()*0.7/10)*10, peace:-5, home:4}, set:{stay:'room'}, r:"Shoes off at the door, lights off by 10pm, and a daily briefing on everyone's business in the area. The rent is fair, though."},
+     {l:`Find a roommate online, ${M(RENT())}. Strangers are a gamble`, fx:{cash:-RENT(), peace:2, future:3}, set:{stay:'room'}, r:"Your roommate is a quiet nurse who works nights. You never see each other. It is perfect."},
+     {l:`Extended-stay hotel while you search, ${M(Math.round(560*MULT[L.cost]))}`, fx:{cash:-Math.round(560*MULT[L.cost]), peace:-4}, set:{stay:'motel'}, r:"The microwave is your kitchen and the ice machine is your neighbour."}]});
+  if(k==='uk') out.push({day:1, when: s => pickV('uk1',2)===1, text: open, choices:[
+     {l:`Accept the curtain room, ${M(Math.round(RENT()*0.7/10)*10)}. Privacy is a myth`, fx:{cash:-Math.round(RENT()*0.7/10)*10, peace:-6}, set:{stay:'shared'}, r:"You hear every conversation in the flat. You now know more about your housemates than their mothers do."},
+     {l:`Pay more for a proper room, ${M(RENT())}`, fx:{cash:-RENT(), peace:5, future:3}, set:{stay:'room'}, r:"A real door with a real lock. You close it just to enjoy the sound."},
+     {l:"Stay with your cousin two hours away for now", fx:{peace:-8}, set:{stay:'cousin'}, r:"Free rent, endless trains, and a cousin who now introduces you as \"my lodger\"."}]});
+  if(k==='ca') out.push({day:1, when: s => pickV('ca1',2)===1, text: open, choices:[
+     {l:`Take the basement, ${M(Math.round(RENT()*0.8/10)*10)}. Drums included free`, fx:{cash:-Math.round(RENT()*0.8/10)*10, peace:-4, home:4}, set:{stay:'basement'}, r:"By week two, you can identify every song he is learning. Most of them are Burna Boy."},
+     {l:`Rent a room downtown, ${M(RENT())}`, fx:{cash:-RENT(), peace:4, future:3}, set:{stay:'basement'}, r:"Quiet, central, and the radiator works. You feel very Canadian."},
+     {l:"Stay with a family from the community. 5am prayers included", fx:{peace:-6, home:3}, set:{stay:'host'}, r:"They are kind and generous. They also wake up at 5am for prayer, and so do you now."}]});
+  if(k==='us') out.push({day:2, when: s => pickV('us2',2)===1, text:"Your first grocery run. A small bag of garri costs $9 at the African store, and the cashier at the supermarket asks if you would like to donate a dollar to charity.",
+    choices:[
+     {l:"Buy the garri anyway. Some things are not negotiable", fx:{cash:-30, peace:6}, r:"You drink garri at midnight with ice water and groundnuts. Home, briefly."},
+     {l:"Buy the store brand of everything", fx:{cash:-12, peace:-2, future:2}, r:"Store-brand cornflakes taste like sadness, but your budget smiles."},
+     {l:"Ask Mummy to send foodstuff with the next traveller", fx:{home:4, peace:3}, r:"She sends a suitcase that weighs 23kg exactly. Mostly crayfish. The airport dog will never forget you."}]});
+  if(k==='us') out.push({day:9, when: s => pickV('us9',2)===1, text: L.cold>0 ? "Your landlord controls the heating and insists it is \"not cold yet\". It is 3°C inside your room." : "Your building's air conditioning breaks in the middle of a heatwave. The landlord says a technician will come \"this week or next\".",
+    choices:[
+     {l: L.cold>0 ? "Buy a $40 space heater. Survival first" : "Buy a $40 fan. Survival first", fx:{cash:-40, peace:6}, r:"It hums all night. You love it like a family member."},
+     {l: L.cold>0 ? "Sleep in your coat. Character building" : "Sleep with a wet towel on your face. Character building", fx:{peace:-8}, r:"You wake up feeling like a Nollywood survival film."},
+     {l:"Email the landlord politely, with photos", fx:{peace:-2, future:4}, r:"Two follow-ups later, it is fixed. You learn that written complaints work magic here."}]});
+  if(k==='uk') out.push({day:4, when: s => pickV('uk4',2)===1, text:"At the supermarket, the self-checkout machine says \"unexpected item in the bagging area\" for the fourth time. The item is your shopping.",
+    choices:[
+     {l:"Call the staff member and wait patiently", fx:{peace:2}, r:"She taps her card, sighs, and says, \"Happens all the time, love.\" You are now her love."},
+     {l:"Go to the staffed till like your mother would", fx:{peace:4}, r:"The cashier chats about the weather. You realise this is how British people show affection."},
+     {l:"Abandon the shopping in protest", fx:{peace:-4, cash:A(20)}, r:"You save money and lose dinner. The machine wins this round."}]});
+  if(k==='uk') out.push({day:6, when: s => pickV('uk6',2)===1, text:`Buses around ${T()} are manageable. The trains are another story. A return ticket to visit your cousin costs more than your weekly food.`,
+    choices:[
+     {l:"Buy a railcard if you qualify. A third off forever", fx:{cash:-30, future:3, peace:3}, r:"You will now calculate the savings out loud to anyone who listens."},
+     {l:"Take the coach. Six hours of character development", fx:{cash:-15, peace:-5}, r:"The coach smells like crisps and regret, but it is cheap."},
+     {l:"Stay local and explore on foot", fx:{peace:2, future:2}, r:"You discover a park, a Polish shop, and a Nigerian hair salon three streets away. Victory."}]});
+  if(k==='ca') out.push({day:4, when: s => pickV('ca4',2)===1, text:"Your bank offers a newcomer package with a credit card and a C$500 limit. Your coworker says credit history is everything here.",
+    choices:[
+     {l:"Take the card and pay it off monthly", fx:{future:8, peace:2}, r:"You buy groceries with it and pay it off immediately. Your credit score is born."},
+     {l:"Avoid credit cards. Debt is a trap", fx:{peace:3, future:-3}, r:"Safe for now. Later, a landlord asks for your credit score and you have none."},
+     {l:"Max it out on winter gear", fx:{cash:A(380), future:-6, peace:4}, r:"You are warm and stylish. The interest rate is not."}]});
+  if(k==='ca') out.push({day:6, when: s => pickV('ca6',2)===1, text: L.cold===2 ? `First snowfall in ${T()}. Everyone back home wants a video, and your aunty asks if you can send her some.` : `It has drizzled in ${T()} for nine days straight. The locals call it mild. You call it a personal attack.`,
+    choices:[
+     {l:"Buy a real parka and boots, C$320", fx:{cash:-320, peace:10}, set:{coat:'proper'}, r:"You look like a sleeping bag with legs, and you have never been happier."},
+     {l:"Film a dramatic video for the family group", fx:{home:6, peace:3}, r:"It gets more reactions than your graduation photos ever did."},
+     {l:"Naija blood dey my body", fx:{peace: L.cold===2?-22:-12}, set:{coat:'none'}, r:"Your nostrils freeze when you breathe. A stranger hands you their scarf and says, \"Oh honey, no.\""}]});
+  return out;
+};
+
 function scenes(){
   const base = R.key==='us' ? US() : R.key==='uk' ? UK() : CA();
-  return base.concat(pathScenes(), fundScenes(), [familyGroup(), mishap(), smallWin(), countryMoment()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  return base.concat(routeAlts(), pathScenes(), fundScenes(), [familyGroup(), mishap(), smallWin(), countryMoment()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -999,6 +1052,7 @@ function autoEvent(kind){
       if(f.stay==='cousin'){ text += ` ${C().cousin}'s husband asks if you will "contribute to bills". $300.`; fx.cash -= 300; }
       if(f.stay==='motel'){ text += ` You finally move into a room. ${M(RENT()*2)} for deposit and first month.`; fx.cash -= RENT()*2; }
       if(f.stay==='prepaid'){ text += " Rent is already paid. You sleep like a baby."; fx.peace = (fx.peace||0) + 4; }
+      if(f.stay==='room'){ text += ` Rent is due. ${M(RENT())}.`; fx.cash -= RENT(); }
       if(f.car==='bought'){ text += " Car insurance is $180, which feels like a personal insult."; fx.cash -= 180; }
     } else if(k==='uk'){
       if(P()==='care'){
@@ -1159,8 +1213,9 @@ function render(){
   }
   if(phase==='scene'){
     const list = typeof sc.choices==='function' ? sc.choices(S) : sc.choices;
+    const ord = list.map((c,i)=>i).sort((a,b)=> hashStr((S.seed||0)+'|'+sc.day+'|'+list[a].l) - hashStr((S.seed||0)+'|'+sc.day+'|'+list[b].l));
     const note = sc.day===1 && !sc.from ? `${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
-    app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${list.map((c,i)=>`<button class="choice" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}${glossLink()}</div>`;
+    app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}${glossLink()}</div>`;
     wireBack();
     app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
       const c = list[+btn.dataset.i];
@@ -1465,7 +1520,7 @@ function renderEnd(app){
     <div class="foot">Everybody wants to japa. Nobody tells you what happens after you land.</div>
     <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
   </div>`;
-  document.getElementById('again').onclick = ()=>{ fresh(); pick.route=null; render(); scrollTo(0,0); };
+  document.getElementById('again').onclick = ()=>{ fresh(); pick.route=null; pick.daily=false; render(); scrollTo(0,0); };
   const SITE = 'https://nowyouhavelanded.com';
   let cardFile = null, cardBlob = null;
   drawCard(title, line, journey, rec).then(canvas => {
