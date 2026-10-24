@@ -1343,9 +1343,30 @@ const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the air
    {l:`Take a taxi, ${M(A(85))}`, fx:{cash:-A(85), peace:3}, r:"The driver plays Afrobeats when he hears your accent. It is the best money you will spend this month."},
    {l:"Keep calling the man who arranged it", fx:{peace:-9}, r:"Fourteen calls. He replies at midnight, \"Sorry, network.\" That is your first lesson about people who \"arrange things\"."}]}; };
 
+/* ---------- Real stories: the host who vanished, and the guest who stayed ---------- */
+const TOLD = 'Nafeezie';
+const barNight = () => ({day:1, credit:TOLD, told:1, when: s => s.landing===1 && pickV('air',3)===2,
+  text:`For weeks, a family friend in ${T()} planned your arrival with you on WhatsApp. He picks you up himself, and you see that his home is one small room shared with his children. "No wahala, we will manage," he says. That evening he takes you to a bar for welcome drinks, steps out to make a call, and never comes back.`,
+  choices:[
+   {l:"Wait at the bar. He must be coming back", fx:{peace:-12}, r:"The bar closes at midnight, and he does not come back. You sleep on a bench by the door with your suitcase between your knees, and that is your first night abroad."},
+   {l:"Call everyone you know until somebody answers", fx:{cash:-A(60), peace:-5, home:2}, r:"At 1am, a friend of a friend picks up and sends you an address. You arrive by taxi with your suitcase and a very long story."},
+   {l:"Book the cheapest room nearby, right now", fx:{cash:-A(90), peace:-2, future:2}, r:"A tired receptionist gives you a room above a takeaway. You lie awake and finally understand what \"we will manage\" meant."}]});
+const guestStay = () => { const c = C(), host = s => s.landing===1 && pickV('HOST',2)===0; return [
+ {day:18, ask:1, credit:TOLD, told:1, when: host, from:c.friend, sub:"Secondary school friend", text:`${c.please}, my cousin just landed in ${T()} and he has nowhere to stay. Can he stay with you for one month? Just one month, while he finds his feet.`,
+  choices:[
+   {l:"Say yes. One month only", fx:{cash:-A(100), home:4, peace:-4}, set:{guest:'yes'}, r:"He arrives with two Ghana Must Go bags and a big smile. He eats well, sleeps well, and thanks you every single day."},
+   {l:"Say yes, with a move-out date in writing", fx:{home:2, peace:-1, future:2}, set:{guest:'dated'}, r:"He signs your note like a contract. It feels awkward, and it also feels safe."},
+   {l:"Say no. Your room is barely enough for you", fx:{home:-5, peace:3}, r:"Your friend says he understands. Then he tells two people that abroad has changed you."}]},
+ {day:27, credit:TOLD, told:1, when: s => host(s) && s.f.guest==='yes', text:"It has been a month. Your guest has his own side of the wardrobe now, your food budget has doubled, and he has not mentioned moving out once.",
+  choices:[
+   {l:"Give him two weeks' notice, kindly but firmly", fx:{peace:4, home:-3}, set:{guest:'notice'}, r:"He looks hurt for one evening. By the end of the week, he has viewed three rooms."},
+   {l:"Let it slide. Maybe next month", fx:{cash:-A(150), peace:-8}, set:{guest:'stayed'}, r:"Next month becomes the month after. The host who told us this story had a one-month guest who stayed for eight."},
+   {l:"Help him find a room and pay the deposit", fx:{cash:-A(300), peace:6, home:3}, set:{guest:'moved'}, r:"You find him a room and pay the deposit to buy your space back. Expensive, but you can finally walk around in your own house."}]}
+]; };
+
 function scenes(){
-  const base = [arrival()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : CA());
-  return base.concat(routeAlts(), pathScenes(), fundScenes(), [familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  const base = [arrival(), barNight()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : CA());
+  return base.concat(routeAlts(), pathScenes(), fundScenes(), guestStay(), [familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -1851,7 +1872,7 @@ function wireBack(){
     render(); scrollTo(0,0);
   };
 }
-const creditTag = sc => sc.credit ? `<div class="credit-tag">A real story, shared by ${sc.credit}</div>` : '';
+const creditTag = sc => sc.credit ? `<div class="credit-tag">${sc.told ? `A real story, told to ${sc.credit}` : `A real story, shared by ${sc.credit}`}</div>` : '';
 function intro(sc, compact){
   if(sc.from){
     return `<div class="when">Day ${sc.day} · New message</div>${creditTag(sc)}
@@ -1898,6 +1919,8 @@ function receipts(){
   if(f.spouse==='looked') out.push(S.gender==='man' ? "Every Nigerian woman at the community meet-up was engaged or not ready for anything serious." : S.gender==='woman' ? "Every Nigerian man at the community meet-up was married or focusing on himself." : "Everyone single at the community meet-up was married, engaged, or focusing on themselves.");
   if(f.network && R.key==='ca') out.push("A community event at minus 20 got you your first real job lead.");
   if(f.coat==='none') out.push("Naija blood was not enough for the cold.");
+  if(f.guest==='stayed') out.push("Your one-month guest is now on month two, and counting.");
+  if(f.guest==='moved') out.push("You paid a deposit to buy back your own living room.");
   return out.slice(0,4);
 }
 
