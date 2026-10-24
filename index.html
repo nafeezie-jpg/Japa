@@ -338,6 +338,9 @@ details.custom summary{font-weight:700}
 .lb-row small{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-val{font-weight:800;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .lb-row.me{background:var(--bubble);border-radius:10px;padding:8px 6px}
+/* dark mode: green text on dark green is unreadable, so headings switch to gold */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) :is(.how summary,.route-btn b,.local b,.journey-line,.lb-tab b,.gloss dt,.storylink,.vbadge.got b){color:var(--gold)}}
+:root[data-theme="dark"] :is(.how summary,.route-btn b,.local b,.journey-line,.lb-tab b,.gloss dt,.storylink,.vbadge.got b){color:var(--gold)}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -2105,7 +2108,7 @@ function scoreOf(g){
   return Math.round(cash + peace + future + home);
 }
 const nowScore = () => scoreOf({rent:S.cash/RENT(), peace:S.peace, home:S.home, future:S.future});
-const LEVELS = [[0,'Just landed','Every story starts at arrivals.'],[40,'Finding your feet','You are learning the rules.'],[60,'Settling in','The ground is getting firmer.'],[75,'Thriving','You are building, not just surviving.'],[90,'Made it','Money, peace, home, and future, all at once.']];
+const LEVELS = [[0,'Just landed','Every story starts at arrivals.'],[40,'Finding your feet','You are learning the rules.'],[60,'Settling in','The ground is getting firmer.'],[75,'Thriving','You are building something real.'],[90,'Made it','Money, peace, home, and future, all at once.']];
 function roadInfo(){
   const h = loadHistory(); if(!h.length) return null;
   const recent = h.slice(-5).map(scoreOf), avg = Math.round(recent.reduce((a,b)=>a+b,0)/recent.length);
