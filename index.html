@@ -698,6 +698,26 @@ function pathScenes(){
        {l:"Move to a cheaper room farther away", fx:{cash:A(150), peace:-6}, r:"You save money and lose an hour a day to the bus. You read journal articles on the top deck."},
        {l:"Pick up extra hours within your visa limit", fx:{cash:A(250), peace:-6, future:-2}, r:"Weekends disappear. So does your social life, which was mostly WhatsApp anyway."}]});
   }
+  if(p==='work'){
+    const papers = {us:'green card', uk:'visa', ca:'PR card'}[R.key];
+    out.push([
+     {day:11, text:`You have a ${papers}, but no credit history. The apartment, the phone contract, and the car dealer all say the same thing in different words. "We cannot see you."`,
+      choices:[
+       {l:`Get a secured credit card with a ${M(A(300))} deposit`, fx:{cash:-A(300), future:8}, r:"Your credit limit is exactly the money you gave them. It feels like lending yourself money, but your credit score is finally born."},
+       {l:`Ask ${c.cousin} to co-sign for you`, fx:{home:-4, peace:-4, future:4}, r:`${c.cousin} agrees, then mentions it at every family event for the next three years.`},
+       {l:`Pay the bigger deposits and move on`, fx:{cash:-A(400), peace:4}, r:"Everything works, it just costs more. Welcome to the starting line."}]},
+     {day:11, from:c.mum, sub:`${c.home} · 8:00pm`, text:`${cap(c.endear)}, since you travelled with your ${papers}, you are settled now. Your mates are asking when you will buy your own house over there.`,
+      choices:[
+       {l:"Explain that papers are just the starting line", fx:{home:-4, peace:5, future:2}, r:`"${c.ok}," she says, "but you will still buy the house?" Some truths take more than one call.`},
+       {l:`Send ${M(A(150))} to show you are doing fine`, fx:{cash:-A(150), home:8, peace:-5}, r:"She is very proud. You are eating cereal for dinner."},
+       {l:"Laugh and say the house is loading", fx:{home:2, peace:3}, r:"She tells everyone the house is loading. It is now a family prayer point."}]},
+     {day:11, from:c.friend, sub:"Secondary school friend", text:`${c.wow} You people that travelled with ${papers}, una don hammer! Life must be soft for you. ${c.please}, remember us o.`,
+      choices:[
+       {l:"Tell him the truth about starting over", fx:{peace:5, home:-2, future:2}, r:"He goes quiet, then says, \"So papers no be money?\" No. Papers are permission to start."},
+       {l:"Send a selfie in your work uniform", fx:{peace:3, home:2}, r:`He replies, "Even with ${papers}, you still dey hustle?" Yes. Especially with ${papers}.`},
+       {l:`Send ${M(A(50))} to keep the image alive`, fx:{cash:-A(50), home:4, peace:-4}, r:"He tells four friends you are now very rich. Your phone starts ringing."}]}
+    ][pickV('W',3)]);
+  }
   if(p==='care'){
     out.push({day:24, text: S.f.cos==='reported' ? `A licensed care home in ${T()} calls back. They have checked your case and will sponsor you properly. The start date is next month, and this time the job is real.` : S.f.cos==='community' ? "The community group introduces you to a licensed employer and an immigration adviser who works for free. For the first time since landing, you have a plan." : "The shop owner pays you late again. When you complain, he reminds you that you have no papers to work there.",
       choices: S.f.cos==='cash' ? [
