@@ -5,8 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Everybody wants to japa. Nobody tells you what happens after you land. A free 30-day game about your first month abroad.">
 <meta property="og:title" content="Now You Have Landed">
-<meta property="og:description" content="Everybody wants to japa. Nobody tells you what happens after you land. Play free in your browser.">
-<meta property="og:url" content="https://nowyouhavelanded.com">
+<meta property="og:description" content="Everybody wants to japa. Nobody tells you what happens after you land. A free 5-minute game.">
+<meta property="og:url" content="https://nowyouhavelanded.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Now You Have Landed">
+<meta property="og:image" content="https://nowyouhavelanded.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Now You Have Landed. The plane landed. Real life began.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Now You Have Landed">
+<meta name="twitter:description" content="Everybody wants to japa. Nobody tells you what happens after you land. Play free.">
+<meta name="twitter:image" content="https://nowyouhavelanded.com/og.png">
+<link rel="canonical" href="https://nowyouhavelanded.com/">
 <meta name="theme-color" content="#0E5A3A">
 <title>Now You Have Landed</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -215,6 +226,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.fade{animation:none}.bar i,.progress i{transition:none}}
 </style>
 
+<script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -319,6 +331,7 @@ const RENT = () => Math.round(R.rent*MULT[L.cost]/10)*10;
 const M = x => R.cur + Math.abs(Math.round(x)).toLocaleString('en-GB');
 const T = () => L.town;
 
+function track(name){ try{ window.goatcounter && window.goatcounter.count && window.goatcounter.count({path:name, title:name, event:true}); }catch(e){} }
 function fresh(){ R=null; L=null; S=null; idx=0; phase='intro'; last=null; }
 function begin(rk, pname, prev){
   const origin = prev ? prev.origin : pick.origin;
@@ -335,6 +348,7 @@ function begin(rk, pname, prev){
   shown = null;
   history = [];
   idx = nextIndex(0); phase = 'scene';
+  track('start-'+rk+'-'+path+(prev?'-again':''));
 }
 function localNote(){
   if(L.note) return L.note;
@@ -1341,6 +1355,7 @@ async function drawCard(title, line, journey, rec){
 
 function renderEnd(app){
   const [title, line] = verdict(), rec = receipts();
+  track('finish-'+title.toLowerCase().replace(/[^a-z]+/g,'-'));
   const where = `${L.town}, ${R.country}`;
   const journey = S.trail.map(t=>t.town).concat([L.town]).join(' → ');
   const share = `I played Now You Have Landed (${journey}) and I am "${title}". ${line} Finished 30 days with ${money(S.cash)}, Peace ${S.peace}, Home ${S.home}, Future ${S.future}. Wetin be your own?`;
@@ -1394,6 +1409,7 @@ function renderEnd(app){
     canvas.toBlob(b => { cardBlob = b; try{ cardFile = new File([b], 'my-landed-verdict.png', {type:'image/png'}); }catch(e){} }, 'image/png');
   });
   document.getElementById('sharecard').onclick = () => {
+    track('share-card');
     const t = document.getElementById('toast');
     if(!cardBlob){ t.textContent = "Your card is still being made. Try again in a second."; return; }
     if(cardFile && navigator.canShare && navigator.canShare({files:[cardFile]})){
@@ -1411,7 +1427,10 @@ function renderEnd(app){
   document.getElementById('s-wa').href = 'https://wa.me/?text=' + enc(text);
   document.getElementById('s-x').href = 'https://twitter.com/intent/tweet?text=' + enc(share) + '&url=' + enc(SITE);
   document.getElementById('s-li').href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + enc(SITE);
+  ['s-wa','s-x','s-li'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click',()=>track('share-'+id.slice(2))); });
+  const sl=document.querySelector('.storylink'); if(sl) sl.addEventListener('click',()=>track('story-form'));
   document.getElementById('copy').onclick = ()=>{
+    track('share-copy');
     const t = document.getElementById('toast');
     const fallback = ()=>{ t.textContent = text; t.style.userSelect = 'all'; };
     try{ navigator.clipboard.writeText(text).then(()=>{ t.textContent = "Copied. Paste it anywhere, including LinkedIn."; }).catch(fallback); }catch(e){ fallback(); }
