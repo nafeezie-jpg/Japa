@@ -818,7 +818,7 @@ const P = () => S.path || 'work';
 const STU = () => ['scholar','partial','study'].includes(P());
 const SOLD = () => !!S.sold;
 const FUND = () => S.fund || (S.sold ? 'sold' : 'savings');
-const soldLine = () => SOLD() ? `You sold your car, your shop, and your land in ${O()} to come, so there is nothing to go back to. ` : FUND()==='borrowed' ? `You borrowed ₦5 million from your cooperative society to make this move. ` : FUND()==='kept' ? `You kept your house in ${O()}, just in case. ` : '';
+const soldLine = () => SOLD() ? `You sold your car, your shop, and your land in ${O()} to come, so there is nothing to go back to. ` : FUND()==='borrowed' ? `You borrowed ₦5 million from your cooperative society to make this move. ` : FUND()==='kept' ? `You rented out your house in ${O()} to help pay for this move. ` : '';
 const FEES = () => A(6000);
 
 function pathScenes(){
@@ -912,11 +912,11 @@ const fundScenes = () => { const c = C(), out = [], f = FUND();
        {l:`Pay an agent ${M(A(80))} to manage it properly`, fx:{cash:-A(80), future:8, peace:3}, set:{house:'managed'}, r:"The agent collects two months' rent in a week. You wonder why you did not do this first."},
        {l:"Wait for the economy to improve", fx:{peace:-5, future:-4}, set:{house:'waiting'}, r:"The economy has not improved. Neither has the tenant."},
        {l:`Send ${c.cousin} to have a word with him`, fx:{home:3, peace:-2, future:3}, set:{house:'cousin'}, r:`${c.cousin} goes with two uncles and a very serious face. Rent arrives the next morning.`}]},
-     {day:19, from:c.sib, sub:`Your brother · ${c.home}`, text:"I don move into your house so that thieves no go break in. I dey protect am for you. Light bill don come sha, you go pay?",
+     {day:19, from:c.sib, sub:`Your brother · ${c.home}`, text:"Your tenant don pack out. I don move into the house so that thieves no go break in. I dey protect am for you. Light bill don come sha, you go pay?",
       choices:[
        {l:`Pay the light bill, ${M(A(60))}. Family first`, fx:{cash:-A(60), home:6, peace:-2}, set:{house:'brother'}, r:"He sends a photo from your sitting room. He is using your good cups."},
        {l:"Ask him to pay rent or move out", fx:{home:-8, peace:4, future:4}, set:{house:'firm'}, r:"The family meeting lasts four hours. In the end he agrees to pay something. Something is better than nothing."},
-       {l:"Rent it out properly through an agent", fx:{cash:-A(80), future:8, home:-4}, set:{house:'managed'}, r:"Your brother moves back to his own place, offended but alive. Your house now earns money."}]}
+       {l:"Rent it out properly through an agent", fx:{cash:-A(80), future:8, home:-4}, set:{house:'managed'}, r:"Your brother moves back to his own place, offended but alive. A new tenant moves in, and the rent starts flowing again."}]}
     ][pickV('K',2)]);
   }
   return out;
@@ -1127,7 +1127,7 @@ function render(){
         <label class="when" for="path">How did you japa?</label>
         <select id="path" class="select">${pathOptions(rk).map(([k,l])=>`<option value="${k}"${k===pick.path?' selected':''}>${l}</option>`).join('')}</select>
         <label class="when" for="fund">How did you fund the move?</label>
-        <select id="fund" class="select">${[['savings','From my savings'],['sold','Sold everything to come'],['borrowed','Borrowed money to come'],['kept','Kept my house back home']].map(([k,l])=>`<option value="${k}"${k===pick.fund?' selected':''}>${l}</option>`).join('')}</select>
+        <select id="fund" class="select">${[['savings','From my savings'],['sold','Sold everything to come'],['borrowed','Borrowed money to come'],['kept','Rented out my house back home']].map(([k,l])=>`<option value="${k}"${k===pick.fund?' selected':''}>${l}</option>`).join('')}</select>
         <label class="check daily" for="daily"><input type="checkbox" id="daily"${pick.daily?' checked':''}> <span><b>Play Today's Landing · ${dayLabel(todayStr())}</b><br>Everyone playing today gets the same requests from home. Compare verdicts with friends.</span></label>
         <button class="primary" id="go">Land in ${ROUTES[rk].label}</button></div>` : ''}`).join('')}
       </div>
