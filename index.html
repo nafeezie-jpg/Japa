@@ -1316,6 +1316,13 @@ const routeAlts = () => { const c = C(), k = R.key, out = [];
   return out;
 };
 
+/* ---------- Converting everything to naira ---------- */
+const convertScene = () => ({day:4, credit:'Nafeezie', own:1, text:`Your first small grocery shop comes to ${M(A(40))}. Before you can stop it, your brain converts. That is ${NG(40)}, a full market run for a family in ${O()}. Your hand starts to shake.`,
+  choices:[
+   {l:"Convert it all. Suffer in naira", fx:{cash:A(15), peace:-6}, r:"You put back the yoghurt, the juice, and the good rice. Dinner is bread, and your heart is racing."},
+   {l:"Stop converting. Peace of mind", fx:{cash:-A(10), peace:4}, r:"You pay and walk out like a local. Your account will discuss it with you later."},
+   {l:"Convert only the big things", fx:{peace:2, future:3}, r:"Rent and phones, you convert. Bread, you just buy. Your sanity says thank you."}]});
+
 /* ---------- WhatsApp survival ---------- */
 const whatsapp = () => { const c = C(); return [
  {day:10, text:`You finally take a fine picture in ${T()}, with good light, a new outfit, and a face that says abroad is treating you well. It belongs on your WhatsApp status. The trouble is that home reads every status as a signal for billing.`,
@@ -1377,7 +1384,7 @@ const guestStay = () => { const c = C(), host = s => pickV('HOST',2)===0; return
 
 function scenes(){
   const base = [arrival(), barNight()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : CA());
-  return base.concat(routeAlts(), pathScenes(), fundScenes(), guestStay(), [familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  return base.concat(routeAlts(), pathScenes(), fundScenes(), guestStay(), [convertScene(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
