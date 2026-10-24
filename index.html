@@ -272,7 +272,7 @@ const ROUTES = {
 
 const ORIGIN_LIST = [["Abia","Aba"],["Adamawa","Yola","YOL"],["Akwa Ibom","Uyo","QUO"],["Anambra","Onitsha"],["Bauchi","Bauchi","BCU"],["Bayelsa","Yenagoa"],["Benue","Makurdi","MDI"],["Borno","Maiduguri","MIU"],["Cross River","Calabar","CBQ"],["Delta","Asaba","ABB"],["Ebonyi","Abakaliki"],["Edo","Benin City","BNI"],["Ekiti","Ado-Ekiti"],["Enugu","Enugu","ENU"],["FCT","Abuja","ABV"],["Gombe","Gombe","GMO"],["Imo","Owerri","QOW"],["Jigawa","Dutse"],["Kaduna","Kaduna","KAD"],["Kano","Kano","KAN"],["Katsina","Katsina","DKA"],["Kebbi","Birnin Kebbi"],["Kogi","Lokoja"],["Kwara","Ilorin","ILR"],["Lagos","Lagos","LOS"],["Nasarawa","Lafia"],["Niger","Minna","MXJ"],["Ogun","Abeokuta"],["Ondo","Akure","AKR"],["Osun","Osogbo"],["Oyo","Ibadan","IBA"],["Plateau","Jos","JOS"],["Rivers","Port Harcourt","PHC"],["Sokoto","Sokoto","SKO"],["Taraba","Jalingo"],["Yobe","Damaturu"],["Zamfara","Gusau"]];
 const ORIGINS = Object.fromEntries(ORIGIN_LIST.map(([st,city,code])=>[city, code || city.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()]));
-let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work", sold:false, gender:"woman"};
+let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work", fund:"savings", gender:"woman"};
 let shown = null;
 const O = () => S.origin;
 const MULT = [0, .75, 1, 1.35];
@@ -290,10 +290,10 @@ function begin(rk, pname, prev){
   const culture = prev ? prev.culture : pick.culture;
   const gender = prev ? prev.gender : pick.gender;
   const path = prev ? 'work' : (pathOptions(rk).some(o=>o[0]===pick.path) ? pick.path : 'work');
-  const sold = prev ? !!prev.sold : !!pick.sold;
-  const start = Math.round(ROUTES[rk].start * PATHS[path].mult * (sold?1.4:1) / 50) * 50;
-  S = prev ? {cash:start, start, path, sold, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture, gender}
-           : {cash:start, start, path, sold, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture, gender};
+  const fund = prev ? prev.fund : (pick.fund||'savings'), sold = fund==='sold';
+  const start = Math.round(ROUTES[rk].start * PATHS[path].mult * ({savings:1, sold:1.4, borrowed:1.3, kept:0.9}[fund]||1) / 50) * 50;
+  S = prev ? {cash:start, start, path, sold, fund, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture, gender}
+           : {cash:start, start, path, sold, fund, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture, gender};
   shown = null;
   history = [];
   idx = nextIndex(0); phase = 'scene';
@@ -748,7 +748,8 @@ function pathOptions(rk){ return Object.entries(PATHS).filter(([k,v])=>v.all||v[
 const P = () => S.path || 'work';
 const STU = () => ['scholar','partial','study'].includes(P());
 const SOLD = () => !!S.sold;
-const soldLine = () => SOLD() ? `You sold your car, your shop, and your land in ${O()} to come, so there is nothing to go back to. ` : '';
+const FUND = () => S.fund || (S.sold ? 'sold' : 'savings');
+const soldLine = () => SOLD() ? `You sold your car, your shop, and your land in ${O()} to come, so there is nothing to go back to. ` : FUND()==='borrowed' ? `You borrowed ₦5 million from your cooperative society to make this move. ` : FUND()==='kept' ? `You kept your house in ${O()}, just in case. ` : '';
 const FEES = () => A(6000);
 
 function pathScenes(){
@@ -821,9 +822,77 @@ function pathScenes(){
   return out;
 }
 
+/* ---------- How you funded the move ---------- */
+const fundScenes = () => { const c = C(), out = [], f = FUND();
+  if(f==='borrowed'){
+    out.push({day:20, from:"Cooperative society", sub:`${c.home} branch`, text:`Reminder: the first repayment on the ₦5 million you borrowed for your relocation is due this month. Your portion is ${M(A(500))}. Your guarantor has been copied.`,
+      choices:[
+       {l:`Pay the ${M(A(500))} in full. Debt is a heavy suitcase`, fx:{cash:-A(500), peace:4, future:4}, set:{loan:'paid'}, r:"The secretary sends a thumbs up. Your guarantor sends a longer one."},
+       {l:"Pay half and send a heartfelt explanation", fx:{cash:-A(250), peace:-4, home:-3}, set:{loan:'half'}, r:"They accept, \"this one time\". The phrase \"this one time\" now haunts you."},
+       {l:"Ignore it. Abroad network is bad", fx:{peace:-10, home:-6}, set:{loan:'late'}, r:"Your phone buzzes for three days. You stop opening WhatsApp in public."}]});
+    out.push({day:25, when: s => s.f.loan==='late', from:c.mum, sub:`${c.home} · 9:00am`, text:`${c.exclaim} The cooperative people came to our house today. They said you are owing. In front of the neighbours!`,
+      choices:[
+       {l:`Pay the ${M(A(500))} immediately`, fx:{cash:-A(500), home:4, peace:2}, set:{loan:'paid'}, r:"The neighbours are still talking, but at least now they are saying you paid."},
+       {l:"Call the secretary and agree a payment plan", fx:{peace:3, future:3, home:-2}, set:{loan:'plan'}, r:"Monthly instalments, signed and witnessed. Your mother can face the neighbours again."},
+       {l:"Tell her you will sort it soon", fx:{home:-8, peace:-6}, r:"\"Soon,\" she repeats slowly, like a warning."}]});
+  }
+  if(f==='kept'){
+    out.push([
+     {day:19, from:c.cousin, sub:`Looking after your house · ${c.home}`, text:`Your tenant has not paid rent for three months. He says he will pay "when the economy improves".`,
+      choices:[
+       {l:`Pay an agent ${M(A(80))} to manage it properly`, fx:{cash:-A(80), future:8, peace:3}, set:{house:'managed'}, r:"The agent collects two months' rent in a week. You wonder why you did not do this first."},
+       {l:"Wait for the economy to improve", fx:{peace:-5, future:-4}, set:{house:'waiting'}, r:"The economy has not improved. Neither has the tenant."},
+       {l:`Send ${c.cousin} to have a word with him`, fx:{home:3, peace:-2, future:3}, set:{house:'cousin'}, r:`${c.cousin} goes with two uncles and a very serious face. Rent arrives the next morning.`}]},
+     {day:19, from:c.sib, sub:`Your brother · ${c.home}`, text:"I don move into your house so that thieves no go break in. I dey protect am for you. Light bill don come sha, you go pay?",
+      choices:[
+       {l:`Pay the light bill, ${M(A(60))}. Family first`, fx:{cash:-A(60), home:6, peace:-2}, set:{house:'brother'}, r:"He sends a photo from your sitting room. He is using your good cups."},
+       {l:"Ask him to pay rent or move out", fx:{home:-8, peace:4, future:4}, set:{house:'firm'}, r:"The family meeting lasts four hours. In the end he agrees to pay something. Something is better than nothing."},
+       {l:"Rent it out properly through an agent", fx:{cash:-A(80), future:8, home:-4}, set:{house:'managed'}, r:"Your brother moves back to his own place, offended but alive. Your house now earns money."}]}
+    ][pickV('K',2)]);
+  }
+  return out;
+};
+
+/* ---------- Signature moments for each country ---------- */
+const countryMoment = () => { const k = R.key; const pool = {
+  us:[
+   {day:29, text: STU() ? "Your school charges a mandatory student health plan. It appears on your account like a surprise guest." : "Your job offers health insurance at $180 a month. In America, this is the price of not being afraid of hospitals.",
+    choices:[
+     {l: STU() ? "Pay it. Getting sick here costs a kidney" : "Take the full plan. Peace of mind costs $180", fx:{cash:-180, peace:6, future:4}, r:"You do not get sick this month. You still feel smarter."},
+     {l:"Pick the cheapest plan and hope", fx:{cash:-60, peace:-2}, r:"The cheapest plan covers \"emergencies, possibly\". You decide not to have any."},
+     {l:"Skip it. Nigerian immunity is undefeated", fx:{peace:-8, future:-4}, r:"You avoid sneezing in public for the rest of the year."}]},
+   {day:29, text:"You went to urgent care for a cough. Three weeks later, a bill arrives for $640, for fifteen minutes and a lollipop.",
+    choices:[
+     {l:"Call and negotiate like you are in Balogun market", fx:{cash:-250, peace:-3, future:3}, r:"After forty minutes, they knock it down to $250. Market skills work everywhere."},
+     {l:"Set up a payment plan. $40 a month forever", fx:{cash:-40, peace:-2}, r:"You will be paying for that lollipop until next summer."},
+     {l:"Pay it and cry quietly", fx:{cash:-640, peace:2}, r:"It is gone, and so is your desire to ever cough again."}]}],
+  uk:[
+   {day:29, text:"A brown envelope arrives. Council tax. Around £140 a month, for the privilege of having your bins collected.",
+    choices:[
+     {l: STU() ? "Check if students are exempt" : "Apply for the single person discount", fx:{cash: STU() ? 0 : -105, future:4, peace:3}, r: STU() ? "Full-time students are often exempt. You send the form and feel very British." : "Living alone gets you 25% off. Loneliness finally pays."},
+     {l:"Pay it in full and say nothing", fx:{cash:-140, peace:2}, r:"The bins are collected on Tuesday. You watch with a sense of ownership."},
+     {l:"Ignore the envelope. Brown envelopes are optional", fx:{peace:-8, future:-4}, r:"A second envelope arrives. This one is red. It is not optional."}]},
+   {day:29, text:"You try to register with a GP. The receptionist asks for proof of address and says the next appointment is in three weeks.",
+    choices:[
+     {l:"Register anyway and wait patiently", fx:{peace:2, future:4}, r:"Three weeks later, the doctor sees you for seven minutes and recommends paracetamol. Welcome to the NHS."},
+     {l:"Go to the pharmacy and ask them instead", fx:{cash:-8, peace:4}, r:"The pharmacist is kind, quick, and Nigerian. She asks which state you are from."},
+     {l:"Call your doctor friend in Nigeria", fx:{home:3, peace:3}, r:"He diagnoses you over WhatsApp in two minutes and asks you to send him a stethoscope."}]}],
+  ca:[
+   {day:29, text: STU() ? "Your professor says your Nigerian transcript needs an official assessment for the research assistant role. C$250 and eight weeks." : "To work in your field, your degree needs an official assessment, and your professional body wants a Canadian exam. C$300 and six months.",
+    choices:[
+     {l:`Start the process. Pay ${STU()?'C$250':'C$300'} and wait`, fx:{cash: STU()?-250:-300, future:10, peace:-2}, r:"You fill in forms, request transcripts, and learn the word \"equivalency\". The clock starts."},
+     {l:"Keep your survival job for now", fx:{future:-3, peace:3}, r:"You decide to stabilise first. The paperwork will still be there next month."},
+     {l:"Ask a Nigerian who has done it already", fx:{future:6, home:2, peace:3}, r:"She sends you a step-by-step voice note, eleven minutes long. It saves you three months."}]},
+   {day:29, text:"Your coworker says you should file your taxes even though you just arrived, because there are credits for newcomers on low income.",
+    choices:[
+     {l:"Go to a free tax clinic", fx:{future:5, peace:2}, r:"A volunteer files everything for free and tells you a credit is coming. Canada gives back. Slowly."},
+     {l:"Pay a tax preparer C$80", fx:{cash:-80, peace:4, future:3}, r:"He asks if you have receipts. You have a shoebox. He sighs and starts."},
+     {l:"Taxes? You just got here", fx:{peace:-3, future:-4}, r:"Next year you discover you missed money you were owed. Lesson learned."}]}]
+  }[k]; return pool[pickV('X'+k, pool.length)]; };
+
 function scenes(){
   const base = R.key==='us' ? US() : R.key==='uk' ? UK() : CA();
-  return base.concat(pathScenes(), [familyGroup(), mishap(), smallWin()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  return base.concat(pathScenes(), fundScenes(), [familyGroup(), mishap(), smallWin(), countryMoment()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -986,7 +1055,8 @@ function render(){
         <select id="place" class="select">${placeOptions(rk)}</select>
         <label class="when" for="path">How did you japa?</label>
         <select id="path" class="select">${pathOptions(rk).map(([k,l])=>`<option value="${k}"${k===pick.path?' selected':''}>${l}</option>`).join('')}</select>
-        <label class="check" for="sold"><input type="checkbox" id="sold"${pick.sold?' checked':''}> I sold everything to come</label>
+        <label class="when" for="fund">How did you fund the move?</label>
+        <select id="fund" class="select">${[['savings','From my savings'],['sold','Sold everything to come'],['borrowed','Borrowed money to come'],['kept','Kept my house back home']].map(([k,l])=>`<option value="${k}"${k===pick.fund?' selected':''}>${l}</option>`).join('')}</select>
         <button class="primary" id="go">Land in ${ROUTES[rk].label}</button>` : ''}
       <div class="foot">About 5 minutes. Every choice follows you.</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
@@ -1001,9 +1071,9 @@ function render(){
     document.getElementById('gender').onchange = e => { pick.gender = e.target.value; };
     app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = b.dataset.r; render(); });
     const go = document.getElementById('go');
-    if(go) go.onclick = ()=>{ pick.path = document.getElementById('path').value; pick.sold = document.getElementById('sold').checked; begin(rk, document.getElementById('place').value); render(); scrollTo(0,0); };
+    if(go) go.onclick = ()=>{ pick.path = document.getElementById('path').value; pick.fund = document.getElementById('fund').value; begin(rk, document.getElementById('place').value); render(); scrollTo(0,0); };
     const ps = document.getElementById('path'); if(ps) ps.onchange = e => { pick.path = e.target.value; };
-    const sb = document.getElementById('sold'); if(sb) sb.onchange = e => { pick.sold = e.target.checked; };
+    const fb = document.getElementById('fund'); if(fb) fb.onchange = e => { pick.fund = e.target.value; };
     return;
   }
   if(phase==='end'){ return renderEnd(app); }
@@ -1148,6 +1218,7 @@ function verdict(){
   if(P()==='scholar' && S.f.stipendHome && S.home>=60) return ["Scholar and Sponsor","You came on a scholarship and somehow became the family's scholarship too."];
   if((P()==='study' || P()==='partial') && (S.f.fees==='pending' || S.f.fees==='paused')) return ["Fees Still Pending","Student by day, worker by night, and negotiator with the finance office in between."];
   if((SOLD() || P()==='care') && S.future>=30) return ["Making It By Force","There is no going back, so you are going forward. Slowly, stubbornly, and with your whole chest."];
+  if(FUND()==='borrowed' && S.f.loan==='late') return ["Owing the Cooperative","You borrowed to japa, and the japa is now borrowing your peace. One repayment at a time."];
   if(S.cash<low) return ["Running on Prayers","You made it to day 30 on faith, leftover jollof, and a very patient bank."];
   if(S.peace<35) return ["Hustle Without Peace","The money is coming in. Your body has filed a formal complaint."];
   if(S.home<35) return ["Ghost Mode Activated","Your account is healthy. The family WhatsApp group thinks you have died."];
@@ -1169,6 +1240,10 @@ function receipts(){
   if(f.fees==='plan') out.push("You turned a scary deadline into three instalments.");
   if(f.stipendHome) out.push("Part of your stipend went home. Your fridge held three eggs and a lemon.");
   if(SOLD()) out.push("You sold everything to come. There was no plan B, so plan A had to work.");
+  if(f.loan==='paid') out.push("You paid the cooperative on time. Your guarantor can sleep again.");
+  if(f.loan==='late') out.push("The cooperative visited your mother. In front of the neighbours.");
+  if(f.house==='managed') out.push("Your house back home now pays you instead of worrying you.");
+  if(f.house==='brother') out.push("Your brother is guarding your house, with your good cups.");
   if(f.spouse==='looked') out.push(S.gender==='man' ? "Every Nigerian woman at the community meet-up was engaged or not ready for anything serious." : "Every Nigerian man at the community meet-up was married or focusing on himself.");
   if(f.network && R.key==='ca') out.push("An owambe at minus 20 got you your first real job lead.");
   if(f.coat==='none') out.push("Naija blood was not enough for the cold.");
@@ -1310,7 +1385,7 @@ function renderEnd(app){
       const rk = btn.dataset.r;
       box.innerHTML = `<label class="when" for="place2">${ROUTES[rk].ask}</label><select id="place2" class="select">${placeOptions(rk)}</select><button class="primary" id="go2">Land in ${ROUTES[rk].label}</button>`;
       document.getElementById('go2').onclick = ()=>{
-        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture, sold:S.sold, gender:S.gender};
+        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture, sold:S.sold, fund:S.fund, gender:S.gender};
         const pl = document.getElementById('place2').value;
         begin(rk, pl, prev); render(); scrollTo(0,0);
       };
