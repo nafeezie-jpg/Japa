@@ -213,7 +213,7 @@ const ROUTES = {
 
 const ORIGIN_LIST = [["Abia","Aba"],["Adamawa","Yola","YOL"],["Akwa Ibom","Uyo","QUO"],["Anambra","Onitsha"],["Bauchi","Bauchi","BCU"],["Bayelsa","Yenagoa"],["Benue","Makurdi","MDI"],["Borno","Maiduguri","MIU"],["Cross River","Calabar","CBQ"],["Delta","Asaba","ABB"],["Ebonyi","Abakaliki"],["Edo","Benin City","BNI"],["Ekiti","Ado-Ekiti"],["Enugu","Enugu","ENU"],["FCT","Abuja","ABV"],["Gombe","Gombe","GMO"],["Imo","Owerri","QOW"],["Jigawa","Dutse"],["Kaduna","Kaduna","KAD"],["Kano","Kano","KAN"],["Katsina","Katsina","DKA"],["Kebbi","Birnin Kebbi"],["Kogi","Lokoja"],["Kwara","Ilorin","ILR"],["Lagos","Lagos","LOS"],["Nasarawa","Lafia"],["Niger","Minna","MXJ"],["Ogun","Abeokuta"],["Ondo","Akure","AKR"],["Osun","Osogbo"],["Oyo","Ibadan","IBA"],["Plateau","Jos","JOS"],["Rivers","Port Harcourt","PHC"],["Sokoto","Sokoto","SKO"],["Taraba","Jalingo"],["Yobe","Damaturu"],["Zamfara","Gusau"]];
 const ORIGINS = Object.fromEntries(ORIGIN_LIST.map(([st,city,code])=>[city, code || city.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()]));
-let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", state:"Oyo", culture:"yoruba"};
+let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general"};
 const O = () => S.origin;
 const MULT = [0, .75, 1, 1.35];
 const A = x => Math.round(x*R.k/5)*5;                 // shared amounts, converted to local currency
@@ -227,9 +227,9 @@ function begin(rk, pname, prev){
   const trail = prev ? prev.trail.concat([{code:L.town.slice(0,3).toUpperCase(), town:L.town, country:R.country}]) : [{code:ORIGINS[origin]||'NGA', town:origin, country:'Nigeria'}];
   R = ROUTES[rk]; L = places(rk).find(p=>p.name===pname);
   // trail now holds every place before this landing
-  const state = prev ? prev.state : pick.state, culture = prev ? prev.culture : pick.culture;
-  S = prev ? {cash:R.start, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, state, culture}
-           : {cash:R.start, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, state, culture};
+  const culture = prev ? prev.culture : pick.culture;
+  S = prev ? {cash:R.start, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture}
+           : {cash:R.start, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture};
   history = [];
   idx = nextIndex(0); phase = 'scene';
 }
@@ -245,7 +245,6 @@ function localNote(){
 }
 
 /* ---------- Culture and state of origin ---------- */
-const STATES = ["Abia","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue","Borno","Cross River","Delta","Ebonyi","Edo","Ekiti","Enugu","FCT Abuja","Gombe","Imo","Jigawa","Kaduna","Kano","Katsina","Kebbi","Kogi","Kwara","Lagos","Nasarawa","Niger","Ogun","Ondo","Osun","Oyo","Plateau","Rivers","Sokoto","Taraba","Yobe","Zamfara"];
 const STATE_CULTURE = {Lagos:'yoruba',Ogun:'yoruba',Oyo:'yoruba',Osun:'yoruba',Ondo:'yoruba',Ekiti:'yoruba',Kwara:'yoruba',
   Abia:'igbo',Anambra:'igbo',Ebonyi:'igbo',Enugu:'igbo',Imo:'igbo',
   Kano:'hausa',Kaduna:'hausa',Katsina:'hausa',Jigawa:'hausa',Zamfara:'hausa',Sokoto:'hausa',Kebbi:'hausa',Bauchi:'hausa',Gombe:'hausa'};
@@ -259,7 +258,7 @@ const CULTURES = {
   general:{label:'General Nigerian', mum:'Mummy', endear:'my child', sib:'Daniel', aunty:'Aunty Grace', cousin:'Blessing', farmer:'Mr. Peter', friend:'Victor', party:'Christmas back home', food:'jollof',
           bless:'"God bless you, my child," she says.'}
 };
-const C = () => Object.assign({}, CULTURES[S.culture||'general'], {home: S.state==='FCT Abuja' ? 'Abuja' : S.state});
+const C = () => Object.assign({}, CULTURES[S.culture||'general'], {home: S.origin});
 const pickV = (key, n) => { S.v = S.v || {}; if(S.v[key]===undefined) S.v[key] = Math.floor(Math.random()*n); return S.v[key]; };
 
 /* ---------- Shared scenes (each has several versions, picked at random per game) ---------- */
@@ -634,12 +633,10 @@ function render(){
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
       <p>Everybody wants to japa. Nobody tells you what happens after you land.</p>
       <p>You have 30 days. Find work, pay rent, survive the weather, and decide who back home gets your money and who gets your questions.</p>
-      <label class="when" for="state">What is your state of origin?</label>
-      <select id="state" class="select">${STATES.map(st=>`<option${st===pick.state?' selected':''}>${st}</option>`).join('')}</select>
-      <label class="when" for="culture">Whose voice should your family speak in?</label>
-      <select id="culture" class="select">${Object.entries(CULTURES).map(([k,v])=>`<option value="${k}"${k===pick.culture?' selected':''}>${v.label}</option>`).join('')}</select>
       <label class="when" for="origin">Which state are you leaving from?</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
+      <label class="when" for="culture">Whose voice should your family speak in?</label>
+      <select id="culture" class="select">${Object.entries(CULTURES).map(([k,v])=>`<option value="${k}"${k===pick.culture?' selected':''}>${v.label}</option>`).join('')}</select>
       <div class="when">Where are you landing?</div>
       <div class="routes">
         ${Object.values(ROUTES).map(r=>`<button class="route-btn${rk===r.key?' on':''}" data-r="${r.key}" aria-pressed="${rk===r.key}"><b>${r.label}</b><span>${r.sub}</span></button>`).join('')}
@@ -650,8 +647,12 @@ function render(){
       <div class="foot">About 5 minutes. Every choice follows you.</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
     </div>`;
-    document.getElementById('origin').onchange = e => { pick.origin = e.target.value; };
-    document.getElementById('state').onchange = e => { pick.state = e.target.value; pick.culture = STATE_CULTURE[pick.state] || 'general'; document.getElementById('culture').value = pick.culture; };
+    document.getElementById('origin').onchange = e => {
+      pick.origin = e.target.value;
+      const st = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0];
+      pick.culture = STATE_CULTURE[st] || 'general';
+      document.getElementById('culture').value = pick.culture;
+    };
     document.getElementById('culture').onchange = e => { pick.culture = e.target.value; };
     app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = b.dataset.r; render(); });
     const go = document.getElementById('go');
@@ -788,7 +789,7 @@ function renderEnd(app){
       const rk = btn.dataset.r;
       box.innerHTML = `<label class="when" for="place2">${ROUTES[rk].ask}</label><select id="place2" class="select">${placeOptions(rk)}</select><button class="primary" id="go2">Land in ${ROUTES[rk].label}</button>`;
       document.getElementById('go2').onclick = ()=>{
-        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, state:S.state, culture:S.culture};
+        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture};
         const pl = document.getElementById('place2').value;
         begin(rk, pl, prev); render(); scrollTo(0,0);
       };
