@@ -324,6 +324,7 @@ details.custom summary{font-weight:700}
 .road p{font-size:13px;color:var(--muted);margin:8px 0 0}
 .pass .brand{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62%}
 #pname{font:inherit}
+.credit-tag{font-size:13px;color:var(--accent);font-weight:600}
 .lbbox{display:grid;gap:10px;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:var(--card)}
 .lbbox p{margin:0;font-size:15px}
 .lb-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
@@ -663,7 +664,13 @@ const friend = () => { const c = C(); return [
    {l:"Reply with your hourly rate and a calculator emoji", fx:{peace:3, home:-3}, r:"You get left on read. Time is money, and you just sent the invoice."},
    {l:`Explain that ${HRS(27)} hours of work is not small`, fx:{peace:2, home:1}, r:"They say sorry. They do not fully understand, but they say sorry, and you will take it."},
    {l:"Say nothing. Next time, send naira without the receipt", fx:{peace:-3, home:2}, r:"You swallow it. Abroad has taught you that every naira you send home has your hours inside it."}]}
-].map((o,i)=>i<5?ASK(o):o)[pickV('E',6)]; };
+,
+ {day:28, credit:'YuYu', from:"Ex-colleague", sub:`Back in ${O()}`, text:`Your bus has been cancelled twice, and you are shivering at the stop when he calls. "So you no fit send your guy ${M(A(100))} since you dey ${R.country}? Oga o!" You ask where he is. ${O()==='Lagos' ? 'On Third Mainland Bridge' : `In traffic in ${O()}`}, he says, in his Jeep.`,
+  choices:[
+   {l:`Send the ${M(A(100))}. Shiver with dignity`, fx:{cash:-A(100), home:3, peace:-6}, r:"He sends a thumbs up from the air-conditioned Jeep. Your third bus finally arrives, and it is full."},
+   {l:"Tell him he should be the one sending you money", fx:{peace:5, home:-3}, r:`He laughs and says, "If abroad no favour you, come back make another person go." You hang up and stand there a while longer.`},
+   {l:"Ask him to send you taxi money instead", fx:{peace:6, home:-1}, r:"The line goes quiet. Then he remembers he is driving and has to go. The bus comes eventually."}]}
+].map((o,i)=>i!==5?ASK(o):o)[pickV('E',7)]; };
 
 const familyGroup = () => { const c = C(); return [
  {day:13, from:"Family WhatsApp group", sub:`${c.aunty} posted`, text:`${c.exclaim} See our person abroad! Proud of you o! [A photo of you from your first week, standing beside a bus stop like it is the Eiffel Tower.]`,
@@ -686,7 +693,13 @@ const familyGroup = () => { const c = C(); return [
    {l:"Pay for drinks you will never drink", fx:{cash:-A(200), home:10}, r:"You are listed as \"Chief Drinks Sponsor\". You will not be there to drink any of it."},
    {l:"Offer small chops only. Small is in the name", fx:{cash:-A(80), home:4}, r:"They accept, then quietly add puff-puff, samosa, spring rolls, and asun to small chops."},
    {l:"Announce you are not coming home in December", fx:{home:-6, peace:4}, r:"Your phone rings eleven times. Not coming is not the same as not paying, apparently."}]}
-].map((o,i)=>i>=2?ASK(o):o)[pickV('F',4)]; };
+,
+ {day:13, credit:'Aisha', from:c.cousin, sub:"Your cousin", text:`${c.cousin} sends you a budget. Rent, data, transport, and "small enjoyment". She would like you to cover all of it every month, starting this one.`,
+  choices:[
+   {l:`Send the first month, ${N(150)}`, fx:{cash:-A(150), home:8, peace:-5}, r:"She sends a heart. Next month's budget arrives early, with one new line."},
+   {l:"Pay her data only. Data is a human right", fx:{cash:-A(20), home:3, peace:2}, r:`She says thank you, then asks if "data" can also cover transport.`},
+   {l:"Send her three job links instead", fx:{home:-6, peace:4, future:2}, r:"She reads them and replies with a thumbs up. You will hear about this at Christmas."}]}
+].map((o,i)=>i>=2?ASK(o):o)[pickV('F',5)]; };
 
 const mishap = () => { const c = C(), workplace = STU() ? 'class' : 'work'; return [
  {day:26, text:"Your bank blocks your card for \"suspicious activity\" right after you send money home. You are at the checkout with a full basket.",
@@ -709,7 +722,18 @@ const mishap = () => { const c = C(), workplace = STU() ? 'class' : 'work'; retu
    {l:`Buy everything for ${M(A(70))}. Your soul needs it`, fx:{cash:-A(70), peace:10}, r:"The smell fills the whole building. A neighbour knocks to ask what it is. You do not share."},
    {l:"Use supermarket spinach and pretend it is ugu", fx:{peace:-3}, r:"Spinach is not ugu. Pasta is not anything. You eat it with your eyes closed."},
    {l:"Host a potluck and start a jollof war", fx:{cash:-A(25), peace:8, home:2}, r:"Six people, nine pots, and two hours of arguing about whose jollof is best. It feels like home."}]}
-][pickV('G',4)]; };
+,
+ {day:26, credit:'YuYu', text:`Your phone dies in the middle of ${T()}, and your map dies with it. ${L.cold>0 || R.key==='uk' ? 'It is bitterly cold, and you do not know which way is home.' : 'It is getting dark, and you do not know which way is home.'}`,
+  choices:[
+   {l:"Run to the man in Ankara. He must be Naija", fx:{peace:8, home:2}, r:"He is Ghanaian. He takes out a pen and writes every bus number on a scrap of paper, step by step. The jollof war is suspended for one evening."},
+   {l:"Find a shop that will let you charge it", fx:{cash:-A(6), peace:2}, r:"You buy a drink you do not want so you can sit near a socket for twenty minutes. The map comes back, and so does your breathing."},
+   {l:"Trust your sense of direction", fx:{peace:-10}, r:`Your sense of direction knows ${O()} by heart and nothing here. You get home two hours later, frozen and very humble.`}]},
+ {day:26, credit:'YuYu', text:`You book a taxi with your Nigerian card. The ride takes five minutes, and your bank charges you ${NG(14)}. Back in ${O()}, you would have walked that distance and bought suya with the change.`,
+  choices:[
+   {l:"Open a local bank account this week", fx:{future:5, peace:2}, r:"The forms take an afternoon. The next taxi costs what the app says, and you feel like a resident."},
+   {l:"Walk everywhere from now on", fx:{peace:-4, future:2, cash:A(10)}, r:"You learn every shortcut in two weeks. Your legs get strong, and your shoes start to complain."},
+   {l:"Screenshot it for the family group", fx:{home:4, peace:3}, r:"Nobody believes you. One uncle says you must have typed the wrong amount."}]}
+][pickV('G',6)]; };
 
 
 const smallWin = () => { const c = C(), workplace = STU() ? 'class' : 'work'; return [
@@ -1803,13 +1827,14 @@ function wireBack(){
     render(); scrollTo(0,0);
   };
 }
+const creditTag = sc => sc.credit ? `<div class="credit-tag">A real story, shared by ${sc.credit}</div>` : '';
 function intro(sc, compact){
   if(sc.from){
-    return `<div class="when">Day ${sc.day} · New message</div>
+    return `<div class="when">Day ${sc.day} · New message</div>${creditTag(sc)}
       <div class="thread"><div class="who"><div class="avatar">${sc.from[0]}</div><div><b>${sc.from}</b><small>${sc.sub||''}</small></div></div>
       <div class="bubble">${sc.text}</div></div>`;
   }
-  return `<div class="when">Day ${sc.day}</div>${compact?'':`<div class="narr">${sc.text}</div>`}`;
+  return `<div class="when">Day ${sc.day}</div>${creditTag(sc)}${compact?'':`<div class="narr">${sc.text}</div>`}`;
 }
 
 function verdict(){
@@ -2086,6 +2111,7 @@ function wirePost(title){
     go.disabled = true; go.textContent = 'Posting...'; t.style.color = ''; t.textContent = '';
     try{
       const res = await fetch(SB_URL + '/rest/v1/landings?select=created_at', {method:'POST', headers:{apikey:SB_KEY, 'Content-Type':'application/json', Prefer:'return=representation'}, body:JSON.stringify(body)});
+      if(res.status>=400 && res.status<500){ go.disabled = false; go.textContent = 'Post my landing'; t.style.color = 'var(--bad)'; t.textContent = 'The board is busy right now. Try again in a minute, or try a different name.'; return; }
       if(!res.ok) throw new Error('post ' + res.status);
       try{ const out = await res.json(); myPostAt = Date.parse(out[0].created_at); }catch(e){}
       S.posted = true; track('leaderboard-post'); SFX.good();
