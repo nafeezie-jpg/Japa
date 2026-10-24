@@ -195,7 +195,7 @@ const US_PLACES = [
  ["Colorado",2,1,1],["Connecticut",3,2,1],["Delaware",2,1,1],
  ["District of Columbia",3,1,0,"Washington","DC is full of policy people. Your Nigerian experience finally makes sense to somebody."],
  ["Florida",2,0,1,"","Florida is warm like home. The hurricanes are not."],
- ["Georgia",2,0,1,"","Atlanta's Nigerian churches have better sound systems than most concerts."],
+ ["Georgia",2,0,1,"","Atlanta's Nigerian parties have better sound systems than most concerts."],
  ["Hawaii",3,0,1],["Idaho",1,2,1],
  ["Illinois",2,2,1,"","Chicago wind has strong opinions about your choices."],
  ["Indiana",1,2,1],["Iowa",1,2,1],["Kansas",1,1,1],["Kentucky",1,1,1],["Louisiana",1,0,1],["Maine",2,2,1],
@@ -226,8 +226,8 @@ const UK_TOWN = {"Greater London":"London","City of London":"London","Greater Ma
 const UK_NOTE = {
  "Greater London":"London rent costs a pound per breath, and the Nigerian parties never end.",
  "Greater Manchester":"Manchester rain is not weather. It is a lifestyle.",
- "West Midlands":"Birmingham has jollof, Nigerian churches, and a bus network you will learn the hard way.",
- "Essex":"Essex has a Nigerian Sunday-service economy of its own.",
+ "West Midlands":"Birmingham has jollof, Nigerian parties every weekend, and a bus network you will learn the hard way.",
+ "Essex":"Essex has so many Nigerians that the aunties have their own economy.",
  "Kent":"Kent is close enough to London for the prices and far enough for the train fares.",
  "Norfolk":"Norwich is quiet, green, and very far from any jollof.",
  "West Yorkshire":"Leeds is friendly, rainy, and full of students who all seem to be named Josh.",
@@ -316,7 +316,7 @@ const CULTURES = {
           bless:'"Chukwu gozie gi," she says. God bless you.'},
   hausa:{label:'Hausa', mum:'Umma', endear:'my child', sib:'Abubakar', aunty:'Hajiya Aisha', cousin:'Zainab', farmer:'Malam Sani', friend:'Usman', party:'Sallah', food:'tuwo and miyan kuka', greet:'Ina kwana', please:'Don Allah', exclaim:'Kai!', ok:'To', wow:'Wallahi,', swear:'wallahi',
           bless:'"Allah ya saka da alheri," she says. May God reward you with good.'},
-  general:{label:'General Nigerian', mum:'Mummy', endear:'my child', sib:'Daniel', aunty:'Aunty Grace', cousin:'Blessing', farmer:'Mr. Peter', friend:'Victor', party:'Christmas back home', food:'jollof', greet:'Good morning', please:'Abeg', exclaim:'Ehn!', ok:'Okay o', wow:'Omo!', swear:'I swear',
+  general:{label:'General Nigerian', mum:'Mummy', endear:'my child', sib:'Daniel', aunty:'Aunty Grace', cousin:'Blessing', farmer:'Mr. Peter', friend:'Victor', party:'December', food:'jollof', greet:'Good morning', please:'Abeg', exclaim:'Ehn!', ok:'Okay o', wow:'Omo!', swear:'I swear',
           bless:'"God bless you, my child," she says.'}
 };
 const C = () => Object.assign({}, CULTURES[S.culture||'general'], {home: S.origin});
@@ -404,7 +404,7 @@ const contribution = () => { const c = C(); return [
    {l:"Pay in full. Get your name on the wall", fx:{cash:-A(170), home:8, future:2}, r:"Your name will be on the town hall wall. In very small letters, under the people who paid ₦1 million."},
    {l:"Promise \"next week\". Buy yourself time", fx:{home:2}, set:{promise:true}, r:"The secretary replies, \"Noted with thanks.\" You feel noted."},
    {l:"Ask to see the building plan. Since 2015", fx:{home:-6, future:3}, r:"They send the plan. It is the same plan from 2015. The hall is still at foundation."},
-   {l:"Pay half. Christmas will handle the rest", fx:{cash:-A(85), home:3}, r:"They accept. Christmas is now a debt collection date."}]},
+   {l:"Pay half. December will handle the rest", fx:{cash:-A(85), home:3}, r:"They accept. December is now a debt collection date."}]},
  {day:16, from:"Class of 2008", sub:"Secondary school alumni group", text:"Old students, we are renovating the school toilets. Every member abroad should drop ₦100,000. Your name will be on the plaque!",
   choices:[
    {l:"Send the ₦100,000 for the toilet plaque", fx:{cash:-A(70), home:6, peace:2}, r:"Your name is on a plaque outside the boys' toilet. Your old principal calls to say thank you, then asks about his nephew's visa."},
@@ -414,7 +414,7 @@ const contribution = () => { const c = C(); return [
 ][pickV('C',5)]; };
 
 const farm = () => { const c = C(); return [
- {day:21, from:c.farmer, sub:`Farm manager · ${c.home}`, text:`Good evening boss. The cold weather killed 300 birds. We need ${M(A(400))} to restock before Christmas.`,
+ {day:21, from:c.farmer, sub:`Farm manager · ${c.home}`, text:`Good evening boss. The cold weather killed 300 birds. We need ${M(A(400))} to restock before the festive season.`,
   choices:[
    {l:`Send the ${M(A(400))}. Rest in peace, cold chickens`, fx:{cash:-A(400)}, set:{farm:'sent'}, r:`You later remember that it was 31°C in ${c.home} that week.`},
    {l:"Ask for the vet report. And proof of death", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"He sends a photo of ten birds and a feed receipt from 2024. You ask more questions, and he goes quiet."},
@@ -627,7 +627,7 @@ const UK = () => [
  sibling(),
  {day:14, from:C().aunty, sub:`Family elder · ${C().home}`, text:"So how far? Have you found someone serious in that UK? You know you are not getting younger o.",
   choices:[
-   {l:"Go to the Nigerian fellowship and scout", fx:{peace:3, home:5, future:3}, set:{spouse:'looked'}, r: S.gender==='man' ? "Everyone is lovely. Every single woman you meet is engaged, married, or \"not ready for anything serious\"." : "Everyone is lovely. Every single man you meet is married, engaged, or \"focusing on himself\"."},
+   {l:"Go to the Nigerian community meet-up and scout", fx:{peace:3, home:5, future:3}, set:{spouse:'looked'}, r: S.gender==='man' ? "Everyone is lovely. Every single woman you meet is engaged, married, or \"not ready for anything serious\"." : "Everyone is lovely. Every single man you meet is married, engaged, or \"focusing on himself\"."},
    {l: P()==='scholar' ? "Tell her you are focusing on your PhD" : STU() ? "Tell her you are focusing on your studies" : "Tell her you are focusing on your career", fx:{home:-4, peace:4, future:4}, r:"She replies with a voice note that is four minutes long. You do not play it."},
    {l:"Join a dating app. What could go wrong?", fx:{peace:-4, home:4}, r:`Your first match lives in ${T()==='Birmingham'?'Manchester':'Birmingham'} and wants to know your salary before your name.`}]},
  {day:15, auto:'pay1'},
@@ -653,7 +653,7 @@ const CA = () => [
  {day:1, text:`${soldLine()}${({work:`Your permanent residence came through, so you land in ${T()} with ${M(S.start)}, a winter jacket from Balogun market, and a Nigerian passport.`,scholar:`You land in ${T()} on a full scholarship with ${M(S.start)}, a winter jacket from Balogun market, and a stipend that everybody at home has already budgeted.`,partial:`You land in ${T()} with half your tuition covered, ${M(S.start)}, and a winter jacket from Balogun market. The other half of the fees is on you.`,study:`Your study permit came through, so you land in ${T()} with ${M(S.start)}, part of your tuition paid, and a winter jacket from Balogun market.`})[P()]} Everybody back home says Canada is the new America. Everybody here says, "Welcome, it gets colder."`,
   choices:[
    {l:`Rent a basement apartment, ${M(RENT())} a month`, fx:{cash:-RENT(), peace:4, future:5}, set:{stay:'basement'}, r:"Your window is at ground level. You can see the feet of everyone who walks past, and soon you will see snow piled against the glass."},
-   {l:"Stay with a church family. 5am prayers included", fx:{peace:-6, home:3}, set:{stay:'host'}, r:"They are kind and generous. They also wake up at 5am for prayer, and so do you now."},
+   {l:"Stay with a family from the community. 5am prayers included", fx:{peace:-6, home:3}, set:{stay:'host'}, r:"They are kind and generous. They also wake up at 5am for prayer, and so do you now."},
    {l:`Airbnb for two weeks, ${M(Math.round(900*MULT[L.cost]))}`, fx:{cash:-Math.round(900*MULT[L.cost]), peace:-3}, set:{stay:'airbnb'}, r:"Two weeks of someone else's furniture and a long list of house rules taped to the fridge."}]},
  mummyThanks(),
  {day:4, text:`You get your SIN, open a bank account, and walk into a phone shop. The cheapest decent plan costs more than your entire data budget in ${O()} for a year.`,
@@ -822,7 +822,7 @@ function autoEvent(kind){
       if(f.job==='warehouse'){ text = "Second paycheck, $1,100. Your body has stopped asking questions."; fx = {cash:1100, peace:-3}; }
       else if(f.job==='care'){ text = "Second paycheck, $900. The old man gives you a $50 tip and calls you his favourite."; fx = {cash:950, peace:3}; }
       else if(f.job==='campus'){ text = "Second campus paycheck, $620. Your supervisor asks if you can cover extra hours during exams."; fx = {cash:620, future:2}; }
-      else { text = "A Nigerian uncle from church refers you. You land a contract role in your field with a $1,600 advance. US experience, finally."; fx = {cash:1600, future:18, peace:6}; }
+      else { text = "A Nigerian uncle from the community association refers you. You land a contract role in your field with a $1,600 advance. US experience, finally."; fx = {cash:1600, future:18, peace:6}; }
       if(P()==='scholar'){ text += " Your assistantship stipend also lands, $1,800."; fx.cash += 1800; }
       if(P()==='partial'){ text += " Your partial stipend lands too, $900."; fx.cash += 900; }
       if(f.stay==='cousin'){ text += ` ${C().cousin}'s husband asks if you will "contribute to bills". $300.`; fx.cash -= 300; }
@@ -1118,7 +1118,7 @@ function receipts(){
   if(f.fees==='plan') out.push("You turned a scary deadline into three instalments.");
   if(f.stipendHome) out.push("Part of your stipend went home. Your fridge held three eggs and a lemon.");
   if(SOLD()) out.push("You sold everything to come. There was no plan B, so plan A had to work.");
-  if(f.spouse==='looked') out.push(S.gender==='man' ? "Every Nigerian woman at the fellowship was engaged or not ready for anything serious." : "Every Nigerian man at the fellowship was married or focusing on himself.");
+  if(f.spouse==='looked') out.push(S.gender==='man' ? "Every Nigerian woman at the community meet-up was engaged or not ready for anything serious." : "Every Nigerian man at the community meet-up was married or focusing on himself.");
   if(f.network && R.key==='ca') out.push("An owambe at minus 20 got you your first real job lead.");
   if(f.coat==='none') out.push("Naija blood was not enough for the cold.");
   return out.slice(0,4);
