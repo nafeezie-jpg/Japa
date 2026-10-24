@@ -130,6 +130,35 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .how dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
 .how dt{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700;padding-top:2px}
 .how dd{margin:0}
+.art{display:flex;justify-content:center;background:var(--bubble);border-radius:14px;padding:6px 0}
+.art svg{width:100%;max-width:240px;height:auto;display:block}
+.f-ink{fill:var(--ink)} .f-paper{fill:var(--card)} .f-green{fill:var(--green)} .f-gold{fill:var(--gold)} .f-goldlight{fill:color-mix(in srgb,var(--gold) 70%,#fff)} .f-line{fill:var(--line)} .f-bad{fill:var(--bad)}
+.s-gold{stroke:var(--gold)} .s-green{stroke:var(--green)} .s-ink{stroke:var(--ink)} .s-line{stroke:var(--muted)} .s-paper{stroke:var(--card)}
+.a-shake{animation:shake 1.2s ease-in-out infinite;transform-origin:80px 45px}
+.a-pulse{animation:pulse 1.2s ease-in-out infinite}
+.a-land{animation:land 1.6s cubic-bezier(.2,.8,.2,1) both}
+.a-drop1{animation:drop .6s ease-out both}.a-drop2{animation:drop .6s .15s ease-out both}.a-drop3{animation:drop .6s .3s ease-out both}
+.a-bob{animation:bob 1.6s ease-in-out infinite}
+.a-fall{animation:fall 1.4s linear infinite}
+.a-spin{animation:spin 12s linear infinite}
+.a-steam{animation:pulse 1.8s ease-in-out infinite}
+.a-road{animation:road .8s linear infinite}
+@keyframes shake{0%,60%,100%{transform:rotate(0)}65%{transform:rotate(-8deg)}70%{transform:rotate(8deg)}75%{transform:rotate(-6deg)}80%{transform:rotate(6deg)}85%{transform:rotate(0)}}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes land{from{transform:translate(-70px,-30px) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes drop{from{transform:translateY(-30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes fall{from{transform:translateY(-14px);opacity:0}30%{opacity:1}to{transform:translateY(8px);opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes road{to{stroke-dashoffset:-24}}
+.stat.up b{animation:statup .9s ease}
+.stat.down b{animation:statdown .7s ease}
+@keyframes statup{0%{transform:scale(1)}30%{transform:scale(1.25);color:var(--gold)}100%{transform:scale(1)}}
+@keyframes statdown{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.choice{transition:border-color .15s,transform .12s,background .15s}
+.choice:hover{transform:translateX(3px);background:var(--bubble)}
+.cardwrap img{width:100%;border-radius:14px;display:block;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+@media (prefers-reduced-motion:reduce){.art *{animation:none!important}.stat.up b,.stat.down b{animation:none}}
 .foot{font-size:13px;color:var(--muted);text-align:center}
 .fade{animation:fade .35s ease both}
 @keyframes fade{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -222,7 +251,8 @@ const ROUTES = {
 
 const ORIGIN_LIST = [["Abia","Aba"],["Adamawa","Yola","YOL"],["Akwa Ibom","Uyo","QUO"],["Anambra","Onitsha"],["Bauchi","Bauchi","BCU"],["Bayelsa","Yenagoa"],["Benue","Makurdi","MDI"],["Borno","Maiduguri","MIU"],["Cross River","Calabar","CBQ"],["Delta","Asaba","ABB"],["Ebonyi","Abakaliki"],["Edo","Benin City","BNI"],["Ekiti","Ado-Ekiti"],["Enugu","Enugu","ENU"],["FCT","Abuja","ABV"],["Gombe","Gombe","GMO"],["Imo","Owerri","QOW"],["Jigawa","Dutse"],["Kaduna","Kaduna","KAD"],["Kano","Kano","KAN"],["Katsina","Katsina","DKA"],["Kebbi","Birnin Kebbi"],["Kogi","Lokoja"],["Kwara","Ilorin","ILR"],["Lagos","Lagos","LOS"],["Nasarawa","Lafia"],["Niger","Minna","MXJ"],["Ogun","Abeokuta"],["Ondo","Akure","AKR"],["Osun","Osogbo"],["Oyo","Ibadan","IBA"],["Plateau","Jos","JOS"],["Rivers","Port Harcourt","PHC"],["Sokoto","Sokoto","SKO"],["Taraba","Jalingo"],["Yobe","Damaturu"],["Zamfara","Gusau"]];
 const ORIGINS = Object.fromEntries(ORIGIN_LIST.map(([st,city,code])=>[city, code || city.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()]));
-let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work", sold:false};
+let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work", sold:false, gender:"woman"};
+let shown = null;
 const O = () => S.origin;
 const MULT = [0, .75, 1, 1.35];
 const A = x => Math.round(x*R.k/5)*5;                 // shared amounts, converted to local currency
@@ -237,11 +267,13 @@ function begin(rk, pname, prev){
   R = ROUTES[rk]; L = places(rk).find(p=>p.name===pname);
   // trail now holds every place before this landing
   const culture = prev ? prev.culture : pick.culture;
+  const gender = prev ? prev.gender : pick.gender;
   const path = prev ? 'work' : (pathOptions(rk).some(o=>o[0]===pick.path) ? pick.path : 'work');
   const sold = prev ? !!prev.sold : !!pick.sold;
   const start = Math.round(ROUTES[rk].start * PATHS[path].mult * (sold?1.4:1) / 50) * 50;
-  S = prev ? {cash:start, start, path, sold, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture}
-           : {cash:start, start, path, sold, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture};
+  S = prev ? {cash:start, start, path, sold, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture, gender}
+           : {cash:start, start, path, sold, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture, gender};
+  shown = null;
   history = [];
   idx = nextIndex(0); phase = 'scene';
 }
@@ -278,118 +310,118 @@ const cap = t => t[0].toUpperCase()+t.slice(1);
 const mummyThanks = () => { const c = C(); return [
  {day:3, from:c.mum, sub:`${c.home} · 6:42am`, text:`${c.greet}! Thank God you landed safely, ${c.endear}. The family is doing a small celebration for your safe arrival. Your uncle said you should send something. Everybody will be there.`,
   choices:[
-   {l:`Send ${M(A(200))}`, fx:{cash:-A(200), home:12}, r:`${c.mum} sends six voice notes of prayer, and your uncle announces your name at the gathering. You have not seen a paycheck yet.`},
-   {l:`Send ${M(A(50))} and a long voice note`, fx:{cash:-A(50), home:4, peace:2}, r:`${c.bless} Your uncle says nothing, which is louder.`},
-   {l:"Tell her the truth. No work yet.", fx:{home:-8, peace:6}, r:`There is a long silence on the line. Then she says, "${c.ok}. We will pray." You feel lighter and guilty at the same time.`}]},
+   {l:`Send ${M(A(200))}. You can eat next month`, fx:{cash:-A(200), home:12}, r:`${c.mum} sends six voice notes of prayer, and your uncle announces your name at the gathering. You have not seen a paycheck yet.`},
+   {l:`Send ${M(A(50))} and a very long voice note`, fx:{cash:-A(50), home:4, peace:2}, r:`${c.bless} Your uncle says nothing, which is louder.`},
+   {l:"Tell her the truth. Abroad is not paying yet", fx:{home:-8, peace:6}, r:`There is a long silence on the line. Then she says, "${c.ok}. We will pray." You feel lighter and guilty at the same time.`}]},
  {day:3, from:c.mum, sub:`${c.home} · 6:10am`, text:`${cap(c.endear)}, the generator in the family house has finally packed up. Your uncles met yesterday and agreed that the person abroad should buy the new one.`,
   choices:[
-   {l:`Send ${M(A(300))} for a new generator`, fx:{cash:-A(300), home:12}, r:"The whole compound has light again. Your uncles now call you \"our person abroad\" in every sentence."},
-   {l:"Offer to pay half if the uncles pay half", fx:{cash:-A(150), home:4, future:2}, r:"The uncles agree, then go quiet. You end up paying the other half too, just more slowly."},
-   {l:"Suggest they look into solar instead", fx:{home:-4, peace:2, future:3}, r:`${c.mum} says, "${c.exclaim} So you have become an engineer abroad?" Two weeks later, your cousin asks you for the solar link.`}]},
+   {l:`Buy the generator. Light for everyone except you`, fx:{cash:-A(300), home:12}, r:"The whole compound has light again. Your uncles now call you \"our person abroad\" in every sentence."},
+   {l:"Offer half if the uncles pay half. Watch them vanish", fx:{cash:-A(150), home:4, future:2}, r:"The uncles agree, then go quiet. You end up paying the other half too, just more slowly."},
+   {l:"Suggest solar like the engineer you are not", fx:{home:-4, peace:2, future:3}, r:`${c.mum} says, "${c.exclaim} So you have become an engineer abroad?" Two weeks later, your cousin asks you for the solar link.`}]},
  {day:3, from:c.mum, sub:`${c.home} · 9:25pm`, text:"Your cousin's naming ceremony is this Saturday. I have told everybody you are abroad now, so they are expecting something special from you.",
   choices:[
-   {l:`Send ${M(A(150))} and ask them to film it`, fx:{cash:-A(150), home:10}, r:"The video arrives. The MC announces your name three times and adds a zero to the amount each time."},
-   {l:"Send a heartfelt voice note for the baby", fx:{home:-2, peace:3}, r:`Your voice note plays at the ceremony. ${c.mum} says it was "very sweet," which is how she describes things that did not include money.`},
-   {l:`Send ${M(A(40))} and promise more later`, fx:{cash:-A(40), home:3}, r:"Your cousin says thank you. Your aunty asks your mother how much \"later\" is."}]},
+   {l:`Send ${M(A(150))} and demand video evidence`, fx:{cash:-A(150), home:10}, r:"The video arrives. The MC announces your name three times and adds a zero to the amount each time."},
+   {l:"Send the baby a voice note. Babies love voice notes", fx:{home:-2, peace:3}, r:`Your voice note plays at the ceremony. ${c.mum} says it was "very sweet," which is how she describes things that did not include money.`},
+   {l:`Send ${M(A(40))} and say "more is coming"`, fx:{cash:-A(40), home:3}, r:"Your cousin says thank you. Your aunty asks your mother how much \"later\" is."}]},
  {day:3, from:c.mum, sub:`${c.home} · 4:50pm`, text:`${c.wow} Your uncle says he is coming to visit you abroad next month. He has never left ${c.home}. He needs you to send money for his visa fee and write him an invitation letter.`,
   choices:[
-   {l:`Send ${M(A(250))} for the visa fee`, fx:{cash:-A(250), home:8, peace:-4}, r:"He books the appointment and starts telling people he is relocating. He has not been approved yet."},
-   {l:"Explain how the visa process really works", fx:{home:-3, peace:2, future:2}, r:"You send a long message with links. He replies with a thumbs up and asks if you can just \"talk to them for me\"."},
-   {l:"Say your house is too small for visitors", fx:{home:-6, peace:4}, r:"He says he can sleep on the floor. He has slept on the floor in Lagos traffic before."}]},
+   {l:`Fund Uncle's visa dream with ${M(A(250))}`, fx:{cash:-A(250), home:8, peace:-4}, r:"He books the appointment and starts telling people he is relocating. He has not been approved yet."},
+   {l:"Explain the visa process. All 47 steps", fx:{home:-3, peace:2, future:2}, r:"You send a long message with links. He replies with a thumbs up and asks if you can just \"talk to them for me\"."},
+   {l:"Say your house is the size of a wardrobe. Because it is", fx:{home:-6, peace:4}, r:"He says he can sleep on the floor. He has slept on the floor in Lagos traffic before."}]},
  {day:3, from:c.mum, sub:`${c.home} · 7:30pm`, text:`${c.please}, send me a new iPhone. This my phone is not showing your face well on video call. I want to see my child clearly.`,
   choices:[
-   {l:`Buy her the phone for ${M(A(900))}`, fx:{cash:-A(900), home:14, peace:2}, r:"She video calls you the next morning at 5am, just to test the camera. The picture is very clear. So are her questions about when you are getting married."},
-   {l:`Send a good mid-range phone for ${M(A(250))}`, fx:{cash:-A(250), home:6}, r:"She likes it, but tells everyone it is \"almost an iPhone\"."},
-   {l:"Tell her the problem is the network, not the phone", fx:{home:-4, peace:3}, r:`"${c.exclaim} So it is the network that is not sending money too?" she asks.`}]}
+   {l:`Buy the iPhone for ${M(A(900))}. Rent can wait`, fx:{cash:-A(900), home:14, peace:2}, r:"She video calls you the next morning at 5am, just to test the camera. The picture is very clear. So are her questions about when you are getting married."},
+   {l:`Send a "nearly iPhone" for ${M(A(250))}`, fx:{cash:-A(250), home:6}, r:"She likes it, but tells everyone it is \"almost an iPhone\"."},
+   {l:"Blame the network. It is always the network", fx:{home:-4, peace:3}, r:`"${c.exclaim} So it is the network that is not sending money too?" she asks.`}]}
 ][pickV('A',5)]; };
 
 const sibling = () => { const c = C(); return [
  {day:12, from:c.sib, sub:`Your brother · ${c.home}`, text:`${c.please}, our building don reach roofing o. We need ${M(A(1500))} for zinc and carpenter. Send am before Friday so the price no go up.`,
   choices:[
-   {l:`Send the ${M(A(1500))}`, fx:{cash:-A(1500), home:10}, set:{sibling:'sent'}, r:`${c.sib} sends three thumbs up and a heart. Then nothing for four days.`},
-   {l:"Ask for a video call from the site", fx:{home:-3}, set:{sibling:'video'}, r:"He says network is bad at the site and sends a photo instead. The photo has a watermark from a website."},
-   {l:`Pay a neutral person ${M(A(40))} to check`, fx:{cash:-A(40), home:-6, future:5}, set:{sibling:'checked'}, r:`Your old classmate visits. The walls stop at window level, so no roof is needed yet. You just saved ${M(A(1460))}.`}]},
+   {l:`Send the ${M(A(1500))}. Who needs food?`, fx:{cash:-A(1500), home:10}, set:{sibling:'sent'}, r:`${c.sib} sends three thumbs up and a heart. Then nothing for four days.`},
+   {l:"Ask for a live video call. Not a screenshot", fx:{home:-3}, set:{sibling:'video'}, r:"He says network is bad at the site and sends a photo instead. The photo has a watermark from a website."},
+   {l:`Pay someone neutral ${M(A(40))} to go and look`, fx:{cash:-A(40), home:-6, future:5}, set:{sibling:'checked'}, r:`Your old classmate visits. The walls stop at window level, so no roof is needed yet. You just saved ${M(A(1460))}.`}]},
  {day:12, from:c.sib, sub:`Your brother · ${c.home}`, text:`I wan start POS business for junction. I just need ${M(A(800))} for the machine, the shop, and small float. I go pay you back from profit, ${c.swear}.`,
   choices:[
-   {l:`Send the ${M(A(800))}`, fx:{cash:-A(800), home:10}, set:{sibling:'sent'}, r:`${c.sib} sends a photo of a POS machine with a bow on it. You do not see the shop yet.`},
-   {l:"Ask him for a simple business plan first", fx:{home:-3, future:2}, set:{sibling:'video'}, r:"He sends a voice note that says, \"The plan is to make money.\" You ask for numbers. He says you have changed."},
-   {l:`Pay a friend ${M(A(30))} to visit the shop`, fx:{cash:-A(30), home:-6, future:5}, set:{sibling:'checked'}, r:`Your friend visits. There is no shop yet, but there is a very good spot by the junction. You send money for the machine only and save ${M(A(500))}.`}]},
+   {l:`Send the ${M(A(800))}. Invest in "the plan"`, fx:{cash:-A(800), home:10}, set:{sibling:'sent'}, r:`${c.sib} sends a photo of a POS machine with a bow on it. You do not see the shop yet.`},
+   {l:"Ask for a business plan. Even a small one", fx:{home:-3, future:2}, set:{sibling:'video'}, r:"He sends a voice note that says, \"The plan is to make money.\" You ask for numbers. He says you have changed."},
+   {l:`Pay a friend ${M(A(30))} to find this shop`, fx:{cash:-A(30), home:-6, future:5}, set:{sibling:'checked'}, r:`Your friend visits. There is no shop yet, but there is a very good spot by the junction. You send money for the machine only and save ${M(A(500))}.`}]},
  {day:12, from:c.sib, sub:`Your brother · ${c.home}`, text:`Land dey sell for cheap for ${c.home}. Plots dey go fast. If you send ${M(A(2000))} this week, I go secure am for you before another person buy am.`,
   choices:[
-   {l:`Send the ${M(A(2000))}`, fx:{cash:-A(2000), home:10}, set:{sibling:'sent'}, r:`${c.sib} says, "You don become landlord!" You ask for the documents. He says they are "processing."`},
-   {l:"Ask for the survey plan and documents", fx:{home:-3}, set:{sibling:'video'}, r:"He sends a blurry photo of a paper with a stamp. The stamp says \"Original\" in three different fonts."},
-   {l:`Pay a lawyer ${M(A(60))} to verify the land`, fx:{cash:-A(60), home:-6, future:6}, set:{sibling:'checked'}, r:`The lawyer finds the same plot has been sold to three people already. You keep your ${M(A(2000))} and your sanity.`}]},
+   {l:`Send the ${M(A(2000))}. Landlord loading`, fx:{cash:-A(2000), home:10}, set:{sibling:'sent'}, r:`${c.sib} says, "You don become landlord!" You ask for the documents. He says they are "processing."`},
+   {l:"Ask for the survey plan. Original, please", fx:{home:-3}, set:{sibling:'video'}, r:"He sends a blurry photo of a paper with a stamp. The stamp says \"Original\" in three different fonts."},
+   {l:`Pay a lawyer ${M(A(60))} before you own one third of nothing`, fx:{cash:-A(60), home:-6, future:6}, set:{sibling:'checked'}, r:`The lawyer finds the same plot has been sold to three people already. You keep your ${M(A(2000))} and your sanity.`}]},
  {day:12, from:c.sib, sub:`Your brother · ${c.home}`, text:`${c.please}, I wan japa too. The agent say if I pay ${M(A(700))} now, he go process everything. IELTS, visa, all. Na guarantee.`,
   choices:[
-   {l:`Send the ${M(A(700))} to the agent`, fx:{cash:-A(700), home:10}, set:{sibling:'sent'}, r:`${c.sib} is so happy he cries on the phone. The agent sends a receipt written on an exercise book page.`},
-   {l:"Ask for the agent's licence and office address", fx:{home:-3, future:2}, set:{sibling:'video'}, r:"The agent sends a photo of a signboard. The signboard is leaning on a wall, not attached to anything."},
-   {l:`Pay the IELTS fee straight to the test centre`, fx:{cash:-A(250), home:-2, future:6}, set:{sibling:'checked'}, r:`You pay the exam centre directly and send ${c.sib} the official guide. If anyone japas next, it will be the real way.`}]},
+   {l:`Send ${M(A(700))} to "the agent". What could go wrong?`, fx:{cash:-A(700), home:10}, set:{sibling:'sent'}, r:`${c.sib} is so happy he cries on the phone. The agent sends a receipt written on an exercise book page.`},
+   {l:"Ask for the agent's licence and real address", fx:{home:-3, future:2}, set:{sibling:'video'}, r:"The agent sends a photo of a signboard. The signboard is leaning on a wall, not attached to anything."},
+   {l:`Pay the exam centre directly. No middlemen`, fx:{cash:-A(250), home:-2, future:6}, set:{sibling:'checked'}, r:`You pay the exam centre directly and send ${c.sib} the official guide. If anyone japas next, it will be the real way.`}]},
  {day:12, from:c.sib, sub:`Your brother · ${c.home}`, text:`Buy me Corolla make I start Uber. I go send you returns every week. Just ${M(A(2500))}. E go pay for itself in six months.`,
   choices:[
-   {l:`Send the ${M(A(2500))}`, fx:{cash:-A(2500), home:12}, set:{sibling:'sent'}, r:`${c.sib} posts the car with the caption "God did". The first weekly return is "next week".`},
-   {l:"Ask for the car papers and the seller's details", fx:{home:-3}, set:{sibling:'video'}, r:"He sends a photo of the steering wheel and says that is the important part."},
-   {l:`Pay a mechanic ${M(A(40))} to inspect the car`, fx:{cash:-A(40), home:-5, future:6}, set:{sibling:'checked'}, r:"The mechanic says the \"2020 Corolla\" is a 2004 with a new face. You keep your money and ask for a better deal."}]}
+   {l:`Send the ${M(A(2500))}. Uber mogul in the family`, fx:{cash:-A(2500), home:12}, set:{sibling:'sent'}, r:`${c.sib} posts the car with the caption "God did". The first weekly return is "next week".`},
+   {l:"Ask for the car papers. All of them", fx:{home:-3}, set:{sibling:'video'}, r:"He sends a photo of the steering wheel and says that is the important part."},
+   {l:`Pay a mechanic ${M(A(40))} to tell you the truth`, fx:{cash:-A(40), home:-5, future:6}, set:{sibling:'checked'}, r:"The mechanic says the \"2020 Corolla\" is a 2004 with a new face. You keep your money and ask for a better deal."}]}
 ][pickV('B',5)]; };
 
 const contribution = () => { const c = C(); return [
  {day:16, from:c.mum, sub:`${c.home} · 7:05am`, text:"Your aunty's daughter is getting married next month. The family has put you down for ₦200,000. I already told them you said yes.",
   choices:[
-   {l:"Send the full ₦200,000", fx:{cash:-A(135), home:8}, r:"Your name is read out at the family meeting. Applause, apparently."},
-   {l:"Promise to send it next week", fx:{home:2}, set:{promise:true}, r:`${c.mum} says, "Next week is not far." It sounds like a warning.`},
-   {l:"Switch off your phone", fx:{home:-12, peace:4}, r:"You get 23 missed calls. Two are from numbers you don't know, and one is the bride."},
-   {l:"Send ₦5,000 and pray", fx:{cash:-A(4), home:-4}, r:"The family WhatsApp group goes quiet. Someone posts a sticker of a man laughing."}]},
+   {l:"Send the full ₦200,000 and cry quietly", fx:{cash:-A(135), home:8}, r:"Your name is read out at the family meeting. Applause, apparently."},
+   {l:"Promise \"next week\". Buy yourself time", fx:{home:2}, set:{promise:true}, r:`${c.mum} says, "Next week is not far." It sounds like a warning.`},
+   {l:"Switch off your phone and enter witness protection", fx:{home:-12, peace:4}, r:"You get 23 missed calls. Two are from numbers you don't know, and one is the bride."},
+   {l:"Send ₦5,000 and pray they don't check", fx:{cash:-A(4), home:-4}, r:"The family WhatsApp group goes quiet. Someone posts a sticker of a man laughing."}]},
  {day:16, from:c.aunty, sub:`Family elder · ${c.home}`, text:`Our elder in ${c.home} has passed on, may his soul rest. The family has shared the burial levy, and your portion is ₦300,000. Those of you abroad are paying in full.`,
   choices:[
-   {l:"Pay the full ₦300,000", fx:{cash:-A(200), home:10}, r:"Your name is on the programme as a chief sponsor. You did not know there was a programme."},
-   {l:"Promise to send it next week", fx:{home:2}, set:{promise:true}, r:`${c.aunty} says, "We have written your name already." That is not reassuring.`},
-   {l:"Ask why abroad people pay double", fx:{home:-10, peace:5}, r:"The question is screenshotted and shared in three family groups before you finish your tea."},
-   {l:"Send ₦20,000 and condolences", fx:{cash:-A(14), home:-4}, r:`${c.aunty} replies, "Thank you." Just that. With a full stop.`}]},
+   {l:"Pay the full ₦300,000. Respect the elders", fx:{cash:-A(200), home:10}, r:"Your name is on the programme as a chief sponsor. You did not know there was a programme."},
+   {l:"Promise \"next week\". Buy yourself time", fx:{home:2}, set:{promise:true}, r:`${c.aunty} says, "We have written your name already." That is not reassuring.`},
+   {l:"Ask why abroad people pay double. Brave", fx:{home:-10, peace:5}, r:"The question is screenshotted and shared in three family groups before you finish your tea."},
+   {l:"Send ₦20,000 and very sincere condolences", fx:{cash:-A(14), home:-4}, r:`${c.aunty} replies, "Thank you." Just that. With a full stop.`}]},
  {day:16, from:c.cousin, sub:"Your cousin", text:`${c.wow} My wedding aso ebi is ₦150,000. You must buy it, sew it, wear it, and send me a picture so I can post it. Everybody in the family is doing it, even the ones abroad.`,
   choices:[
-   {l:"Buy the aso ebi and send pictures", fx:{cash:-A(100), home:8, peace:2}, r:"You take the picture in your tiny kitchen with the best lighting available. It gets 46 likes and one comment asking if you have added weight."},
-   {l:"Promise to send it next week", fx:{home:2}, set:{promise:true}, r:`${c.cousin} replies with a heart and a calendar emoji.`},
-   {l:"Say you will celebrate in spirit", fx:{home:-8, peace:4}, r:"Your cousin says spirit does not wear aso ebi."},
-   {l:"Send ₦10,000 as a gift instead", fx:{cash:-A(7), home:-2}, r:"She says thank you and asks if you can at least wear red that day."}]},
+   {l:"Buy the aso ebi and pose in your kitchen", fx:{cash:-A(100), home:8, peace:2}, r:"You take the picture in your tiny kitchen with the best lighting available. It gets 46 likes and one comment asking if you have added weight."},
+   {l:"Promise \"next week\". Buy yourself time", fx:{home:2}, set:{promise:true}, r:`${c.cousin} replies with a heart and a calendar emoji.`},
+   {l:"Celebrate in spirit. Spirit is free", fx:{home:-8, peace:4}, r:"Your cousin says spirit does not wear aso ebi."},
+   {l:"Send ₦10,000 and wear red at home", fx:{cash:-A(7), home:-2}, r:"She says thank you and asks if you can at least wear red that day."}]},
  {day:16, from:"Town union", sub:`${c.home} development association`, text:"Greetings to our sons and daughters in the diaspora. Each diaspora member is levied ₦250,000 for the new town hall. Names of defaulters will be read at the end-of-year meeting.",
   choices:[
-   {l:"Pay the levy in full", fx:{cash:-A(170), home:8, future:2}, r:"Your name will be on the town hall wall. In very small letters, under the people who paid ₦1 million."},
-   {l:"Promise to send it next week", fx:{home:2}, set:{promise:true}, r:"The secretary replies, \"Noted with thanks.\" You feel noted."},
-   {l:"Ask to see the building plan first", fx:{home:-6, future:3}, r:"They send the plan. It is the same plan from 2015. The hall is still at foundation."},
-   {l:"Pay half and promise the rest at Christmas", fx:{cash:-A(85), home:3}, r:"They accept. Christmas is now a debt collection date."}]},
+   {l:"Pay in full. Get your name on the wall", fx:{cash:-A(170), home:8, future:2}, r:"Your name will be on the town hall wall. In very small letters, under the people who paid ₦1 million."},
+   {l:"Promise \"next week\". Buy yourself time", fx:{home:2}, set:{promise:true}, r:"The secretary replies, \"Noted with thanks.\" You feel noted."},
+   {l:"Ask to see the building plan. Since 2015", fx:{home:-6, future:3}, r:"They send the plan. It is the same plan from 2015. The hall is still at foundation."},
+   {l:"Pay half. Christmas will handle the rest", fx:{cash:-A(85), home:3}, r:"They accept. Christmas is now a debt collection date."}]},
  {day:16, from:"Class of 2008", sub:"Secondary school alumni group", text:"Old students, we are renovating the school toilets. Every member abroad should drop ₦100,000. Your name will be on the plaque!",
   choices:[
-   {l:"Send the ₦100,000", fx:{cash:-A(70), home:6, peace:2}, r:"Your name is on a plaque outside the boys' toilet. Your old principal calls to say thank you, then asks about his nephew's visa."},
-   {l:"Promise to send it next week", fx:{home:2}, set:{promise:true}, r:"The group admin tags you every morning for a week."},
-   {l:"Send ₦20,000 and a nice message", fx:{cash:-A(14), home:1}, r:"Your former class captain replies, \"Every little helps.\" He has never said anything little in his life."},
-   {l:"Leave the group quietly", fx:{home:-6, peace:6}, r:"Ten minutes later, three people message you privately to ask if you are okay."}]}
+   {l:"Send the ₦100,000 for the toilet plaque", fx:{cash:-A(70), home:6, peace:2}, r:"Your name is on a plaque outside the boys' toilet. Your old principal calls to say thank you, then asks about his nephew's visa."},
+   {l:"Promise \"next week\". Buy yourself time", fx:{home:2}, set:{promise:true}, r:"The group admin tags you every morning for a week."},
+   {l:"Send ₦20,000 and many motivational words", fx:{cash:-A(14), home:1}, r:"Your former class captain replies, \"Every little helps.\" He has never said anything little in his life."},
+   {l:"Leave the alumni group like a ninja", fx:{home:-6, peace:6}, r:"Ten minutes later, three people message you privately to ask if you are okay."}]}
 ][pickV('C',5)]; };
 
 const farm = () => { const c = C(); return [
  {day:21, from:c.farmer, sub:`Farm manager · ${c.home}`, text:`Good evening boss. The cold weather killed 300 birds. We need ${M(A(400))} to restock before Christmas.`,
   choices:[
-   {l:`Send the ${M(A(400))}`, fx:{cash:-A(400)}, set:{farm:'sent'}, r:`You later remember that it was 31°C in ${c.home} that week.`},
-   {l:"Ask for the vet report and photos", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"He sends a photo of ten birds and a feed receipt from 2024. You ask more questions, and he goes quiet."},
-   {l:"Ask your neighbour to count the birds", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:`Your neighbour counts 412 birds, very alive and very loud. ${c.farmer} says it was "a small mistake".`}]},
+   {l:`Send the ${M(A(400))}. Rest in peace, cold chickens`, fx:{cash:-A(400)}, set:{farm:'sent'}, r:`You later remember that it was 31°C in ${c.home} that week.`},
+   {l:"Ask for the vet report. And proof of death", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"He sends a photo of ten birds and a feed receipt from 2024. You ask more questions, and he goes quiet."},
+   {l:"Send your neighbour to count. Trust, but verify", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:`Your neighbour counts 412 birds, very alive and very loud. ${c.farmer} says it was "a small mistake".`}]},
  {day:21, from:c.farmer, sub:`Fish farm · ${c.home}`, text:`Good evening boss. Heavy flood washed 2,000 catfish out of the pond. We need ${M(A(350))} to restock.`,
   choices:[
-   {l:`Send the ${M(A(350))}`, fx:{cash:-A(350)}, set:{farm:'sent'}, r:"You check the weather app. It has not rained in that town for two weeks."},
-   {l:"Ask for photos of the flooded pond", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"He sends a photo of a dry pond and says the water has \"gone back\"."},
-   {l:"Ask your neighbour to check the pond", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:"Your neighbour says there was no flood. There was a party, and there was a lot of catfish pepper soup."}]},
+   {l:`Send the ${M(A(350))}. The fish deserve a second chance`, fx:{cash:-A(350)}, set:{farm:'sent'}, r:"You check the weather app. It has not rained in that town for two weeks."},
+   {l:"Ask for flood photos. Any flood will do", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"He sends a photo of a dry pond and says the water has \"gone back\"."},
+   {l:"Send your neighbour to see this famous flood", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:"Your neighbour says there was no flood. There was a party, and there was a lot of catfish pepper soup."}]},
  {day:21, from:c.farmer, sub:`Farm manager · ${c.home}`, text:`Good evening boss. The farm needs a new borehole before dry season. It is ${M(A(600))} for drilling and pump.`,
   choices:[
-   {l:`Send the ${M(A(600))}`, fx:{cash:-A(600)}, set:{farm:'sent'}, r:"He sends a photo of a borehole. It looks very similar to the one he sent last year."},
-   {l:"Ask for three quotes from drillers", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"All three quotes arrive in the same handwriting."},
-   {l:"Ask your neighbour to look at the farm", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:"Your neighbour reports that the farm already has a working borehole, dug in 2023. It just needs a new tap."}]},
+   {l:`Send the ${M(A(600))}. Water is life, apparently twice`, fx:{cash:-A(600)}, set:{farm:'sent'}, r:"He sends a photo of a borehole. It looks very similar to the one he sent last year."},
+   {l:"Ask for three quotes like a serious oga", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"All three quotes arrive in the same handwriting."},
+   {l:"Send your neighbour on a surprise visit", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:"Your neighbour reports that the farm already has a working borehole, dug in 2023. It just needs a new tap."}]},
  {day:21, from:c.farmer, sub:`Goat farm · ${c.home}`, text:`Good evening boss. The goats have caught a disease. We need ${M(A(300))} for vaccine and the vet, urgently.`,
   choices:[
-   {l:`Send the ${M(A(300))}`, fx:{cash:-A(300)}, set:{farm:'sent'}, r:"He sends a photo of a goat looking healthy and slightly offended."},
-   {l:"Ask for the vet's name and number", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"The vet's number belongs to a woman who sells akara. She has never seen your goats."},
-   {l:"Ask your neighbour to count the goats", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:"Your neighbour counts every goat. All present, all healthy, all loud. One of them ate his slippers."}]},
+   {l:`Send the ${M(A(300))}. Get well soon, goats`, fx:{cash:-A(300)}, set:{farm:'sent'}, r:"He sends a photo of a goat looking healthy and slightly offended."},
+   {l:"Ask for the vet's number. Let us call this vet", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"The vet's number belongs to a woman who sells akara. She has never seen your goats."},
+   {l:"Send your neighbour to take goat attendance", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:"Your neighbour counts every goat. All present, all healthy, all loud. One of them ate his slippers."}]},
  {day:21, from:c.farmer, sub:`Snail farm · ${c.home}`, text:`Good evening boss. The snails escaped at night. We need ${M(A(250))} to restock the pen.`,
   choices:[
-   {l:`Send the ${M(A(250))}`, fx:{cash:-A(250)}, set:{farm:'sent'}, r:"You send it, then spend the evening wondering how fast snails can run."},
-   {l:"Ask how snails escaped", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"He says, \"Boss, these ones are special. Very fast.\""},
-   {l:"Ask your neighbour to check the pen", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:"Your neighbour confirms that snails do not run. They are exactly where you left them."}]}
+   {l:`Send the ${M(A(250))}. Fast snails are expensive`, fx:{cash:-A(250)}, set:{farm:'sent'}, r:"You send it, then spend the evening wondering how fast snails can run."},
+   {l:"Ask how exactly snails escape", fx:{home:-2, future:3}, set:{farm:'asked'}, r:"He says, \"Boss, these ones are special. Very fast.\""},
+   {l:"Send your neighbour to supervise the snails", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:"Your neighbour confirms that snails do not run. They are exactly where you left them."}]}
 ][pickV('D',5)]; };
 
 const promise = () => ({day:22, when: s => s.f.promise, from:C().mum, sub:`${C().home} · 6:30am`, text:"It is next week.",
@@ -400,75 +432,75 @@ const promise = () => ({day:22, when: s => s.f.promise, from:C().mum, sub:`${C()
 const friend = () => { const c = C(); return [
  {day:28, from:c.friend, sub:"Secondary school friend", text:`${c.please}, how you take japa? Help me with proof of funds. Just show ${M(A(10000))} in your account for one week, I go return am.`,
   choices:[
-   {l:"Let him use your account", fx:{peace:-10, home:2, future:-10}, r:"This is how people get flagged. You lie awake checking your banking app every hour."},
-   {l:"Send him the guide you used", fx:{future:3, home:3}, r:"You send a long voice note with every step. He says, \"I owe you.\" He does."},
-   {l:"Leave him on read", fx:{home:-4, peace:2}, r:"He posts a status about fake friends abroad. You know it is for you."}]},
+   {l:"Lend him your account. What is a fraud alert?", fx:{peace:-10, home:2, future:-10}, r:"This is how people get flagged. You lie awake checking your banking app every hour."},
+   {l:"Send him the real guide. Free of charge", fx:{future:3, home:3}, r:"You send a long voice note with every step. He says, \"I owe you.\" He does."},
+   {l:"Leave him on read. Abroad is busy", fx:{home:-4, peace:2}, r:"He posts a status about fake friends abroad. You know it is for you."}]},
  {day:28, from:c.friend, sub:"Secondary school friend", text:"Buy me the latest iPhone over there. I go pay you in naira at good rate when you come home.",
   choices:[
-   {l:`Buy it for ${M(A(1100))}`, fx:{cash:-A(1100), home:4, peace:-6}, r:"He receives the phone and posts it immediately. The naira payment is \"coming\"."},
-   {l:"Send him the link so he can buy it himself", fx:{home:-2, peace:3, future:2}, r:"He says the link does not work in Nigeria. You both know it does."},
-   {l:"Tell him phones are expensive here too", fx:{home:-4, peace:2}, r:"He does not believe you. Nobody at home believes anything is expensive abroad."}]},
+   {l:`Buy the iPhone for ${M(A(1100))}. "Good rate" loading`, fx:{cash:-A(1100), home:4, peace:-6}, r:"He receives the phone and posts it immediately. The naira payment is \"coming\"."},
+   {l:"Send him the link. He has fingers", fx:{home:-2, peace:3, future:2}, r:"He says the link does not work in Nigeria. You both know it does."},
+   {l:"Say phones are expensive here too. He will not believe you", fx:{home:-4, peace:2}, r:"He does not believe you. Nobody at home believes anything is expensive abroad."}]},
  {day:28, from:c.friend, sub:"Secondary school friend", text:`Your old laptop, ${c.please} send am give me. Even if e slow, I fit use am for my online class.`,
   choices:[
-   {l:`Ship it to him for ${M(A(80))}`, fx:{cash:-A(80), home:5, future:2}, r:"He sends a video of himself in his first online class. It is genuinely the best thing you have seen all month."},
-   {l:"Sell it and send him the money", fx:{cash:A(60), home:2}, r:"You sell it for more than expected and send him half. He buys a better one locally."},
-   {l:"Say you still need it", fx:{home:-3, peace:2}, r:"He understands. Then he asks for your old phone instead."}]},
+   {l:`Ship the laptop for ${M(A(80))}. Education is key`, fx:{cash:-A(80), home:5, future:2}, r:"He sends a video of himself in his first online class. It is genuinely the best thing you have seen all month."},
+   {l:"Sell it and send him half. Capitalism", fx:{cash:A(60), home:2}, r:"You sell it for more than expected and send him half. He buys a better one locally."},
+   {l:"Say you still need it. Because you do", fx:{home:-3, peace:2}, r:"He understands. Then he asks for your old phone instead."}]},
  {day:28, from:c.friend, sub:"Secondary school friend", text:`My birthday is next week and I am doing a giveaway on Instagram. Just send ${M(A(100))}, I will tag you as "my person abroad".`,
   choices:[
-   {l:`Send the ${M(A(100))}`, fx:{cash:-A(100), home:4}, r:"He tags you as \"my billionaire abroad\". Four strangers send you message requests asking for help with rent."},
-   {l:"Send a birthday voice note instead", fx:{home:-1, peace:3}, r:"He plays it on his story with sad music. Somehow you are the villain."},
-   {l:"Ask him to do a giveaway for you", fx:{home:-2, peace:5}, r:"He sends a laughing emoji and nothing else. That is fair."}]},
+   {l:`Send the ${M(A(100))}. Become "my person abroad"`, fx:{cash:-A(100), home:4}, r:"He tags you as \"my billionaire abroad\". Four strangers send you message requests asking for help with rent."},
+   {l:"Send a birthday voice note. Priceless, literally", fx:{home:-1, peace:3}, r:"He plays it on his story with sad music. Somehow you are the villain."},
+   {l:"Ask him to do a giveaway for you instead", fx:{home:-2, peace:5}, r:"He sends a laughing emoji and nothing else. That is fair."}]},
  {day:28, from:c.friend, sub:"Secondary school friend", text:`${c.wow} You no even call me since you travel. Abroad don change you? Send me something make I know say you still remember me.`,
   choices:[
-   {l:`Send ${M(A(60))} to keep the peace`, fx:{cash:-A(60), home:4}, r:"He replies, \"My person! I knew you were still real.\" The price of being real is now 60."},
-   {l:"Call him for an hour instead", fx:{home:4, peace:4}, r:"You laugh about secondary school until 2am. He does not mention money once. You feel richer anyway."},
-   {l:"Explain that abroad has not changed your account", fx:{home:-3, peace:2}, r:"He says your account is just shy. You tell him your account is in therapy."}]}
+   {l:`Send ${M(A(60))}. Friendship tax`, fx:{cash:-A(60), home:4}, r:"He replies, \"My person! I knew you were still real.\" The price of being real is now 60."},
+   {l:"Call him for an hour. Talk is cheap, literally", fx:{home:4, peace:4}, r:"You laugh about secondary school until 2am. He does not mention money once. You feel richer anyway."},
+   {l:"Explain that abroad has not changed your account balance", fx:{home:-3, peace:2}, r:"He says your account is just shy. You tell him your account is in therapy."}]}
 ][pickV('E',5)]; };
 
 const familyGroup = () => { const c = C(); return [
  {day:13, from:"Family WhatsApp group", sub:`${c.aunty} posted`, text:`${c.exclaim} See our person abroad! Proud of you o! [A photo of you from your first week, standing beside a bus stop like it is the Eiffel Tower.]`,
   choices:[
    {l:"Reply \"Thank you all, I am grateful\"", fx:{home:6, peace:-2}, r:"Forty-seven people react. Then five private messages arrive, each starting with \"Hope you are good.\""},
-   {l:"Mute the group for one year", fx:{home:-3, peace:6}, r:"You see the mute icon and feel a peace that passes all understanding."},
-   {l:"Exit the group quietly", fx:{home:-8, peace:4}, r:`Someone adds you back within six minutes. ${c.aunty} asks if your phone has a virus.`}]},
+   {l:"Mute the group for one year. Inner peace", fx:{home:-3, peace:6}, r:"You see the mute icon and feel a peace that passes all understanding."},
+   {l:"Exit the group. Bold move", fx:{home:-8, peace:4}, r:`Someone adds you back within six minutes. ${c.aunty} asks if your phone has a virus.`}]},
  {day:13, from:"Family WhatsApp group", sub:"Uncle forwarded a voice note", text:"Forwarded many times: \"In abroad, government gives every new arrival a free house and a free car. Our people abroad are just hiding it.\"",
   choices:[
-   {l:"Correct him politely with facts", fx:{home:-2, peace:-2, future:2}, r:"He replies, \"So you are saying I am lying?\" The group takes sides. Your side is small."},
-   {l:"Send a laughing emoji and move on", fx:{peace:3}, r:"Your aunty sends the same voice note to you privately, just in case you missed it."},
+   {l:"Correct him with facts. In a family group", fx:{home:-2, peace:-2, future:2}, r:"He replies, \"So you are saying I am lying?\" The group takes sides. Your side is small."},
+   {l:"Send a laughing emoji and keep scrolling", fx:{peace:3}, r:"Your aunty sends the same voice note to you privately, just in case you missed it."},
    {l:"Say yes, and that yours is still processing", fx:{home:2, peace:4}, r:"Everyone congratulates you. Three people ask for the address of the free house."}]},
  {day:13, from:"Family WhatsApp group", sub:`${c.cousin} posted`, text:"Big thanks to my sponsor abroad for agreeing to pay for my master's in the UK next year!! God bless you. [You never agreed to this.]",
   choices:[
-   {l:"Correct it publicly", fx:{home:-10, peace:4}, r:"The group goes silent for two days. It is the quietest the group has ever been."},
-   {l:"Call her privately to talk", fx:{home:2, peace:2, future:2}, r:`She says, "${c.ok}, but you will at least help with the application fee?" You end the call ${M(A(80))} lighter.`},
+   {l:"Correct it publicly. Choose chaos", fx:{home:-10, peace:4}, r:"The group goes silent for two days. It is the quietest the group has ever been."},
+   {l:"Call her privately. Peace talks", fx:{home:2, peace:2, future:2}, r:`She says, "${c.ok}, but you will at least help with the application fee?" You end the call ${M(A(80))} lighter.`},
    {l:"Reply with a vague \"We will talk\"", fx:{home:4, peace:-6}, r:"Her mother screenshots it and shares it as a signed contract."}]},
  {day:13, from:"Family WhatsApp group", sub:"December planning committee", text:`The family homecoming is set for ${c.party}. Budget assigned: drinks and small chops, ₦300,000, to the people abroad.`,
   choices:[
-   {l:"Pay for the drinks", fx:{cash:-A(200), home:10}, r:"You are listed as \"Chief Drinks Sponsor\". You will not be there to drink any of it."},
-   {l:"Offer to pay for small chops only", fx:{cash:-A(80), home:4}, r:"They accept, then quietly add puff-puff, samosa, spring rolls, and asun to small chops."},
-   {l:"Say you are not coming home in December", fx:{home:-6, peace:4}, r:"Your phone rings eleven times. Not coming is not the same as not paying, apparently."}]}
+   {l:"Pay for drinks you will never drink", fx:{cash:-A(200), home:10}, r:"You are listed as \"Chief Drinks Sponsor\". You will not be there to drink any of it."},
+   {l:"Offer small chops only. Small is in the name", fx:{cash:-A(80), home:4}, r:"They accept, then quietly add puff-puff, samosa, spring rolls, and asun to small chops."},
+   {l:"Announce you are not coming home in December", fx:{home:-6, peace:4}, r:"Your phone rings eleven times. Not coming is not the same as not paying, apparently."}]}
 ][pickV('F',4)]; };
 
 const mishap = () => { const c = C(), workplace = STU() ? 'class' : 'work'; return [
  {day:26, text:"Your bank blocks your card for \"suspicious activity\" right after you send money home. You are at the checkout with a full basket.",
   choices:[
-   {l:"Call the bank from the shop", fx:{peace:-4}, r:"Forty minutes on hold with jazz music. Then a man named Kevin asks if you have been to Nigeria recently."},
-   {l:"Leave the basket and go home", fx:{peace:-6, cash:A(40)}, r:"You save money by accident. Dinner is bread and determination."},
-   {l:"Ask a Nigerian friend to pay and refund later", fx:{home:2, peace:2}, r:"Your friend pays and says, \"No wahala, it happens to all of us.\" It really does."}]},
+   {l:"Call the bank while the whole queue watches", fx:{peace:-4}, r:"Forty minutes on hold with jazz music. Then a man named Kevin asks if you have been to Nigeria recently."},
+   {l:"Abandon the basket. Diet starts today", fx:{peace:-6, cash:A(40)}, r:"You save money by accident. Dinner is bread and determination."},
+   {l:"Call a Nigerian friend. We have all been there", fx:{home:2, peace:2}, r:"Your friend pays and says, \"No wahala, it happens to all of us.\" It really does."}]},
  {day:26, text:`The nearest Nigerian hair salon or barber in ${T()} is 90 minutes away and charges like a lawyer.`,
   choices:[
-   {l:`Make the trip and pay ${M(A(120))}`, fx:{cash:-A(120), peace:8}, r:"Four hours, three Nollywood films, and one aunty telling everyone's business. You leave looking like money."},
-   {l:"Watch YouTube and do it yourself", fx:{peace:-6}, r:"It looks fine from the front. You avoid mirrors with a back view for two weeks."},
-   {l:"Wear a cap until further notice", fx:{peace:-2, cash:-A(10)}, r:"You become the person who always wears a cap. It is now your personality."}]},
+   {l:`Travel 90 minutes and pay ${M(A(120))}. Beauty is pain`, fx:{cash:-A(120), peace:8}, r:"Four hours, three Nollywood films, and one aunty telling everyone's business. You leave looking like money."},
+   {l:"Do it yourself with YouTube. How hard can it be?", fx:{peace:-6}, r:"It looks fine from the front. You avoid mirrors with a back view for two weeks."},
+   {l:"Wear a cap until further notice. Forever", fx:{peace:-2, cash:-A(10)}, r:"You become the person who always wears a cap. It is now your personality."}]},
  {day:26, text:`Someone at ${workplace} mispronounces your name for the third time this week, confidently, in front of everybody.`,
   choices:[
-   {l:"Correct them kindly again", fx:{peace:2, future:2}, r:"They try. It is closer. You accept progress."},
-   {l:"Give them an easy nickname", fx:{peace:3, home:-2}, r:`Your mother would be very disappointed. ${c.exclaim}`},
-   {l:"Mispronounce their name back, gently", fx:{peace:6}, r:"They get the message. By Friday, your name is perfect."}]},
+   {l:"Correct them. Again. Kindly. Again.", fx:{peace:2, future:2}, r:"They try. It is closer. You accept progress."},
+   {l:"Give them an easy nickname. Sorry, ancestors", fx:{peace:3, home:-2}, r:`Your mother would be very disappointed. ${c.exclaim}`},
+   {l:"Mispronounce their name back. Gently. Daily", fx:{peace:6}, r:"They get the message. By Friday, your name is perfect."}]},
  {day:26, text:`You are craving ${c.food}. The African shop in ${T()} has the ingredients, at prices that would make your mother faint.`,
   choices:[
-   {l:`Buy everything for ${M(A(70))}`, fx:{cash:-A(70), peace:10}, r:"The smell fills the whole building. A neighbour knocks to ask what it is. You do not share."},
-   {l:"Cook with what the supermarket has", fx:{peace:-3}, r:"Spinach is not ugu. Pasta is not anything. You eat it with your eyes closed."},
-   {l:"Host a potluck with Nigerians you have met", fx:{cash:-A(25), peace:8, home:2}, r:"Six people, nine pots, and two hours of arguing about whose jollof is best. It feels like home."}]}
+   {l:`Buy everything for ${M(A(70))}. Your soul needs it`, fx:{cash:-A(70), peace:10}, r:"The smell fills the whole building. A neighbour knocks to ask what it is. You do not share."},
+   {l:"Use supermarket spinach and pretend it is ugu", fx:{peace:-3}, r:"Spinach is not ugu. Pasta is not anything. You eat it with your eyes closed."},
+   {l:"Host a potluck and start a jollof war", fx:{cash:-A(25), peace:8, home:2}, r:"Six people, nine pots, and two hours of arguing about whose jollof is best. It feels like home."}]}
 ][pickV('G',4)]; };
 
 const doubt = (day, where, extra) => ({day, text: STU() ? `You sit in the library after a long day. Your lecturer still cannot pronounce your name, and your account balance is lower than your GPA. You start asking yourself why you came.` : `${where} You had staff in ${O()}. Today someone half your age told you the role needs "someone more entry level". You start asking yourself why you left.`,
@@ -491,47 +523,47 @@ const finalCall = () => ({day:30, from:C().mum, sub:"Video call", text:`Let me s
 const US = () => [
  {day:1, text:`${soldLine()}${({work:`You resign from a good job in ${O()} and land in ${T()} with ${M(S.start)}${SOLD()?'':', which is your ajo payout plus everything you sold before leaving,'} and a Nigerian passport.`,scholar:`You land in ${T()} on a full scholarship with a teaching assistantship. Your stipend starts next month, and everybody at home has already budgeted it. You have ${M(S.start)} until then.`,partial:`You land in ${T()} with a scholarship that covers half your tuition. The other half, and everything else, is on you. You have ${M(S.start)}.`,study:`You land in ${T()} on a student visa. Part of your tuition is paid, and your family has promised the rest "before the deadline". You have ${M(S.start)} for everything else.`})[P()]} Your cousin ${C().cousin} says you can stay with her until you find your feet. She has a husband, three children, and two bedrooms.`,
   choices:[
-   {l:`Stay with ${C().cousin}`, fx:{peace:-10}, set:{stay:'cousin'}, r:"You sleep on the couch. Her last born uses your back as a trampoline at 6am. Rent is free, but every plate you eat is counted in her eyes."},
+   {l:`Stay with ${C().cousin}. Free rent, zero privacy`, fx:{peace:-10}, set:{stay:'cousin'}, r:"You sleep on the couch. Her last born uses your back as a trampoline at 6am. Rent is free, but every plate you eat is counted in her eyes."},
    {l:`Pay four months' rent upfront, ${M(RENT()*4)}`, fx:{cash:-RENT()*4, peace:10, future:6}, set:{stay:'prepaid'}, r:"The landlord has never seen anyone pay four months upfront. Your room is small, but nobody can tell you to leave."},
    {l:`Cheap motel for now, ${M(Math.round(560*MULT[L.cost]))}`, fx:{cash:-Math.round(560*MULT[L.cost]), peace:-5}, set:{stay:'motel'}, r:"Two weeks at a motel off the highway. The heater rattles like a danfo, and you are paying money just to think."}]},
  {day:2, text:`In ${O()} you had a driver, a cleaner, and someone to stand in the bank queue for you. Here, the laundry is in the basement, the dishes are yours, and nobody is coming.`,
   choices:[
-   {l:"Roll up your sleeves and do it all", fx:{peace:-5, future:3}, r:"You wash, cook, clean, and carry. By evening your hands know things your degrees never taught them."},
-   {l:"Pay $40 for a laundry service", fx:{cash:-40, peace:3}, r:"Forty dollars to wash clothes. Your former house help earned less than that in a week."},
-   {l:"Call Mummy to complain", fx:{home:4, peace:2}, r:"She laughs and says, \"Abroad wan teach you work.\" She is not wrong."}]},
+   {l:"Do it all yourself. Welcome to abroad", fx:{peace:-5, future:3}, r:"You wash, cook, clean, and carry. By evening your hands know things your degrees never taught them."},
+   {l:"Pay $40 for laundry like royalty", fx:{cash:-40, peace:3}, r:"Forty dollars to wash clothes. Your former house help earned less than that in a week."},
+   {l:"Call Mummy to complain. She will laugh", fx:{home:4, peace:2}, r:"She laughs and says, \"Abroad wan teach you work.\" She is not wrong."}]},
  mummyThanks(),
  L.car
  ? {day:5, text:`${T()} without a car is a long walk and three buses. Everybody says the same thing. Get a car first, then a job.`,
     choices:[
      {l:"Spend $2,500 of your ajo money on a 2011 Corolla", fx:{cash:-2500, peace:10, future:8}, set:{car:'bought'}, r:"The ajo you contributed to for two years becomes a silver Corolla with 140,000 miles. It coughs in the morning, and you love it anyway."},
-     {l:"Take the bus and protect your savings", fx:{peace:-8}, set:{car:'bus'}, r:"Your savings stay untouched. You also spend two hours a day at bus stops learning patience."},
-     {l:"Uber everywhere until you decide", fx:{cash:-320, peace:2}, set:{car:'uber'}, r:"Three hundred and twenty dollars later, the drivers know you by name."}]}
+     {l:"Take the bus. Your savings say thank you", fx:{peace:-8}, set:{car:'bus'}, r:"Your savings stay untouched. You also spend two hours a day at bus stops learning patience."},
+     {l:"Uber everywhere like a visiting celebrity", fx:{cash:-320, peace:2}, set:{car:'uber'}, r:"Three hundred and twenty dollars later, the drivers know you by name."}]}
  : {day:5, text:`In ${T()} a car is more trouble than help. Parking alone costs more than your first rent in ${O()}.`,
     choices:[
-     {l:"Buy a monthly transit pass", fx:{cash:-130, peace:4, future:3}, set:{car:'transit'}, r:"You learn every train line in a week and start giving tourists directions."},
-     {l:"Walk everywhere and save money", fx:{peace:-6, future:2}, r:"Your legs are strong. Your shoes are finished."},
-     {l:"Keep your ajo money for emergencies", fx:{peace:3, future:2}, set:{car:'saved'}, r:"Two years of ajo sit in the bank as your safety net. You feel rich for about one day."}]},
+     {l:"Buy a transit pass. Become a train expert", fx:{cash:-130, peace:4, future:3}, set:{car:'transit'}, r:"You learn every train line in a week and start giving tourists directions."},
+     {l:"Walk everywhere. Free cardio", fx:{peace:-6, future:2}, r:"Your legs are strong. Your shoes are finished."},
+     {l:"Keep the ajo money for emergencies. There will be many", fx:{peace:3, future:2}, set:{car:'saved'}, r:"Two years of ajo sit in the bank as your safety net. You feel rich for about one day."}]},
  STU() ? {day:7, text:"Your student visa only allows on-campus work during term. The dining hall and the library are both hiring.",
   choices:[
-   {l:"Dining hall shifts", fx:{peace:-4}, set:{job:'campus'}, r:"You serve breakfast to students half your age. One of them tips you in compliments."},
-   {l:"Library assistant", fx:{peace:-2, future:4}, set:{job:'campus'}, r:"Quiet shifts, fewer hours, and a supervisor who lets you study at the desk."},
-   {l:"Take a cash job off campus", fx:{cash:600, peace:-12, future:-12}, set:{job:'campus', risky:true}, r:"The money helps. The fear of losing your visa follows you everywhere."}]} :
+   {l:"Dining hall shifts. Serve breakfast, skip yours", fx:{peace:-4}, set:{job:'campus'}, r:"You serve breakfast to students half your age. One of them tips you in compliments."},
+   {l:"Library assistant. Shh, I am working", fx:{peace:-2, future:4}, set:{job:'campus'}, r:"Quiet shifts, fewer hours, and a supervisor who lets you study at the desk."},
+   {l:"Take a cash job off campus. Risky business", fx:{cash:600, peace:-12, future:-12}, set:{job:'campus', risky:true}, r:"The money helps. The fear of losing your visa follows you everywhere."}]} :
  {day:7, text:`You apply for jobs with a first degree, a master's, and ten years in ${O()}. Every employer asks the same question. Do you have US experience?`,
   choices:[
    {l:"Take a warehouse night shift, $17 an hour", fx:{peace:-6, future:-2}, set:{job:'warehouse'}, r:"You start Monday at 10pm. Your supervisor is 23 and calls you \"buddy\"."},
-   {l:"Home care job through Aunty's connect", fx:{peace:-2, home:3}, set:{job:'care'}, r:"Aunty says you must thank her properly. The client is a sweet old man who calls you \"Nigeria\"."},
-   {l:"Get your degrees evaluated and hold out", fx:{cash:-200, future:12, peace:-4}, set:{job:'field'}, r:"A credential evaluation costs $200 and says your master's equals a US master's. Employers still want US experience."}]},
+   {l:"Home care job through Aunty's connect. Thank her properly", fx:{peace:-2, home:3}, set:{job:'care'}, r:"Aunty says you must thank her properly. The client is a sweet old man who calls you \"Nigeria\"."},
+   {l:"Get your degrees evaluated and hold out for your field", fx:{cash:-200, future:12, peace:-4}, set:{job:'field'}, r:"A credential evaluation costs $200 and says your master's equals a US master's. Employers still want US experience."}]},
  L.cold>0
  ? {day:9, text: L.cold===2 ? `Winter arrives in ${T()} like it has a personal problem with you. Your ${O()} jacket was always decorative.` : `The first cold front reaches ${T()}. Your ${O()} jacket was always decorative, and now everybody knows.`,
     choices:[
-     {l:"Buy a proper coat for $180", fx:{cash:-180, peace:8}, set:{coat:'proper'}, r:"Warm at last. You walk slowly past the bus stop, just to enjoy it."},
-     {l:"Thrift store coat for $25", fx:{cash:-25, peace:4}, set:{coat:'thrift'}, r:"It smells a little like someone's grandmother. It is warm, and you wear it with pride."},
+     {l:"Buy a proper coat for $180. Survival first", fx:{cash:-180, peace:8}, set:{coat:'proper'}, r:"Warm at last. You walk slowly past the bus stop, just to enjoy it."},
+     {l:"Thrift store coat for $25. \"Vintage\"", fx:{cash:-25, peace:4}, set:{coat:'thrift'}, r:"It smells a little like someone's grandmother. It is warm, and you wear it with pride."},
      {l:"Naija blood dey my body", fx:{peace: L.cold===2?-20:-15}, set:{coat:'none'}, r:"You catch a cold that lasts eleven days and learn the word \"layering\" the hard way."}]}
  : {day:9, text:`Winter in ${T()} is gentle. The electricity bill is not. The AC has been running since the day you landed.`,
     choices:[
-     {l:"Pay the $160 bill and keep the AC on", fx:{cash:-160, peace:6}, r:"Cool air and peace of mind. Your NEPA trauma is slowly healing."},
-     {l:"Switch to a standing fan", fx:{peace:-6, cash:-40}, r:`It feels exactly like ${O()} during a power cut. Except you are paying for it.`},
-     {l:"Open the windows like home", fx:{peace:-3}, r:"A neighbour asks if you are okay. In America, open windows mean something is wrong."}]},
+     {l:"Pay $160 and keep the AC blasting", fx:{cash:-160, peace:6}, r:"Cool air and peace of mind. Your NEPA trauma is slowly healing."},
+     {l:"Switch to a standing fan. Nostalgia", fx:{peace:-6, cash:-40}, r:`It feels exactly like ${O()} during a power cut. Except you are paying for it.`},
+     {l:"Open the windows like you are in Lagos", fx:{peace:-3}, r:"A neighbour asks if you are okay. In America, open windows mean something is wrong."}]},
  sibling(),
  {day:15, auto:'pay1'},
  contribution(),
@@ -552,47 +584,47 @@ const UK = () => [
  mummyThanks(),
  {day:4, text:`You step off the pavement and look left, the way you have done your whole life. A car comes from the right and the driver says something very British through the window.`,
   choices:[
-   {l:"Follow the locals and cross when they cross", fx:{peace:3, future:2}, r:"You attach yourself to an old lady with a shopping trolley. She crosses safely, and so do you."},
-   {l:"Press the button and wait for the green man", fx:{peace:2}, r:"You wait four minutes on an empty road while everyone else crosses. But you are alive."},
+   {l:"Follow an old lady across. She knows things", fx:{peace:3, future:2}, r:"You attach yourself to an old lady with a shopping trolley. She crosses safely, and so do you."},
+   {l:"Wait for the green man like a model citizen", fx:{peace:2}, r:"You wait four minutes on an empty road while everyone else crosses. But you are alive."},
    {l:`Use your ${O()} instincts and run`, fx:{peace:-10}, r:"A cyclist, a bus, and a taxi all honk at once. You make it across, shaking and slightly proud."}]},
  {day:6, text:`There is no car, the bus costs money every single time, and the supermarket in ${T()} is 25 minutes away on foot. In the rain.`,
   choices:[
-   {l:"Walk everywhere and save money", fx:{peace:-6, future:2}, r:"You walk 14,000 steps a day. Your legs are strong, your shoes are finished, and your umbrella died on day two."},
-   {l:"Buy a second-hand bike for £60", fx:{cash:-60, peace:3, future:3}, r:"You buy a bike. Then you remember the cars come from the wrong side, and you push it more than you ride it."},
-   {l:"Take the bus and stop counting", fx:{cash:-40, peace:4}, r:"Forty pounds in a week on buses. But you arrive dry."}]},
+   {l:"Walk everywhere. Free cardio", fx:{peace:-6, future:2}, r:"You walk 14,000 steps a day. Your legs are strong, your shoes are finished, and your umbrella died on day two."},
+   {l:"Buy a £60 bike. Brave, on these roads", fx:{cash:-60, peace:3, future:3}, r:"You buy a bike. Then you remember the cars come from the wrong side, and you push it more than you ride it."},
+   {l:"Take the bus and stop counting. Ignorance is bliss", fx:{cash:-40, peace:4}, r:"Forty pounds in a week on buses. But you arrive dry."}]},
  P()==='care' ? {day:8, text:"You report to the care home that sponsored you. There are no shifts for you, and the manager stops answering your calls. Your friend checks the company address on the internet. It is a barbershop.",
   choices:[
-   {l:"Report it and look for a licensed sponsor", fx:{peace:-6, future:8}, set:{cos:'reported', job:'none'}, r:"You fill in the report with shaking hands. A support worker tells you this has happened to thousands of people, and that it is not your fault."},
-   {l:"Take cash-in-hand shifts a friend offers", fx:{peace:-15, future:-15}, set:{cos:'cash', job:'cash'}, r:"A shop pays you in envelopes. It keeps you fed, but it puts everything you came for at risk."},
-   {l:"Go to a Nigerian community group for help", fx:{peace:6, home:4, future:4}, set:{cos:'community', job:'none'}, r:"They have seen this before. Someone hands you jollof in a takeaway pack and a phone number for a free immigration adviser."}]} :
+   {l:"Report the fake agent and find a real sponsor", fx:{peace:-6, future:8}, set:{cos:'reported', job:'none'}, r:"You fill in the report with shaking hands. A support worker tells you this has happened to thousands of people, and that it is not your fault."},
+   {l:"Take cash-in-hand shifts and hope for the best", fx:{peace:-15, future:-15}, set:{cos:'cash', job:'cash'}, r:"A shop pays you in envelopes. It keeps you fed, but it puts everything you came for at risk."},
+   {l:"Find the Nigerian community. They have seen it all", fx:{peace:6, home:4, future:4}, set:{cos:'community', job:'none'}, r:"They have seen this before. Someone hands you jollof in a takeaway pack and a phone number for a free immigration adviser."}]} :
  P()==='work' ? {day:8, text:"Your induction at the new job is going well, but your first salary is a month away and your savings are already nervous.",
   choices:[
-   {l:"Borrow from a friend until payday", fx:{cash:A(400), home:2, peace:-3}, set:{job:'salaried', borrowed:true}, r:"Your friend sends it immediately and says, \"No wahala.\" You add one more name to the list of people you owe dinner."},
-   {l:"Live on rice and walk everywhere", fx:{peace:-6, future:3}, set:{job:'salaried'}, r:"Rice with stew, rice with egg, rice with more rice. You reach payday thinner and prouder."},
-   {l:"Ask your employer for a salary advance", fx:{cash:A(500), peace:2, future:-2}, set:{job:'salaried', advance:true}, r:"HR approves it with a smile and a form. Your first payslip will be smaller, but you can sleep tonight."}]} :
+   {l:"Borrow from a friend. Owe them forever", fx:{cash:A(400), home:2, peace:-3}, set:{job:'salaried', borrowed:true}, r:"Your friend sends it immediately and says, \"No wahala.\" You add one more name to the list of people you owe dinner."},
+   {l:"Rice, rice, and more rice until payday", fx:{peace:-6, future:3}, set:{job:'salaried'}, r:"Rice with stew, rice with egg, rice with more rice. You reach payday thinner and prouder."},
+   {l:"Ask HR for an advance. Bold", fx:{cash:A(500), peace:2, future:-2}, set:{job:'salaried', advance:true}, r:"HR approves it with a smile and a form. Your first payslip will be smaller, but you can sleep tonight."}]} :
  {day:8, text: P()==='scholar' ? "Your PhD stipend has not arrived yet, and the university says it will take \"a few more weeks\". You need work, but your visa limits your hours during term." : "The rest of your tuition is due soon, and your visa limits your hours during term. You need work that fits around lectures.",
   choices:[
-   {l:"Pick up care home shifts", fx:{peace:-5, home:2}, set:{job:'care'}, r:"Twenty hours a week of lifting, feeding, and smiling. The residents love your accent and ask if you know the King."},
-   {l:"Become a research assistant on campus", fx:{future:10, peace:-2}, set:{job:'field'}, r:"Less money, but your supervisor notices you. That matters more than you know yet."},
-   {l:"Work a warehouse shift at the weekend", fx:{peace:-7}, set:{job:'warehouse'}, r:"Saturdays and Sundays packing boxes. Your reading happens on the bus."}]},
+   {l:"Care home shifts. Your back will never forgive you", fx:{peace:-5, home:2}, set:{job:'care'}, r:"Twenty hours a week of lifting, feeding, and smiling. The residents love your accent and ask if you know the King."},
+   {l:"Research assistant. Less money, more glory", fx:{future:10, peace:-2}, set:{job:'field'}, r:"Less money, but your supervisor notices you. That matters more than you know yet."},
+   {l:"Weekend warehouse shifts. Goodbye, Saturdays", fx:{peace:-7}, set:{job:'warehouse'}, r:"Saturdays and Sundays packing boxes. Your reading happens on the bus."}]},
  sibling(),
  {day:14, from:C().aunty, sub:`Family elder · ${C().home}`, text:"So how far? Have you found someone serious in that UK? You know you are not getting younger o.",
   choices:[
-   {l:"Go to the Nigerian fellowship this Sunday", fx:{peace:3, home:5, future:3}, set:{spouse:'looked'}, r:"Everyone is lovely. Every single man you meet is married, engaged, or \"focusing on himself\"."},
+   {l:"Go to the Nigerian fellowship and scout", fx:{peace:3, home:5, future:3}, set:{spouse:'looked'}, r: S.gender==='man' ? "Everyone is lovely. Every single woman you meet is engaged, married, or \"not ready for anything serious\"." : "Everyone is lovely. Every single man you meet is married, engaged, or \"focusing on himself\"."},
    {l: P()==='scholar' ? "Tell her you are focusing on your PhD" : STU() ? "Tell her you are focusing on your studies" : "Tell her you are focusing on your career", fx:{home:-4, peace:4, future:4}, r:"She replies with a voice note that is four minutes long. You do not play it."},
-   {l:"Tell her you will join a dating app", fx:{peace:-4, home:4}, r:`Your first match lives in ${T()==='Birmingham'?'Manchester':'Birmingham'} and wants to know your salary before your name.`}]},
+   {l:"Join a dating app. What could go wrong?", fx:{peace:-4, home:4}, r:`Your first match lives in ${T()==='Birmingham'?'Manchester':'Birmingham'} and wants to know your salary before your name.`}]},
  {day:15, auto:'pay1'},
  contribution(),
  {day:18, text:"Your cousin's wedding is in Lagos next month. You chose the UK so flights home would be easy. Easy turns out to mean £780.",
   choices:[
-   {l:"Book the flight and go", fx:{cash:-780, home:10, peace:4}, r:"You dance until 3am, eat three plates of jollof, and come back broke and very happy."},
-   {l:"Send money instead", fx:{cash:-120, home:4}, r:"Your aunty says they understand. Nobody in your family has ever understood anything."},
-   {l:"Join on video call", fx:{home:-3, peace:2}, r:"The network drops during the vows. You watch the rest on someone's Instagram story."}]},
+   {l:"Book the flight. Jollof is worth it", fx:{cash:-780, home:10, peace:4}, r:"You dance until 3am, eat three plates of jollof, and come back broke and very happy."},
+   {l:"Send money instead. Present in spirit and cash", fx:{cash:-120, home:4}, r:"Your aunty says they understand. Nobody in your family has ever understood anything."},
+   {l:"Join on video call. Network permitting", fx:{home:-3, peace:2}, r:"The network drops during the vows. You watch the rest on someone's Instagram story."}]},
  {day:20, text:`It has rained in ${T()} for nineteen of your first twenty days. The houses are small, the sky is grey, and you start asking yourself whether you have made the same mistake twice.`,
   choices:[
-   {l:"Buy vitamin D and a proper raincoat", fx:{cash:-60, peace:8}, r:"The raincoat changes everything. The vitamin D might be doing something too."},
-   {l:"Complain in the Nigerians-in-UK group chat", fx:{peace:5, home:2}, r:"Three hundred people reply that they also have not seen the sun since August. You feel less alone."},
-   {l:"Write down why you came", fx:{peace:6, future:8}, r:`Closer to home, ${STU() ? "a degree" : "a real career"}, a fresh start. You stick the note on your tiny wall, which is the only wall you have.`}]},
+   {l:"Buy vitamin D. The sun is not coming", fx:{cash:-60, peace:8}, r:"The raincoat changes everything. The vitamin D might be doing something too."},
+   {l:"Complain in the Nigerians-in-UK group chat. Free therapy", fx:{peace:5, home:2}, r:"Three hundred people reply that they also have not seen the sun since August. You feel less alone."},
+   {l:"Write down why you came. Stick it on the damp wall", fx:{peace:6, future:8}, r:`Closer to home, ${STU() ? "a degree" : "a real career"}, a fresh start. You stick the note on your tiny wall, which is the only wall you have.`}]},
  farm(), promise(),
  {day:25, auto:'pay2'},
  {day:27, when: s => s.f.sibling==='sent' || s.f.sibling==='video', auto:'roof'},
@@ -604,13 +636,13 @@ const CA = () => [
  {day:1, text:`${soldLine()}${({work:`Your permanent residence came through, so you land in ${T()} with ${M(S.start)}, a winter jacket from Balogun market, and a Nigerian passport.`,scholar:`You land in ${T()} on a full scholarship with ${M(S.start)}, a winter jacket from Balogun market, and a stipend that everybody at home has already budgeted.`,partial:`You land in ${T()} with half your tuition covered, ${M(S.start)}, and a winter jacket from Balogun market. The other half of the fees is on you.`,study:`Your study permit came through, so you land in ${T()} with ${M(S.start)}, part of your tuition paid, and a winter jacket from Balogun market.`})[P()]} Everybody back home says Canada is the new America. Everybody here says, "Welcome, it gets colder."`,
   choices:[
    {l:`Rent a basement apartment, ${M(RENT())} a month`, fx:{cash:-RENT(), peace:4, future:5}, set:{stay:'basement'}, r:"Your window is at ground level. You can see the feet of everyone who walks past, and soon you will see snow piled against the glass."},
-   {l:"Stay with a family from church", fx:{peace:-6, home:3}, set:{stay:'host'}, r:"They are kind and generous. They also wake up at 5am for prayer, and so do you now."},
+   {l:"Stay with a church family. 5am prayers included", fx:{peace:-6, home:3}, set:{stay:'host'}, r:"They are kind and generous. They also wake up at 5am for prayer, and so do you now."},
    {l:`Airbnb for two weeks, ${M(Math.round(900*MULT[L.cost]))}`, fx:{cash:-Math.round(900*MULT[L.cost]), peace:-3}, set:{stay:'airbnb'}, r:"Two weeks of someone else's furniture and a long list of house rules taped to the fridge."}]},
  mummyThanks(),
  {day:4, text:`You get your SIN, open a bank account, and walk into a phone shop. The cheapest decent plan costs more than your entire data budget in ${O()} for a year.`,
   choices:[
-   {l:"Pay C$75 a month for a proper plan", fx:{cash:-75, peace:4}, r:"You have data everywhere. Your bank account felt that."},
-   {l:"Get a cheap prepaid plan", fx:{cash:-30, peace:-2}, r:"It works well, except in buildings, basements, and anywhere you actually are."},
+   {l:"Pay C$75 a month for data. A tax on breathing", fx:{cash:-75, peace:4}, r:"You have data everywhere. Your bank account felt that."},
+   {l:"Cheap prepaid plan. Works everywhere except where you are", fx:{cash:-30, peace:-2}, r:"It works well, except in buildings, basements, and anywhere you actually are."},
    {l:"Survive on library and Tim Hortons Wi-Fi", fx:{peace:-6, future:2}, r:"You become a regular. The staff know your double-double before you order it."}]},
  {day:6, text: L.cold===2 ? `The forecast for ${T()} says minus 18, feels like minus 27. Your Balogun jacket was designed for Lagos harmattan.` : `${T()} is milder than the rest of Canada. It is also wet in a way that gets into your bones.`,
   choices:[
@@ -619,33 +651,33 @@ const CA = () => [
    {l:"Naija blood dey my body", fx:{peace: L.cold===2?-22:-12}, set:{coat:'none'}, r:"Your nostrils freeze when you breathe. A stranger hands you their scarf and says, \"Oh honey, no.\""}]},
  STU() ? {day:8, text:"Your study permit limits how many hours you can work during term. Tuition is not waiting for anybody.",
   choices:[
-   {l:"Campus job at the student centre", fx:{peace:-3, future:3}, set:{job:'campus'}, r:"You make lattes between lectures and learn every professor's coffee order."},
-   {l:"Part-time warehouse shifts within your limit", fx:{peace:-6}, set:{job:'warehouse'}, r:"Weekend shifts with three other international students. You all fall asleep on the same bus."},
-   {l:"Work extra hours off the books", fx:{cash:A(600), peace:-12, future:-12}, set:{job:'campus', risky:true}, r:"The money helps. The fear of losing your permit follows you everywhere."}]} :
+   {l:"Make lattes at the student centre", fx:{peace:-3, future:3}, set:{job:'campus'}, r:"You make lattes between lectures and learn every professor's coffee order."},
+   {l:"Warehouse shifts. Legal, but painful", fx:{peace:-6}, set:{job:'warehouse'}, r:"Weekend shifts with three other international students. You all fall asleep on the same bus."},
+   {l:"Work off the books. Risky business", fx:{cash:A(600), peace:-12, future:-12}, set:{job:'campus', risky:true}, r:"The money helps. The fear of losing your permit follows you everywhere."}]} :
  {day:8, text:"Every interview ends with the same sentence. \"We are looking for someone with Canadian experience.\" You ask how you get Canadian experience without a Canadian job. Nobody answers.",
   choices:[
-   {l:"Take a warehouse survival job", fx:{peace:-6, future:-2}, set:{job:'warehouse'}, r:"Twelve-hour shifts with three engineers and a former bank manager. Everybody is \"just doing this for now\"."},
-   {l:"Personal support worker shifts", fx:{peace:-3, home:3}, set:{job:'care'}, r:"Hard work, kind patients, and a coworker from Ibadan who adopts you immediately."},
-   {l:"Join a bridging program and volunteer", fx:{future:12, peace:-4, cash:-150}, set:{job:'field'}, r:"Unpaid hours and a C$150 course fee. But now your CV has a Canadian line on it."}]},
+   {l:"Warehouse survival job. Everybody there is an engineer", fx:{peace:-6, future:-2}, set:{job:'warehouse'}, r:"Twelve-hour shifts with three engineers and a former bank manager. Everybody is \"just doing this for now\"."},
+   {l:"PSW shifts. Hard work, kind people", fx:{peace:-3, home:3}, set:{job:'care'}, r:"Hard work, kind patients, and a coworker from Ibadan who adopts you immediately."},
+   {l:"Bridging program. Unpaid, but Canadian", fx:{future:12, peace:-4, cash:-150}, set:{job:'field'}, r:"Unpaid hours and a C$150 course fee. But now your CV has a Canadian line on it."}]},
  sibling(),
  L.car
  ? {day:14, text:`Your Nigerian driver's licence gets you a polite smile in ${T()}. You need to pass the local road test, in snow.`,
     choices:[
-     {l:"Pay for lessons and take the test", fx:{cash:-400, future:6, peace:-2}, set:{car:'licence'}, r:"Your instructor says you drive \"very confidently\". He does not mean it as a compliment. You pass on the second try."},
-     {l:"Buy a winter beater and drive carefully", fx:{cash:-1800, peace:4}, set:{car:'bought'}, r:"A 2009 Civic with four snow tires and a heater that only works on full blast."},
-     {l:"Stick to the bus for now", fx:{peace:-6}, r:"You wait at a bus stop at minus 20 and question every decision you have ever made."}]}
+     {l:"Pay for lessons and take the test. Maybe twice", fx:{cash:-400, future:6, peace:-2}, set:{car:'licence'}, r:"Your instructor says you drive \"very confidently\". He does not mean it as a compliment. You pass on the second try."},
+     {l:"Buy a winter beater. Heater stuck on full", fx:{cash:-1800, peace:4}, set:{car:'bought'}, r:"A 2009 Civic with four snow tires and a heater that only works on full blast."},
+     {l:"Wait for the bus at minus 20", fx:{peace:-6}, r:"You wait at a bus stop at minus 20 and question every decision you have ever made."}]}
  : {day:14, text:`In ${T()} the transit system is good, but the cold at the bus stop is personal.`,
     choices:[
-     {l:"Buy a monthly transit pass", fx:{cash:-155, peace:4, future:2}, r:"The train becomes your office, your library, and your nap room."},
-     {l:"Walk to save money", fx:{peace:-8}, r:"Two kilometres in the snow. Your toes file a formal complaint."},
-     {l:"Carpool with your coworker from Ibadan", fx:{cash:-60, peace:6, home:2}, r:"Afrobeats in the car at 6am. It feels like home on wheels."}]},
+     {l:"Buy a transit pass. Become a train expert", fx:{cash:-155, peace:4, future:2}, r:"The train becomes your office, your library, and your nap room."},
+     {l:"Walk in the snow. Toes optional", fx:{peace:-8}, r:"Two kilometres in the snow. Your toes file a formal complaint."},
+     {l:"Carpool with your Ibadan coworker. Afrobeats at 6am", fx:{cash:-60, peace:6, home:2}, r:"Afrobeats in the car at 6am. It feels like home on wheels."}]},
  {day:15, auto:'pay1'},
  contribution(),
  {day:18, from:"Chioma", sub:"Nigerian association · "+L.town, text:"Owambe this Saturday! Dress code is gold and green. Don't tell me it's too cold, everybody is coming.",
   choices:[
-   {l:"Go in full aso ebi over your parka", fx:{peace:8, home:3, future:4}, set:{network:true}, r:"Fifty Nigerians, jollof in steel trays, and a DJ who plays Wizkid until midnight. Someone offers you a job lead between the small chops and the cake."},
-   {l:"Stay home and save the money", fx:{peace:-3}, r:"You watch the party on Instagram stories from your basement. The jollof looks warm."},
-   {l:"Work an extra shift instead", fx:{cash:A(220), peace:-6}, r:"Time and a half for working Saturday. Your aso ebi stays in the bag."}]},
+   {l:"Wear aso ebi over your parka. Fashion", fx:{peace:8, home:3, future:4}, set:{network:true}, r:"Fifty Nigerians, jollof in steel trays, and a DJ who plays Wizkid until midnight. Someone offers you a job lead between the small chops and the cake."},
+   {l:"Stay home and watch it on Instagram", fx:{peace:-3}, r:"You watch the party on Instagram stories from your basement. The jollof looks warm."},
+   {l:"Work the extra shift. Time and a half", fx:{cash:A(220), peace:-6}, r:"Time and a half for working Saturday. Your aso ebi stays in the bag."}]},
  doubt(20, "You sit in your basement watching snow pile up against the window.", "You write them on the back of your PR card envelope. Opportunity, safety, and a future for your children."),
  farm(), promise(),
  {day:25, auto:'pay2'},
@@ -677,64 +709,64 @@ function pathScenes(){
       ? `Reminder: your scholarship covers half your tuition. The remaining ${M(FEES()/2)} is due in 14 days. Students who do not pay will be withdrawn from their programme.`
       : `Reminder: the outstanding balance on your tuition, ${M(FEES())}, is due in 14 days. Students who do not pay will be withdrawn from their programme.`,
       choices:[
-       {l:"Ask the family to raise the money", fx:{home:-4, peace:-4, future:10}, set:{fees:'family'}, r:"Your uncles hold a meeting. Somebody sells a plot. The money arrives in three instalments, each with a voice note reminding you what was sacrificed."},
-       {l:"Ask the school for a payment plan", fx:{peace:4, future:6}, set:{fees:'plan'}, r:"The international student office agrees to three instalments. It is not freedom, but it is breathing room."},
-       {l:"Ignore the email and keep working", fx:{peace:-8}, set:{fees:'pending'}, r:"The email becomes three emails, then a red banner on your student portal."}]});
+       {l:"Ask the family. Somebody's plot is about to go", fx:{home:-4, peace:-4, future:10}, set:{fees:'family'}, r:"Your uncles hold a meeting. Somebody sells a plot. The money arrives in three instalments, each with a voice note reminding you what was sacrificed."},
+       {l:"Beg for a payment plan, politely", fx:{peace:4, future:6}, set:{fees:'plan'}, r:"The international student office agrees to three instalments. It is not freedom, but it is breathing room."},
+       {l:"Ignore the email. Maybe it will go away", fx:{peace:-8}, set:{fees:'pending'}, r:"The email becomes three emails, then a red banner on your student portal."}]});
     out.push({day:24, when: s => s.f.fees==='pending', text:"Your student account is on hold. You cannot see your grades or register for next term, and your classmates are asking why you missed the group meeting.",
       choices:[
-       {l:"Go to the international student office", fx:{peace:3, future:8}, set:{fees:'plan'}, r:"The adviser has seen this many times. She sets up a plan, points you to a hardship fund, and tells you not to hide next time."},
-       {l:"Call home and tell them everything", fx:{home:-4, peace:6, future:6}, set:{fees:'family'}, r:`${c.mum} is quiet for a long time. Then she says, "We did not bring you this far to stop now." Your family starts a contribution.`},
-       {l:"Pause your studies for a term", fx:{peace:4, future:-12}, set:{fees:'paused'}, r:"You breathe again, even though you know pausing puts your visa and your plans at risk. You promise yourself it is only for now."}]});
+       {l:"Go to the international office and confess", fx:{peace:3, future:8}, set:{fees:'plan'}, r:"The adviser has seen this many times. She sets up a plan, points you to a hardship fund, and tells you not to hide next time."},
+       {l:"Call home and tell them everything. Brace yourself", fx:{home:-4, peace:6, future:6}, set:{fees:'family'}, r:`${c.mum} is quiet for a long time. Then she says, "We did not bring you this far to stop now." Your family starts a contribution.`},
+       {l:"Pause your studies. A \"strategic break\"", fx:{peace:4, future:-12}, set:{fees:'paused'}, r:"You breathe again, even though you know pausing puts your visa and your plans at risk. You promise yourself it is only for now."}]});
   }
   if(p==='scholar'){
     out.push({day:10, from:c.mum, sub:`${c.home} · 8:15pm`, text:`${End}, your younger brother's school fees are due. Since your scholarship money is coming every month, you can help, abi?`,
       choices:[
-       {l:`Send ${M(A(400))} from your stipend`, fx:{cash:-A(400), home:10, peace:-4}, set:{stipendHome:true}, r:"Your brother sends a photo in his school uniform. Your fridge has three eggs and a lemon."},
-       {l:`Send ${M(A(100))} and explain the stipend is tight`, fx:{cash:-A(100), home:2, peace:2}, r:"She says she understands. Then she asks your aunty to call and explain it again from her side."},
-       {l:"Explain that the scholarship barely covers rent", fx:{home:-8, peace:4}, r:"\"But they said it is a scholarship,\" she says. To her, the word means you are being paid to be rich."}]});
+       {l:`Send ${M(A(400))} from your stipend. Who needs groceries?`, fx:{cash:-A(400), home:10, peace:-4}, set:{stipendHome:true}, r:"Your brother sends a photo in his school uniform. Your fridge has three eggs and a lemon."},
+       {l:`Send ${M(A(100))} and explain what "stipend" means`, fx:{cash:-A(100), home:2, peace:2}, r:"She says she understands. Then she asks your aunty to call and explain it again from her side."},
+       {l:"Explain that scholarship does not mean rich", fx:{home:-8, peace:4}, r:"\"But they said it is a scholarship,\" she says. To her, the word means you are being paid to be rich."}]});
     out.push({day:24, text:"Your rent has gone up. Your stipend has not. The scholarship office says the amount is \"fixed for the duration of your award\".",
       choices:[
-       {l:"Apply to the department's hardship fund", fx:{cash:A(300), future:4, peace:3}, r:"A two-page form and a week of waiting. Then an email with good news and a polite request to keep it confidential."},
-       {l:"Move to a cheaper room farther away", fx:{cash:A(150), peace:-6}, r:"You save money and lose an hour a day to the bus. You read journal articles on the top deck."},
-       {l:"Pick up extra hours within your visa limit", fx:{cash:A(250), peace:-6, future:-2}, r:"Weekends disappear. So does your social life, which was mostly WhatsApp anyway."}]});
+       {l:"Apply to the hardship fund. You qualify", fx:{cash:A(300), future:4, peace:3}, r:"A two-page form and a week of waiting. Then an email with good news and a polite request to keep it confidential."},
+       {l:"Move farther away. The bus is your new home", fx:{cash:A(150), peace:-6}, r:"You save money and lose an hour a day to the bus. You read journal articles on the top deck."},
+       {l:"Work extra hours. Sleep is overrated", fx:{cash:A(250), peace:-6, future:-2}, r:"Weekends disappear. So does your social life, which was mostly WhatsApp anyway."}]});
   }
   if(p==='work'){
     const papers = {us:'green card', uk:'visa', ca:'PR card'}[R.key];
     out.push([
      {day:11, text:`You have a ${papers}, but no credit history. The apartment, the phone contract, and the car dealer all say the same thing in different words. "We cannot see you."`,
       choices:[
-       {l:`Get a secured credit card with a ${M(A(300))} deposit`, fx:{cash:-A(300), future:8}, r:"Your credit limit is exactly the money you gave them. It feels like lending yourself money, but your credit score is finally born."},
-       {l:`Ask ${c.cousin} to co-sign for you`, fx:{home:-4, peace:-4, future:4}, r:`${c.cousin} agrees, then mentions it at every family event for the next three years.`},
-       {l:`Pay the bigger deposits and move on`, fx:{cash:-A(400), peace:4}, r:"Everything works, it just costs more. Welcome to the starting line."}]},
+       {l:`Lend yourself ${M(A(300))} with a secured credit card`, fx:{cash:-A(300), future:8}, r:"Your credit limit is exactly the money you gave them. It feels like lending yourself money, but your credit score is finally born."},
+       {l:`Beg ${c.cousin} to co-sign. Owe her forever`, fx:{home:-4, peace:-4, future:4}, r:`${c.cousin} agrees, then mentions it at every family event for the next three years.`},
+       {l:`Pay the "new person" deposit and move on`, fx:{cash:-A(400), peace:4}, r:"Everything works, it just costs more. Welcome to the starting line."}]},
      {day:11, from:c.mum, sub:`${c.home} · 8:00pm`, text:`${cap(c.endear)}, since you travelled with your ${papers}, you are settled now. Your mates are asking when you will buy your own house over there.`,
       choices:[
-       {l:"Explain that papers are just the starting line", fx:{home:-4, peace:5, future:2}, r:`"${c.ok}," she says, "but you will still buy the house?" Some truths take more than one call.`},
-       {l:`Send ${M(A(150))} to show you are doing fine`, fx:{cash:-A(150), home:8, peace:-5}, r:"She is very proud. You are eating cereal for dinner."},
-       {l:"Laugh and say the house is loading", fx:{home:2, peace:3}, r:"She tells everyone the house is loading. It is now a family prayer point."}]},
+       {l:"Explain that papers are not money. Again", fx:{home:-4, peace:5, future:2}, r:`"${c.ok}," she says, "but you will still buy the house?" Some truths take more than one call.`},
+       {l:`Send ${M(A(150))} to maintain the illusion`, fx:{cash:-A(150), home:8, peace:-5}, r:"She is very proud. You are eating cereal for dinner."},
+       {l:"Say the house is loading. Buffering, actually", fx:{home:2, peace:3}, r:"She tells everyone the house is loading. It is now a family prayer point."}]},
      {day:11, from:c.friend, sub:"Secondary school friend", text:`${c.wow} You people that travelled with ${papers}, una don hammer! Life must be soft for you. ${c.please}, remember us o.`,
       choices:[
-       {l:"Tell him the truth about starting over", fx:{peace:5, home:-2, future:2}, r:"He goes quiet, then says, \"So papers no be money?\" No. Papers are permission to start."},
-       {l:"Send a selfie in your work uniform", fx:{peace:3, home:2}, r:`He replies, "Even with ${papers}, you still dey hustle?" Yes. Especially with ${papers}.`},
-       {l:`Send ${M(A(50))} to keep the image alive`, fx:{cash:-A(50), home:4, peace:-4}, r:"He tells four friends you are now very rich. Your phone starts ringing."}]}
+       {l:"Tell him papers are just permission to start", fx:{peace:5, home:-2, future:2}, r:"He goes quiet, then says, \"So papers no be money?\" No. Papers are permission to start."},
+       {l:"Send a selfie in your work uniform. Reality check", fx:{peace:3, home:2}, r:`He replies, "Even with ${papers}, you still dey hustle?" Yes. Especially with ${papers}.`},
+       {l:`Send ${M(A(50))} to keep up appearances`, fx:{cash:-A(50), home:4, peace:-4}, r:"He tells four friends you are now very rich. Your phone starts ringing."}]}
     ][pickV('W',3)]);
   }
   if(p==='care'){
     out.push({day:24, text: S.f.cos==='reported' ? `A licensed care home in ${T()} calls back. They have checked your case and will sponsor you properly. The start date is next month, and this time the job is real.` : S.f.cos==='community' ? "The community group introduces you to a licensed employer and an immigration adviser who works for free. For the first time since landing, you have a plan." : "The shop owner pays you late again. When you complain, he reminds you that you have no papers to work there.",
       choices: S.f.cos==='cash' ? [
-       {l:"Walk away and report the agent", fx:{peace:6, future:10, cash:-A(100)}, set:{cos:'reported'}, r:"It is the scariest thing you have done since landing. A support worker helps you file it. You are not the first, and you will not be the last."},
-       {l:"Keep your head down and keep working", fx:{cash:A(300), peace:-10, future:-6}, r:"The envelope is thinner this week. So is your patience."},
-       {l:"Talk to the community group", fx:{peace:6, home:3, future:6}, set:{cos:'community'}, r:"Nobody judges you. Three people in the room have the same story."}] : [
-       {l:"Accept and start the paperwork", fx:{peace:8, future:12}, r:"There are forms, fees, and waiting. But every form brings you closer to a life on paper."},
-       {l:"Warn other people about the fake agent", fx:{peace:4, home:4, future:4}, r:"You post a warning in three WhatsApp groups. A stranger messages to say you saved her ₦10 million."}]});
+       {l:"Walk away and report the agent. Courage", fx:{peace:6, future:10, cash:-A(100)}, set:{cos:'reported'}, r:"It is the scariest thing you have done since landing. A support worker helps you file it. You are not the first, and you will not be the last."},
+       {l:"Keep your head down. Keep the envelopes coming", fx:{cash:A(300), peace:-10, future:-6}, r:"The envelope is thinner this week. So is your patience."},
+       {l:"Talk to the community group. You are not alone", fx:{peace:6, home:3, future:6}, set:{cos:'community'}, r:"Nobody judges you. Three people in the room have the same story."}] : [
+       {l:"Accept. Paperwork has never looked so beautiful", fx:{peace:8, future:12}, r:"There are forms, fees, and waiting. But every form brings you closer to a life on paper."},
+       {l:"Warn the WhatsApp groups. Save the next person", fx:{peace:4, home:4, future:4}, r:"You post a warning in three WhatsApp groups. A stranger messages to say you saved her ₦10 million."}]});
   }
   if(p==='study' || p==='partial' || p==='care' || SOLD()){
     out.push({day:23, from:"Old colleague", sub:O(), text:"So when are you coming back? Abroad is not for everybody o. No shame in returning.",
       choices:[
-       {l:"Post your best photo from abroad", fx:{peace:-2, home:4}, r:"You post a photo by a fountain you walked 40 minutes to reach. Twelve people comment, \"Abroad don show for your body.\""},
-       {l:"Tell him the truth", fx:{peace:6, home:-2}, r:"He goes quiet, then says, \"Me too, I have been struggling here.\" You talk for an hour."},
-       SOLD() ? {l:"Remind yourself there is no going back", fx:{peace:-2, future:6}, r:"You sold everything to come. So you mute the chat, make tea, and apply for two more jobs. Forward is the only direction left."}
-       : p==='care' ? {l:"Remind yourself why you came", fx:{peace:2, future:5}, r:"You paid too much and came too far to turn back now. You mute the chat and call the immigration adviser instead."}
-       : {l:"Mute the chat and study", fx:{peace:3, future:3}, r:"You put your phone face down and finish the essay due at midnight."}]});
+       {l:"Post your best abroad photo. Filter on", fx:{peace:-2, home:4}, r:"You post a photo by a fountain you walked 40 minutes to reach. Twelve people comment, \"Abroad don show for your body.\""},
+       {l:"Tell him the truth. Abroad is not for the weak", fx:{peace:6, home:-2}, r:"He goes quiet, then says, \"Me too, I have been struggling here.\" You talk for an hour."},
+       SOLD() ? {l:"Mute him. There is no going back", fx:{peace:-2, future:6}, r:"You sold everything to come. So you mute the chat, make tea, and apply for two more jobs. Forward is the only direction left."}
+       : p==='care' ? {l:"Mute him and remember why you came", fx:{peace:2, future:5}, r:"You paid too much and came too far to turn back now. You mute the chat and call the immigration adviser instead."}
+       : {l:"Mute the chat. Essays don't write themselves", fx:{peace:3, future:3}, r:"You put your phone face down and finish the essay due at midnight."}]});
   }
   return out;
 }
@@ -835,15 +867,18 @@ function chips(fx){
 }
 function header(day){
   const pct = Math.min(100, (day/30)*100);
+  const cls = k => !shown ? '' : S[k] > shown[k] ? ' up' : S[k] < shown[k] ? ' down' : '';
+  const c = {cash:cls('cash'), peace:cls('peace'), home:cls('home'), future:cls('future')};
+  shown = {cash:S.cash, peace:S.peace, home:S.home, future:S.future};
   const b = v => `<div class="bar"><i style="width:${v}%"></i></div>`;
   return `<div class="pass">
     <div class="pass-top"><div class="brand">LANDED</div><div class="day">DAY ${String(day).padStart(2,'0')} / 30</div></div>
     <div class="route">${S.trail.map(t=>t.code).join(' → ')} → ${R.country} · ${L.town===L.name?L.name:L.town+', '+L.name}</div>
     <div class="stats">
-      <div class="stat"><span>Cash</span><b>${money(S.cash)}</b></div>
-      <div class="stat"><span>Peace</span><b>${S.peace}</b>${b(S.peace)}</div>
-      <div class="stat"><span>Home</span><b>${S.home}</b>${b(S.home)}</div>
-      <div class="stat"><span>Future</span><b>${S.future}</b>${b(S.future)}</div>
+      <div class="stat${c.cash}"><span>Cash</span><b>${money(S.cash)}</b></div>
+      <div class="stat${c.peace}"><span>Peace</span><b>${S.peace}</b>${b(S.peace)}</div>
+      <div class="stat${c.home}"><span>Home</span><b>${S.home}</b>${b(S.home)}</div>
+      <div class="stat${c.future}"><span>Future</span><b>${S.future}</b>${b(S.future)}</div>
     </div>
   </div>
   <div class="progress" aria-hidden="true"><i style="width:${pct}%"></i></div>`;
@@ -889,6 +924,8 @@ function render(){
       </details>
       <label class="when" for="origin">Which state are you leaving from?</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
+      <label class="when" for="gender">I am a</label>
+      <select id="gender" class="select"><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select>
       <label class="when" for="culture">Whose voice should your family speak in?</label>
       <select id="culture" class="select">${Object.entries(CULTURES).map(([k,v])=>`<option value="${k}"${k===pick.culture?' selected':''}>${v.label}</option>`).join('')}</select>
       <div class="when">Where are you landing?</div>
@@ -911,6 +948,7 @@ function render(){
       document.getElementById('culture').value = pick.culture;
     };
     document.getElementById('culture').onchange = e => { pick.culture = e.target.value; };
+    document.getElementById('gender').onchange = e => { pick.gender = e.target.value; };
     app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = b.dataset.r; render(); });
     const go = document.getElementById('go');
     if(go) go.onclick = ()=>{ pick.path = document.getElementById('path').value; pick.sold = document.getElementById('sold').checked; begin(rk, document.getElementById('place').value); render(); scrollTo(0,0); };
@@ -928,7 +966,7 @@ function render(){
   if(phase==='scene'){
     const list = typeof sc.choices==='function' ? sc.choices(S) : sc.choices;
     const note = sc.day===1 && !sc.from ? `${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
-    app.innerHTML = header(sc.day) + `<div class="scene fade">${intro(sc)}${note}<div class="choices">${list.map((c,i)=>`<button class="choice" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span>${c.l}</span></button>`).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}</div>`;
+    app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${list.map((c,i)=>`<button class="choice" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span>${c.l}</span></button>`).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}</div>`;
     wireBack();
     app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
       const c = list[+btn.dataset.i];
@@ -939,7 +977,7 @@ function render(){
     return;
   }
   const picked = last.picked ? `<div class="when">You chose · ${last.picked}</div>` : '';
-  const body = (last.auto ? `<div class="when">Day ${sc.day}</div>` : intro(sc,true)) + picked +
+  const body = art(sc) + (last.auto ? `<div class="when">Day ${sc.day}</div>` : intro(sc,true)) + picked +
     `<div class="result">${last.r}</div><div class="chips">${chips(last.fx)}</div>
      <button class="primary" id="next">${nextIndex(idx+1)>=SCENES.length?'See how your 30 days went':'Continue'}</button>${history.length?`<button class="backbtn" id="back">← Change this choice</button>`:''}`;
   app.innerHTML = header(sc.day) + `<div class="scene fade">${body}</div>`;
@@ -950,11 +988,48 @@ function render(){
     render(); scrollTo(0,0);
   };
 }
+
+/* ---------- Scene illustrations ---------- */
+function artKind(sc){
+  if(sc.auto==='roof') return S.f.sibling==='sent' && ((S.v&&S.v.B)||0)===0 ? 'goat' : 'phone';
+  if(sc.auto) return 'coins';
+  if(sc.day===1) return 'plane';
+  if(sc.from) return 'phone';
+  const t = sc.text||'';
+  if(/snow|minus|winter|cold front|parka/i.test(t)) return 'snow';
+  if(/rain/i.test(t)) return 'rain';
+  if(/AC |electricity|heat/i.test(t)) return 'sun';
+  if(/bank|card|credit/i.test(t)) return 'card';
+  if(/craving|food|African shop/i.test(t)) return 'food';
+  if(/tuition|lecture|library|student|study permit|campus/i.test(t)) return 'school';
+  if(/car|bus|transit|road|licence|pavement|Uber/i.test(t)) return 'car';
+  if(/laundry|dishes|house|room|basement/i.test(t)) return 'house';
+  if(/job|interview|shift|induction|salary|employer|work/i.test(t)) return 'work';
+  return 'globe';
+}
+const ART = {
+  phone:`<g class="a-shake"><rect x="62" y="12" width="36" height="66" rx="7" class="f-ink"/><rect x="66" y="20" width="28" height="48" rx="3" class="f-paper"/><rect x="70" y="27" width="18" height="7" rx="3" class="f-green"/><rect x="72" y="38" width="16" height="7" rx="3" class="f-gold"/><rect x="70" y="49" width="14" height="7" rx="3" class="f-green"/></g><path d="M48 30 q-6 15 0 30 M40 24 q-10 21 0 42 M112 30 q6 15 0 30 M120 24 q10 21 0 42" class="s-gold a-pulse" fill="none" stroke-width="3" stroke-linecap="round"/>`,
+  plane:`<line x1="10" y1="78" x2="150" y2="78" class="s-line" stroke-width="3" stroke-dasharray="10 8"/><g class="a-land"><path d="M30 50 L110 44 Q122 44 122 50 Q122 56 110 56 L30 52 Z" class="f-green"/><path d="M70 47 L58 26 L68 26 L90 47 Z M70 55 L58 72 L68 72 L90 55 Z M34 50 L28 38 L36 38 L44 50 Z" class="f-green"/><circle cx="112" cy="50" r="2.5" class="f-paper"/></g>`,
+  coins:`<g class="a-drop1"><ellipse cx="62" cy="70" rx="18" ry="6" class="f-gold"/><rect x="44" y="60" width="36" height="10" class="f-gold"/><ellipse cx="62" cy="60" rx="18" ry="6" class="f-goldlight"/></g><g class="a-drop2"><ellipse cx="98" cy="70" rx="18" ry="6" class="f-gold"/><rect x="80" y="54" width="36" height="16" class="f-gold"/><ellipse cx="98" cy="54" rx="18" ry="6" class="f-goldlight"/></g><g class="a-drop3"><ellipse cx="80" cy="40" rx="18" ry="6" class="f-gold"/><rect x="62" y="34" width="36" height="6" class="f-gold"/><ellipse cx="80" cy="34" rx="18" ry="6" class="f-goldlight"/></g>`,
+  goat:`<rect x="18" y="40" width="44" height="38" class="f-line"/><rect x="18" y="40" width="44" height="6" class="f-ink" opacity=".25"/><g class="a-bob"><ellipse cx="104" cy="56" rx="24" ry="13" class="f-ink"/><circle cx="128" cy="44" r="9" class="f-ink"/><path d="M124 36 q-4 -10 4 -12 M132 36 q4 -10 -2 -12" class="s-ink" stroke-width="3" fill="none"/><rect x="88" y="64" width="4" height="14" class="f-ink"/><rect x="98" y="64" width="4" height="14" class="f-ink"/><rect x="110" y="64" width="4" height="14" class="f-ink"/><rect x="118" y="64" width="4" height="14" class="f-ink"/><circle cx="131" cy="42" r="1.6" class="f-paper"/></g>`,
+  snow:`<path d="M48 44 a14 14 0 0 1 26 -10 a18 18 0 0 1 34 6 a12 12 0 0 1 2 24 h-60 a12 12 0 0 1 -2 -20z" class="f-line"/><g class="a-fall">${[54,68,82,96,110].map((x,i)=>`<circle cx="${x}" cy="${72+(i%2)*6}" r="2.6" class="f-ink"/>`).join('')}</g>`,
+  rain:`<path d="M48 44 a14 14 0 0 1 26 -10 a18 18 0 0 1 34 6 a12 12 0 0 1 2 24 h-60 a12 12 0 0 1 -2 -20z" class="f-line"/><g class="a-fall">${[54,66,78,90,102,114].map((x,i)=>`<line x1="${x}" y1="${70+(i%2)*5}" x2="${x-3}" y2="${78+(i%2)*5}" class="s-green" stroke-width="2.5" stroke-linecap="round"/>`).join('')}</g>`,
+  sun:`<g class="a-spin" style="transform-origin:80px 45px">${[0,45,90,135,180,225,270,315].map(a=>`<line x1="80" y1="14" x2="80" y2="22" class="s-gold" stroke-width="4" stroke-linecap="round" transform="rotate(${a} 80 45)"/>`).join('')}</g><circle cx="80" cy="45" r="16" class="f-gold"/>`,
+  card:`<g class="a-shake"><rect x="46" y="22" width="68" height="44" rx="6" class="f-green"/><rect x="46" y="32" width="68" height="8" class="f-ink" opacity=".5"/><rect x="54" y="48" width="22" height="6" rx="2" class="f-paper"/></g><circle cx="114" cy="64" r="12" class="f-bad"/><path d="M109 59 l10 10 M119 59 l-10 10" class="s-paper" stroke-width="3" stroke-linecap="round"/>`,
+  food:`<path d="M44 46 h72 l-6 28 h-60 z" class="f-green"/><rect x="40" y="42" width="80" height="6" rx="3" class="f-ink"/><path d="M64 34 q-6 -8 0 -16 M80 34 q-6 -8 0 -16 M96 34 q-6 -8 0 -16" class="s-line a-steam" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+  school:`<g class="a-bob"><path d="M80 18 L124 34 L80 50 L36 34 Z" class="f-ink"/><path d="M58 42 v14 q22 12 44 0 v-14 l-22 8 z" class="f-green"/><line x1="118" y1="36" x2="118" y2="58" class="s-gold" stroke-width="3"/><circle cx="118" cy="60" r="4" class="f-gold"/></g>`,
+  car:`<line x1="0" y1="78" x2="160" y2="78" class="s-line a-road" stroke-width="3" stroke-dasharray="14 10"/><g class="a-bob"><rect x="44" y="40" width="72" height="26" rx="6" class="f-gold"/><rect x="52" y="30" width="48" height="16" rx="5" class="f-gold"/><rect x="56" y="33" width="18" height="10" rx="2" class="f-paper"/><rect x="78" y="33" width="18" height="10" rx="2" class="f-paper"/><circle cx="62" cy="68" r="8" class="f-ink"/><circle cx="100" cy="68" r="8" class="f-ink"/></g>`,
+  house:`<path d="M44 46 L80 18 L116 46 Z" class="f-green"/><rect x="50" y="46" width="60" height="32" class="f-line"/><rect x="74" y="56" width="12" height="22" class="f-ink"/><rect x="56" y="52" width="12" height="10" class="f-gold a-pulse"/><rect x="92" y="52" width="12" height="10" class="f-gold a-pulse"/>`,
+  work:`<g class="a-bob"><rect x="46" y="32" width="68" height="44" rx="6" class="f-green"/><rect x="68" y="22" width="24" height="12" rx="3" class="s-green" fill="none" stroke-width="4"/><rect x="46" y="48" width="68" height="6" class="f-ink" opacity=".35"/><rect x="74" y="46" width="12" height="10" rx="2" class="f-gold"/></g>`,
+  globe:`<g class="a-spin" style="transform-origin:80px 45px"><circle cx="80" cy="45" r="26" class="f-green"/><path d="M62 34 q10 6 6 14 q-6 6 2 14 M92 26 q-6 10 4 16 q8 4 4 14" class="s-paper" stroke-width="3" fill="none"/></g>`
+};
+function art(sc){ return `<div class="art" aria-hidden="true"><svg viewBox="0 0 160 90">${ART[artKind(sc)]}</svg></div>`; }
+
 function wireBack(){
   const b = document.getElementById('back');
   if(b) b.onclick = ()=>{
     const snap = JSON.parse(history.pop());
-    S = snap.S; idx = snap.idx; phase = 'scene'; last = null;
+    S = snap.S; idx = snap.idx; phase = 'scene'; last = null; shown = null;
     render(); scrollTo(0,0);
   };
 }
@@ -995,11 +1070,60 @@ function receipts(){
   if(f.fees==='plan') out.push("You turned a scary deadline into three instalments.");
   if(f.stipendHome) out.push("Part of your stipend went home. Your fridge held three eggs and a lemon.");
   if(SOLD()) out.push("You sold everything to come. There was no plan B, so plan A had to work.");
-  if(f.spouse==='looked') out.push("Every Nigerian man at the fellowship was married or focusing on himself.");
+  if(f.spouse==='looked') out.push(S.gender==='man' ? "Every Nigerian woman at the fellowship was engaged or not ready for anything serious." : "Every Nigerian man at the fellowship was married or focusing on himself.");
   if(f.network && R.key==='ca') out.push("An owambe at minus 20 got you your first real job lead.");
   if(f.coat==='none') out.push("Naija blood was not enough for the cold.");
   return out.slice(0,4);
 }
+
+/* ---------- Result card picture ---------- */
+function wrapText(ctx, text, maxW){
+  const words = text.split(' '), lines = []; let line = '';
+  for(const w of words){ const test = line ? line+' '+w : w; if(ctx.measureText(test).width > maxW && line){ lines.push(line); line = w; } else line = test; }
+  if(line) lines.push(line); return lines;
+}
+async function drawCard(title, line, journey, rec){
+  try{ await Promise.all(["800 80px Unbounded","600 40px Figtree","700 40px 'JetBrains Mono'"].map(f=>document.fonts.load(f))); }catch(e){}
+  const W=1080, H=1350, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const x=cv.getContext('2d');
+  const green='#0E5A3A', gold='#E0BD4C', paper='#F2F5F0';
+  x.fillStyle=green; x.fillRect(0,0,W,H);
+  x.beginPath(); x.arc(0,H*0.62,46,0,Math.PI*2); x.arc(W,H*0.62,46,0,Math.PI*2); x.fillStyle=paper; x.fill();
+  x.setLineDash([18,14]); x.strokeStyle='rgba(255,255,255,.35)'; x.lineWidth=3; x.beginPath(); x.moveTo(70,H*0.62); x.lineTo(W-70,H*0.62); x.stroke(); x.setLineDash([]);
+  x.fillStyle=gold; x.font="700 30px 'JetBrains Mono', monospace"; x.fillText('NOW YOU HAVE LANDED', 80, 110);
+  x.fillStyle='rgba(255,255,255,.85)'; x.font="600 34px Figtree, sans-serif";
+  wrapText(x, journey, 900).slice(0,2).forEach((l,i)=>x.fillText(l, 80, 168+i*44));
+  x.fillStyle=gold; x.font="700 28px 'JetBrains Mono', monospace"; x.fillText('MY DAY 30 VERDICT', 80, 300);
+  x.fillStyle='#FFFFFF'; x.font="800 84px Unbounded, 'Arial Black', sans-serif";
+  let y=400; wrapText(x, title, 920).slice(0,3).forEach(l=>{ x.fillText(l, 80, y); y+=100; });
+  x.fillStyle='rgba(255,255,255,.92)'; x.font="600 40px Figtree, sans-serif"; y+=10;
+  wrapText(x, line, 920).slice(0,4).forEach(l=>{ x.fillText(l, 80, y); y+=54; });
+  // journey route between the text and the divider
+  const ry = Math.round((y + H*0.62) / 2) + 10, places = S.trail.map(t=>t.town).concat([L.town]);
+  const xs = places.map((_,i)=> 120 + i*(840/Math.max(1,places.length-1)));
+  x.setLineDash([10,10]); x.strokeStyle=gold; x.lineWidth=4; x.beginPath();
+  for(let i=0;i<xs.length-1;i++){ const mx=(xs[i]+xs[i+1])/2; x.moveTo(xs[i],ry); x.quadraticCurveTo(mx, ry-90, xs[i+1], ry); }
+  x.stroke(); x.setLineDash([]);
+  xs.forEach((px,i)=>{ x.beginPath(); x.arc(px,ry,12,0,Math.PI*2); x.fillStyle = i===xs.length-1 ? gold : '#FFFFFF'; x.fill();
+    x.fillStyle='rgba(255,255,255,.85)'; x.font="700 24px 'JetBrains Mono', monospace"; const lab=places[i].toUpperCase().slice(0,14); const w=x.measureText(lab).width;
+    x.fillText(lab, Math.min(W-60-w, Math.max(60, px-w/2)), ry+48); });
+  const pmx=(xs[xs.length-2]+xs[xs.length-1])/2; x.save(); x.translate(pmx, ry-68); x.rotate(0.12); x.fillStyle='#FFFFFF';
+  x.beginPath(); x.moveTo(-34,0); x.lineTo(26,-4); x.quadraticCurveTo(36,-4,36,0); x.quadraticCurveTo(36,4,26,4); x.lineTo(-34,2); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(-2,-2); x.lineTo(-14,-22); x.lineTo(-6,-22); x.lineTo(12,-2); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(-2,3); x.lineTo(-14,22); x.lineTo(-6,22); x.lineTo(12,3); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(-30,0); x.lineTo(-38,-12); x.lineTo(-32,-12); x.lineTo(-24,0); x.closePath(); x.fill(); x.restore();
+  const stats=[['CASH',money(S.cash)],['PEACE',S.peace],['HOME',S.home],['FUTURE',S.future]];
+  stats.forEach(([k,v],i)=>{ const bx=80+i*235, by=H*0.62+60;
+    x.fillStyle='rgba(255,255,255,.1)'; x.fillRect(bx,by,215,140);
+    x.fillStyle=gold; x.font="700 24px 'JetBrains Mono', monospace"; x.fillText(k, bx+20, by+44);
+    x.fillStyle='#FFFFFF'; const vs=String(v); x.font=`700 ${vs.length>6?34:44}px 'JetBrains Mono', monospace`; x.fillText(vs, bx+20, by+108); });
+  x.fillStyle='rgba(255,255,255,.85)'; x.font="600 30px Figtree, sans-serif"; y=H*0.62+260;
+  rec.slice(0,2).forEach(r=>{ wrapText(x, '› '+r, 920).slice(0,1).forEach(l=>{ x.fillText(l, 80, y); y+=42; }); });
+  x.fillStyle=gold; x.font="800 34px Unbounded, sans-serif"; x.fillText("What's your verdict?", 80, H-90);
+  x.fillStyle='#FFFFFF'; x.font="600 32px Figtree, sans-serif"; x.fillText('Play free at nowyouhavelanded.com', 80, H-44);
+  return cv;
+}
+
 function renderEnd(app){
   const [title, line] = verdict(), rec = receipts();
   const where = `${L.town}, ${R.country}`;
@@ -1020,8 +1144,10 @@ function renderEnd(app){
       </div>
       ${rec.length?`<div class="receipts">${rec.map(r=>`<div>${r}</div>`).join('')}</div>`:''}
     </div>
+    <div class="cardwrap"><img id="cardimg" alt="Your result card" hidden></div>
+    <button class="primary" id="sharecard">Share my result card</button>
     <div class="share">
-      <div class="when">Share your result</div>
+      <div class="when">Or share as text</div>
       <div class="share-row">
         <a class="sbtn wa" id="s-wa" target="_blank" rel="noopener">WhatsApp</a>
         <a class="sbtn" id="s-x" target="_blank" rel="noopener">X</a>
@@ -1040,6 +1166,25 @@ function renderEnd(app){
   </div>`;
   document.getElementById('again').onclick = ()=>{ fresh(); pick.route=null; render(); scrollTo(0,0); };
   const SITE = 'https://nowyouhavelanded.com';
+  let cardFile = null, cardBlob = null;
+  drawCard(title, line, journey, rec).then(canvas => {
+    const img = document.getElementById('cardimg'); if(!img) return;
+    img.src = canvas.toDataURL('image/png'); img.hidden = false;
+    canvas.toBlob(b => { cardBlob = b; try{ cardFile = new File([b], 'my-landed-verdict.png', {type:'image/png'}); }catch(e){} }, 'image/png');
+  });
+  document.getElementById('sharecard').onclick = () => {
+    const t = document.getElementById('toast');
+    if(!cardBlob){ t.textContent = "Your card is still being made. Try again in a second."; return; }
+    if(cardFile && navigator.canShare && navigator.canShare({files:[cardFile]})){
+      navigator.share({files:[cardFile], text:`My verdict: ${title}. What is yours? ${SITE}`}).catch(()=>{});
+      return;
+    }
+    try{
+      const a = document.createElement('a'); a.href = URL.createObjectURL(cardBlob); a.download = 'my-landed-verdict.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      t.textContent = "Card saved. Post it on your WhatsApp status, LinkedIn, or Instagram.";
+    }catch(e){ t.textContent = "Press and hold the card above to save it."; }
+  };
   const text = share + ' Play here: ' + SITE;
   const enc = encodeURIComponent;
   document.getElementById('s-wa').href = 'https://wa.me/?text=' + enc(text);
@@ -1058,7 +1203,7 @@ function renderEnd(app){
       const rk = btn.dataset.r;
       box.innerHTML = `<label class="when" for="place2">${ROUTES[rk].ask}</label><select id="place2" class="select">${placeOptions(rk)}</select><button class="primary" id="go2">Land in ${ROUTES[rk].label}</button>`;
       document.getElementById('go2').onclick = ()=>{
-        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture, sold:S.sold};
+        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture, sold:S.sold, gender:S.gender};
         const pl = document.getElementById('place2').value;
         begin(rk, pl, prev); render(); scrollTo(0,0);
       };
