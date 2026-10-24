@@ -328,6 +328,7 @@ details.custom summary{font-weight:700}
 .lbbox{display:grid;gap:10px;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:var(--card)}
 .lbbox p{margin:0;font-size:15px}
 .lb-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
+.lb-tab:first-child{grid-column:1/-1}
 .lb-tab{background:var(--bubble);border:1.5px solid transparent;border-radius:12px;padding:10px;text-align:left;display:grid;gap:2px}
 .lb-tab b{font-family:var(--display);font-size:15px;color:var(--green2)}
 .lb-tab span{font-size:12px;color:var(--muted);line-height:1.3}
@@ -478,7 +479,7 @@ function begin(rk, pname, prev){
   const start = Math.round(ROUTES[rk].start * PATHS[path].mult * ({savings:1, sold:1.4, borrowed:1.3, kept:0.9}[fund]||1) / 50) * 50;
   S = prev ? {cash:start, start, path, sold, fund, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture, gender, daily, seed, duo, duoDay}
            : {cash:start, start, path, sold, fund, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture, gender, daily, seed, duo, duoDay};
-  S.st = {r:0, s:0, g:0};   // requests refused, money sent home (USD), traps fallen for
+  S.st = {r:0, s:0, g:0, p:0};   // requests refused, money sent home (USD), traps fallen for, traps spotted
   shown = null;
   history = [];
   idx = nextIndex(0); phase = 'scene';
@@ -597,7 +598,7 @@ const contribution = () => { const c = C(); return [
   choices:[
    {l:"Pay in full. Name on the wall", fx:{cash:-A(170), home:8, future:2}, r:"Your name will be on the town hall wall. In very small letters, under the people who paid ₦1 million."},
    {l:"Promise \"next week\". Buy time", fx:{home:2}, set:{promise:true}, r:"The secretary replies, \"Noted with thanks.\" You feel noted."},
-   {l:"Ask for the plan. Since 2015", fx:{home:-6, future:3}, r:"They send the plan. It is the same plan from 2015. The hall is still at foundation."},
+   {l:"Ask for the plan. Since 2015", sp:1, fx:{home:-6, future:3}, r:"They send the plan. It is the same plan from 2015. The hall is still at foundation."},
    {l:"Pay half. December will handle it", fx:{cash:-A(85), home:3}, r:"They accept. December is now a debt collection date."}]},
  {day:16, from:"Class of 2008", sub:"Secondary school alumni group", text:"Old students, we are renovating the school toilets. Every member abroad should drop ₦100,000. Your name will be on the plaque!",
   choices:[
@@ -644,7 +645,7 @@ const friend = () => { const c = C(); return [
  {day:28, from:c.friend, sub:"Secondary school friend", text:`${c.please}, how you take japa? Help me with proof of funds. Just show ${M(A(10000))} in your account for one week, I go return am.`,
   choices:[
    {l:"Lend him your account. Fraud what?", g:1, fx:{peace:-10, home:2, future:-10}, r:"This is how people get flagged. You lie awake checking your banking app every hour."},
-   {l:"Send him the real guide. Free", fx:{future:3, home:3}, r:"You send a long voice note with every step. He says, \"I owe you.\" He does."},
+   {l:"Send him the real guide. Free", sp:1, fx:{future:3, home:3}, r:"You send a long voice note with every step. He says, \"I owe you.\" He does."},
    {l:"Leave him on read. Abroad is busy", fx:{home:-4, peace:2}, r:"He posts a status about fake friends abroad. You know it is for you."}]},
  {day:28, from:c.friend, sub:"Secondary school friend", text:"Buy me the latest iPhone over there. I go pay you in naira at good rate when you come home.",
   choices:[
@@ -688,7 +689,7 @@ const familyGroup = () => { const c = C(); return [
    {l:"Exit the group. Bold move", fx:{home:-8, peace:4}, r:`Someone adds you back within six minutes. ${c.aunty} asks if your phone has a virus.`}]},
  {day:13, from:"Family WhatsApp group", sub:"Uncle forwarded a voice note", text:"Forwarded many times: \"In abroad, government gives every new arrival a free house and a free car. Our people abroad are just hiding it.\"",
   choices:[
-   {l:"Correct him. In a family group", fx:{home:-2, peace:-2, future:2}, r:"He replies, \"So you are saying I am lying?\" The group takes sides. Your side is small."},
+   {l:"Correct him. In a family group", sp:1, fx:{home:-2, peace:-2, future:2}, r:"He replies, \"So you are saying I am lying?\" The group takes sides. Your side is small."},
    {l:"Send a laughing emoji", fx:{peace:3}, r:"Your aunty sends the same voice note to you privately, just in case you missed it."},
    {l:"Say yours is still processing", fx:{home:2, peace:4}, r:"Everyone congratulates you. Three people ask for the address of the free house."}]},
  {day:13, from:"Family WhatsApp group", sub:`${c.cousin} posted`, text:"Big thanks to my sponsor abroad for agreeing to pay for my master's in the UK next year!! God bless you. [You never agreed to this.]",
@@ -1242,7 +1243,7 @@ const routeAlts = () => { const c = C(), k = R.key, out = [];
    ? {day:5, when: s => pickV('us5',2)===1, text:`Someone in the ${T()} Nigerians WhatsApp group is selling a 2012 Camry for $3,000. "Very clean, just small AC issue." Everybody says the same thing. Get a car first, then a job.`,
       choices:[
        {l:"Buy the Camry with your ajo money", g:1, fx:{cash:-3000, peace:9, future:8}, set:{car:'bought'}, r:"The small AC issue is that there is no AC. It still gets you to every interview, and you love it anyway."},
-       {l:"Pay a mechanic $60 to check", fx:{cash:-60, peace:2, future:3}, set:{car:'bus'}, r:"He finds three problems the seller forgot to mention. You keep your ajo money and learn the bus routes instead."},
+       {l:"Pay a mechanic $60 to check", sp:1, fx:{cash:-60, peace:2, future:3}, set:{car:'bus'}, r:"He finds three problems the seller forgot to mention. You keep your ajo money and learn the bus routes instead."},
        {l:"Beg for rides from the group chat", fx:{cash:-90, peace:-3, home:3}, set:{car:'uber'}, r:"Everybody offers a ride. Everybody also asks for fuel money and a full update on your life."}]}
    : {day:5, when: s => pickV('us5',2)===1, text:`Every apartment in ${T()} is a trade-off. The good rooms are near the train, and the cheap ones are three buses away.`,
       choices:[
@@ -2001,7 +2002,7 @@ const VERDICTS = [
  ['Fees Still Pending','Go as a student and leave your fees unpaid.'],
  ['Owing the Cooperative','Borrow money for the move and ignore the repayment.'],
  ['Stronger Than The Agent','Take the UK care visa route and report the fake agent.'],
- ['Best Landing','Top Shine Eye on the leaderboard when the week closes. The weekly crown.']
+ ['Best Landing','Top the Best landing board when the week closes. The weekly crown.']
 ];
 
 /* ---------- My games: a personal journal kept on this device ---------- */
@@ -2107,9 +2108,11 @@ function tally(sc, c){
     else if(!set.promise) st.r++;
   }
   if(c.g || set.sibling==='sent' || set.farm==='sent' || set.status==='scam') st.g++;
+  if(c.sp || ['checked','video'].includes(set.sibling) || ['asked','counted'].includes(set.farm) || ['lawyer','community'].includes(set.status) || set.cos==='reported') st.p = (st.p||0) + 1;
 }
 const BOARDS = [
-  {key:'score', title:'Shine Eye', sub:'Highest Landing Score', val:r=>r.score, show:r=>`${r.score}/100`},
+  {key:'score', title:'Best landing', sub:'Highest Landing Score · wins the weekly crown', val:r=>r.score, show:r=>`${r.score}/100`},
+  {key:'spotted', title:'Shine Eye', sub:'Spotted the most traps', val:r=>r.spotted||0, show:r=>`${r.spotted} spotted`},
   {key:'refused', title:'Hardest heart', sub:'Said no to home the most', val:r=>r.refused, show:r=>`${r.refused} time${r.refused===1?'':'s'}`},
   {key:'sent', title:'Softest heart', sub:'The Family ATM award', val:r=>r.sent, show:r=>NGN0(r.sent)},
   {key:'fooled', title:'Most gullible', sub:'Fell for the most traps', val:r=>r.fooled, show:r=>`${r.fooled} trap${r.fooled===1?'':'s'}`}
@@ -2145,13 +2148,13 @@ async function checkCrowns(){
   if(won && saveVerdict('Best Landing')){
     track('crown-won');
     const app = document.getElementById('app'), intro = app && app.querySelector('.intro');
-    if(intro){ const d = document.createElement('div'); d.className = 'crownwin fade'; d.innerHTML = `<b>👑 You were Best Landing for the week!</b><span>${won.score}/100 put you top of Shine Eye when the week closed. Your gold badge is in your verdict collection.</span>`; intro.insertBefore(d, intro.children[1]); SFX.good(); }
+    if(intro){ const d = document.createElement('div'); d.className = 'crownwin fade'; d.innerHTML = `<b>👑 You were Best Landing for the week!</b><span>${won.score}/100 put you top of the Best landing board when the week closed. Your gold badge is in your verdict collection.</span>`; intro.insertBefore(d, intro.children[1]); SFX.good(); }
   }
 }
 let boardRows = null, boardTab = 'score', myPostAt = 0, boardCrown = null;
 async function loadBoard(force){
   if(boardRows && !force) return boardRows;
-  const q = '/rest/v1/landings?select=name,route,town,verdict,score,refused,sent,fooled,created_at&created_at=gte.' + encodeURIComponent(weekStart().toISOString()) + '&order=created_at.desc&limit=1000';
+  const q = '/rest/v1/landings?select=*&created_at=gte.' + encodeURIComponent(weekStart().toISOString()) + '&order=created_at.desc&limit=1000';
   const res = await fetch(SB_URL + q, {headers:{apikey:SB_KEY}});
   if(!res.ok) throw new Error('board ' + res.status);
   return (boardRows = await res.json());
@@ -2166,7 +2169,7 @@ function boardHTML(){
   const cr = boardCrown ? `<div class="lb-crown">👑 Last week's Best Landing: <b>${esc(boardCrown.name)}</b>, ${boardCrown.score}/100</div>` : '';
   return `${cr}<div class="lb-tabs">${BOARDS.map(x=>`<button class="lb-tab${x.key===boardTab?' on':''}" type="button" data-t="${x.key}"><b>${x.title}</b><span>${x.sub}</span></button>`).join('')}</div>
     <div class="lb-list">${list}</div>
-    <p class="small" style="color:var(--muted);font-size:13px">The board resets every Monday. ${boardRows.length} landing${boardRows.length===1?'':'s'} posted this week.</p>`;
+    ${Date.now() < Date.parse('2026-10-26T00:00:00Z') ? `<p class="small" style="color:var(--muted);font-size:13px">Scoring got stricter on 24 October, so a perfect 100 is now rare.</p>` : ''}<p class="small" style="color:var(--muted);font-size:13px">The board resets every Monday. ${boardRows.length} landing${boardRows.length===1?'':'s'} posted this week.</p>`;
 }
 function openBoard(){
   let o = document.getElementById('boardover');
@@ -2183,7 +2186,7 @@ function openBoard(){
 }
 function postBoxHTML(){
   const st = S.st || {r:0, s:0, g:0};
-  const facts = `<p>This game you said no to home <b>${st.r}</b> time${st.r===1?'':'s'}, sent <b>${NGN0(st.s)}</b> home, and fell for <b>${st.g}</b> trap${st.g===1?'':'s'}.</p>`;
+  const facts = `<p>This game you said no to home <b>${st.r}</b> time${st.r===1?'':'s'}, sent <b>${NGN0(st.s)}</b> home, fell for <b>${st.g}</b> trap${st.g===1?'':'s'}, and spotted <b>${st.p||0}</b>.</p>`;
   const who = esc(getName() || 'Anonymous lander');
   const status = S.rank ? `<p class="lb-rankline">You are <b>#${S.rank}</b> on this week's board, out of ${S.rankOf} landing${S.rankOf===1?'':'s'}.</p><p class="small" style="color:var(--muted);font-size:13px">Posted as ${who}.${getName()?'':' Add your name at the start of your next game to show it here.'}</p>`
     : S.postFail ? `<p>${S.postFail}</p><button class="ghost" type="button" id="lbretry">Try again</button>`
@@ -2196,9 +2199,11 @@ async function autoPost(title, onRank){
   if(S.posted){ paint(); return; }
   const st = S.st || {r:0, s:0, g:0}, nm = getName(), score = Math.max(0, Math.min(100, nowScore()));
   const body = {name: (nm && !BAD_NAME.test(nm)) ? nm : 'Anonymous lander', route:R.key, town:String(L.town).slice(0,40), verdict:String(title).slice(0,40), score,
-    refused:Math.min(30, st.r), sent:Math.min(20000, Math.max(0, st.s)), fooled:Math.min(10, st.g), daily:!!S.daily};
+    refused:Math.min(30, st.r), sent:Math.min(20000, Math.max(0, st.s)), fooled:Math.min(10, st.g), spotted:Math.min(15, st.p||0), daily:!!S.daily};
   try{
-    const res = await fetch(SB_URL + '/rest/v1/landings?select=created_at', {method:'POST', headers:{apikey:SB_KEY, 'Content-Type':'application/json', Prefer:'return=representation'}, body:JSON.stringify(body)});
+    const send = b => fetch(SB_URL + '/rest/v1/landings?select=created_at', {method:'POST', headers:{apikey:SB_KEY, 'Content-Type':'application/json', Prefer:'return=representation'}, body:JSON.stringify(b)});
+    let res = await send(body);
+    if(res.status===400){ const t = await res.clone().text(); if(/spotted/i.test(t)){ delete body.spotted; res = await send(body); } }
     if(res.status>=400 && res.status<500){ S.postFail = 'The board is busy right now, so this game was not added.'; paint(); return; }
     if(!res.ok) throw new Error('post ' + res.status);
     S.posted = true; track('leaderboard-post');
@@ -2220,7 +2225,7 @@ async function renderWinners(app){
   app.innerHTML = `<div class="scene fade"><div class="when">Weekly winners · ${range}</div><p>Drawing the winners card...</p></div>`;
   let rows = [];
   try{
-    const q = '/rest/v1/landings?select=name,route,town,verdict,score,refused,sent,fooled,created_at&created_at=gte.' + encodeURIComponent(from.toISOString()) + '&created_at=lt.' + encodeURIComponent(to.toISOString()) + '&limit=5000';
+    const q = '/rest/v1/landings?select=*&created_at=gte.' + encodeURIComponent(from.toISOString()) + '&created_at=lt.' + encodeURIComponent(to.toISOString()) + '&limit=5000';
     const res = await fetch(SB_URL + q, {headers:{apikey:SB_KEY}}); if(!res.ok) throw 0; rows = await res.json();
   }catch(e){ app.innerHTML = `<div class="scene fade"><p>The winners could not load. Check your connection and refresh.</p></div>`; return; }
   const wins = BOARDS.map(b => ({b, r: rows.filter(r=>b.val(r)>0).sort(boardSort(b))[0]})).filter(w=>w.r);
@@ -2232,12 +2237,12 @@ async function renderWinners(app){
   x.fillStyle=gold; x.font="700 30px 'DM Sans', sans-serif"; x.fillText('NOW YOU HAVE LANDED', 80, 110);
   x.fillStyle='#FFFFFF'; x.font="800 84px 'Playfair Display', Georgia, serif"; x.fillText(thisWeek ? 'Winners so far' : 'Weekly winners', 80, 210);
   x.fillStyle='rgba(255,255,255,.8)'; x.font="600 34px 'DM Sans', sans-serif"; x.fillText(`${range} · ${rows.length} landing${rows.length===1?'':'s'}`, 80, 266);
-  const top = 320, gap = 20, bh = (H - top - 190 - gap*3) / 4;
+  const top = 320, gap = 16, bh = (H - top - 190 - gap*(wins.length-1)) / wins.length;
   wins.forEach((w,i)=>{ const y = top + i*(bh+gap);
     x.fillStyle='rgba(255,255,255,.08)'; x.fillRect(80, y, W-160, bh);
     x.fillStyle=gold; x.fillRect(80, y, 8, bh);
-    x.fillStyle=gold; x.font="800 36px 'Playfair Display', Georgia, serif"; x.fillText(w.b.key==='score' ? (thisWeek ? 'Shine Eye' : '👑 Best Landing') : w.b.title, 116, y+56);
-    x.fillStyle='rgba(255,255,255,.6)'; x.font="600 24px 'DM Sans', sans-serif"; x.fillText((w.b.key==='score' && !thisWeek ? 'Top of Shine Eye this week' : w.b.sub).toUpperCase(), 116, y+92);
+    x.fillStyle=gold; x.font="800 36px 'Playfair Display', Georgia, serif"; x.fillText(w.b.key==='score' ? (thisWeek ? 'Best landing' : '👑 Best Landing') : w.b.title, 116, y+56);
+    x.fillStyle='rgba(255,255,255,.6)'; x.font="600 24px 'DM Sans', sans-serif"; x.fillText((w.b.key==='score' ? 'Highest Landing Score' : w.b.sub).toUpperCase(), 116, y+92);
     x.fillStyle='#FFFFFF'; x.font="800 52px 'DM Sans', sans-serif"; let nm = w.r.name; while(x.measureText(nm).width > 560 && nm.length>3) nm = nm.slice(0,-2)+'…'; x.fillText(nm, 116, y+bh-40);
     x.textAlign='right'; x.fillStyle=gold; x.font="800 46px 'DM Sans', sans-serif"; x.fillText(w.b.show(w.r), W-116, y+bh-40);
     x.fillStyle='rgba(255,255,255,.7)'; x.font="600 24px 'DM Sans', sans-serif"; x.fillText(`${String(w.r.town).toUpperCase().slice(0,22)}, ${flagTxt[w.r.route]||''}`, W-116, y+56); x.textAlign='left'; });
@@ -2264,11 +2269,14 @@ async function renderWinners(app){
 /* ---------- Your name, your score, your road to making it ---------- */
 function getName(){ try{ return (localStorage.getItem('nyhl-name')||'').slice(0,20); }catch(e){ return ''; } }
 function setName(v){ v = (v||'').replace(/[^\p{L}\p{M} '\-.]/gu,'').replace(/\s+/g,' ').trim().slice(0,20); try{ localStorage.setItem('nyhl-name', v); }catch(e){} return v; }
-// 100 means every meter healthy: Peace 60+, Future 40+, Home 50 to 85, and 3 months' rent saved
+// Healthy on every meter scores about 68. A perfect 100 needs excellence on all four:
+// Peace 92+, Future 80+, Home 75 to 85, and 8 months' rent saved.
+const EXCELLENT = {peace:92, future:80, home:75, rent:8};
 function scoreOf(g){
-  const cash = g.rent < 0 ? 0 : Math.min(g.rent/3, 1)*25;
-  const peace = Math.min(g.peace/MARKS.peace[1], 1)*25, future = Math.min(g.future/MARKS.future[1], 1)*25;
-  const home = g.home > HOME_CAP ? Math.max(10, 25-(g.home-HOME_CAP)) : Math.min(g.home/MARKS.home[1], 1)*25;
+  const ramp = (v, healthy, top) => v <= healthy ? 17*Math.max(0, v)/healthy : 17 + 8*Math.min(1, (v-healthy)/(top-healthy));
+  const cash = g.rent < 0 ? 0 : ramp(g.rent, 3, EXCELLENT.rent);
+  const peace = ramp(g.peace, MARKS.peace[1], EXCELLENT.peace), future = ramp(g.future, MARKS.future[1], EXCELLENT.future);
+  const home = g.home > HOME_CAP ? Math.max(8, 25-(g.home-HOME_CAP)*0.8) : ramp(g.home, MARKS.home[1], EXCELLENT.home);
   return Math.round(cash + peace + future + home);
 }
 const nowScore = () => scoreOf({rent:S.cash/RENT(), peace:S.peace, home:S.home, future:S.future});
@@ -2334,7 +2342,7 @@ function renderEnd(app){
       <p class="bench">Healthy marks: Peace ${MARKS.peace[1]}, Future ${MARKS.future[1]} (you started at 20), and Home between ${MARKS.home[1]} and ${HOME_CAP}. Above ${HOME_CAP}, home may be loving you at your own expense. For cash, healthy is three months' rent saved.</p>
       <div class="lesson">${lesson()}</div>
     </div>
-    <div class="score"><div><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div><p>100 means all four meters are healthy at the same time.</p></div>
+    <div class="score"><div><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div><p>Healthy on all four meters is about 70. A perfect 100 needs all four to be excellent.</p></div>
     ${postBoxHTML()}
     ${roadHTML()}
     ${streakHTML('end')}

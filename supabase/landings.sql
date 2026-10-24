@@ -54,3 +54,7 @@ end $$;
 drop trigger if exists landings_guard on public.landings;
 create trigger landings_guard before insert on public.landings
   for each row execute function public.landings_guard();
+
+-- Shine Eye (added later): how many traps the player spotted.
+alter table public.landings add column if not exists spotted smallint not null default 0 check (spotted between 0 and 15);
+grant insert (spotted) on public.landings to anon, authenticated;
