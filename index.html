@@ -1180,10 +1180,6 @@ function render(){
           <p>Each meter is out of 100, and 60 or more is healthy. There are no right answers. Every choice follows you to the end of the game.</p>
         </div>
       </details>
-      <details class="how">
-        <summary>Naija words in this game</summary>
-        <div class="how-body">${glossaryHTML()}</div>
-      </details>
       <label class="when" for="origin">Which state are you leaving from?</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
       <label class="when" for="gender">I am a</label>
@@ -1203,6 +1199,10 @@ function render(){
       </div>
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
       <div class="foot">About 5 minutes. Every choice follows you.</div>
+      <details class="how">
+        <summary>Naija words in this game</summary>
+        <div class="how-body">${glossaryHTML()}</div>
+      </details>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
     </div>`;
     document.getElementById('origin').onchange = e => {
