@@ -905,6 +905,12 @@ const UK = () => [
    {l:"Book the flight. Jollof is worth it", fx:{cash:-780, home:10, peace:4}, r:"You dance until 3am, eat three plates of jollof, and come back broke and very happy."},
    {l:"Send money instead. Present in spirit and cash", fx:{cash:-120, home:4}, r:"Your aunty says they understand. Nobody in your family has ever understood anything."},
    {l:"Join on video call. Network permitting", fx:{home:-3, peace:2}, r:"The network drops during the vows. You watch the rest on someone's Instagram story."}]},
+ {day:22, credit:'Nafeezie', own:1, text:`After weeks of searching, you finally get an en suite room in ${T()}. Your own bathroom, at last. The kitchen is shared with five strangers, and one of them has quietly moved his wife in. Nobody in the house agrees on what "clean" means.`,
+  choices:[
+   {l:"Report the extra housemate to the landlord", fx:{peace:-4, future:3}, set:{flat:'reported'}, r:"The landlord sends a polite email to the whole house. Everyone knows it was you, and the kitchen goes very quiet."},
+   {l:"Say nothing. You are not the house police", fx:{peace:-6}, set:{flat:'quiet'}, r:"His wife cooks better than all of you, but the queue for the hob is now forty minutes and the fridge has no space left."},
+   {l:"Call a house meeting and make a cleaning rota", fx:{peace:5, future:2}, set:{flat:'rota'}, r:"Six strangers argue for an hour about bins. The rota lasts nine days, which is a record for this house."},
+   {l:"Keep your pots, plates, and food in your room", fx:{cash:-A(40), peace:3}, set:{flat:'room'}, r:"You buy a mini fridge and a kettle and cook when the kitchen is empty. Your room smells of stew, but your plates are clean."}]},
  {day:20, when: s => pickV('uk20',2)===0, text:`It has rained in ${T()} for nineteen of your first twenty days. The houses are small, the sky is grey, and you start asking yourself whether you have made the same mistake twice.`,
   choices:[
    {l:"Buy vitamin D. The sun is not coming", fx:{cash:-60, peace:8}, r:"Two weeks later you feel a little brighter. It could be the vitamins, or it could be stubbornness."},
@@ -1351,13 +1357,13 @@ const barNight = () => ({day:1, credit:TOLD, told:1, when: s => s.landing===1 &&
    {l:"Wait at the bar. He must be coming back", fx:{peace:-12}, r:"The bar closes at midnight, and he does not come back. You sleep on a bench by the door with your suitcase between your knees, and that is your first night abroad."},
    {l:"Call everyone you know until somebody answers", fx:{cash:-A(60), peace:-5, home:2}, r:"At 1am, a friend of a friend picks up and sends you an address. You arrive by taxi with your suitcase and a very long story."},
    {l:"Book the cheapest room nearby, right now", fx:{cash:-A(90), peace:-2, future:2}, r:"A tired receptionist gives you a room above a takeaway. You lie awake and finally understand what \"we will manage\" meant."}]});
-const guestStay = () => { const c = C(), host = s => s.landing===1 && pickV('HOST',2)===0; return [
- {day:18, ask:1, credit:TOLD, told:1, when: host, from:c.friend, sub:"Secondary school friend", text:`${c.please}, my cousin just landed in ${T()} and he has nowhere to stay. Can he stay with you for one month? Just one month, while he finds his feet.`,
+const guestStay = () => { const c = C(), host = s => pickV('HOST',2)===0; return [
+ {day:30, label:'Two months later', ask:1, credit:TOLD, told:1, when: host, from:c.friend, sub:"Secondary school friend", text:`You have finally found your feet in ${T()}. Then a message comes in. "${c.please}, my cousin just landed and he has nowhere to stay. Can he stay with you for one month? Just one month, while he finds his feet."`,
   choices:[
    {l:"Say yes. One month only", fx:{cash:-A(100), home:4, peace:-4}, set:{guest:'yes'}, r:"He arrives with two Ghana Must Go bags and a big smile. He eats well, sleeps well, and thanks you every single day."},
    {l:"Say yes, with a move-out date in writing", fx:{home:2, peace:-1, future:2}, set:{guest:'dated'}, r:"He signs your note like a contract. It feels awkward, and it also feels safe."},
    {l:"Say no. Your room is barely enough for you", fx:{home:-5, peace:3}, r:"Your friend says he understands. Then he tells two people that abroad has changed you."}]},
- {day:27, credit:TOLD, told:1, when: s => host(s) && s.f.guest==='yes', text:"It has been a month. Your guest has his own side of the wardrobe now, your food budget has doubled, and he has not mentioned moving out once.",
+ {day:30, label:'Three months later', credit:TOLD, told:1, when: s => host(s) && s.f.guest==='yes', text:"It has been a month. Your guest has his own side of the wardrobe now, your food budget has doubled, and he has not mentioned moving out once.",
   choices:[
    {l:"Give him two weeks' notice, kindly but firmly", fx:{peace:4, home:-3}, set:{guest:'notice'}, r:"He looks hurt for one evening. By the end of the week, he has viewed three rooms."},
    {l:"Let it slide. Maybe next month", fx:{cash:-A(150), peace:-8}, set:{guest:'stayed'}, r:"Next month becomes the month after. The host who told us this story had a one-month guest who stayed for eight."},
@@ -1872,14 +1878,14 @@ function wireBack(){
     render(); scrollTo(0,0);
   };
 }
-const creditTag = sc => sc.credit ? `<div class="credit-tag">${sc.told ? `A real story, told to ${sc.credit}` : `A real story, shared by ${sc.credit}`}</div>` : '';
+const creditTag = sc => sc.credit ? `<div class="credit-tag">${sc.own ? "From Nafeezie's own japa" : sc.told ? `A real story, told to ${sc.credit}` : `A real story, shared by ${sc.credit}`}</div>` : '';
 function intro(sc, compact){
   if(sc.from){
-    return `<div class="when">Day ${sc.day} · New message</div>${creditTag(sc)}
+    return `<div class="when">${sc.label || 'Day '+sc.day} · New message</div>${creditTag(sc)}
       <div class="thread"><div class="who"><div class="avatar">${sc.from[0]}</div><div><b>${sc.from}</b><small>${sc.sub||''}</small></div></div>
       <div class="bubble">${sc.text}</div></div>`;
   }
-  return `<div class="when">Day ${sc.day}</div>${creditTag(sc)}${compact?'':`<div class="narr">${sc.text}</div>`}`;
+  return `<div class="when">${sc.label || 'Day '+sc.day}</div>${creditTag(sc)}${compact?'':`<div class="narr">${sc.text}</div>`}`;
 }
 
 function verdict(){
@@ -1919,6 +1925,7 @@ function receipts(){
   if(f.spouse==='looked') out.push(S.gender==='man' ? "Every Nigerian woman at the community meet-up was engaged or not ready for anything serious." : S.gender==='woman' ? "Every Nigerian man at the community meet-up was married or focusing on himself." : "Everyone single at the community meet-up was married, engaged, or focusing on themselves.");
   if(f.network && R.key==='ca') out.push("A community event at minus 20 got you your first real job lead.");
   if(f.coat==='none') out.push("Naija blood was not enough for the cold.");
+  if(f.flat==='quiet') out.push("Your housemate's wife still lives in the kitchen. You still say nothing.");
   if(f.guest==='stayed') out.push("Your one-month guest is now on month two, and counting.");
   if(f.guest==='moved') out.push("You paid a deposit to buy back your own living room.");
   return out.slice(0,4);
