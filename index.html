@@ -338,6 +338,8 @@ details.custom summary{font-weight:700}
 .lb-row b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-row small{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-val{font-weight:800;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.lb-rankline{font-size:17px!important}
+.lb-rankline b{font-family:var(--display);font-size:22px;color:var(--accent)}
 .lb-row.me{background:var(--bubble);border-radius:10px;padding:8px 6px}
 /* dark mode: green text on dark green is unreadable, so headings switch to gold */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) :is(.how summary,.route-btn b,.local b,.journey-line,.lb-tab b,.gloss dt,.storylink,.vbadge.got b){color:var(--gold)}}
@@ -1546,7 +1548,7 @@ function render(){
       <p class="mirror"><b>More than a game.</b> A 5-minute reality check on your money, your peace of mind, your standing at home, and the future you came to build.</p>
       <label class="when" for="origin">Leaving from</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
-      <label class="when" for="pname">Your name (optional)</label>
+      <label class="when" for="pname">Your name for the leaderboard (optional)</label>
       <input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="So the game knows who landed" value="${getName().replace(/"/g,'&quot;')}">
       <div class="when quick-ask">Tap where you are landing</div>
       <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select"><option value="">Surprise me</option>${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
@@ -1894,7 +1896,7 @@ async function drawCard(title, line, journey, rec){
   x.fillStyle=gold; x.font="700 30px 'DM Sans', sans-serif"; x.fillText(S.daily ? `NOW YOU HAVE LANDED · TODAY'S LANDING ${dayLabel(S.daily).toUpperCase()}` : 'NOW YOU HAVE LANDED', 80, 110);
   x.fillStyle='rgba(255,255,255,.85)'; x.font="600 34px 'DM Sans', sans-serif";
   wrapText(x, journey, 900).slice(0,2).forEach((l,i)=>x.fillText(l, 80, 168+i*44));
-  x.fillStyle=gold; x.font="700 28px 'DM Sans', sans-serif"; x.fillText(`${getName() ? getName().toUpperCase()+"'S" : 'MY'} DAY 30 VERDICT · SCORE ${nowScore()}/100`, 80, 300);
+  x.fillStyle=gold; x.font="700 28px 'DM Sans', sans-serif"; x.fillText(`${getName() ? getName().toUpperCase()+"'S" : 'MY'} DAY 30 VERDICT · SCORE ${nowScore()}/100${S.rank ? ` · #${S.rank} THIS WEEK` : ''}`, 80, 300);
   x.fillStyle='#FFFFFF'; x.font="800 88px 'Playfair Display', Georgia, serif";
   let y=400; wrapText(x, title, 920).slice(0,3).forEach(l=>{ x.fillText(l, 80, y); y+=100; });
   x.fillStyle='rgba(255,255,255,.92)'; x.font="600 40px 'DM Sans', sans-serif"; y+=10;
@@ -2091,37 +2093,29 @@ function openBoard(){
 function postBoxHTML(){
   const st = S.st || {r:0, s:0, g:0};
   const facts = `<p>This game you said no to home <b>${st.r}</b> time${st.r===1?'':'s'}, sent <b>${NGN0(st.s)}</b> home, and fell for <b>${st.g}</b> trap${st.g===1?'':'s'}.</p>`;
-  if(S.posted) return `<div class="lbbox"><div class="when">Weekly leaderboard</div>${facts}<p><b>You are on this week's board.</b></p><button class="ghost" type="button" onclick="openBoard()">See this week's board</button></div>`;
-  return `<div class="lbbox" id="lbbox"><div class="when">Weekly leaderboard</div>${facts}
-    <label class="when" for="lbname">Name on the board</label>
-    <input id="lbname" class="select" type="text" maxlength="20" autocomplete="nickname" placeholder="Anonymous lander" value="${esc(getName())}">
-    <button class="primary" id="lbgo" type="button">Post my landing</button>
-    <button class="ghost" type="button" onclick="openBoard()">See this week's board</button>
-    <div class="toast" id="lbtoast" role="status"></div></div>`;
+  const who = esc(getName() || 'Anonymous lander');
+  const status = S.rank ? `<p class="lb-rankline">You are <b>#${S.rank}</b> on this week's board, out of ${S.rankOf} landing${S.rankOf===1?'':'s'}.</p><p class="small" style="color:var(--muted);font-size:13px">Posted as ${who}.${getName()?'':' Add your name at the start of your next game to show it here.'}</p>`
+    : S.postFail ? `<p>${S.postFail}</p><button class="ghost" type="button" id="lbretry">Try again</button>`
+    : `<p>Adding you to this week's board as ${who}...</p>`;
+  return `<div class="lbbox" id="lbbox"><div class="when">Weekly leaderboard</div>${status}${facts}<button class="ghost" type="button" onclick="openBoard()">🏆 See this week's board</button></div>`;
 }
-function wirePost(title){
-  const go = document.getElementById('lbgo'); if(!go) return;
-  go.onclick = async () => {
-    const t = document.getElementById('lbtoast'), raw = document.getElementById('lbname').value;
-    const nm = setName(raw);
-    if(BAD_NAME.test(nm)){ t.style.color = 'var(--bad)'; t.textContent = 'Please pick a different name for the board.'; return; }
-    const st = S.st || {r:0, s:0, g:0};
-    const body = {name: nm || 'Anonymous lander', route:R.key, town:String(L.town).slice(0,40), verdict:String(title).slice(0,40), score:Math.max(0, Math.min(100, nowScore())),
-      refused:Math.min(30, st.r), sent:Math.min(20000, Math.max(0, st.s)), fooled:Math.min(10, st.g), daily:!!S.daily};
-    go.disabled = true; go.textContent = 'Posting...'; t.style.color = ''; t.textContent = '';
-    try{
-      const res = await fetch(SB_URL + '/rest/v1/landings?select=created_at', {method:'POST', headers:{apikey:SB_KEY, 'Content-Type':'application/json', Prefer:'return=representation'}, body:JSON.stringify(body)});
-      if(res.status>=400 && res.status<500){ go.disabled = false; go.textContent = 'Post my landing'; t.style.color = 'var(--bad)'; t.textContent = 'The board is busy right now. Try again in a minute, or try a different name.'; return; }
-      if(!res.ok) throw new Error('post ' + res.status);
-      try{ const out = await res.json(); myPostAt = Date.parse(out[0].created_at); }catch(e){}
-      S.posted = true; track('leaderboard-post'); SFX.good();
-      document.getElementById('lbbox').outerHTML = postBoxHTML();
-      openBoard();
-    }catch(e){
-      go.disabled = false; go.textContent = 'Post my landing';
-      t.style.color = 'var(--bad)'; t.textContent = 'That did not go through. Check your connection and try again.';
-    }
-  };
+// every finished game goes on the board automatically, then reports its rank
+async function autoPost(title, onRank){
+  const paint = () => { const b = document.getElementById('lbbox'); if(b){ b.outerHTML = postBoxHTML(); const r = document.getElementById('lbretry'); if(r) r.onclick = () => { S.postFail = null; paint(); autoPost(title, onRank); }; } };
+  if(S.posted){ paint(); return; }
+  const st = S.st || {r:0, s:0, g:0}, nm = getName(), score = Math.max(0, Math.min(100, nowScore()));
+  const body = {name: (nm && !BAD_NAME.test(nm)) ? nm : 'Anonymous lander', route:R.key, town:String(L.town).slice(0,40), verdict:String(title).slice(0,40), score,
+    refused:Math.min(30, st.r), sent:Math.min(20000, Math.max(0, st.s)), fooled:Math.min(10, st.g), daily:!!S.daily};
+  try{
+    const res = await fetch(SB_URL + '/rest/v1/landings?select=created_at', {method:'POST', headers:{apikey:SB_KEY, 'Content-Type':'application/json', Prefer:'return=representation'}, body:JSON.stringify(body)});
+    if(res.status>=400 && res.status<500){ S.postFail = 'The board is busy right now, so this game was not added.'; paint(); return; }
+    if(!res.ok) throw new Error('post ' + res.status);
+    S.posted = true; track('leaderboard-post');
+    try{ const out = await res.json(); myPostAt = Date.parse(out[0].created_at); }catch(e){}
+    const rows = await loadBoard(true);
+    S.rank = 1 + rows.filter(r=>r.score > score).length; S.rankOf = rows.length;
+    paint(); if(onRank) onRank(S.rank);
+  }catch(e){ S.postFail = 'We could not reach the board. Check your connection.'; paint(); }
 }
 
 /* ---------- Your name, your score, your road to making it ---------- */
@@ -2228,7 +2222,7 @@ function renderEnd(app){
     <div class="foot credit">Created by <b>Nafeezie</b> · © 2026</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
   </div>`;
-  wireRemind(); wirePost(title);
+  wireRemind();
   document.getElementById('pada').onclick = ()=>{
     track('japada'); SFX.land();
     const box = document.getElementById('padabox'), c = C(), rent = RENT();
@@ -2243,17 +2237,18 @@ function renderEnd(app){
   document.getElementById('again').onclick = ()=>{ fresh(); pick.route=null; pick.qroute=null; pick.daily=false; pick.duo=0; render(); scrollTo(0,0); };
   const SITE = 'https://nowyouhavelanded.com';
   let cardFile = null, cardBlob = null;
-  drawCard(title, line, journey, rec).then(canvas => {
+  const paintCard = () => drawCard(title, line, journey, rec).then(canvas => {
     const img = document.getElementById('cardimg'); if(!img) return;
     img.src = canvas.toDataURL('image/png'); img.hidden = false;
     canvas.toBlob(b => { cardBlob = b; try{ cardFile = new File([b], 'my-landed-verdict.png', {type:'image/png'}); }catch(e){} }, 'image/png');
   });
+  paintCard();
   document.getElementById('sharecard').onclick = () => {
     track('share-card');
     const t = document.getElementById('toast');
     if(!cardBlob){ t.textContent = "Your card is still being made. Try again in a second."; return; }
     if(cardFile && navigator.canShare && navigator.canShare({files:[cardFile]})){
-      navigator.share({files:[cardFile], text:`${S.daily ? `Today's Landing, ${dayLabel(S.daily)}. ` : ''}My verdict: ${title}. What is yours? ${SITE}`}).catch(()=>{});
+      navigator.share({files:[cardFile], text:`${S.daily ? `Today's Landing, ${dayLabel(S.daily)}. ` : ''}My verdict: ${title}.${S.rank ? ` I am #${S.rank} on this week's leaderboard.` : ''} What is yours? ${SITE}`}).catch(()=>{});
       return;
     }
     try{
@@ -2262,10 +2257,16 @@ function renderEnd(app){
       t.textContent = "Card saved. Post it on your WhatsApp status, LinkedIn, or Instagram.";
     }catch(e){ t.textContent = "Press and hold the card above to save it."; }
   };
-  const text = share + ' Play here: ' + SITE;
   const enc = encodeURIComponent;
-  document.getElementById('s-wa').href = 'https://wa.me/?text=' + enc(text);
-  document.getElementById('s-x').href = 'https://twitter.com/intent/tweet?text=' + enc(share) + '&url=' + enc(SITE);
+  const shareNow = () => S.rank ? share.replace(' Wetin be your own?', ` I am #${S.rank} on this week's leaderboard. Wetin be your own?`) : share;
+  let text = shareNow() + ' Play here: ' + SITE;
+  const setLinks = () => {
+    text = shareNow() + ' Play here: ' + SITE;
+    document.getElementById('s-wa').href = 'https://wa.me/?text=' + enc(text);
+    document.getElementById('s-x').href = 'https://twitter.com/intent/tweet?text=' + enc(shareNow()) + '&url=' + enc(SITE);
+  };
+  setLinks();
+  autoPost(title, () => { setLinks(); paintCard(); });
   document.getElementById('s-li').href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + enc(SITE);
   ['s-wa','s-x','s-li'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click',()=>track('share-'+id.slice(2))); });
   const sl=document.querySelector('.storylink'); if(sl) sl.addEventListener('click',()=>track('story-form'));

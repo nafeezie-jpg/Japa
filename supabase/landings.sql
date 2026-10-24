@@ -34,7 +34,7 @@ grant select on public.landings to anon, authenticated;
 grant insert (name, route, town, verdict, score, refused, sent, fooled, daily) on public.landings to anon, authenticated;
 
 -- Spam protection (added later). Run this part on its own if the table already exists.
--- Limits: 20 posts a minute across everyone, 5 posts an hour per name, and no rude names.
+-- Limits: 20 posts a minute across everyone, 20 posts an hour per name, and no rude names.
 create or replace function public.landings_guard() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
@@ -45,7 +45,7 @@ begin
     raise exception 'The board is busy. Try again in a minute.';
   end if;
   if new.name <> 'Anonymous lander'
-     and (select count(*) from public.landings where name = new.name and created_at > now() - interval '1 hour') >= 5 then
+     and (select count(*) from public.landings where name = new.name and created_at > now() - interval '1 hour') >= 20 then
     raise exception 'That name has posted a lot this hour.';
   end if;
   return new;
