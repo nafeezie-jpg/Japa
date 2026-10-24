@@ -359,6 +359,8 @@ const A = x => Math.round(x*R.k/5)*5;                 // shared amounts, convert
 const RENT = () => Math.round(R.rent*MULT[L.cost]/10)*10;
 const NGN_PER_USD = 1500;
 const N = x => '₦' + (Math.round(x*NGN_PER_USD/5000)*5000).toLocaleString('en-GB') + ' (about ' + M(A(x)) + ')';
+const NG = x => '₦' + (Math.round(x*NGN_PER_USD/5000)*5000).toLocaleString('en-GB');
+const HRS = x => Math.max(1, Math.round(A(x)/({us:15, uk:12, ca:17}[R.key])));
 const M = x => R.cur + Math.abs(Math.round(x)).toLocaleString('en-GB');
 const T = () => L.town;
 
@@ -564,7 +566,13 @@ const friend = () => { const c = C(); return [
    {l:`Send ${N(60)}. Friendship tax`, fx:{cash:-A(60), home:4}, r:"He replies, \"My person! I knew you were still real.\" The price of being real is now 60."},
    {l:"Call him for an hour. Talk is cheap, literally", fx:{home:4, peace:4}, r:"You laugh about secondary school until 2am. He does not mention money once. You feel richer anyway."},
    {l:"Explain that abroad has not changed your account balance", fx:{home:-3, peace:2}, r:"He says your account is just shy. You tell him your account is in therapy."}]}
-][pickV('E',5)]; };
+,
+ {day:28, from:c.cousin, sub:"Cousin", text:`You sent ${c.cousin} ${NG(60)} for school books. The reply comes in two seconds. "Thank you o. So na only ${M(A(60))} be this?" That ${M(A(60))} is ${HRS(60)} hours of your work.`,
+  choices:[
+   {l:"Reply with your hourly rate and a calculator emoji", fx:{peace:3, home:-3}, r:"You get left on read. Time is money, and you just sent the invoice."},
+   {l:`Explain that ${HRS(60)} hours of work is not small`, fx:{peace:2, home:1}, r:"They say sorry. They do not fully understand, but they say sorry, and you will take it."},
+   {l:"Say nothing. Next time, send naira without the receipt", fx:{peace:-3, home:2}, r:"You swallow it. Abroad has taught you that every naira you send home has your hours inside it."}]}
+][pickV('E',6)]; };
 
 const familyGroup = () => { const c = C(); return [
  {day:13, from:"Family WhatsApp group", sub:`${c.aunty} posted`, text:`${c.exclaim} See our person abroad! Proud of you o! [A photo of you from your first week, standing beside a bus stop like it is the Eiffel Tower.]`,
@@ -624,7 +632,7 @@ const smallWin = () => { const c = C(), workplace = STU() ? 'class' : 'work'; re
    {l:`Accept the ${N(400)}. ${O()} money, abroad address`, fx:{cash:A(400), future:6, peace:-2}, r:"You work evenings for two weeks. The payment lands, and so does a reminder that your skills still matter."},
    {l:"Negotiate. You are abroad now, after all", fx:{cash:A(550), future:4, peace:-1}, r:"They agree faster than expected. You wonder how long you have been undercharging."},
    {l:"Decline politely. Rest is also a strategy", fx:{peace:5}, r:"They say the door is always open. It feels good to be wanted."}]},
- {day:17, text:`A refund you forgot about lands in your account. ${N(180)}, just like that.`,
+ {day:17, text:`A refund you forgot about lands in your account. ${M(A(180))}, just like that.`,
   choices:[
    {l:"Save every penny. Future you is watching", fx:{cash:A(180), future:4}, r:"You move it to savings and feel like a responsible adult for an entire afternoon."},
    {l:"Treat yourself. You deserve one nice thing", fx:{cash:A(90), peace:9}, r:"Proper restaurant, no calculator. It tastes like freedom."},
@@ -639,7 +647,13 @@ const smallWin = () => { const c = C(), workplace = STU() ? 'class' : 'work'; re
    {l:"Replay it ten times", fx:{peace:10}, r:"By the tenth time, you are crying in the kitchen. The good kind."},
    {l:"Call her back immediately", fx:{peace:6, home:6}, r:"You talk for an hour about nothing. It is the best hour of the month."},
    {l:"Save it for hard days", fx:{peace:5, future:2}, r:"You star the voice note. On bad days, it will be there."}]}
-][pickV('H',5)]; };
+,
+ {day:17, from:c.mum, sub:`${c.home} · bank alert`, text:`${c.mum} sends you ${NG(25)} "for your upkeep". It lands as ${M(A(25))}, which is about ${HRS(25)} hours of your pay. You know she sold something to send it.`,
+  choices:[
+   {l:"Accept it with both hands. It is love, not maths", fx:{cash:A(25), home:6, peace:6}, r:"You thank her properly. Some money is measured in sacrifice, and hers just outweighed your salary."},
+   {l:`Send it back with ${M(A(50))} on top`, fx:{cash:-A(50), home:8, peace:2}, r:"She calls you stubborn and then tells the whole family. You gain respect and lose money, which is how abroad works."},
+   {l:"Tell her to keep it. The exchange rate already ate it", fx:{home:-4, peace:-3}, r:"She goes quiet. You meant well, but she heard that her help is useless. Exchange rates hurt feelings too."}]}
+][pickV('H',6)]; };
 
 const doubt = (day, where, extra) => ({day, text: STU() ? `You sit in the library after a long day. Your lecturer still cannot pronounce your name, and your account balance is lower than your GPA. You start asking yourself why you came.` : `${where} You had staff in ${O()}. Today someone half your age told you the role needs "someone more entry level". You start asking yourself why you left.`,
   choices:[
