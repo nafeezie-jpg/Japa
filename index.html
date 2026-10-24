@@ -207,6 +207,8 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 :root[data-theme="dark"] .result{background:var(--card)}
 .verdict{box-shadow:0 16px 40px rgba(16,47,40,.15)}
 .f-cloud{fill:var(--card);stroke:var(--muted);stroke-width:2}
+.storylink{display:block;text-align:center;background:var(--bubble);color:var(--green2);font-weight:700;text-decoration:none;border-radius:12px;padding:14px 16px}
+.storylink:hover{text-decoration:underline}
 .foot{font-size:13px;color:var(--muted);text-align:center}
 .fade{animation:fade .35s ease both}
 @keyframes fade{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -1378,6 +1380,7 @@ function renderEnd(app){
       <button class="ghost" id="again">Start a new life</button>
     </div>
     <div id="movebox" hidden class="routes"></div>
+    <a class="storylink" href="https://tally.so/r/q5480d" target="_blank" rel="noopener">Have a japa story? Share it and it could become a scene in the game →</a>
     <div class="toast" id="toast" role="status"></div>
     <div class="foot">Everybody wants to japa. Nobody tells you what happens after you land.</div>
     <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
