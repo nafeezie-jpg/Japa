@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Everybody wants to japa. Nobody tells you what happens after you land. A free 30-day game about your first month abroad.">
 <meta property="og:title" content="Now You Have Landed">
-<meta property="og:description" content="Everybody wants to japa. Nobody tells you what happens after you land. A free 5-minute game.">
+<meta property="og:description" content="Everybody wants to japa. Nobody tells you what happens after you land. Play free in your browser.">
 <meta property="og:url" content="https://nowyouhavelanded.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Now You Have Landed">
@@ -220,6 +220,8 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .f-cloud{fill:var(--card);stroke:var(--muted);stroke-width:2}
 .storylink{display:block;text-align:center;background:var(--bubble);color:var(--green2);font-weight:700;text-decoration:none;border-radius:12px;padding:14px 16px}
 .storylink:hover{text-decoration:underline}
+.route-panel{display:grid;gap:10px;background:var(--card);border:1.5px solid var(--green2);border-top:0;border-radius:0 0 12px 12px;margin-top:-12px;padding:16px 14px 14px}
+.route-btn.on{border-radius:12px 12px 0 0}
 .foot{font-size:13px;color:var(--muted);text-align:center}
 .fade{animation:fade .35s ease both}
 @keyframes fade{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -1101,15 +1103,14 @@ function render(){
       <select id="culture" class="select">${Object.entries(CULTURES).map(([k,v])=>`<option value="${k}"${k===pick.culture?' selected':''}>${v.label}</option>`).join('')}</select>
       <div class="when">Where are you landing?</div>
       <div class="routes">
-        ${Object.values(ROUTES).map(r=>`<button class="route-btn${rk===r.key?' on':''}" data-r="${r.key}" aria-pressed="${rk===r.key}"><b>${r.label}</b><span>${r.sub}</span></button>`).join('')}
-      </div>
-      ${rk ? `<label class="when" for="place">${ROUTES[rk].ask}</label>
+        ${Object.values(ROUTES).map(r=>`<button class="route-btn${rk===r.key?' on':''}" data-r="${r.key}" aria-pressed="${rk===r.key}"><b>${r.label}</b><span>${r.sub}</span></button>${rk===r.key ? `<div class="route-panel" id="routepanel"><label class="when" for="place">${ROUTES[rk].ask}</label>
         <select id="place" class="select">${placeOptions(rk)}</select>
         <label class="when" for="path">How did you japa?</label>
         <select id="path" class="select">${pathOptions(rk).map(([k,l])=>`<option value="${k}"${k===pick.path?' selected':''}>${l}</option>`).join('')}</select>
         <label class="when" for="fund">How did you fund the move?</label>
         <select id="fund" class="select">${[['savings','From my savings'],['sold','Sold everything to come'],['borrowed','Borrowed money to come'],['kept','Kept my house back home']].map(([k,l])=>`<option value="${k}"${k===pick.fund?' selected':''}>${l}</option>`).join('')}</select>
-        <button class="primary" id="go">Land in ${ROUTES[rk].label}</button>` : ''}
+        <button class="primary" id="go">Land in ${ROUTES[rk].label}</button></div>` : ''}`).join('')}
+      </div>
       <div class="foot">About 5 minutes. Every choice follows you.</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
     </div>`;
@@ -1121,7 +1122,7 @@ function render(){
     };
     document.getElementById('culture').onchange = e => { pick.culture = e.target.value; };
     document.getElementById('gender').onchange = e => { pick.gender = e.target.value; };
-    app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = b.dataset.r; render(); });
+    app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = (pick.route===b.dataset.r ? null : b.dataset.r); render(); const rp=document.getElementById('routepanel'); if(rp) rp.scrollIntoView({behavior:'smooth', block:'nearest'}); });
     const go = document.getElementById('go');
     if(go) go.onclick = ()=>{ pick.path = document.getElementById('path').value; pick.fund = document.getElementById('fund').value; begin(rk, document.getElementById('place').value); render(); scrollTo(0,0); };
     const ps = document.getElementById('path'); if(ps) ps.onchange = e => { pick.path = e.target.value; };
