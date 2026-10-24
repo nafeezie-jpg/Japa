@@ -905,12 +905,16 @@ const UK = () => [
    {l:"Book the flight. Jollof is worth it", fx:{cash:-780, home:10, peace:4}, r:"You dance until 3am, eat three plates of jollof, and come back broke and very happy."},
    {l:"Send money instead. Present in spirit and cash", fx:{cash:-120, home:4}, r:"Your aunty says they understand. Nobody in your family has ever understood anything."},
    {l:"Join on video call. Network permitting", fx:{home:-3, peace:2}, r:"The network drops during the vows. You watch the rest on someone's Instagram story."}]},
- {day:22, credit:'Nafeezie', own:1, text:`After weeks of searching, you finally get an en suite room in ${T()}. Your own bathroom, at last. The kitchen is shared with five strangers, and one of them has quietly moved his wife in. Nobody in the house agrees on what "clean" means.`,
+ {day:22, credit:'Nafeezie', own:1, text:`You finally get an en suite room in ${T()}, with a kitchen shared by five strangers. One housemate has quietly moved his wife in. His room pays for one and uses for two, so everyone's bills go up. She is lovely, though.`,
   choices:[
-   {l:"Report the extra housemate to the landlord", fx:{peace:-4, future:3}, set:{flat:'reported'}, r:"The landlord sends a polite email to the whole house. Everyone knows it was you, and the kitchen goes very quiet."},
-   {l:"Say nothing. You are not the house police", fx:{peace:-6}, set:{flat:'quiet'}, r:"His wife cooks better than all of you, but the queue for the hob is now forty minutes and the fridge has no space left."},
-   {l:"Call a house meeting and make a cleaning rota", fx:{peace:5, future:2}, set:{flat:'rota'}, r:"Six strangers argue for an hour about bins. The rota lasts nine days, which is a record for this house."},
-   {l:"Keep your pots, plates, and food in your room", fx:{cash:-A(40), peace:3}, set:{flat:'room'}, r:"You buy a mini fridge and a kettle and cook when the kitchen is empty. Your room smells of stew, but your plates are clean."}]},
+   {l:"Tell the landlord", fx:{peace:-4, future:2}, set:{flat:'reported'}, r:"The bills go down. So does the mood in the kitchen."},
+   {l:"Say nothing. She is nice", fx:{cash:-A(25), peace:-2}, set:{flat:'quiet'}, r:"You pay a little more every month and keep the peace."},
+   {l:"Ask him to pay a bit more", fx:{peace:2}, set:{flat:'asked'}, r:"He agrees at once. Then he forgets."}]},
+ {day:24, credit:'Nafeezie', own:1, text:"Your housemates have very different ideas of clean. Pots soak in the sink for days, and nobody takes out the bin.",
+  choices:[
+   {l:"Make a cleaning rota", fx:{peace:4, future:1}, r:"It lasts nine days. A house record."},
+   {l:"Keep your plates in your room", fx:{cash:-A(20), peace:3}, r:"Your plates stay clean. Your room smells of stew."},
+   {l:"Clean it all yourself", fx:{peace:-5}, r:"The kitchen shines. Nobody says thank you."}]},
  {day:20, when: s => pickV('uk20',2)===0, text:`It has rained in ${T()} for nineteen of your first twenty days. The houses are small, the sky is grey, and you start asking yourself whether you have made the same mistake twice.`,
   choices:[
    {l:"Buy vitamin D. The sun is not coming", fx:{cash:-60, peace:8}, r:"Two weeks later you feel a little brighter. It could be the vitamins, or it could be stubbornness."},
@@ -1925,7 +1929,7 @@ function receipts(){
   if(f.spouse==='looked') out.push(S.gender==='man' ? "Every Nigerian woman at the community meet-up was engaged or not ready for anything serious." : S.gender==='woman' ? "Every Nigerian man at the community meet-up was married or focusing on himself." : "Everyone single at the community meet-up was married, engaged, or focusing on themselves.");
   if(f.network && R.key==='ca') out.push("A community event at minus 20 got you your first real job lead.");
   if(f.coat==='none') out.push("Naija blood was not enough for the cold.");
-  if(f.flat==='quiet') out.push("Your housemate's wife still lives in the kitchen. You still say nothing.");
+  if(f.flat==='quiet') out.push("You still pay extra bills for your housemate's wife. She is still lovely.");
   if(f.guest==='stayed') out.push("Your one-month guest is now on month two, and counting.");
   if(f.guest==='moved') out.push("You paid a deposit to buy back your own living room.");
   return out.slice(0,4);
