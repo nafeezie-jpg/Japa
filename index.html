@@ -222,6 +222,17 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .storylink:hover{text-decoration:underline}
 .route-panel{display:grid;gap:10px;background:var(--card);border:1.5px solid var(--green2);border-top:0;border-radius:0 0 12px 12px;margin-top:-12px;padding:16px 14px 14px}
 .route-btn.on{border-radius:12px 12px 0 0}
+.check.daily{align-items:flex-start;background:var(--bubble);border-radius:12px;padding:12px;font-weight:500;font-size:14px}
+.check.daily b{font-size:15px}
+.check.daily input{margin-top:3px}
+.gloss{margin:0;display:grid;gap:8px}
+.gloss dt{font-weight:800;color:var(--green2)}
+.gloss dd{margin:-4px 0 4px;color:var(--muted);font-size:15px}
+.glossbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:14px;text-align:left;padding:4px 0;text-decoration:underline}
+.overlay{position:fixed;inset:0;background:rgba(16,47,40,.55);display:flex;align-items:flex-end;justify-content:center;z-index:50;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.sheet-panel{background:var(--card);color:var(--ink);border-radius:16px;max-width:520px;width:100%;max-height:80vh;overflow:auto;padding:16px 18px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;position:sticky;top:-16px;background:var(--card);padding-top:4px}
+.xbtn{background:var(--bubble);border:0;border-radius:999px;width:34px;height:34px;font-weight:700}
 .foot{font-size:13px;color:var(--muted);text-align:center}
 .fade{animation:fade .35s ease both}
 @keyframes fade{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -324,7 +335,7 @@ const ROUTES = {
 
 const ORIGIN_LIST = [["Abia","Aba"],["Adamawa","Yola","YOL"],["Akwa Ibom","Uyo","QUO"],["Anambra","Onitsha"],["Bauchi","Bauchi","BCU"],["Bayelsa","Yenagoa"],["Benue","Makurdi","MDI"],["Borno","Maiduguri","MIU"],["Cross River","Calabar","CBQ"],["Delta","Asaba","ABB"],["Ebonyi","Abakaliki"],["Edo","Benin City","BNI"],["Ekiti","Ado-Ekiti"],["Enugu","Enugu","ENU"],["FCT","Abuja","ABV"],["Gombe","Gombe","GMO"],["Imo","Owerri","QOW"],["Jigawa","Dutse"],["Kaduna","Kaduna","KAD"],["Kano","Kano","KAN"],["Katsina","Katsina","DKA"],["Kebbi","Birnin Kebbi"],["Kogi","Lokoja"],["Kwara","Ilorin","ILR"],["Lagos","Lagos","LOS"],["Nasarawa","Lafia"],["Niger","Minna","MXJ"],["Ogun","Abeokuta"],["Ondo","Akure","AKR"],["Osun","Osogbo"],["Oyo","Ibadan","IBA"],["Plateau","Jos","JOS"],["Rivers","Port Harcourt","PHC"],["Sokoto","Sokoto","SKO"],["Taraba","Jalingo"],["Yobe","Damaturu"],["Zamfara","Gusau"]];
 const ORIGINS = Object.fromEntries(ORIGIN_LIST.map(([st,city,code])=>[city, code || city.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()]));
-let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work", fund:"savings", gender:"woman"};
+let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work", fund:"savings", gender:"woman", daily:false};
 let shown = null;
 const O = () => S.origin;
 const MULT = [0, .75, 1, 1.35];
@@ -344,13 +355,14 @@ function begin(rk, pname, prev){
   const gender = prev ? prev.gender : pick.gender;
   const path = prev ? 'work' : (pathOptions(rk).some(o=>o[0]===pick.path) ? pick.path : 'work');
   const fund = prev ? prev.fund : (pick.fund||'savings'), sold = fund==='sold';
+  const daily = prev ? (prev.daily||null) : (pick.daily ? todayStr() : null);
   const start = Math.round(ROUTES[rk].start * PATHS[path].mult * ({savings:1, sold:1.4, borrowed:1.3, kept:0.9}[fund]||1) / 50) * 50;
-  S = prev ? {cash:start, start, path, sold, fund, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture, gender}
-           : {cash:start, start, path, sold, fund, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture, gender};
+  S = prev ? {cash:start, start, path, sold, fund, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture, gender, daily}
+           : {cash:start, start, path, sold, fund, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture, gender, daily};
   shown = null;
   history = [];
   idx = nextIndex(0); phase = 'scene';
-  track('start-'+rk+'-'+path+(prev?'-again':''));
+  track('start-'+rk+'-'+path+(prev?'-again':'')+(daily?'-daily':''));
 }
 function localNote(){
   if(L.note) return L.note;
@@ -378,7 +390,10 @@ const CULTURES = {
           bless:'"God bless you, my child," she says.'}
 };
 const C = () => Object.assign({}, CULTURES[S.culture||'general'], {home: S.origin});
-const pickV = (key, n) => { S.v = S.v || {}; if(S.v[key]===undefined) S.v[key] = Math.floor(Math.random()*n); return S.v[key]; };
+const hashStr = t => { let h = 2166136261; for(const ch of t){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+const pickV = (key, n) => { S.v = S.v || {}; if(S.v[key]===undefined) S.v[key] = S.daily ? hashStr(S.daily+'|'+key) % n : Math.floor(Math.random()*n); return S.v[key]; };
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dayLabel(ds){ const [y,m,d]=ds.split('-').map(Number); return d+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]; }
 
 /* ---------- Shared scenes (each has several versions, picked at random per game) ---------- */
 const cap = t => t[0].toUpperCase()+t.slice(1);
@@ -1095,6 +1110,10 @@ function render(){
           <p>Each meter is out of 100, and 60 or more is healthy. There are no right answers. Every choice follows you to the end of the game.</p>
         </div>
       </details>
+      <details class="how">
+        <summary>Naija words in this game</summary>
+        <div class="how-body">${glossaryHTML()}</div>
+      </details>
       <label class="when" for="origin">Which state are you leaving from?</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
       <label class="when" for="gender">I am a</label>
@@ -1109,6 +1128,7 @@ function render(){
         <select id="path" class="select">${pathOptions(rk).map(([k,l])=>`<option value="${k}"${k===pick.path?' selected':''}>${l}</option>`).join('')}</select>
         <label class="when" for="fund">How did you fund the move?</label>
         <select id="fund" class="select">${[['savings','From my savings'],['sold','Sold everything to come'],['borrowed','Borrowed money to come'],['kept','Kept my house back home']].map(([k,l])=>`<option value="${k}"${k===pick.fund?' selected':''}>${l}</option>`).join('')}</select>
+        <label class="check daily" for="daily"><input type="checkbox" id="daily"${pick.daily?' checked':''}> <span><b>Play Today's Landing · ${dayLabel(todayStr())}</b><br>Everyone playing today gets the same requests from home. Compare verdicts with friends.</span></label>
         <button class="primary" id="go">Land in ${ROUTES[rk].label}</button></div>` : ''}`).join('')}
       </div>
       <div class="foot">About 5 minutes. Every choice follows you.</div>
@@ -1124,9 +1144,10 @@ function render(){
     document.getElementById('gender').onchange = e => { pick.gender = e.target.value; };
     app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = (pick.route===b.dataset.r ? null : b.dataset.r); render(); const rp=document.getElementById('routepanel'); if(rp) rp.scrollIntoView({behavior:'smooth', block:'nearest'}); });
     const go = document.getElementById('go');
-    if(go) go.onclick = ()=>{ pick.path = document.getElementById('path').value; pick.fund = document.getElementById('fund').value; begin(rk, document.getElementById('place').value); render(); scrollTo(0,0); };
+    if(go) go.onclick = ()=>{ pick.path = document.getElementById('path').value; pick.fund = document.getElementById('fund').value; pick.daily = document.getElementById('daily').checked; begin(rk, document.getElementById('place').value); render(); scrollTo(0,0); };
     const ps = document.getElementById('path'); if(ps) ps.onchange = e => { pick.path = e.target.value; };
     const fb = document.getElementById('fund'); if(fb) fb.onchange = e => { pick.fund = e.target.value; };
+    const db = document.getElementById('daily'); if(db) db.onchange = e => { pick.daily = e.target.checked; };
     return;
   }
   if(phase==='end'){ return renderEnd(app); }
@@ -1139,7 +1160,7 @@ function render(){
   if(phase==='scene'){
     const list = typeof sc.choices==='function' ? sc.choices(S) : sc.choices;
     const note = sc.day===1 && !sc.from ? `${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
-    app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${list.map((c,i)=>`<button class="choice" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}</div>`;
+    app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${list.map((c,i)=>`<button class="choice" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}${glossLink()}</div>`;
     wireBack();
     app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
       const c = list[+btn.dataset.i];
@@ -1247,6 +1268,49 @@ function lesson(){
   }[m[0]];
 }
 
+
+/* ---------- Naija words ---------- */
+const GLOSSARY = [
+ ['Japa','To leave Nigeria for a new life abroad. From Yoruba, "to run away quickly".'],
+ ['Ajo','A savings circle. Everyone contributes monthly and takes turns collecting the whole pot.'],
+ ['Owambe','A big Yoruba party with loud music, matching outfits, and endless food.'],
+ ['Aso ebi','Matching fabric that family and friends buy and wear to show they belong at a party.'],
+ ['Gele','The dramatic head tie worn with aso ebi.'],
+ ['Abeg','Please, in Pidgin. Usually before a request you should probably say no to.'],
+ ['Ejo · Biko · Don Allah','Please, in Yoruba, Igbo, and Hausa.'],
+ ['Ha! · Chineke! · Kai! · Ehn!','Exclamations of shock, from mild surprise to "I cannot believe what I am hearing".'],
+ ['Omo! · Chai! · Wallahi','Wow, or "I swear". Pidgin, Igbo, and Hausa flavours of disbelief.'],
+ ['E kaaro · Ututu oma · Ina kwana','Good morning, in Yoruba, Igbo, and Hausa.'],
+ ['Omo mi · Nwa m','My child, in Yoruba and Igbo. What every mother calls you before a request.'],
+ ['Umma · Hajiya','Mother, and a respectful title for a woman who has been to Mecca, common in Hausa homes.'],
+ ['Oga','Boss. Also anyone you need a favour from.'],
+ ['Una don hammer','"You have made it big." Said to anyone who lives abroad, regardless of their bank balance.'],
+ ['Abroad don show for your body','"Abroad is showing on you." A compliment about looking well fed or well dressed.'],
+ ['Naija blood dey my body','"I have Nigerian blood." Famous last words before your first winter without a coat.'],
+ ['NEPA','The old national power company. Still the word for electricity cuts at home.'],
+ ['POS','Point of sale. Small kiosks where people withdraw cash or transfer money for a fee.'],
+ ['Ghana Must Go','The big checked plastic bag that has carried every Nigerian relocation in history.'],
+ ['Jollof','Spiced tomato rice and the subject of a permanent friendly war between Nigeria and Ghana.'],
+ ['Small chops','Party snacks: puff-puff, samosa, spring rolls, and gizzard.'],
+ ['Suya · Zobo · Akara','Spicy grilled meat, a hibiscus drink, and fried bean cakes.'],
+ ['Ugu','Fluted pumpkin leaves. Spinach is not a substitute, no matter what anyone says.'],
+ ['Amala · Ofe onugbu · Tuwo','Comfort food from Yoruba, Igbo, and Hausa kitchens.'],
+ ['Sallah','The Eid celebrations, a big family time in Hausa and other Muslim homes.'],
+ ['Cooperative society','A members\' savings and loan group. Very patient, until they visit your mother.']
+];
+function glossaryHTML(){ return `<dl class="gloss">${GLOSSARY.map(([w,m])=>`<dt>${w}</dt><dd>${m}</dd>`).join('')}</dl>`; }
+function openGlossary(){
+  let o = document.getElementById('glossover');
+  if(!o){ o = document.createElement('div'); o.id='glossover'; o.className='overlay'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-label','Naija words');
+    o.innerHTML = `<div class="sheet-panel"><div class="sheet-head"><b>Naija words in this game</b><button class="xbtn" id="glossclose" aria-label="Close">✕</button></div>${glossaryHTML()}</div>`;
+    document.body.appendChild(o);
+    o.addEventListener('click', e=>{ if(e.target===o) o.hidden=true; });
+    o.querySelector('#glossclose').onclick = ()=>{ o.hidden=true; };
+  }
+  o.hidden = false; track('glossary');
+}
+function glossLink(){ return `<button class="glossbtn" type="button" onclick="openGlossary()">What do these Naija words mean?</button>`; }
+
 function wireBack(){
   const b = document.getElementById('back');
   if(b) b.onclick = ()=>{
@@ -1317,7 +1381,7 @@ async function drawCard(title, line, journey, rec){
   x.fillStyle=green; x.fillRect(0,0,W,H);
   x.beginPath(); x.arc(0,H*0.62,46,0,Math.PI*2); x.arc(W,H*0.62,46,0,Math.PI*2); x.fillStyle=paper; x.fill();
   x.setLineDash([18,14]); x.strokeStyle='rgba(255,255,255,.35)'; x.lineWidth=3; x.beginPath(); x.moveTo(70,H*0.62); x.lineTo(W-70,H*0.62); x.stroke(); x.setLineDash([]);
-  x.fillStyle=gold; x.font="700 30px 'DM Sans', sans-serif"; x.fillText('NOW YOU HAVE LANDED', 80, 110);
+  x.fillStyle=gold; x.font="700 30px 'DM Sans', sans-serif"; x.fillText(S.daily ? `NOW YOU HAVE LANDED · TODAY'S LANDING ${dayLabel(S.daily).toUpperCase()}` : 'NOW YOU HAVE LANDED', 80, 110);
   x.fillStyle='rgba(255,255,255,.85)'; x.font="600 34px 'DM Sans', sans-serif";
   wrapText(x, journey, 900).slice(0,2).forEach((l,i)=>x.fillText(l, 80, 168+i*44));
   x.fillStyle=gold; x.font="700 28px 'DM Sans', sans-serif"; x.fillText('MY DAY 30 VERDICT', 80, 300);
@@ -1359,9 +1423,9 @@ function renderEnd(app){
   track('finish-'+title.toLowerCase().replace(/[^a-z]+/g,'-'));
   const where = `${L.town}, ${R.country}`;
   const journey = S.trail.map(t=>t.town).concat([L.town]).join(' → ');
-  const share = `I played Now You Have Landed (${journey}) and I am "${title}". ${line} Finished 30 days with ${money(S.cash)}, Peace ${S.peace}, Home ${S.home}, Future ${S.future}. Wetin be your own?`;
+  const share = `${S.daily ? `Today's Landing, ${dayLabel(S.daily)}. ` : ''}I played Now You Have Landed (${journey}) and I am "${title}". ${line} Finished 30 days with ${money(S.cash)}, Peace ${S.peace}, Home ${S.home}, Future ${S.future}. Wetin be your own?`;
   app.innerHTML = `<div class="scene fade">
-    <div class="when">Day 30 · Your result</div>
+    <div class="when">Day 30 · Your result${S.daily ? ` · Today's Landing, ${dayLabel(S.daily)}` : ''}</div>
     <div class="journey-line">${journey}</div>
     <div class="verdict">
       <div class="label">Now You Have Landed</div>
@@ -1414,7 +1478,7 @@ function renderEnd(app){
     const t = document.getElementById('toast');
     if(!cardBlob){ t.textContent = "Your card is still being made. Try again in a second."; return; }
     if(cardFile && navigator.canShare && navigator.canShare({files:[cardFile]})){
-      navigator.share({files:[cardFile], text:`My verdict: ${title}. What is yours? ${SITE}`}).catch(()=>{});
+      navigator.share({files:[cardFile], text:`${S.daily ? `Today's Landing, ${dayLabel(S.daily)}. ` : ''}My verdict: ${title}. What is yours? ${SITE}`}).catch(()=>{});
       return;
     }
     try{
@@ -1444,7 +1508,7 @@ function renderEnd(app){
       const rk = btn.dataset.r;
       box.innerHTML = `<label class="when" for="place2">${ROUTES[rk].ask}</label><select id="place2" class="select">${placeOptions(rk)}</select><button class="primary" id="go2">Land in ${ROUTES[rk].label}</button>`;
       document.getElementById('go2').onclick = ()=>{
-        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture, sold:S.sold, fund:S.fund, gender:S.gender};
+        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture, sold:S.sold, fund:S.fund, gender:S.gender, daily:S.daily};
         const pl = document.getElementById('place2').value;
         begin(rk, pl, prev); render(); scrollTo(0,0);
       };
