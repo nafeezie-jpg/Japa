@@ -301,6 +301,7 @@ details.custom summary{font-weight:700}
 .remind p{font-size:14px;color:var(--muted);margin:4px 0 10px}
 .remind .row .ghost{box-sizing:border-box;min-width:0;text-align:center;padding:12px 10px;font-size:15px}
 .remind .row a.ghost{display:flex;align-items:center;justify-content:center;text-decoration:none;color:inherit}
+.foot.credit{font-size:14px;margin-top:14px}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1523,6 +1524,7 @@ function render(){
         <summary>Naija words in this game</summary>
         <div class="how-body">${glossaryHTML()}</div>
       </details>
+      <div class="foot credit">Created by <b>Nafeezie</b> (Nafeesat Rabiu-Adebayo) · © 2026</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
     </div>`;
     document.getElementById('origin').onchange = e => {
@@ -1831,6 +1833,7 @@ async function drawCard(title, line, journey, rec){
   rec.slice(0,2).forEach(r=>{ wrapText(x, '› '+r, 920).slice(0,1).forEach(l=>{ x.fillText(l, 80, y); y+=42; }); });
   x.fillStyle=gold; x.font="800 38px 'Playfair Display', Georgia, serif"; x.fillText("What's your verdict?", 80, H-90);
   x.fillStyle='#FFFFFF'; x.font="600 32px 'DM Sans', sans-serif"; x.fillText('Play free at nowyouhavelanded.com', 80, H-44);
+  x.fillStyle='rgba(255,255,255,.6)'; x.font="500 24px 'DM Sans', sans-serif"; x.textAlign='right'; x.fillText('Created by Nafeezie', W-80, H-44); x.textAlign='left';
   return cv;
 }
 
@@ -2003,7 +2006,8 @@ function renderEnd(app){
     <a class="storylink" href="https://tally.so/r/q5480d" target="_blank" rel="noopener">Have a japa story? Share it and it could become a scene in the game →</a>
     <div class="toast" id="toast" role="status"></div>
     <div class="foot">Everybody wants to japa. Nobody tells you what happens after you land.</div>
-    <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
+    <div class="foot credit">Created by <b>Nafeezie</b> (Nafeesat Rabiu-Adebayo) · © 2026</div>
+      <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
   </div>`;
   wireRemind();
   document.getElementById('pada').onclick = ()=>{
