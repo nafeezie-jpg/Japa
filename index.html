@@ -2053,7 +2053,7 @@ function tally(sc, c){
 }
 const BOARDS = [
   {key:'score', title:'Best landing', sub:'Highest Landing Score', val:r=>r.score, show:r=>`${r.score}/100`},
-  {key:'refused', title:'Hardest heart', sub:'Said no to home the most', val:r=>r.refused, show:r=>`${r.refused} no${r.refused===1?'':'s'}`},
+  {key:'refused', title:'Hardest heart', sub:'Said no to home the most', val:r=>r.refused, show:r=>`${r.refused} time${r.refused===1?'':'s'}`},
   {key:'sent', title:'Softest heart', sub:'The Family ATM award', val:r=>r.sent, show:r=>NGN0(r.sent)},
   {key:'fooled', title:'Most gullible', sub:'Fell for the most traps', val:r=>r.fooled, show:r=>`${r.fooled} trap${r.fooled===1?'':'s'}`}
 ];
@@ -2116,6 +2116,58 @@ async function autoPost(title, onRank){
     S.rank = 1 + rows.filter(r=>r.score > score).length; S.rankOf = rows.length;
     paint(); if(onRank) onRank(S.rank);
   }catch(e){ S.postFail = 'We could not reach the board. Check your connection.'; paint(); }
+}
+
+/* ---------- Weekly winners card: open /?winners on Monday (or /?winners=this for the current week) ---------- */
+async function renderWinners(app){
+  soundButton();
+  const thisWeek = /winners=this/.test(location.search);
+  const to = weekStart(), from = new Date(to); if(thisWeek){ from.setTime(to.getTime()); to.setTime(to.getTime() + 7*864e5); } else from.setUTCDate(from.getUTCDate() - 7);
+  const lastDay = new Date(to.getTime() - 864e5);
+  const fmt = d => d.getUTCDate() + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
+  const range = `${fmt(from)} to ${fmt(lastDay)}`;
+  app.innerHTML = `<div class="scene fade"><div class="when">Weekly winners · ${range}</div><p>Drawing the winners card...</p></div>`;
+  let rows = [];
+  try{
+    const q = '/rest/v1/landings?select=name,route,town,verdict,score,refused,sent,fooled&created_at=gte.' + encodeURIComponent(from.toISOString()) + '&created_at=lt.' + encodeURIComponent(to.toISOString()) + '&limit=5000';
+    const res = await fetch(SB_URL + q, {headers:{apikey:SB_KEY}}); if(!res.ok) throw 0; rows = await res.json();
+  }catch(e){ app.innerHTML = `<div class="scene fade"><p>The winners could not load. Check your connection and refresh.</p></div>`; return; }
+  const wins = BOARDS.map(b => ({b, r: rows.filter(r=>b.val(r)>0).sort((x,y)=> b.val(y)-b.val(x) || (b.key==='fooled' ? x.score-y.score : y.score-x.score))[0]})).filter(w=>w.r);
+  if(!wins.length){ app.innerHTML = `<div class="scene fade"><div class="when">Weekly winners · ${range}</div><p>Nobody posted a landing that week.${thisWeek?'':' Try <a href="?winners=this">this week so far</a>.'}</p></div>`; return; }
+  try{ await Promise.all(["800 80px 'Playfair Display'","600 40px 'DM Sans'","800 40px 'DM Sans'"].map(f=>document.fonts.load(f))); }catch(e){}
+  const W=1080, H=1350, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d');
+  const green='#102F28', gold='#E8BB69', paper='#F8F4E9', flagTxt = {us:'USA', uk:'UK', ca:'CANADA'};
+  x.fillStyle=green; x.fillRect(0,0,W,H);
+  x.fillStyle=gold; x.font="700 30px 'DM Sans', sans-serif"; x.fillText('NOW YOU HAVE LANDED', 80, 110);
+  x.fillStyle='#FFFFFF'; x.font="800 84px 'Playfair Display', Georgia, serif"; x.fillText(thisWeek ? 'Winners so far' : 'Weekly winners', 80, 210);
+  x.fillStyle='rgba(255,255,255,.8)'; x.font="600 34px 'DM Sans', sans-serif"; x.fillText(`${range} · ${rows.length} landing${rows.length===1?'':'s'}`, 80, 266);
+  const top = 320, gap = 20, bh = (H - top - 190 - gap*3) / 4;
+  wins.forEach((w,i)=>{ const y = top + i*(bh+gap);
+    x.fillStyle='rgba(255,255,255,.08)'; x.fillRect(80, y, W-160, bh);
+    x.fillStyle=gold; x.fillRect(80, y, 8, bh);
+    x.fillStyle=gold; x.font="800 36px 'Playfair Display', Georgia, serif"; x.fillText(w.b.title, 116, y+56);
+    x.fillStyle='rgba(255,255,255,.6)'; x.font="600 24px 'DM Sans', sans-serif"; x.fillText(w.b.sub.toUpperCase(), 116, y+92);
+    x.fillStyle='#FFFFFF'; x.font="800 52px 'DM Sans', sans-serif"; let nm = w.r.name; while(x.measureText(nm).width > 560 && nm.length>3) nm = nm.slice(0,-2)+'…'; x.fillText(nm, 116, y+bh-40);
+    x.textAlign='right'; x.fillStyle=gold; x.font="800 46px 'DM Sans', sans-serif"; x.fillText(w.b.show(w.r), W-116, y+bh-40);
+    x.fillStyle='rgba(255,255,255,.7)'; x.font="600 24px 'DM Sans', sans-serif"; x.fillText(`${String(w.r.town).toUpperCase().slice(0,22)}, ${flagTxt[w.r.route]||''}`, W-116, y+56); x.textAlign='left'; });
+  x.fillStyle=gold; x.font="800 40px 'Playfair Display', Georgia, serif"; x.fillText('Can you top the board this week?', 80, H-96);
+  x.fillStyle='#FFFFFF'; x.font="600 32px 'DM Sans', sans-serif"; x.fillText('Play free at nowyouhavelanded.com', 80, H-48);
+  x.fillStyle='rgba(255,255,255,.6)'; x.font="500 24px 'DM Sans', sans-serif"; x.textAlign='right'; x.fillText('Created by Nafeezie', W-80, H-48); x.textAlign='left';
+  const caption = `This week's winners on Now You Have Landed 🏆 ${wins.map(w=>`${w.b.title}: ${w.r.name} (${w.b.show(w.r)})`).join(', ')}. ${rows.length} people landed. Can you top the board? Play free at nowyouhavelanded.com`;
+  app.innerHTML = `<div class="scene fade"><div class="when">Weekly winners · ${range}</div>
+    <div class="cardwrap"><img id="wimg" alt="Weekly winners card" src="${cv.toDataURL('image/png')}"></div>
+    <button class="primary" id="wshare">Share or save the card</button>
+    <div class="when">Suggested caption</div><div class="mirror" id="wcap">${esc(caption)}</div>
+    <button class="ghost" id="wcopy">Copy caption</button>
+    <div class="toast" id="wtoast" role="status"></div>
+    <a class="storylink" href="./">Back to the game</a></div>`;
+  const t = document.getElementById('wtoast');
+  document.getElementById('wcopy').onclick = () => { try{ navigator.clipboard.writeText(caption).then(()=>{ t.textContent = 'Caption copied.'; }); }catch(e){ t.textContent = 'Press and hold the caption to copy it.'; } };
+  document.getElementById('wshare').onclick = () => cv.toBlob(b => {
+    try{ const f = new File([b], 'weekly-winners.png', {type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[f]})){ navigator.share({files:[f], text:caption}).catch(()=>{}); return; } }catch(e){}
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'weekly-winners.png'; document.body.appendChild(a); a.click(); a.remove(); t.textContent = 'Card saved.';
+  }, 'image/png');
 }
 
 /* ---------- Your name, your score, your road to making it ---------- */
@@ -2294,6 +2346,7 @@ function renderEnd(app){
 
 function start(data){
   fresh();
+  if(/[?&]winners/.test(location.search)){ renderWinners(document.getElementById('app')); return; }
   if(data && data.rk && data.pn){ R = ROUTES[data.rk]; L = places(data.rk).find(p=>p.name===data.pn); S = data.S; idx = data.idx; phase = data.phase; last = data.last; history = data.history||[]; }
   render();
 }
