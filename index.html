@@ -356,7 +356,7 @@ const US_PLACES = [
  ["Maryland",3,1,1,"","Half the Nigerians you know already live here. The aunties will find you before your mail does."],
  ["Massachusetts",3,2,1,"","Boston has many universities and many very cold mornings."],
  ["Michigan",2,2,1],
- ["Minnesota",2,2,1,"","Minnesota cold is not weather. It is a personality test."],
+ ["Minnesota",2,2,1,"","Minnesota cold is a personality test that lasts until April."],
  ["Mississippi",1,0,1],["Missouri",1,1,1],["Montana",1,2,1],["Nebraska",1,2,1],
  ["Nevada",2,0,1,"","In Nevada the desert heat is free and everything else costs money."],
  ["New Hampshire",2,2,1],
@@ -379,7 +379,7 @@ const UK_COST1 = ["Durham","Tyne and Wear","Northumberland","Cumbria","Lincolnsh
 const UK_TOWN = {"Highland":"Inverness","Fife":"Dunfermline","Kent":"Maidstone","Essex":"Chelmsford","Hampshire":"Southampton","Devon":"Exeter","Lancashire":"Preston","Surrey":"Guildford","Berkshire":"Reading","Oxfordshire":"Oxford","Cambridgeshire":"Cambridge","Suffolk":"Ipswich","East Sussex":"Brighton","Northamptonshire":"Northampton","Bedfordshire":"Luton","Hertfordshire":"Watford","Staffordshire":"Stoke","Derbyshire":"Derby","Cornwall":"Truro","North Yorkshire":"York","Wiltshire":"Swindon","Gloucestershire":"Gloucester","Greater London":"London","City of London":"London","Greater Manchester":"Manchester","West Midlands":"Birmingham","Norfolk":"Norwich","West Yorkshire":"Leeds","South Yorkshire":"Sheffield","Merseyside":"Liverpool","Tyne and Wear":"Newcastle","City of Edinburgh":"Edinburgh","Glasgow City":"Glasgow","South Glamorgan":"Cardiff","Antrim":"Belfast","Bristol":"Bristol","Leicestershire":"Leicester","Nottinghamshire":"Nottingham","Aberdeen City":"Aberdeen","Dundee City":"Dundee"};
 const UK_NOTE = {
  "Greater London":"London rent costs a pound per breath, and the Nigerian parties never end.",
- "Greater Manchester":"Manchester rain is not weather. It is a lifestyle.",
+ "Greater Manchester":"Manchester rain is a lifestyle you will adopt whether you like it or not.",
  "West Midlands":"Birmingham has jollof, Nigerian parties every weekend, and a bus network you will learn the hard way.",
  "Essex":"Essex has so many Nigerians that the aunties have their own economy.",
  "Kent":"Kent is close enough to London for the prices and far enough for the train fares.",
@@ -856,7 +856,7 @@ const UK = () => [
    {l:"Join on video call. Network permitting", fx:{home:-3, peace:2}, r:"The network drops during the vows. You watch the rest on someone's Instagram story."}]},
  {day:20, when: s => pickV('uk20',2)===0, text:`It has rained in ${T()} for nineteen of your first twenty days. The houses are small, the sky is grey, and you start asking yourself whether you have made the same mistake twice.`,
   choices:[
-   {l:"Buy vitamin D. The sun is not coming", fx:{cash:-60, peace:8}, r:"The raincoat changes everything. The vitamin D might be doing something too."},
+   {l:"Buy vitamin D. The sun is not coming", fx:{cash:-60, peace:8}, r:"Two weeks later you feel a little brighter. It could be the vitamins, or it could be stubbornness."},
    {l:"Complain in the Nigerians-in-UK group chat. Free therapy", fx:{peace:5, home:2}, r:"Three hundred people reply that they also have not seen the sun since August. You feel less alone."},
    {l:"Write down why you came. Stick it on the damp wall", fx:{peace:6, future:8}, r:`Closer to home, ${STU() ? "a degree" : "a real career"}, a fresh start. You stick the note on your tiny wall, which is the only wall you have.`}]},
  farm(), promise(),
@@ -1825,7 +1825,7 @@ function receipts(){
   if(f.loan==='late') out.push("The cooperative visited your mother. In front of the neighbours.");
   if(f.house==='managed') out.push("Your house back home now pays you instead of worrying you.");
   if(f.house==='brother') out.push("Your brother is guarding your house, with your good cups.");
-  if(f.spouse==='looked') out.push(S.gender==='man' ? "Every Nigerian woman at the community meet-up was engaged or not ready for anything serious." : "Every Nigerian man at the community meet-up was married or focusing on himself.");
+  if(f.spouse==='looked') out.push(S.gender==='man' ? "Every Nigerian woman at the community meet-up was engaged or not ready for anything serious." : S.gender==='woman' ? "Every Nigerian man at the community meet-up was married or focusing on himself." : "Everyone single at the community meet-up was married, engaged, or focusing on themselves.");
   if(f.network && R.key==='ca') out.push("A community event at minus 20 got you your first real job lead.");
   if(f.coat==='none') out.push("Naija blood was not enough for the cold.");
   return out.slice(0,4);
@@ -2099,7 +2099,7 @@ function renderEnd(app){
     lines.push(S.cash >= rent*3 ? "The saving habit you started in month one paid off. You come home with something real to start with." : S.cash >= 0 ? "You come home with stories, small savings, and a suitcase full of gifts you could not really afford." : `You come home still paying off what you owed abroad, and the first person to ask "where is our own?" gets a very long silence.`);
     lines.push(S.home >= 50 ? `${c.mum} cooks ${c.food} and tells everyone you are "on holiday".` : "Half the family is happy to see you. The other half wants to know what happened.");
     lines.push(S.future >= 40 ? "You bring back skills, contacts, and a clearer head. This time you know exactly what you want." : "You sleep through the night for the first time in a year. The plan can wait until you are rested.");
-    lines.push("Japada is not failure. Sometimes the plan changes, and coming home is the bravest part.");
+    lines.push("Coming home takes courage. Sometimes the plan changes, and that is allowed.");
     box.innerHTML = `<div class="when">Japada · One year later · Back in ${O()}</div>${lines.map(l=>`<p>${l}</p>`).join('')}`;
     box.hidden = false; box.scrollIntoView({behavior:'smooth', block:'nearest'});
   };
