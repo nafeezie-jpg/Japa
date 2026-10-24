@@ -233,6 +233,22 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .sheet-panel{background:var(--card);color:var(--ink);border-radius:16px;max-width:520px;width:100%;max-height:80vh;overflow:auto;padding:16px 18px}
 .sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;position:sticky;top:-16px;background:var(--card);padding-top:4px}
 .xbtn{background:var(--bubble);border:0;border-radius:999px;width:34px;height:34px;font-weight:700}
+.collection{display:grid;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.coll-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.coll-bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.coll-bar i{display:block;height:100%;background:var(--gold)}
+.coll-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vbadge{border-radius:10px;padding:10px;display:grid;gap:3px;position:relative;min-width:0}
+.vbadge b{font-family:var(--display);font-size:15px;line-height:1.2}
+.vbadge small{font-size:12px;color:var(--muted);line-height:1.35}
+.vbadge.got{background:var(--bubble)}
+.vbadge.got b{color:var(--green2)}
+.vbadge.locked{background:transparent;border:1.5px dashed var(--line)}
+.vbadge.locked b{color:var(--muted);letter-spacing:.2em}
+.vbadge.cur{outline:2px solid var(--gold)}
+.newtag{position:absolute;top:-8px;right:8px;background:var(--gold);color:#1B332B;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px}
+.coll-mini{background:var(--bubble);border-radius:12px;padding:10px 12px;font-size:15px;text-align:center}
+@media (max-width:360px){.coll-grid{grid-template-columns:1fr}}
 .foot{font-size:13px;color:var(--muted);text-align:center}
 .fade{animation:fade .35s ease both}
 @keyframes fade{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -1185,6 +1201,7 @@ function render(){
         <label class="check daily" for="daily"><input type="checkbox" id="daily"${pick.daily?' checked':''}> <span><b>Play Today's Landing · ${dayLabel(todayStr())}</b><br>Everyone playing today gets the same requests from home. Compare verdicts with friends.</span></label>
         <button class="primary" id="go">Land in ${ROUTES[rk].label}</button></div>` : ''}`).join('')}
       </div>
+      ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
       <div class="foot">About 5 minutes. Every choice follows you.</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
     </div>`;
@@ -1473,9 +1490,37 @@ async function drawCard(title, line, journey, rec){
   return cv;
 }
 
+/* ---------- Verdict collection ---------- */
+const VERDICTS = [
+ ['Abroad Strategist','Protect your money, your peace, and your future at the same time.'],
+ ['The Family ATM','Send the big money home and keep your family very, very happy.'],
+ ['Running on Prayers','Finish the month with almost nothing left.'],
+ ['Hustle Without Peace','Chase the money until your peace runs out.'],
+ ['Ghost Mode Activated','Ignore home until the family group forgets you.'],
+ ['Still Finding Your Feet','Finish somewhere comfortably in the middle.'],
+ ['Serial Japa Champion','Japa again from the result screen and keep building.'],
+ ['Making It By Force','Sell everything to come, then build your future anyway.'],
+ ['Scholar and Sponsor','Go on a full scholarship and send your stipend home.'],
+ ['Fees Still Pending','Go as a student and leave your fees unpaid.'],
+ ['Owing the Cooperative','Borrow money for the move and ignore the repayment.'],
+ ['Stronger Than The Agent','Take the UK care visa route and report the fake agent.']
+];
+function loadVerdicts(){ try{ return JSON.parse(localStorage.getItem('nyhl-verdicts')||'[]'); }catch(e){ return []; } }
+function saveVerdict(t){ const v = loadVerdicts(); const isNew = !v.includes(t); if(isNew){ v.push(t); try{ localStorage.setItem('nyhl-verdicts', JSON.stringify(v)); }catch(e){} } return isNew; }
+function collectionHTML(current, isNew){
+  const got = loadVerdicts();
+  return `<div class="collection">
+    <div class="coll-head"><div class="when">Your verdict collection</div><b>${got.length} of ${VERDICTS.length} unlocked</b></div>
+    <div class="coll-bar"><i style="width:${Math.round(got.length/VERDICTS.length*100)}%"></i></div>
+    <div class="coll-grid">${VERDICTS.map(([t,h])=>{ const has=got.includes(t), cur=t===current;
+      return `<div class="vbadge ${has?'got':'locked'}${cur?' cur':''}"><b>${has ? t : '? ? ?'}</b>${cur && isNew ? '<span class="newtag">New!</span>' : ''}<small>${has ? (cur ? 'Just unlocked this game' : 'Unlocked') : 'Hint: '+h}</small></div>`; }).join('')}</div>
+  </div>`;
+}
+
 function renderEnd(app){
   const [title, line] = verdict(), rec = receipts();
   track('finish-'+title.toLowerCase().replace(/[^a-z]+/g,'-'));
+  const isNewVerdict = saveVerdict(title);
   const where = `${L.town}, ${R.country}`;
   const journey = S.trail.map(t=>t.town).concat([L.town]).join(' → ');
   const share = `${S.daily ? `Today's Landing, ${dayLabel(S.daily)}. ` : ''}I played Now You Have Landed (${journey}) and I am "${title}". ${line} Finished 30 days with ${money(S.cash)}, Peace ${S.peace}, Home ${S.home}, Future ${S.future}. Wetin be your own?`;
@@ -1499,6 +1544,7 @@ function renderEnd(app){
       <p class="bench">Healthy is ${HEALTHY} and above. For cash, healthy is at least three months' rent saved. The real skill is keeping all four out of the red at the same time.</p>
       <div class="lesson">${lesson()}</div>
     </div>
+    ${collectionHTML(title, isNewVerdict)}
     <div class="cardwrap"><img id="cardimg" alt="Your result card" hidden></div>
     <button class="primary" id="sharecard">Share my result card</button>
     <div class="share">
