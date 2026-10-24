@@ -121,6 +121,8 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .sbtn:hover{border-color:var(--green)}
 .sbtn.wa{background:var(--green);color:var(--green-ink);border-color:var(--green)}
 @media (max-width:360px){.share-row{grid-template-columns:repeat(2,1fr)}}
+.check{display:flex;gap:10px;align-items:center;font-weight:600;font-size:16px;cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--green);flex:none}
 .foot{font-size:13px;color:var(--muted);text-align:center}
 .fade{animation:fade .35s ease both}
 @keyframes fade{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -213,7 +215,7 @@ const ROUTES = {
 
 const ORIGIN_LIST = [["Abia","Aba"],["Adamawa","Yola","YOL"],["Akwa Ibom","Uyo","QUO"],["Anambra","Onitsha"],["Bauchi","Bauchi","BCU"],["Bayelsa","Yenagoa"],["Benue","Makurdi","MDI"],["Borno","Maiduguri","MIU"],["Cross River","Calabar","CBQ"],["Delta","Asaba","ABB"],["Ebonyi","Abakaliki"],["Edo","Benin City","BNI"],["Ekiti","Ado-Ekiti"],["Enugu","Enugu","ENU"],["FCT","Abuja","ABV"],["Gombe","Gombe","GMO"],["Imo","Owerri","QOW"],["Jigawa","Dutse"],["Kaduna","Kaduna","KAD"],["Kano","Kano","KAN"],["Katsina","Katsina","DKA"],["Kebbi","Birnin Kebbi"],["Kogi","Lokoja"],["Kwara","Ilorin","ILR"],["Lagos","Lagos","LOS"],["Nasarawa","Lafia"],["Niger","Minna","MXJ"],["Ogun","Abeokuta"],["Ondo","Akure","AKR"],["Osun","Osogbo"],["Oyo","Ibadan","IBA"],["Plateau","Jos","JOS"],["Rivers","Port Harcourt","PHC"],["Sokoto","Sokoto","SKO"],["Taraba","Jalingo"],["Yobe","Damaturu"],["Zamfara","Gusau"]];
 const ORIGINS = Object.fromEntries(ORIGIN_LIST.map(([st,city,code])=>[city, code || city.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()]));
-let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work"};
+let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work", sold:false};
 const O = () => S.origin;
 const MULT = [0, .75, 1, 1.35];
 const A = x => Math.round(x*R.k/5)*5;                 // shared amounts, converted to local currency
@@ -229,9 +231,10 @@ function begin(rk, pname, prev){
   // trail now holds every place before this landing
   const culture = prev ? prev.culture : pick.culture;
   const path = prev ? 'work' : (pathOptions(rk).some(o=>o[0]===pick.path) ? pick.path : 'work');
-  const start = Math.round(ROUTES[rk].start * PATHS[path].mult / 50) * 50;
-  S = prev ? {cash:start, start, path, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture}
-           : {cash:start, start, path, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture};
+  const sold = prev ? !!prev.sold : !!pick.sold;
+  const start = Math.round(ROUTES[rk].start * PATHS[path].mult * (sold?1.4:1) / 50) * 50;
+  S = prev ? {cash:start, start, path, sold, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture}
+           : {cash:start, start, path, sold, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture};
   history = [];
   idx = nextIndex(0); phase = 'scene';
 }
@@ -362,12 +365,12 @@ const friend = () => { const c = C(); return [
    {l:"Say you still need it", fx:{home:-3, peace:2}, r:"He understands. Then he asks for your old phone instead."}]}
 ][pickV('E',3)]; };
 
-const doubt = (day, where, extra) => ({day, text:`${where} You had staff in ${O()}. Today someone half your age told you the role needs "someone more entry level". You start asking yourself why you left.`,
+const doubt = (day, where, extra) => ({day, text: STU() ? `You sit in the library after a long day. Your lecturer still cannot pronounce your name, and your account balance is lower than your GPA. You start asking yourself why you came.` : `${where} You had staff in ${O()}. Today someone half your age told you the role needs "someone more entry level". You start asking yourself why you left.`,
   choices:[
    {l:`Call a friend still in ${O()}`, fx:{home:3, peace:6}, r:"She says the office misses you and that fuel is now unbelievable. You hang up feeling missed and very sure about the fuel."},
-   P()==='sold' ? {l:"Remember there is nothing to go back to", fx:{peace:-2, future:5}, r:"No house, no shop, no car. Going back is not an option, so you wipe your eyes and open another job application."}
+   SOLD() ? {l:"Remember there is nothing to go back to", fx:{peace:-2, future:5}, r:"No house, no shop, no car. Going back is not an option, so you wipe your eyes and open another job application."}
      : {l:`Check flights back to ${O()}`, fx:{peace:-6, future:-4}, r:`One way is ${M(A(780))}. You close the tab, open it again, and close it again.`},
-   {l:"Write down the three reasons you came", fx:{peace:6, future:8}, r:extra}]});
+   {l:"Write down the three reasons you came", fx:{peace:6, future:8}, r: STU() ? "You write them on the back of your admission letter. A degree, a future, and making your family proud." : extra}]});
 const finalCall = () => ({day:30, from:C().mum, sub:"Video call", text:`Let me see your face, ${C().endear}. How is abroad?`,
   choices: s => [
    {l:"Tell her the truth, all of it", fx:{home:6, peace:8}, r:`She cries a little, then laughs at your new accent. "You are still my child," she says, and promises to cook ${C().food} when you visit.`},
@@ -380,7 +383,7 @@ const finalCall = () => ({day:30, from:C().mum, sub:"Video call", text:`Let me s
 
 /* ---------- United States ---------- */
 const US = () => [
- {day:1, text:`${P()==='study' ? `You land in ${T()} on a student visa. Part of your tuition is paid, and your family has promised the rest "before the deadline". You have ${M(S.start)} for everything else.` : P()==='sold' ? `You sold your car, your shop, and your land in ${O()} to come. You land in ${T()} with ${M(S.start)} and nothing to go back to.` : `You resign from a good job in ${O()} and land in ${T()} with ${M(S.start)}, which is your ajo payout plus everything you sold before leaving, and a Nigerian passport.`} Your cousin ${C().cousin} says you can stay with her until you find your feet. She has a husband, three children, and two bedrooms.`,
+ {day:1, text:`${soldLine()}${({work:`You resign from a good job in ${O()} and land in ${T()} with ${M(S.start)}${SOLD()?'':', which is your ajo payout plus everything you sold before leaving,'} and a Nigerian passport.`,scholar:`You land in ${T()} on a full scholarship with a teaching assistantship. Your stipend starts next month, and everybody at home has already budgeted it. You have ${M(S.start)} until then.`,partial:`You land in ${T()} with a scholarship that covers half your tuition. The other half, and everything else, is on you. You have ${M(S.start)}.`,study:`You land in ${T()} on a student visa. Part of your tuition is paid, and your family has promised the rest "before the deadline". You have ${M(S.start)} for everything else.`})[P()]} Your cousin ${C().cousin} says you can stay with her until you find your feet. She has a husband, three children, and two bedrooms.`,
   choices:[
    {l:`Stay with ${C().cousin}`, fx:{peace:-10}, set:{stay:'cousin'}, r:"You sleep on the couch. Her last born uses your back as a trampoline at 6am. Rent is free, but every plate you eat is counted in her eyes."},
    {l:`Pay four months' rent upfront, ${M(RENT()*4)}`, fx:{cash:-RENT()*4, peace:10, future:6}, set:{stay:'prepaid'}, r:"The landlord has never seen anyone pay four months upfront. Your room is small, but nobody can tell you to leave."},
@@ -402,7 +405,7 @@ const US = () => [
      {l:"Buy a monthly transit pass", fx:{cash:-130, peace:4, future:3}, set:{car:'transit'}, r:"You learn every train line in a week and start giving tourists directions."},
      {l:"Walk everywhere and save money", fx:{peace:-6, future:2}, r:"Your legs are strong. Your shoes are finished."},
      {l:"Keep your ajo money for emergencies", fx:{peace:3, future:2}, set:{car:'saved'}, r:"Two years of ajo sit in the bank as your safety net. You feel rich for about one day."}]},
- P()==='study' ? {day:7, text:"Your student visa only allows on-campus work during term. The dining hall and the library are both hiring.",
+ STU() ? {day:7, text:"Your student visa only allows on-campus work during term. The dining hall and the library are both hiring.",
   choices:[
    {l:"Dining hall shifts", fx:{peace:-4}, set:{job:'campus'}, r:"You serve breakfast to students half your age. One of them tips you in compliments."},
    {l:"Library assistant", fx:{peace:-2, future:4}, set:{job:'campus'}, r:"Quiet shifts, fewer hours, and a supervisor who lets you study at the desk."},
@@ -435,10 +438,10 @@ const US = () => [
 
 /* ---------- United Kingdom ---------- */
 const UK = () => [
- {day:1, text: P()==='care' ? `You land at Heathrow on a care worker visa with ${M(S.start)}. You paid an agent ₦12 million for your Certificate of Sponsorship, and the care home in ${T()} said a job is waiting for you. It is raining.` : P()==='study' ? `You land at Heathrow for your master's in ${T()} with ${M(S.start)} and only part of your tuition paid. Your family promised the rest "before the deadline". It is raining.` : P()==='sold' ? `You sold everything in ${O()} to fund this move. You land at Heathrow for your PhD in ${T()} with ${M(S.start)} and nothing to go back to. Everybody said the UK is closer to home. It is raining.` : `You land at Heathrow for your PhD in ${T()} with ${M(S.start)}, two boxes of Indomie, and a Nigerian passport. You chose the UK because it is closer to home, flights are shorter, and everybody said you will find a Nigerian spouse there easily. It is raining.`,
+ {day:1, text: soldLine() + ({work:`You land at Heathrow on a skilled worker visa with ${M(S.start)}. Your new job in ${T()} starts in two weeks, and everyone at home thinks you are already rich. It is raining.`,scholar:`You land at Heathrow for your PhD in ${T()} with ${M(S.start)}, a full scholarship, and two boxes of Indomie. You chose the UK because it is closer to home, flights are shorter, and everybody said you will find a Nigerian spouse there easily. It is raining.`,partial:`You land at Heathrow for your master's in ${T()} with ${M(S.start)}. Your scholarship covers half your fees. The other half is your problem. It is raining.`,study:`You land at Heathrow for your master's in ${T()} with ${M(S.start)} and only part of your tuition paid. Your family promised the rest "before the deadline". It is raining.`,care:`You land at Heathrow on a care worker visa with ${M(S.start)}. You paid an agent ₦12 million for your Certificate of Sponsorship, and the care home in ${T()} said a job is waiting for you. It is raining.`})[P()],
   choices:[
-   {l:`Take a student room, ${M(RENT())} a month`, fx:{cash:-RENT(), peace:4, future:6}, set:{stay:'room'}, r:"The room is clean and close to campus. It is also so small that you can open the window from your bed."},
-   {l:"Stay with your cousin two hours away", fx:{peace:-8}, set:{stay:'cousin'}, r:"Free rent, but every lecture costs you four hours on trains."},
+   {l: STU() ? `Take a student room, ${M(RENT())} a month` : `Rent a small studio, ${M(RENT())} a month`, fx:{cash:-RENT(), peace:4, future:6}, set:{stay:'room'}, r: STU() ? "The room is clean and close to campus. It is also so small that you can open the window from your bed." : "The studio is clean and close to the bus stop. It is also so small that you can open the window from your bed."},
+   {l:"Stay with your cousin two hours away", fx:{peace:-8}, set:{stay:'cousin'}, r: STU() ? "Free rent, but every lecture costs you four hours on trains." : "Free rent, but every shift costs you four hours on trains."},
    {l:`Share a house with four strangers, ${M(Math.round(RENT()*0.78/10)*10)}`, fx:{cash:-Math.round(RENT()*0.78/10)*10, peace:-4}, set:{stay:'shared'}, r:"One housemate labels his milk. Another cooks fish at midnight. You are the only one who cleans the bathroom."}]},
  mummyThanks(),
  {day:4, text:`You step off the pavement and look left, the way you have done your whole life. A car comes from the right and the driver says something very British through the window.`,
@@ -456,16 +459,21 @@ const UK = () => [
    {l:"Report it and look for a licensed sponsor", fx:{peace:-6, future:8}, set:{cos:'reported', job:'none'}, r:"You fill in the report with shaking hands. A support worker tells you this has happened to thousands of people, and that it is not your fault."},
    {l:"Take cash-in-hand shifts a friend offers", fx:{peace:-15, future:-15}, set:{cos:'cash', job:'cash'}, r:"A shop pays you in envelopes. It keeps you fed, but it puts everything you came for at risk."},
    {l:"Go to a Nigerian community group for help", fx:{peace:6, home:4, future:4}, set:{cos:'community', job:'none'}, r:"They have seen this before. Someone hands you jollof in a takeaway pack and a phone number for a free immigration adviser."}]} :
- {day:8, text: P()==='study' ? "The rest of your tuition is due soon, and your visa limits your hours during term. You need work that fits around lectures." : "Your PhD stipend has not arrived yet, and the university says it will take \"a few more weeks\". You need work, but your visa limits your hours during term.",
+ P()==='work' ? {day:8, text:"Your induction at the new job is going well, but your first salary is a month away and your savings are already nervous.",
+  choices:[
+   {l:"Borrow from a friend until payday", fx:{cash:A(400), home:2, peace:-3}, set:{job:'salaried', borrowed:true}, r:"Your friend sends it immediately and says, \"No wahala.\" You add one more name to the list of people you owe dinner."},
+   {l:"Live on rice and walk everywhere", fx:{peace:-6, future:3}, set:{job:'salaried'}, r:"Rice with stew, rice with egg, rice with more rice. You reach payday thinner and prouder."},
+   {l:"Ask your employer for a salary advance", fx:{cash:A(500), peace:2, future:-2}, set:{job:'salaried', advance:true}, r:"HR approves it with a smile and a form. Your first payslip will be smaller, but you can sleep tonight."}]} :
+ {day:8, text: P()==='scholar' ? "Your PhD stipend has not arrived yet, and the university says it will take \"a few more weeks\". You need work, but your visa limits your hours during term." : "The rest of your tuition is due soon, and your visa limits your hours during term. You need work that fits around lectures.",
   choices:[
    {l:"Pick up care home shifts", fx:{peace:-5, home:2}, set:{job:'care'}, r:"Twenty hours a week of lifting, feeding, and smiling. The residents love your accent and ask if you know the King."},
    {l:"Become a research assistant on campus", fx:{future:10, peace:-2}, set:{job:'field'}, r:"Less money, but your supervisor notices you. That matters more than you know yet."},
-   {l:"Work a warehouse shift at the weekend", fx:{peace:-7}, set:{job:'warehouse'}, r:"Saturdays and Sundays packing boxes. Your PhD reading happens on the bus."}]},
+   {l:"Work a warehouse shift at the weekend", fx:{peace:-7}, set:{job:'warehouse'}, r:"Saturdays and Sundays packing boxes. Your reading happens on the bus."}]},
  sibling(),
  {day:14, from:C().aunty, sub:`Family elder · ${C().home}`, text:"So how far? Have you found someone serious in that UK? You know you are not getting younger o.",
   choices:[
    {l:"Go to the Nigerian fellowship this Sunday", fx:{peace:3, home:5, future:3}, set:{spouse:'looked'}, r:"Everyone is lovely. Every single man you meet is married, engaged, or \"focusing on himself\"."},
-   {l:"Tell her you are focusing on your PhD", fx:{home:-4, peace:4, future:4}, r:"She replies with a voice note that is four minutes long. You do not play it."},
+   {l: P()==='scholar' ? "Tell her you are focusing on your PhD" : STU() ? "Tell her you are focusing on your studies" : "Tell her you are focusing on your career", fx:{home:-4, peace:4, future:4}, r:"She replies with a voice note that is four minutes long. You do not play it."},
    {l:"Tell her you will join a dating app", fx:{peace:-4, home:4}, r:`Your first match lives in ${T()==='Birmingham'?'Manchester':'Birmingham'} and wants to know your salary before your name.`}]},
  {day:15, auto:'pay1'},
  contribution(),
@@ -478,7 +486,7 @@ const UK = () => [
   choices:[
    {l:"Buy vitamin D and a proper raincoat", fx:{cash:-60, peace:8}, r:"The raincoat changes everything. The vitamin D might be doing something too."},
    {l:"Complain in the Nigerians-in-UK group chat", fx:{peace:5, home:2}, r:"Three hundred people reply that they also have not seen the sun since August. You feel less alone."},
-   {l:"Write down why you came", fx:{peace:6, future:8}, r:"Closer to home, a PhD, a fresh start. You stick the note on your tiny wall, which is the only wall you have."}]},
+   {l:"Write down why you came", fx:{peace:6, future:8}, r:`Closer to home, ${STU() ? "a degree" : "a real career"}, a fresh start. You stick the note on your tiny wall, which is the only wall you have.`}]},
  farm(), promise(),
  {day:25, auto:'pay2'},
  {day:27, when: s => s.f.sibling==='sent' || s.f.sibling==='video', auto:'roof'},
@@ -487,7 +495,7 @@ const UK = () => [
 
 /* ---------- Canada ---------- */
 const CA = () => [
- {day:1, text:`${P()==='study' ? `Your study permit came through, so you land in ${T()} with ${M(S.start)}, part of your tuition paid, and a winter jacket from Balogun market.` : P()==='sold' ? `You sold everything you owned in ${O()} for this move. You land in ${T()} with ${M(S.start)}, a winter jacket from Balogun market, and nothing to go back to.` : `Your permanent residence came through, so you land in ${T()} with ${M(S.start)}, a winter jacket from Balogun market, and a Nigerian passport.`} Everybody back home says Canada is the new America. Everybody here says, "Welcome, it gets colder."`,
+ {day:1, text:`${soldLine()}${({work:`Your permanent residence came through, so you land in ${T()} with ${M(S.start)}, a winter jacket from Balogun market, and a Nigerian passport.`,scholar:`You land in ${T()} on a full scholarship with ${M(S.start)}, a winter jacket from Balogun market, and a stipend that everybody at home has already budgeted.`,partial:`You land in ${T()} with half your tuition covered, ${M(S.start)}, and a winter jacket from Balogun market. The other half of the fees is on you.`,study:`Your study permit came through, so you land in ${T()} with ${M(S.start)}, part of your tuition paid, and a winter jacket from Balogun market.`})[P()]} Everybody back home says Canada is the new America. Everybody here says, "Welcome, it gets colder."`,
   choices:[
    {l:`Rent a basement apartment, ${M(RENT())} a month`, fx:{cash:-RENT(), peace:4, future:5}, set:{stay:'basement'}, r:"Your window is at ground level. You can see the feet of everyone who walks past, and soon you will see snow piled against the glass."},
    {l:"Stay with a family from church", fx:{peace:-6, home:3}, set:{stay:'host'}, r:"They are kind and generous. They also wake up at 5am for prayer, and so do you now."},
@@ -503,7 +511,7 @@ const CA = () => [
    {l:"Buy a real parka and boots, C$320", fx:{cash:-320, peace:10}, set:{coat:'proper'}, r:"You look like a sleeping bag with legs, and you have never been happier."},
    {l:"Thrift store parka, C$40", fx:{cash:-40, peace:5}, set:{coat:'thrift'}, r:"One zip is broken, but it has survived worse winters than this one, and so will you."},
    {l:"Naija blood dey my body", fx:{peace: L.cold===2?-22:-12}, set:{coat:'none'}, r:"Your nostrils freeze when you breathe. A stranger hands you their scarf and says, \"Oh honey, no.\""}]},
- P()==='study' ? {day:8, text:"Your study permit limits how many hours you can work during term. Tuition is not waiting for anybody.",
+ STU() ? {day:8, text:"Your study permit limits how many hours you can work during term. Tuition is not waiting for anybody.",
   choices:[
    {l:"Campus job at the student centre", fx:{peace:-3, future:3}, set:{job:'campus'}, r:"You make lattes between lectures and learn every professor's coffee order."},
    {l:"Part-time warehouse shifts within your limit", fx:{peace:-6}, set:{job:'warehouse'}, r:"Weekend shifts with three other international students. You all fall asleep on the same bus."},
@@ -542,19 +550,26 @@ const CA = () => [
 let SCENES = [];
 /* ---------- How you japa'd ---------- */
 const PATHS = {
-  work:  {us:'With a job offer or a green card', uk:'For a PhD with a scholarship', ca:'With permanent residence', mult:1},
-  study: {all:'As a student, without the full school fees', mult:0.6},
-  care:  {uk:'On a care worker visa', mult:0.5},
-  sold:  {all:'Sold everything to come', mult:1.4}
+  work:    {us:'With a job offer or a green card', uk:'On a skilled worker visa', ca:'With permanent residence', mult:1},
+  scholar: {all:'On a full scholarship', mult:0.6},
+  partial: {all:'With partial funding', mult:0.55},
+  study:   {all:'Self-funded, without the full fees', mult:0.5},
+  care:    {uk:'On a care worker visa', mult:0.5}
 };
 function pathOptions(rk){ return Object.entries(PATHS).filter(([k,v])=>v.all||v[rk]).map(([k,v])=>[k, v[rk]||v.all]); }
 const P = () => S.path || 'work';
+const STU = () => ['scholar','partial','study'].includes(P());
+const SOLD = () => !!S.sold;
+const soldLine = () => SOLD() ? `You sold your car, your shop, and your land in ${O()} to come, so there is nothing to go back to. ` : '';
 const FEES = () => A(6000);
 
 function pathScenes(){
   const p = P(), c = C(), out = [];
-  if(p==='study'){
-    out.push({day:10, from:"Student Finance Office", sub:"Your university", text:`Reminder: the outstanding balance on your tuition, ${M(FEES())}, is due in 14 days. Students who do not pay will be withdrawn from their programme.`,
+  const End = c.endear[0].toUpperCase()+c.endear.slice(1);
+  if(p==='study' || p==='partial'){
+    out.push({day:10, from:"Student Finance Office", sub:"Your university", text: p==='partial'
+      ? `Reminder: your scholarship covers half your tuition. The remaining ${M(FEES()/2)} is due in 14 days. Students who do not pay will be withdrawn from their programme.`
+      : `Reminder: the outstanding balance on your tuition, ${M(FEES())}, is due in 14 days. Students who do not pay will be withdrawn from their programme.`,
       choices:[
        {l:"Ask the family to raise the money", fx:{home:-4, peace:-4, future:10}, set:{fees:'family'}, r:"Your uncles hold a meeting. Somebody sells a plot. The money arrives in three instalments, each with a voice note reminding you what was sacrificed."},
        {l:"Ask the school for a payment plan", fx:{peace:4, future:6}, set:{fees:'plan'}, r:"The international student office agrees to three instalments. It is not freedom, but it is breathing room."},
@@ -565,6 +580,18 @@ function pathScenes(){
        {l:"Call home and tell them everything", fx:{home:-4, peace:6, future:6}, set:{fees:'family'}, r:`${c.mum} is quiet for a long time. Then she says, "We did not bring you this far to stop now." Your family starts a contribution.`},
        {l:"Pause your studies for a term", fx:{peace:4, future:-12}, set:{fees:'paused'}, r:"You breathe again, even though you know pausing puts your visa and your plans at risk. You promise yourself it is only for now."}]});
   }
+  if(p==='scholar'){
+    out.push({day:10, from:c.mum, sub:`${c.home} · 8:15pm`, text:`${End}, your younger brother's school fees are due. Since your scholarship money is coming every month, you can help, abi?`,
+      choices:[
+       {l:`Send ${M(A(400))} from your stipend`, fx:{cash:-A(400), home:10, peace:-4}, set:{stipendHome:true}, r:"Your brother sends a photo in his school uniform. Your fridge has three eggs and a lemon."},
+       {l:`Send ${M(A(100))} and explain the stipend is tight`, fx:{cash:-A(100), home:2, peace:2}, r:"She says she understands. Then she asks your aunty to call and explain it again from her side."},
+       {l:"Explain that the scholarship barely covers rent", fx:{home:-8, peace:4}, r:"\"But they said it is a scholarship,\" she says. To her, the word means you are being paid to be rich."}]});
+    out.push({day:24, text:"Your rent has gone up. Your stipend has not. The scholarship office says the amount is \"fixed for the duration of your award\".",
+      choices:[
+       {l:"Apply to the department's hardship fund", fx:{cash:A(300), future:4, peace:3}, r:"A two-page form and a week of waiting. Then an email with good news and a polite request to keep it confidential."},
+       {l:"Move to a cheaper room farther away", fx:{cash:A(150), peace:-6}, r:"You save money and lose an hour a day to the bus. You read journal articles on the top deck."},
+       {l:"Pick up extra hours within your visa limit", fx:{cash:A(250), peace:-6, future:-2}, r:"Weekends disappear. So does your social life, which was mostly WhatsApp anyway."}]});
+  }
   if(p==='care'){
     out.push({day:24, text: S.f.cos==='reported' ? `A licensed care home in ${T()} calls back. They have checked your case and will sponsor you properly. The start date is next month, and this time the job is real.` : S.f.cos==='community' ? "The community group introduces you to a licensed employer and an immigration adviser who works for free. For the first time since landing, you have a plan." : "The shop owner pays you late again. When you complain, he reminds you that you have no papers to work there.",
       choices: S.f.cos==='cash' ? [
@@ -572,16 +599,16 @@ function pathScenes(){
        {l:"Keep your head down and keep working", fx:{cash:A(300), peace:-10, future:-6}, r:"The envelope is thinner this week. So is your patience."},
        {l:"Talk to the community group", fx:{peace:6, home:3, future:6}, set:{cos:'community'}, r:"Nobody judges you. Three people in the room have the same story."}] : [
        {l:"Accept and start the paperwork", fx:{peace:8, future:12}, r:"There are forms, fees, and waiting. But every form brings you closer to a life on paper."},
-       {l:"Tell other people about the fake agent", fx:{peace:4, home:4, future:4}, r:"You post a warning in three WhatsApp groups. A stranger messages to say you saved her ₦10 million."}]});
+       {l:"Warn other people about the fake agent", fx:{peace:4, home:4, future:4}, r:"You post a warning in three WhatsApp groups. A stranger messages to say you saved her ₦10 million."}]});
   }
-  if(p!=='work'){
+  if(p==='study' || p==='partial' || p==='care' || SOLD()){
     out.push({day:23, from:"Old colleague", sub:O(), text:"So when are you coming back? Abroad is not for everybody o. No shame in returning.",
       choices:[
        {l:"Post your best photo from abroad", fx:{peace:-2, home:4}, r:"You post a photo by a fountain you walked 40 minutes to reach. Twelve people comment, \"Abroad don show for your body.\""},
        {l:"Tell him the truth", fx:{peace:6, home:-2}, r:"He goes quiet, then says, \"Me too, I have been struggling here.\" You talk for an hour."},
-       p==='study'
-         ? {l:"Mute the chat and study", fx:{peace:3, future:3}, r:"You put your phone face down and finish the essay due at midnight."}
-         : {l:"Remind yourself there is no going back", fx:{peace:-2, future:6}, r:"You sold everything to come. So you mute the chat, make tea, and apply for two more jobs. Going forward is the only direction left."}]});
+       SOLD() ? {l:"Remind yourself there is no going back", fx:{peace:-2, future:6}, r:"You sold everything to come. So you mute the chat, make tea, and apply for two more jobs. Forward is the only direction left."}
+       : p==='care' ? {l:"Remind yourself why you came", fx:{peace:2, future:5}, r:"You paid too much and came too far to turn back now. You mute the chat and call the immigration adviser instead."}
+       : {l:"Mute the chat and study", fx:{peace:3, future:3}, r:"You put your phone face down and finish the essay due at midnight."}]});
   }
   return out;
 }
@@ -604,8 +631,9 @@ function autoEvent(kind){
       if(f.job==='warehouse'){ text = "First weekend pay. £360. You spend £4 on a meal deal to celebrate."; fx = {cash:360, peace:-3}; }
       else if(f.job==='care'){ text = "First care home pay. £640. Your back sends its regards."; fx = {cash:640}; }
       else if(f.job==='cash'){ text = "£420 in an envelope, three days late."; fx = {cash:420, peace:-4}; }
+      else if(f.job==='salaried'){ text = "No salary yet. Payday is next week, and the week is very long."; fx = {cash:0, peace:-2}; }
       else if(f.job==='none'){ text = "No pay. Your savings are shrinking, and the agent has blocked your number."; fx = {cash:0, peace:-5}; }
-      else { text = "Your research assistant pay arrives. £300. Your stipend is still \"processing\"."; fx = {cash:300}; }
+      else { text = P()==='scholar' ? "Your research assistant pay arrives. £300. Your stipend is still \"processing\"." : "Your research assistant pay arrives. £300. Your supervisor says you are doing well."; fx = {cash:300}; }
     } else {
       if(f.job==='warehouse'){ text = "First pay. C$1,350 after deductions. You learn the words CPP and EI the expensive way."; fx = {cash:1350, peace:-3}; }
       else if(f.job==='care'){ text = "First pay. C$1,200. Your coworker from Ibadan takes you for suya to celebrate."; fx = {cash:1200, peace:3}; }
@@ -620,6 +648,8 @@ function autoEvent(kind){
       else if(f.job==='care'){ text = "Second paycheck, $900. The old man gives you a $50 tip and calls you his favourite."; fx = {cash:950, peace:3}; }
       else if(f.job==='campus'){ text = "Second campus paycheck, $620. Your supervisor asks if you can cover extra hours during exams."; fx = {cash:620, future:2}; }
       else { text = "A Nigerian uncle from church refers you. You land a contract role in your field with a $1,600 advance. US experience, finally."; fx = {cash:1600, future:18, peace:6}; }
+      if(P()==='scholar'){ text += " Your assistantship stipend also lands, $1,800."; fx.cash += 1800; }
+      if(P()==='partial'){ text += " Your partial stipend lands too, $900."; fx.cash += 900; }
       if(f.stay==='cousin'){ text += ` ${C().cousin}'s husband asks if you will "contribute to bills". $300.`; fx.cash -= 300; }
       if(f.stay==='motel'){ text += ` You finally move into a room. ${M(RENT()*2)} for deposit and first month.`; fx.cash -= RENT()*2; }
       if(f.stay==='prepaid'){ text += " Rent is already paid. You sleep like a baby."; fx.peace = (fx.peace||0) + 4; }
@@ -628,7 +658,12 @@ function autoEvent(kind){
       if(P()==='care'){
         if(f.job==='cash'){ text = "Another envelope. £380 this time. The owner says business is slow."; fx = {cash:380, peace:-4}; }
         else { text = "No wages yet, but the community food bank and a hardship grant of £250 keep you going."; fx = {cash:250, peace:2}; }
+      } else if(P()==='work'){
+        text = "Your first UK salary lands. £2,050 after tax, National Insurance, and pension. Three new words on one payslip."; fx = {cash:2050, peace:6, future:4};
+        if(f.advance){ text += " Minus the advance."; fx.cash -= A(500); }
+        if(f.borrowed){ text += " You pay your friend back first."; fx.cash -= A(400); }
       } else if(P()==='study'){ text = "No stipend for you. Just your part-time pay."; fx = {cash:0}; }
+      else if(P()==='partial'){ text = "Your partial stipend lands. £700. Half funding, full bills."; fx = {cash:700, peace:2}; }
       else { text = "Your PhD stipend finally lands. £1,450. You check the app three times to be sure."; fx = {cash:1450, peace:6, future:4}; }
       if(f.job==='care'){ text += " Plus £640 from the care home."; fx.cash += 640; }
       if(f.job==='warehouse'){ text += " Plus £360 from weekend shifts."; fx.cash += 360; }
@@ -641,6 +676,8 @@ function autoEvent(kind){
       else if(f.job==='campus'){ text = "Second campus pay, C$850. A professor asks if you want to be a research assistant next term."; fx = {cash:850, future:6}; }
       else if(f.network){ text = "The job lead from the owambe calls back. A contract role in your field, with a C$2,000 signing advance. Canadian experience, finally."; fx = {cash:2000, future:18, peace:6}; }
       else { text = "The bridging program connects you to a paid placement. C$600 for now and a reference letter later."; fx = {cash:600, future:8}; }
+      if(P()==='scholar'){ text += " Your scholarship stipend also lands, C$2,000."; fx.cash += 2000; }
+      if(P()==='partial'){ text += " Your partial stipend lands too, C$1,000."; fx.cash += 1000; }
       if(f.stay==='basement'){ text += ` Basement rent is due. ${M(RENT())}.`; fx.cash -= RENT(); }
       if(f.stay==='host'){ text += " You give your host family C$400 for food and gratitude."; fx.cash -= 400; }
       if(f.stay==='airbnb'){ text += ` You finally rent a basement. ${M(RENT()*2)} for deposit and first month.`; fx.cash -= RENT()*2; }
@@ -708,7 +745,7 @@ function render(){
       <div class="stamp">Arrived · Day 01</div>
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
       <p>Everybody wants to japa. Nobody tells you what happens after you land.</p>
-      <p>You have 30 days. Find work, pay rent, survive the weather, and decide who back home gets your money and who gets your questions.</p>
+      <p>You have 30 days. Home thinks you are rich. Your bank account would like a word.</p>
       <label class="when" for="origin">Which state are you leaving from?</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
       <label class="when" for="culture">Whose voice should your family speak in?</label>
@@ -721,6 +758,7 @@ function render(){
         <select id="place" class="select">${placeOptions(rk)}</select>
         <label class="when" for="path">How did you japa?</label>
         <select id="path" class="select">${pathOptions(rk).map(([k,l])=>`<option value="${k}"${k===pick.path?' selected':''}>${l}</option>`).join('')}</select>
+        <label class="check" for="sold"><input type="checkbox" id="sold"${pick.sold?' checked':''}> I sold everything to come</label>
         <button class="primary" id="go">Land in ${ROUTES[rk].label}</button>` : ''}
       <div class="foot">About 5 minutes. Every choice follows you.</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
@@ -734,8 +772,9 @@ function render(){
     document.getElementById('culture').onchange = e => { pick.culture = e.target.value; };
     app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = b.dataset.r; render(); });
     const go = document.getElementById('go');
-    if(go) go.onclick = ()=>{ pick.path = document.getElementById('path').value; begin(rk, document.getElementById('place').value); render(); scrollTo(0,0); };
+    if(go) go.onclick = ()=>{ pick.path = document.getElementById('path').value; pick.sold = document.getElementById('sold').checked; begin(rk, document.getElementById('place').value); render(); scrollTo(0,0); };
     const ps = document.getElementById('path'); if(ps) ps.onchange = e => { pick.path = e.target.value; };
+    const sb = document.getElementById('sold'); if(sb) sb.onchange = e => { pick.sold = e.target.checked; };
     return;
   }
   if(phase==='end'){ return renderEnd(app); }
@@ -791,8 +830,9 @@ function verdict(){
   const f = S.f, low = A(300), mid = A(900);
   if(f.sibling==='sent' && S.home>=65 && S.cash<mid) return ["The Family ATM", `Everybody at home is thriving. You are eating Indomie in ${T()}.`];
   if(P()==='care' && S.f.cos==='reported') return ["Stronger Than The Agent","Somebody sold you a dream that did not exist. You reported it, found the real thing, and kept your head up."];
-  if(P()==='study' && (S.f.fees==='pending' || S.f.fees==='paused')) return ["Fees Still Pending","Student by day, worker by night, and negotiator with the finance office in between."];
-  if((P()==='sold' || P()==='care') && S.future>=30) return ["Making It By Force","There is no going back, so you are going forward. Slowly, stubbornly, and with your whole chest."];
+  if(P()==='scholar' && S.f.stipendHome && S.home>=60) return ["Scholar and Sponsor","You came on a scholarship and somehow became the family's scholarship too."];
+  if((P()==='study' || P()==='partial') && (S.f.fees==='pending' || S.f.fees==='paused')) return ["Fees Still Pending","Student by day, worker by night, and negotiator with the finance office in between."];
+  if((SOLD() || P()==='care') && S.future>=30) return ["Making It By Force","There is no going back, so you are going forward. Slowly, stubbornly, and with your whole chest."];
   if(S.cash<low) return ["Running on Prayers","You made it to day 30 on faith, leftover jollof, and a very patient bank."];
   if(S.peace<35) return ["Hustle Without Peace","The money is coming in. Your body has filed a formal complaint."];
   if(S.home<35) return ["Ghost Mode Activated","Your account is healthy. The family WhatsApp group thinks you have died."];
@@ -812,7 +852,8 @@ function receipts(){
   if(f.cos==='cash') out.push("Cash in envelopes kept you fed and kept you afraid.");
   if(f.fees==='family') out.push("Somebody back home sold a plot so you could stay in school.");
   if(f.fees==='plan') out.push("You turned a scary deadline into three instalments.");
-  if(P()==='sold') out.push("You sold everything to come. There was no plan B, so plan A had to work.");
+  if(f.stipendHome) out.push("Part of your stipend went home. Your fridge held three eggs and a lemon.");
+  if(SOLD()) out.push("You sold everything to come. There was no plan B, so plan A had to work.");
   if(f.spouse==='looked') out.push("Every Nigerian man at the fellowship was married or focusing on himself.");
   if(f.network && R.key==='ca') out.push("An owambe at minus 20 got you your first real job lead.");
   if(f.coat==='none') out.push("Naija blood was not enough for the cold.");
@@ -876,7 +917,7 @@ function renderEnd(app){
       const rk = btn.dataset.r;
       box.innerHTML = `<label class="when" for="place2">${ROUTES[rk].ask}</label><select id="place2" class="select">${placeOptions(rk)}</select><button class="primary" id="go2">Land in ${ROUTES[rk].label}</button>`;
       document.getElementById('go2').onclick = ()=>{
-        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture};
+        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture, sold:S.sold};
         const pl = document.getElementById('place2').value;
         begin(rk, pl, prev); render(); scrollTo(0,0);
       };
