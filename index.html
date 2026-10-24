@@ -1776,28 +1776,10 @@ function vnToast(msg){
   if(!t){ t = document.createElement('div'); t.id = 'ftoast'; t.setAttribute('role','status'); document.body.appendChild(t); }
   t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), 2600);
 }
-function pickVoice(){
-  const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
-  return vs.find(v=>/en[-_]NG/i.test(v.lang)) || vs.find(v=>/en[-_](GB|ZA|KE|GH)/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null;
-}
-try{ if(window.speechSynthesis) speechSynthesis.getVoices(); }catch(e){}   // some browsers load voices late
 function playVN(el){
-  track('voicenote-tap');
-  const say = (el.dataset.say||'').replace(/\s+/g,' ').trim(), synth = window.speechSynthesis;
-  if(!SFX.on){ vnToast('Turn the sound on to hear voice notes.'); return; }
-  if(!say || !synth || typeof SpeechSynthesisUtterance === 'undefined'){
-    SFX.crackle(); el.classList.add('playing'); setTimeout(()=>el.classList.remove('playing'), 1400);
-    vnToast(VN_LINES[Math.floor(Math.random()*VN_LINES.length)]); return;
-  }
-  const hint = el.querySelector('.vn-hint');
-  if(synth.speaking){ synth.cancel(); el.classList.remove('playing'); if(hint) hint.textContent = 'Tap to play'; return; }
-  const u = new SpeechSynthesisUtterance(say), v = pickVoice();
-  if(v){ u.voice = v; u.lang = v.lang; } u.rate = 0.95; u.pitch = 1.1;
-  const stop = () => { el.classList.remove('playing'); if(hint) hint.textContent = 'Tap to play'; };
-  u.onend = stop; u.onerror = stop;
-  el.classList.add('playing'); if(hint) hint.textContent = 'Playing · tap to stop';
-  track('voicenote-play' + (v && /NG/i.test(v.lang) ? '-ng' : ''));
-  synth.speak(u);
+  SFX.crackle(); track('voicenote-tap');
+  el.classList.add('playing'); setTimeout(()=>el.classList.remove('playing'), 1400);
+  vnToast(VN_LINES[Math.floor(Math.random()*VN_LINES.length)]);
 }
 
 
