@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Everybody wants to japa. Nobody tells you what happens after you land. A free 30-day game about your first month abroad.">
-<meta property="og:title" content="JAPA: You Have Landed">
+<meta property="og:title" content="Now You Have Landed">
 <meta property="og:description" content="Everybody wants to japa. Nobody tells you what happens after you land. Play free in your browser.">
 <meta name="theme-color" content="#0E5A3A">
-<title>JAPA: You Have Landed</title>
+<title>Now You Have Landed</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
@@ -81,7 +81,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 /* Intro */
 .intro{display:grid;gap:18px;padding-top:8px}
 .stamp{justify-self:start;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);border:1.5px solid var(--gold);padding:4px 10px;border-radius:4px;transform:rotate(-3deg)}
-.intro h1{font-family:var(--display);font-weight:800;font-size:clamp(40px,13vw,58px);line-height:.95;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.intro h1{font-family:var(--display);font-weight:800;font-size:clamp(36px,11vw,54px);line-height:.95;letter-spacing:-.01em;margin:0;text-wrap:balance}
 .intro h1 em{font-style:normal;color:var(--green);display:block;font-size:.5em;letter-spacing:.02em;margin-top:8px}
 .intro p{margin:0;font-size:17px;color:var(--muted);max-width:38ch}
 .kit{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -494,7 +494,7 @@ function header(day){
   const pct = Math.min(100, (day/30)*100);
   const b = v => `<div class="bar"><i style="width:${v}%"></i></div>`;
   return `<div class="pass">
-    <div class="pass-top"><div class="brand">JAPA</div><div class="day">DAY ${String(day).padStart(2,'0')} / 30</div></div>
+    <div class="pass-top"><div class="brand">LANDED</div><div class="day">DAY ${String(day).padStart(2,'0')} / 30</div></div>
     <div class="route">${S.trail.map(t=>t.code).join(' → ')} → ${R.country} · ${L.town===L.name?L.name:L.town+', '+L.name}</div>
     <div class="stats">
       <div class="stat"><span>Cash</span><b>${money(S.cash)}</b></div>
@@ -528,7 +528,7 @@ function render(){
     const rk = pick.route;
     app.innerHTML = `<div class="intro fade">
       <div class="stamp">Arrived · Day 01</div>
-      <h1>JAPA<em>You Have Landed</em></h1>
+      <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
       <p>Everybody wants to japa. Nobody tells you what happens after you land.</p>
       <p>You have 30 days. Find work, pay rent, survive the weather, and decide who back home gets your money and who gets your questions.</p>
       <label class="when" for="origin">Where are you leaving from?</label>
@@ -614,12 +614,12 @@ function renderEnd(app){
   const [title, line] = verdict(), rec = receipts();
   const where = `${L.town}, ${R.country}`;
   const journey = S.trail.map(t=>t.town).concat([L.town]).join(' → ');
-  const share = `I played JAPA: You Have Landed (${journey}) and I am "${title}". ${line} Finished 30 days with ${money(S.cash)}, Peace ${S.peace}, Home ${S.home}, Future ${S.future}. Wetin be your own?`;
+  const share = `I played Now You Have Landed (${journey}) and I am "${title}". ${line} Finished 30 days with ${money(S.cash)}, Peace ${S.peace}, Home ${S.home}, Future ${S.future}. Wetin be your own?`;
   app.innerHTML = `<div class="scene fade">
     <div class="when">Day 30 · Your result</div>
     <div class="journey-line">${journey}</div>
     <div class="verdict">
-      <div class="label">JAPA · You Have Landed</div>
+      <div class="label">Now You Have Landed</div>
       <h2>${title}</h2>
       <p>${line}</p>
       <div class="final">
@@ -645,7 +645,7 @@ function renderEnd(app){
   document.getElementById('copy').onclick = async ()=>{
     const t = document.getElementById('toast'), text = share + (url ? ' ' + url : '');
     try{
-      if(navigator.share){ await navigator.share({title:'JAPA: You Have Landed', text}); t.textContent = "Shared."; return; }
+      if(navigator.share){ await navigator.share({title:'Now You Have Landed', text}); t.textContent = "Shared."; return; }
     }catch(e){ if(e && e.name==='AbortError') return; }
     navigator.clipboard.writeText(text).then(()=>{ t.textContent = "Copied. Paste it in the family group chat."; })
     .catch(()=>{ t.textContent = text; });
