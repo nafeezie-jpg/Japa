@@ -1357,9 +1357,9 @@ const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the air
 /* ---------- Real stories: the host who vanished, and the guest who stayed ---------- */
 const TOLD = 'Nafeezie';
 const barNight = () => ({day:1, credit:TOLD, told:1, when: s => s.landing===1 && pickV('air',3)===2,
-  text:`For weeks, a family friend in ${T()} planned your arrival with you on WhatsApp. He picks you up himself, and you see that his home is one small room shared with his children. "No wahala, we will manage," he says. That evening he takes you to a bar for welcome drinks, steps out to make a call, and never comes back.`,
+  text:`For weeks, a family friend in ${T()} planned your arrival with you on WhatsApp. He picks you up himself, and you see that his home is one small room shared with his children. "No wahala, we will manage," he says. That evening he takes you to a bar for welcome drinks, steps out to make a call, and never comes back. E be like film trick.`,
   choices:[
-   {l:"Wait. He must be coming back", fx:{peace:-12}, r:"The bar closes at midnight, and he does not come back. You sleep on a bench by the door with your suitcase between your knees, and that is your first night abroad."},
+   {l:"Wait. He must be coming back", fx:{peace:-12}, r:"Everywhere first blur. You sleep on a bench in the bar with your suitcase between your knees. In the morning, reality wakes you up, and you start figuring things out from zero."},
    {l:"Call everyone you know", fx:{cash:-A(60), peace:-5, home:2}, r:"At 1am, a friend of a friend picks up and sends you an address. You arrive by taxi with your suitcase and a very long story."},
    {l:"Book the cheapest room nearby", fx:{cash:-A(90), peace:-2, future:2}, r:"A tired receptionist gives you a room above a takeaway. You lie awake and finally understand what \"we will manage\" meant."}]});
 const guestStay = () => { const c = C(), host = s => pickV('HOST',2)===0; return [
@@ -1858,6 +1858,8 @@ const GLOSSARY = [
  ['Ugu','Fluted pumpkin leaves. Spinach is not a substitute, no matter what anyone says.'],
  ['Amala · Ofe onugbu · Tuwo','Comfort food from Yoruba, Igbo, and Hausa kitchens.'],
  ['Sallah','The Eid celebrations, a big family time in Hausa and other Muslim homes.'],
+ ['E be like film trick','"It is like a movie stunt." Said when something too shocking to be real happens.'],
+ ['Everywhere first blur','When shock hits so hard that everything goes blurry for a moment.'],
  ['Blue ticks','WhatsApp\'s sign that you have read a message. A powerful weapon in family politics.'],
  ['Status','WhatsApp\'s 24-hour photo updates. At home, also read as a request for an invoice.'],
  ['Cooperative society','A members\' savings and loan group. Very patient, until they visit your mother.']
