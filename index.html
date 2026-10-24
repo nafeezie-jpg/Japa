@@ -198,6 +198,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .mbar{position:relative;height:6px;border-radius:3px;background:var(--line)}
 .mbar i{display:block;height:100%;border-radius:3px;background:var(--muted)}
 .meter.high .mbar i{background:var(--good)} .meter.mid .mbar i{background:var(--gold)} .meter.low .mbar i{background:var(--bad)}
+.mbar em.cap{opacity:.35;background:var(--bad)}
 .mbar em{position:absolute;left:60%;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.5}
 .bench{margin:0;font-size:14px;color:var(--muted)}
 .lesson{background:var(--bubble);border-radius:12px;padding:12px 14px;font-weight:600}
@@ -267,6 +268,8 @@ body{padding-bottom:64px}
 .quickdaily{margin-top:8px;font-size:13px}
 details.custom summary{font-weight:700}
 .introstory{display:block;margin:6px 0 14px}
+.padabox{margin-top:12px}
+.padabox p{margin:8px 0}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1196,6 +1199,14 @@ const routeAlts = () => { const c = C(), k = R.key, out = [];
   return out;
 };
 
+/* ---------- Japada: running back home ---------- */
+const padaScene = () => { const c = C();
+  return {day:26, when: s => s.landing===1 && (s.peace < 50 || s.cash < RENT()), from:"Old classmate", sub:`Back in ${O()}`, text:`I don do japada o! Six months abroad was enough for me. I am back in ${O()}, eating ${c.food} and sleeping with both eyes closed. Peace of mind is wealth. You, how far?`,
+  choices:[
+   {l:"Start pricing tickets home. Quietly", fx:{peace:5, future:-6}, set:{pada:true}, r:"You check flights at 2am and do not book. But now you know the price, and that is a kind of comfort."},
+   {l:"Call him and ask how it really is", fx:{peace:3, home:2}, r:"He says the first month back is sweet and the third month is hard. Nobody tells you that part either."},
+   {l:"Face it head on. Give it everything", fx:{peace:-2, future:7}, r:"You close the chat, make tea, and send two more applications. You did not come this far to only come this far."}]}; };
+
 /* ---------- Stranded at arrivals ---------- */
 const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the airport', uk:'Heathrow', ca: T()==='Toronto' ? 'Pearson' : 'the airport'}[R.key];
   return {day:1, when: s => s.landing===1 && pickV('air',3)===1, text:`You land at ${port}. The man who arranged your trip said someone would pick you up. He is not picking up his calls. The people you know are hours away, and the only person in ${T()} is at work until 6pm.`,
@@ -1206,7 +1217,7 @@ const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the air
 
 function scenes(){
   const base = [arrival()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : CA());
-  return base.concat(routeAlts(), pathScenes(), fundScenes(), [familyGroup(), mishap(), smallWin(), countryMoment()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  return base.concat(routeAlts(), pathScenes(), fundScenes(), [familyGroup(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -1464,7 +1475,7 @@ function render(){
             <dt>Home</dt><dd>Family ratings. Money pushes it up. Voice notes do absolutely nothing.</dd>
             <dt>Future</dt><dd>What you are really building. Nobody at home can see it, which is why it grows.</dd>
           </dl>
-          <p>Each meter is out of 100, and 60 or more is healthy. There are no right answers. Every choice follows you to the end of the game.</p>
+          <p>Each meter is out of 100, and each has its own healthy mark. Future starts at 20, so 40 is already good. Home is best between 50 and 85, because a family that adores you in month one usually means you are overgiving. There are no right answers. Every choice follows you to the end of the game.</p>
         </div>
       </details>
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
@@ -1599,6 +1610,10 @@ function art(sc){ return `<div class="art" aria-hidden="true"><svg viewBox="0 0 
 
 /* ---------- What the scores mean ---------- */
 const HEALTHY = 60;
+// low below the first number, healthy from the second; home also has a ceiling
+const MARKS = {peace:[35,60], home:[30,50], future:[25,40]};
+const HOME_CAP = 85;
+const healthy = (k, v) => v >= MARKS[k][1] && !(k==='home' && v > HOME_CAP);
 function band(k, v){
   if(k==='cash'){
     const rent = RENT();
@@ -1609,17 +1624,19 @@ function band(k, v){
   }
   const T = {
     peace:[['Running on fumes','You are exhausted. Too many yeses, too little rest.'],['Holding it together','You are coping, but the stress is building.'],['Zen master','You protected your sanity and rested when you needed to.']],
-    home:[['"You have changed"','Family relationships are strained. Expect long voice notes.'],['On speaking terms','Your family is okay with you, but they have opinions.'],['Family favourite','Your family is very happy with you. Possibly too happy.']],
+    home:[['"You have changed"','Family relationships are strained. Expect long voice notes.'],['On speaking terms','Your family is okay with you, but they have opinions.'],['Well loved','Your family is happy with you, and you still kept something for yourself.']],
     future:[['Still loading','Little went into your career, savings, or plans. You survived, but you did not build.'],['Building slowly','You have started building something for yourself. Keep going.'],['On the up','Your choices are building a real future. Your later self says thank you.']]
   }[k];
-  const i = v < 35 ? 0 : v < HEALTHY ? 1 : 2;
+  if(k==='home' && v > HOME_CAP) return {cls:'mid', label:'Family ATM risk', meaning:'Home is thrilled with you. Check what your savings and your peace paid for it.'};
+  const i = v < MARKS[k][0] ? 0 : v < MARKS[k][1] ? 1 : 2;
   return {cls:['low','mid','high'][i], label:T[i][0], meaning:T[i][1]};
 }
 function lesson(){
   const rent = RENT();
   if(S.cash < 0) return "Your lesson: you gave more than you had. Generosity without a budget becomes debt, and debt follows you everywhere.";
-  const m = [['peace',S.peace],['home',S.home],['future',S.future]].sort((a,b)=>a[1]-b[1])[0];
-  if(m[1] >= HEALTHY && S.cash >= rent) return "Your lesson: you kept all four meters healthy at once. That is rare. Teach the rest of us.";
+  if(S.home > HOME_CAP && (S.cash < rent*3 || S.peace < MARKS.peace[1])) return "Your lesson: home is very happy with you, and your savings or your peace paid for it. You cannot give from an empty cup.";
+  const m = [['peace',S.peace],['home',S.home],['future',S.future]].map(([k,v])=>[k, v - MARKS[k][1]]).sort((a,b)=>a[1]-b[1])[0];
+  if(m[1] >= 0 && S.cash >= rent) return "Your lesson: you kept all four meters healthy at once. That is rare. Teach the rest of us.";
   return {
     peace:"Your lesson: saying yes to everything cost you your peace. A small no is still love.",
     home:"Your lesson: you protected yourself, but home feels far away. A phone call costs nothing.",
@@ -1826,10 +1843,10 @@ function renderEnd(app){
       ${[['cash','Cash',money(S.cash)],['peace','Peace',S.peace+'/100'],['home','Home',S.home+'/100'],['future','Future',S.future+'/100']].map(([k,n,v])=>{ const b=band(k, S[k]); return `
       <div class="meter ${b.cls}">
         <div class="meter-top"><b>${n}</b><span class="val">${v}</span><span class="tag">${b.label}</span></div>
-        ${k==='cash' ? '' : `<div class="mbar"><i style="width:${S[k]}%"></i><em title="Healthy from ${HEALTHY}"></em></div>`}
+        ${k==='cash' ? '' : `<div class="mbar"><i style="width:${S[k]}%"></i><em style="left:${MARKS[k][1]}%" title="Healthy from ${MARKS[k][1]}"></em>${k==='home'?`<em class="cap" style="left:${HOME_CAP}%" title="Above ${HOME_CAP} means you may be overgiving"></em>`:''}</div>`}
         <p>${b.meaning}</p>
       </div>`; }).join('')}
-      <p class="bench">Healthy is ${HEALTHY} and above. For cash, healthy is at least three months' rent saved. The real skill is keeping all four out of the red at the same time.</p>
+      <p class="bench">Healthy marks: Peace ${MARKS.peace[1]}, Future ${MARKS.future[1]} (you started at 20), and Home between ${MARKS.home[1]} and ${HOME_CAP}. Above ${HOME_CAP}, home may be loving you at your own expense. For cash, healthy is three months' rent saved.</p>
       <div class="lesson">${lesson()}</div>
     </div>
     ${collectionHTML(title, isNewVerdict)}
@@ -1845,15 +1862,28 @@ function renderEnd(app){
       </div>
     </div>
     <div class="row">
-      <button class="ghost" id="move">Japa again from here</button>
+      <button class="ghost" id="move">Japa again to another country</button>
+      <button class="ghost" id="pada">${S.f.pada ? 'Japada. Go back home' : 'Japada. What if you went back home?'}</button>
       <button class="ghost" id="again">Start a new life</button>
     </div>
     <div id="movebox" hidden class="routes"></div>
+    <div id="padabox" hidden class="result padabox"></div>
     <a class="storylink" href="https://tally.so/r/q5480d" target="_blank" rel="noopener">Have a japa story? Share it and it could become a scene in the game →</a>
     <div class="toast" id="toast" role="status"></div>
     <div class="foot">Everybody wants to japa. Nobody tells you what happens after you land.</div>
     <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
   </div>`;
+  document.getElementById('pada').onclick = ()=>{
+    track('japada'); SFX.land();
+    const box = document.getElementById('padabox'), c = C(), rent = RENT();
+    const lines = [`You land back in ${O()} after ${S.landing>1 ? 'more than one japa' : 'thirty days abroad'}.`];
+    lines.push(S.cash >= rent*3 ? `You come home with ${money(S.cash)} saved, which is more than most people expected.` : S.cash >= 0 ? `You come home with ${money(S.cash)} and a lot of stories.` : `You come home owing ${money(-S.cash)}, and the first person to ask "where is our own?" gets a very long silence.`);
+    lines.push(S.home >= 50 ? `${c.mum} cooks ${c.food} and tells everyone you are "on holiday".` : `Half the family is happy to see you. The other half wants to know what happened.`);
+    lines.push(S.future >= 40 ? "You bring back skills, contacts, and a clearer head. This time you know exactly what you want." : "You sleep through the night for the first time in a month. The plan can wait until you are rested.");
+    lines.push("Japada is not failure. Sometimes the plan changes, and coming home is the bravest part.");
+    box.innerHTML = `<div class="when">Japada · Back in ${O()}</div>${lines.map(l=>`<p>${l}</p>`).join('')}`;
+    box.hidden = false; box.scrollIntoView({behavior:'smooth', block:'nearest'});
+  };
   document.getElementById('again').onclick = ()=>{ fresh(); pick.route=null; pick.qroute=null; pick.daily=false; pick.duo=0; render(); scrollTo(0,0); };
   const SITE = 'https://nowyouhavelanded.com';
   let cardFile = null, cardBlob = null;
