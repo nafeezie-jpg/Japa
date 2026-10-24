@@ -262,6 +262,7 @@ body{padding-bottom:64px}
 .quick-btn .flag{font-size:26px;line-height:1}
 .quick-btn b{font-family:var(--display);font-size:20px;flex:1;color:#fff}
 .quick-btn .go{font-size:20px;color:var(--gold)}
+#qpanel{margin-top:-4px}
 .quick-ask{margin-top:18px}
 .quickdaily{margin-top:8px;font-size:13px}
 details.custom summary{font-weight:700}
@@ -1345,16 +1346,16 @@ function render(){
       <div class="stamp">Arrived · Day 01</div>
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
       <p>Everybody wants to japa. Nobody tells you what happens after you land. Home thinks you are rich. Your bank account would like a word.</p>
+      <label class="when" for="origin">Leaving from</label>
+      <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
       <div class="when quick-ask">Tap where you are landing</div>
-      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">→</span></button>`).join('')}</div>
+      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select"><option value="">Surprise me</option>${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
       <label class="check daily quickdaily" for="qdaily"><input type="checkbox" id="qdaily"${pick.daily?' checked':''}> <span><b>Today's Landing · ${dayLabel(todayStr())}</b> Same game as everyone today</span></label>
-      <div class="foot">One tap and you are in. Your visa, city, and money are a surprise. About 5 minutes.</div>
+      <div class="foot">Pick, tap, and land. Anything you skip is a surprise. About 5 minutes.</div>
       <details class="how custom"${pick.custom?' open':''}>
         <summary>Make it your story</summary>
         <div class="how-body">
-      <p>Choose your state, your family's voice, your city, and how you japa'd.</p>
-      <label class="when" for="origin">Which state are you leaving from?</label>
-      <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
+      <p>Choose your family's voice, how you funded the move, and more.</p>
       <label class="when" for="gender">I am a</label>
       <select id="gender" class="select"><option value="any"${pick.gender==='any'?' selected':''}>Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select>
       <label class="when" for="culture">Whose voice should your family speak in?</label>
@@ -1405,14 +1406,20 @@ function render(){
     const qd = document.getElementById('qdaily'); if(qd) qd.onchange = e => { pick.daily = e.target.checked; const d2 = document.getElementById('daily'); if(d2) d2.checked = pick.daily; };
     const cu = app.querySelector('details.custom'); if(cu) cu.ontoggle = () => { pick.custom = cu.open; };
     app.querySelectorAll('.quick-btn').forEach(b=>b.onclick=()=>{
-      const rk = b.dataset.q, any = a => a[Math.floor(Math.random()*a.length)];
+      SFX.tap(); pick.qroute = (pick.qroute===b.dataset.q ? null : b.dataset.q); render();
+      const qp = document.getElementById('qpanel'); if(qp) qp.scrollIntoView({behavior:'smooth', block:'nearest'});
+    });
+    const qg = document.getElementById('qgo');
+    if(qg) qg.onclick = ()=>{
+      const rk = pick.qroute, any = a => a[Math.floor(Math.random()*a.length)];
+      const pl = document.getElementById('qplace').value, pa = document.getElementById('qpath').value;
       SFX.land();
-      pick.path = any(pathOptions(rk))[0];
+      pick.path = pa || any(pathOptions(rk))[0];
       pick.fund = any(['savings','savings','sold','borrowed','kept']);
       pick.duo = 0;
       track('quick-'+rk);
-      begin(rk, any(places(rk)).name); render(); scrollTo(0,0);
-    });
+      begin(rk, pl || any(places(rk)).name); render(); scrollTo(0,0);
+    };
     document.getElementById('gender').onchange = e => { pick.gender = e.target.value; };
     app.querySelectorAll('.route-btn').forEach(b=>b.onclick=()=>{ pick.route = (pick.route===b.dataset.r ? null : b.dataset.r); render(); const rp=document.getElementById('routepanel'); if(rp) rp.scrollIntoView({behavior:'smooth', block:'nearest'}); });
     const go = document.getElementById('go');
@@ -1769,7 +1776,7 @@ function renderEnd(app){
     <div class="foot">Everybody wants to japa. Nobody tells you what happens after you land.</div>
     <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
   </div>`;
-  document.getElementById('again').onclick = ()=>{ fresh(); pick.route=null; pick.daily=false; pick.duo=0; render(); scrollTo(0,0); };
+  document.getElementById('again').onclick = ()=>{ fresh(); pick.route=null; pick.qroute=null; pick.daily=false; pick.duo=0; render(); scrollTo(0,0); };
   const SITE = 'https://nowyouhavelanded.com';
   let cardFile = null, cardBlob = null;
   drawCard(title, line, journey, rec).then(canvas => {
