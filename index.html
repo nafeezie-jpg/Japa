@@ -339,6 +339,8 @@ details.custom summary{font-weight:700}
 .abnew{margin:0;font-weight:700;color:var(--accent)}
 .abadges{display:flex;flex-wrap:wrap;gap:6px}
 .abadges i{font-style:normal;font-size:13px;font-weight:600;background:var(--bubble);border-radius:999px;padding:4px 10px}
+.namebox{display:grid;gap:6px;margin:4px 0}
+.namebox .row{grid-template-columns:1fr auto}
 .lb-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
 .lb-tab:first-child{grid-column:1/-1}
 .lb-tab{background:var(--bubble);border:1.5px solid transparent;border-radius:12px;padding:10px;text-align:left;display:grid;gap:2px}
@@ -1735,13 +1737,13 @@ function render(){
         const where = (pl.town===pl.name ? pl.name : pl.town + ', ' + pl.name) + ', ' + ROUTES[plan.rk].label;
         return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>Everyone lands in ${where} today</b>
         <span>${done ? `You played today and scored ${scoreOf(done)}/100. A new country and new surprises arrive in <em id="cd">${untilMidnight()}</em>.` : `One shared game a day. Same place and same surprises for everyone, so you can compare scores with friends. A new country arrives in <em id="cd">${untilMidnight()}</em>.`}</span>
+        ${done ? '' : `<label class="when" for="pname" style="color:#E8BB69">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">`}
         <button class="primary" id="dailygo" type="button">${done ? "See how everyone did today" : "Play Today's Landing"}</button></div>`; })()}
       <p class="mirror"><b>More than a game.</b> A 5-minute reality check on your money, your peace of mind, your standing at home, and the future you came to build.</p>
+      <div class="when quick-ask">Or play your own landing</div><div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
       <label class="when" for="origin">Leaving from</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
-      <label class="when" for="pname">Your name for the leaderboard (optional)</label>
-      <input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="So the game knows who landed" value="${getName().replace(/"/g,'&quot;')}">
-      <div class="when quick-ask">Or play your own landing</div><div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
+      ${loadHistory().some(g=>g.daily && dayKey(g.t)===dayKey(Date.now())) ? `<label class="when" for="pname">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">` : ''}
       <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select">${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
       <div class="foot">Pick, tap, and land. Anything you skip is a surprise. About 5 minutes.</div>
       <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-intro')">Have a japa story? Tell us, and it could become a scene →</a>
@@ -1781,6 +1783,7 @@ function render(){
     const dg = document.getElementById('dailygo');
     if(dg) dg.onclick = () => {
       if(loadHistory().some(g=>g.daily && dayKey(g.t)===dayKey(Date.now()))){ openBoard(); return; }
+      const pn2 = document.getElementById('pname'); if(pn2) setName(pn2.value);
       const ds = todayStr(), plan = dailyPlan(ds), st = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0];
       SFX.land(); pick.daily = true; pick.path = plan.path; pick.fund = plan.fund; pick.culture = STATE_CULTURE[st] || 'general'; pick.duo = 0;
       track('daily-' + dailyNo(ds)); begin(plan.rk, plan.place); render(); scrollTo(0,0);
@@ -1791,6 +1794,7 @@ function render(){
     });
     const qg = document.getElementById('qgo');
     if(qg) qg.onclick = ()=>{
+      const pn3 = document.getElementById('pname'); if(pn3) setName(pn3.value);
       const rk = pick.qroute, any = a => a[Math.floor(Math.random()*a.length)];
       const pl = document.getElementById('qplace').value, pa = document.getElementById('qpath').value;
       SFX.land();
@@ -2331,12 +2335,18 @@ function openBoard(){
   crownFor(lastWeekStart()).then(c => { boardCrown = c; if(!o.hidden && boardRows) paint(); }).catch(()=>{});
   loadBoard(true).then(paint).catch(()=>{ const bb = o.querySelector('#boardbody'); if(bb) bb.innerHTML = `<p>The board could not load. Check your connection and try again.</p>`; });
 }
+function saveEndName(){
+  const i = document.getElementById('endname'), m = document.getElementById('endnamemsg'); if(!i) return;
+  const v = setName(i.value);
+  if(BAD_NAME.test(v)){ m.textContent = 'Please pick a different name.'; return; }
+  m.textContent = v ? `Saved. Your next games will show as ${v}.` : 'Type a name first.'; track('name-saved-end');
+}
 function postBoxHTML(){
   const st = S.st || {r:0, s:0, g:0};
   const facts = `<p>This game you said no to home <b>${st.r}</b> time${st.r===1?'':'s'}, sent <b>${NGN0(st.s)}</b> home, fell for <b>${st.g}</b> trap${st.g===1?'':'s'}, and spotted <b>${st.p||0}</b>.</p>`;
   const who = esc(getName() || 'Anonymous lander');
   const today = S.daily && S.dailyN ? `<p class="lb-rankline">${S.beat===null ? `You are the first to play Today's Landing #${dailyNo(S.daily)}.` : `Today's Landing #${dailyNo(S.daily)}: you beat <b>${S.beat}%</b> of today's ${S.dailyN} players.`}</p>` : '';
-  const status = S.rank ? `${today}<p class="lb-rankline">You are <b>#${S.rank}</b> on this week's board, out of ${S.rankOf} player${S.rankOf===1?'':'s'}.</p><p class="small" style="color:var(--muted);font-size:13px">Posted as ${who}.${getName()?'':' Add your name at the start of your next game to show it here.'}</p>`
+  const status = S.rank ? `${today}<p class="lb-rankline">You are <b>#${S.rank}</b> on this week's board, out of ${S.rankOf} player${S.rankOf===1?'':'s'}.</p><p class="small" style="color:var(--muted);font-size:13px">Posted as ${who}.</p>${getName() ? '' : `<div class="namebox"><label class="when" for="endname">Want your name on the board next time?</label><div class="row"><input id="endname" class="select" type="text" maxlength="20" placeholder="Your name or nickname"><button class="ghost" type="button" onclick="saveEndName()">Save</button></div><p class="small" id="endnamemsg" style="color:var(--muted);font-size:13px;margin:0"></p></div>`}`
     : S.postFail ? `<p>${S.postFail}</p><button class="ghost" type="button" id="lbretry">Try again</button>`
     : `<p>Adding you to this week's board as ${who}...</p>`;
   return `<div class="lbbox" id="lbbox"><div class="when">Weekly leaderboard</div>${status}${facts}<button class="ghost" type="button" onclick="openBoard()">🏆 See this week's board</button></div>`;
