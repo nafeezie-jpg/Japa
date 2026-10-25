@@ -1752,6 +1752,7 @@ function render(){
         <span>${done ? `You played today and scored ${scoreOf(done)}/100. A new country and new surprises arrive in <em id="cd">${untilMidnight()}</em>.` : `One shared game a day. Same place and same surprises for everyone, so you can compare scores with friends. A new country arrives in <em id="cd">${untilMidnight()}</em>.`}</span>
         ${done ? '' : `<label class="when" for="pname" style="color:#E8BB69">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">`}
         <button class="primary" id="dailygo" type="button">${done ? "See how everyone did today" : "Play Today's Landing"}</button>
+        ${done ? '' : pushButtonHTML()}
         ${done ? `${pushButtonHTML()}<div class="hero-remind">Or add a calendar reminder · <button type="button" id="hr-ics">Apple or Outlook</button> · <a id="hr-g" target="_blank" rel="noopener" href="${remindGoogle()}">Google</a></div>` : ''}</div>`; })()}
       ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>` : ''}
       <button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>
