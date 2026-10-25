@@ -2103,7 +2103,7 @@ const VERDICTS = [
  ['Fees Still Pending','Go as a student and leave your fees unpaid.'],
  ['Owing the Cooperative','Borrow money for the move and ignore the repayment.'],
  ['Stronger Than The Agent','Take the UK care visa route and report the fake agent.'],
- ['Best Landing','Top the Best landing board when the week closes. The weekly crown.']
+ ['Best Landing','Post the best Today\'s Landing score of the week. The weekly crown.']
 ];
 
 /* ---------- My games: a personal journal kept on this device ---------- */
@@ -2229,7 +2229,7 @@ const crownCache = {};
 async function crownFor(from){   // the top score of the week starting at 'from', earliest first on a tie
   const k = from.toISOString(); if(k in crownCache) return crownCache[k];
   const to = new Date(from.getTime() + 7*864e5);
-  const q = '/rest/v1/landings?select=name,route,town,score,created_at&created_at=gte.' + encodeURIComponent(boardFrom(from).toISOString()) + '&created_at=lt.' + encodeURIComponent(to.toISOString()) + '&order=score.desc,created_at.asc&limit=1';
+  const q = '/rest/v1/landings?select=name,route,town,score,created_at&created_at=gte.' + encodeURIComponent(boardFrom(from).toISOString()) + '&created_at=lt.' + encodeURIComponent(to.toISOString()) + '&daily=eq.true&order=score.desc,created_at.asc&limit=1';
   const res = await fetch(SB_URL + q, {headers:{apikey:SB_KEY}}); if(!res.ok) throw new Error('crown ' + res.status);
   return (crownCache[k] = (await res.json())[0] || null);
 }
@@ -2252,7 +2252,7 @@ async function checkCrowns(){
   if(won && saveVerdict('Best Landing')){
     track('crown-won');
     const app = document.getElementById('app'), intro = app && app.querySelector('.intro');
-    if(intro){ const d = document.createElement('div'); d.className = 'crownwin fade'; d.innerHTML = `<b>👑 You were Best Landing for the week!</b><span>${won.score}/100 put you top of the Best landing board when the week closed. Your gold badge is in your verdict collection.</span>`; intro.insertBefore(d, intro.children[1]); SFX.good(); }
+    if(intro){ const d = document.createElement('div'); d.className = 'crownwin fade'; d.innerHTML = `<b>👑 You were Best Landing for the week!</b><span>${won.score}/100 was the best Today's Landing score of the week. Your gold badge is in your verdict collection.</span>`; intro.insertBefore(d, intro.children[1]); SFX.good(); }
   }
 }
 let boardRows = null, boardTab = 'score', myPostAt = 0, boardCrown = null;
@@ -2263,17 +2263,20 @@ async function loadBoard(force){
   if(!res.ok) throw new Error('board ' + res.status);
   return (boardRows = await res.json());
 }
+// each player shows once per board, with their best result; anonymous players stay separate
+const playerKey = r => { const n = String(r.name||'').trim().toLowerCase(); return n && n !== 'anonymous lander' ? n : 'anon|' + r.created_at; };
+function bestPerPlayer(rows, b){ const seen = new Set(); return rows.filter(r => b.val(r) > 0).sort(boardSort(b)).filter(r => { const k = playerKey(r); if(seen.has(k)) return false; seen.add(k); return true; }); }
 function boardHTML(){
   if(!boardRows) return `<p>Loading this week's board...</p>`;
   const b = BOARDS.find(x=>x.key===boardTab);
-  const rows = boardRows.filter(r=>b.val(r) > 0).sort(boardSort(b)).slice(0,10);
+  const rows = bestPerPlayer(boardRows, b).slice(0,10);
   const flag = {us:'🇺🇸', uk:'🇬🇧', ca:'🇨🇦'};
   const list = rows.length ? rows.map((r,i)=>`<div class="lb-row${myPostAt && Date.parse(r.created_at)===myPostAt ? ' me' : ''}"><span class="lb-rank">${i+1}</span><div><b>${esc(r.name)}</b><small>${flag[r.route]||''} ${esc(r.town)} · ${esc(r.verdict)}</small></div><span class="lb-val">${b.show(r)}</span></div>`).join('')
     : `<p>${b.key==='spotted' ? 'Nobody has spotted a trap yet this week. Play with your eyes open to be the first.' : 'Nobody is on this board yet this week. Finish a game to be the first.'}</p>`;
   const cr = boardCrown ? `<div class="lb-crown">👑 Last week's Best Landing: <b>${esc(boardCrown.name)}</b>, ${boardCrown.score}/100</div>` : '';
   return `${cr}<div class="lb-tabs">${BOARDS.map(x=>`<button class="lb-tab${x.key===boardTab?' on':''}" type="button" data-t="${x.key}"><b>${x.title}</b><span>${x.sub}</span></button>`).join('')}</div>
     <div class="lb-list">${list}</div>
-    ${Date.now() < Date.parse('2026-10-26T00:00:00Z') ? `<p class="small" style="color:var(--muted);font-size:13px">Fresh start: the boards restarted on 24 October with stricter scoring, so everyone competes on the same rules.</p>` : ''}<p class="small" style="color:var(--muted);font-size:13px">The board resets every Monday. ${boardRows.length} landing${boardRows.length===1?'':'s'} posted this week.</p>`;
+    ${Date.now() < Date.parse('2026-10-26T00:00:00Z') ? `<p class="small" style="color:var(--muted);font-size:13px">Fresh start: the boards restarted on 24 October with stricter scoring, so everyone competes on the same rules.</p>` : ''}<p class="small" style="color:var(--muted);font-size:13px">Each player shows once, with their best game. ${boardTab==='score' ? 'The weekly crown goes to the best Today\'s Landing score. ' : ''}The board resets every Monday. ${boardRows.length} landing${boardRows.length===1?'':'s'} posted this week.</p>`;
 }
 function openBoard(){
   let o = document.getElementById('boardover');
@@ -2293,7 +2296,7 @@ function postBoxHTML(){
   const facts = `<p>This game you said no to home <b>${st.r}</b> time${st.r===1?'':'s'}, sent <b>${NGN0(st.s)}</b> home, fell for <b>${st.g}</b> trap${st.g===1?'':'s'}, and spotted <b>${st.p||0}</b>.</p>`;
   const who = esc(getName() || 'Anonymous lander');
   const today = S.daily && S.dailyN ? `<p class="lb-rankline">${S.beat===null ? `You are the first to play Today's Landing #${dailyNo(S.daily)}.` : `Today's Landing #${dailyNo(S.daily)}: you beat <b>${S.beat}%</b> of today's ${S.dailyN} players.`}</p>` : '';
-  const status = S.rank ? `${today}<p class="lb-rankline">You are <b>#${S.rank}</b> on this week's board, out of ${S.rankOf} landing${S.rankOf===1?'':'s'}.</p><p class="small" style="color:var(--muted);font-size:13px">Posted as ${who}.${getName()?'':' Add your name at the start of your next game to show it here.'}</p>`
+  const status = S.rank ? `${today}<p class="lb-rankline">You are <b>#${S.rank}</b> on this week's board, out of ${S.rankOf} player${S.rankOf===1?'':'s'}.</p><p class="small" style="color:var(--muted);font-size:13px">Posted as ${who}.${getName()?'':' Add your name at the start of your next game to show it here.'}</p>`
     : S.postFail ? `<p>${S.postFail}</p><button class="ghost" type="button" id="lbretry">Try again</button>`
     : `<p>Adding you to this week's board as ${who}...</p>`;
   return `<div class="lbbox" id="lbbox"><div class="when">Weekly leaderboard</div>${status}${facts}<button class="ghost" type="button" onclick="openBoard()">🏆 See this week's board</button></div>`;
@@ -2314,7 +2317,8 @@ async function autoPost(title, onRank){
     S.posted = true; track('leaderboard-post');
     try{ const out = await res.json(); myPostAt = Date.parse(out[0].created_at); rememberPost(out[0].created_at); }catch(e){}
     const rows = await loadBoard(true);
-    S.rank = 1 + rows.filter(r=>r.score > score).length; S.rankOf = rows.length;
+    const best = bestPerPlayer(rows, BOARDS[0]), me = playerKey({name: body.name, created_at: new Date(myPostAt).toISOString()});
+    S.rank = 1 + best.filter(r => playerKey(r) !== me && r.score > score).length; S.rankOf = new Set(best.map(playerKey)).size;
     if(S.daily){ try{
       const a = new Date(); a.setHours(0,0,0,0); const z = new Date(a.getTime() + 864e5);
       const dr = await (await fetch(SB_URL + '/rest/v1/landings?select=score&daily=eq.true&created_at=gte.' + encodeURIComponent(boardFrom(a).toISOString()) + '&created_at=lt.' + encodeURIComponent(z.toISOString()) + '&limit=5000', {headers:{apikey:SB_KEY}})).json();
@@ -2338,7 +2342,7 @@ async function renderWinners(app){
     const q = '/rest/v1/landings?select=*&created_at=gte.' + encodeURIComponent(boardFrom(from).toISOString()) + '&created_at=lt.' + encodeURIComponent(to.toISOString()) + '&limit=5000';
     const res = await fetch(SB_URL + q, {headers:{apikey:SB_KEY}}); if(!res.ok) throw 0; rows = await res.json();
   }catch(e){ app.innerHTML = `<div class="scene fade"><p>The winners could not load. Check your connection and refresh.</p></div>`; return; }
-  const wins = BOARDS.map(b => ({b, r: rows.filter(r=>b.val(r)>0).sort(boardSort(b))[0]})).filter(w=>w.r);
+  const wins = BOARDS.map(b => ({b, r: bestPerPlayer(b.key==='score' && !thisWeek ? rows.filter(r=>r.daily) : rows, b)[0]})).filter(w=>w.r);
   if(!wins.length){ app.innerHTML = `<div class="scene fade"><div class="when">Weekly winners · ${range}</div><p>Nobody posted a landing that week.${thisWeek?'':' Try <a href="?winners=this">this week so far</a>.'}</p></div>`; return; }
   try{ await Promise.all(["800 80px 'Playfair Display'","600 40px 'DM Sans'","800 40px 'DM Sans'"].map(f=>document.fonts.load(f))); }catch(e){}
   const W=1080, H=1350, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d');
