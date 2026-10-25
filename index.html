@@ -353,6 +353,9 @@ details.custom summary{font-weight:700}
 .hero-remind{font-size:13px;opacity:.9;text-align:center}
 .hero-remind button,.hero-remind a{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
 .hero .pushbtn{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
+.how.more > summary{font-size:16px}
+.how.more .quick{margin-top:6px}
+.how.about .storylink{margin:0}
 .hometip{display:grid;gap:8px;background:var(--bubble);border-radius:14px;padding:14px}
 .hometip p{margin:0;font-size:15px}
 .hometip .row{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
@@ -1765,8 +1768,7 @@ function render(){
     app.innerHTML = `<div class="intro fade">
       <div class="stamp">Arrived · Day 01</div>
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
-      <p>Everybody wants to japa. Nobody tells you what happens after you land. Home thinks you are rich. Your bank account would like a word.</p>
-      <p class="mirror"><b>More than a game.</b> A 5-minute reality check on your money, your peace of mind, your standing at home, and the future you came to build.</p>
+      <p>Everybody wants to japa. Nobody tells you what happens after you land. A five-minute reality check on your money, your peace of mind, your family, and the future you came to build.</p>
       ${(() => { const nm = getName(), set = (() => { try{ return !!localStorage.getItem('nyhl-origin') || !!nm; }catch(e){ return !!nm; } })(), open = !set || pick.editMe;
         const from = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[pick.origin,pick.origin]);
         return open ? `<div class="me open"><div class="when">Your details · used in every game</div>
@@ -1789,27 +1791,37 @@ function render(){
       ${roadHTML()}
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
       ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
-      <div class="when quick-ask">Want to play more? Play your own landing</div><div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
-      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select">${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
-      <div class="foot">Pick, tap, and land. Anything you skip is a surprise. About 5 minutes.</div>
-      <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-intro')">Have a japa story? Tell us, and it could become a scene →</a>
-      <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-edition')">Not from Nigeria? Help us build your country's edition →</a>
-      <details class="how">
-        <summary>How it works</summary>
+      <details class="how more" id="moredet"${pick.qroute || pick.moreOpen ? ' open' : ''}>
+        <summary>Want to play more? Play your own landing</summary>
         <div class="how-body">
-          <p>Life abroad asks questions. Your phone asks more. Every answer moves four meters.</p>
-          <dl>
-            <dt>Cash</dt><dd>Whatever survives "just send something small".</dd>
-            <dt>Peace</dt><dd>Your sanity. It drops when your mouth says yes and your heart says no.</dd>
-            <dt>Home</dt><dd>Family ratings. Money pushes it up. Voice notes do absolutely nothing.</dd>
-            <dt>Future</dt><dd>What you are really building. Nobody at home can see it, which is why it grows.</dd>
-          </dl>
-          <p>Each meter is out of 100, and each has its own healthy mark. Future starts at 20, so 40 is already good. Home is best between 50 and 85, because a family that adores you in month one usually means you are overgiving. There are no right answers. Every choice follows you to the end of the game.</p>
+        <div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
+      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select">${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
+        <div class="foot">Pick, tap, and land. Anything you skip is a surprise. About 5 minutes.</div>
         </div>
       </details>
-      <details class="how">
-        <summary>Naija words in this game</summary>
-        <div class="how-body">${glossaryHTML()}</div>
+      <details class="how about">
+        <summary>About the game · share a story, how it works, Naija words</summary>
+        <div class="how-body">
+        <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-intro')">Have a japa story? Tell us, and it could become a scene →</a>
+        <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-edition')">Not from Nigeria? Help us build your country's edition →</a>
+        <details class="how">
+          <summary>How it works</summary>
+          <div class="how-body">
+            <p>Life abroad asks questions. Your phone asks more. Every answer moves four meters.</p>
+            <dl>
+              <dt>Cash</dt><dd>Whatever survives "just send something small".</dd>
+              <dt>Peace</dt><dd>Your sanity. It drops when your mouth says yes and your heart says no.</dd>
+              <dt>Home</dt><dd>Family ratings. Money pushes it up. Voice notes do absolutely nothing.</dd>
+              <dt>Future</dt><dd>What you are really building. Nobody at home can see it, which is why it grows.</dd>
+            </dl>
+            <p>Each meter is out of 100, and each has its own healthy mark. Future starts at 20, so 40 is already good. Home is best between 50 and 85, because a family that adores you in month one usually means you are overgiving. There are no right answers. Every choice follows you to the end of the game.</p>
+          </div>
+        </details>
+        <details class="how">
+          <summary>Naija words in this game</summary>
+          <div class="how-body">${glossaryHTML()}</div>
+        </details>
+        </div>
       </details>
       <div class="foot credit">Created by <b>Nafeezie</b> · © 2026</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
@@ -1832,6 +1844,7 @@ function render(){
       SFX.land(); pick.daily = true; pick.path = plan.path; pick.fund = plan.fund; pick.culture = STATE_CULTURE[st] || 'general'; pick.duo = 0;
       track('daily-' + dailyNo(ds)); begin(plan.rk, plan.place); render(); scrollTo(0,0);
     };
+    const md = document.getElementById('moredet'); if(md) md.ontoggle = () => { pick.moreOpen = md.open; };
     app.querySelectorAll('.quick-btn').forEach(b=>b.onclick=()=>{
       SFX.tap(); pick.qroute = (pick.qroute===b.dataset.q ? null : b.dataset.q); render();
       const qp = document.getElementById('qpanel'); if(qp) qp.scrollIntoView({behavior:'smooth', block:'nearest'});
