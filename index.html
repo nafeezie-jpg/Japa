@@ -1632,12 +1632,47 @@ const SFX = (() => {
   // a talking-drum hit: a low skin tone whose pitch bends, plus a little slap
   const drum = (at = 0, from = 150, to = 95, vol = 0.5) => { tone(from, 0.28, {at, to, vol, attack: 0.003}); noise(0.05, {at, vol: 0.12, from: 1800, to: 900, q: 1.5}); };
   const buzz = () => { try { if(navigator.vibrate) navigator.vibrate(12); } catch(e) {} };
+  // scene ambience: soft rain, wind, a buzzing phone, traffic, a sizzle, a fan, an airport hum
+  let amb = null, ambKind = null, noiseBuf = null;
+  const getNoise = c => { if(noiseBuf) return noiseBuf; const b = c.createBuffer(1, c.sampleRate*2, c.sampleRate), d = b.getChannelData(0); for(let i = 0; i < d.length; i++) d[i] = Math.random()*2 - 1; return (noiseBuf = b); };
+  const ambStop = (fade = 0.7) => {
+    if(!amb) return; const a = amb; amb = null; ambKind = null; clearInterval(a.timer);
+    try{ const t = ctx.currentTime; a.g.gain.cancelScheduledValues(t); a.g.gain.setValueAtTime(Math.max(a.g.gain.value, 0.0001), t); a.g.gain.exponentialRampToValueAtTime(0.0001, t + fade); }catch(e){}
+    setTimeout(() => a.nodes.forEach(n => { try{ n.stop && n.stop(); }catch(e){} try{ n.disconnect(); }catch(e){} }), fade*1000 + 150);
+  };
+  const ambStart = kind => {
+    if(kind === ambKind) return; ambStop(); if(!kind || !on) return;
+    const c = ensure(); if(!c) return;
+    const g = c.createGain(); g.gain.value = 0.0001; g.connect(master);
+    const nodes = [g]; let timer = null, vol = 0.06;
+    const noise = (type, freq, q = 0.7) => { const src = c.createBufferSource(); src.buffer = getNoise(c); src.loop = true; const f = c.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; src.connect(f); f.connect(g); src.start(); nodes.push(src, f); return f; };
+    if(kind === 'rain'){ noise('highpass', 1400); noise('bandpass', 6000, 0.4); vol = 0.05; }
+    else if(kind === 'snow'){ const f = noise('lowpass', 500, 1.2); const l = c.createOscillator(), lg = c.createGain(); l.frequency.value = 0.13; lg.gain.value = 320; l.connect(lg); lg.connect(f.frequency); l.start(); nodes.push(l, lg); vol = 0.08; }
+    else if(kind === 'car'){ noise('lowpass', 170, 0.8); vol = 0.14; }
+    else if(kind === 'sun'){ noise('lowpass', 380, 0.5); vol = 0.05; }
+    else if(kind === 'food'){ noise('highpass', 2600, 0.6); vol = 0.035; }
+    else if(kind === 'plane'){ noise('lowpass', 650, 0.7); vol = 0.07; }
+    else if(kind === 'phone'){
+      const o = c.createOscillator(), f = c.createBiquadFilter(), bg = c.createGain();
+      o.type = 'sawtooth'; o.frequency.value = 150; f.type = 'lowpass'; f.frequency.value = 480; bg.gain.value = 0;
+      o.connect(f); f.connect(bg); bg.connect(g); o.start(); nodes.push(o, f, bg); vol = 0.22;
+      let n = 0; const buzz = () => { if(n++ >= 3){ clearInterval(timer); return; } const t = c.currentTime;
+        [0, 0.55].forEach(d => { bg.gain.setValueAtTime(0, t+d); bg.gain.linearRampToValueAtTime(1, t+d+0.03); bg.gain.setValueAtTime(1, t+d+0.35); bg.gain.linearRampToValueAtTime(0, t+d+0.4); });
+        try{ if(navigator.vibrate) navigator.vibrate([350, 200, 350]); }catch(e){} };
+      buzz(); timer = setInterval(buzz, 2400);
+    }
+    else { g.disconnect(); return; }
+    g.gain.exponentialRampToValueAtTime(vol, c.currentTime + 1.2);
+    amb = {g, nodes, timer}; ambKind = kind;
+  };
+  try{ document.addEventListener('visibilitychange', () => { if(document.hidden) ambStop(0.2); }); }catch(e){}
   // wake the audio on every tap and whenever the page comes back into view
   const wake = () => { if(on && ctx && ctx.state !== 'running') ctx.resume().catch(()=>{}); };
   try{ ['touchend','click'].forEach(ev => document.addEventListener(ev, wake, {passive:true})); document.addEventListener('visibilitychange', () => { if(!document.hidden) wake(); }); }catch(e){}
   return {
     get on(){ return on; },
-    toggle(){ on = !on; try { localStorage.setItem('nyhl-sound', on ? 'on' : 'off'); } catch(e) {} if(on) this.tap(); return on; },
+    toggle(){ on = !on; try { localStorage.setItem('nyhl-sound', on ? 'on' : 'off'); } catch(e) {} if(on) this.tap(); else ambStop(0.2); return on; },
+    ambient(kind){ try{ ambStart(kind); }catch(e){} },
     tap(){ tone(620, 0.06, {type:'triangle', vol:0.12}); buzz(); },
     land(){ noise(1.1, {vol:0.18, from:300, to:2600}); drum(0.75, 130, 190); drum(0.98, 150, 100); drum(1.2, 120, 170, 0.6); },
     ping(){ tone(1046, 0.12, {vol:0.16}); tone(1568, 0.22, {vol:0.14, at:0.09}); },
@@ -1683,10 +1718,13 @@ function soundButton(){
 }
 
 const isCall = sc => /call/i.test(sc.sub||'') || /\bcalls\b|phone rings/.test(sc.text||'');
+const AMBIENT = ['rain','snow','car','sun','food','plane','phone'];
+function ambientFor(sc){ if(!sc || sc.auto) return null; const k = artKind(sc); if(!AMBIENT.includes(k)) return null; if(k==='phone' && isCall(sc)) return null; return k; }
 function render(){
   try{ if(window.speechSynthesis && speechSynthesis.speaking) speechSynthesis.cancel(); }catch(e){}
   soundButton();
   const app = document.getElementById('app');
+  if(phase==='intro' || phase==='end') SFX.ambient(null);
   if(phase==='intro'){
     const rk = pick.route;
     app.innerHTML = `<div class="intro fade">
@@ -1781,6 +1819,7 @@ function render(){
     const note = sc.day<=1 && !sc.from && idx===nextIndex(0) ? `${S.daily && S.landing===1 ? `<div class="local"><b>Today's Landing #${dailyNo(S.daily)}</b>Everyone playing today lands here and meets the same surprises. Your score is compared with theirs at the end.</div>` : ''}${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
     app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}${glossLink()}</div>`;
     wireBack();
+    SFX.ambient(ambientFor(sc));
     if(sc.from && !(S.landing===1 && sc.day===1)) setTimeout(()=> isCall(sc) ? SFX.ring() : SFX.ping(), 150);
     else if(!sc.from && /\bcalls\b|phone rings/.test(sc.text||'')) setTimeout(()=>SFX.ring(), 150);
     app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
