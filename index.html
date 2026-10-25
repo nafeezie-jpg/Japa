@@ -649,7 +649,7 @@ const contribution = () => { const c = C(); return [
   choices:[
    {l:"Pay the full ₦300,000", fx:{cash:-A(200), home:10}, r:"Your name is on the programme as a chief sponsor. You did not know there was a programme."},
    {l:"Promise \"next week\". Buy time", fx:{home:2}, set:{promise:true}, r:`${c.aunty} says, "We have written your name already." That is not reassuring.`},
-   {l:"Ask why people abroad pay double", fx:{home:-10, peace:5}, r:"The question is screenshotted and shared in three family groups before you finish your tea."},
+   {l:"Ask why people abroad pay double", fx:{home:-10, peace:5}, r:"The question is screenshotted and shared in three family groups before you finish your tea. Beef don set."},
    {l:"Send ₦20,000 and deep condolences", fx:{cash:-A(14), home:-4}, r:`${c.aunty} replies, "Thank you." Just that. With a full stop.`}]},
  {day:16, from:c.cousin, sub:"Your cousin", text:`${c.wow} My wedding aso ebi is ₦150,000. You must buy it, sew it, wear it, and send me a picture so I can post it. Everybody in the family is doing it, even the ones abroad.`,
   choices:[
@@ -709,7 +709,7 @@ const friend = () => { const c = C(); return [
   choices:[
    {l:"Let him use your bank account", g:1, fx:{peace:-10, home:2, future:-10}, r:"This is how people get flagged. You lie awake checking your banking app every hour."},
    {l:"Send him the real visa guide", sp:1, fx:{future:3, home:3}, r:"You send a long voice note with every step. He says, \"I owe you.\" He does."},
-   {l:"Leave him on read", fx:{home:-4, peace:2}, r:"He posts a status about fake friends abroad. You know it is for you."}]},
+   {l:"Leave him on read", fx:{home:-4, peace:2}, r:"He posts a status about fake friends abroad. You know it is for you. Beef don set."}]},
  {day:28, from:c.friend, sub:"Secondary school friend", text:"Buy me the latest iPhone over there. I go pay you in naira at good rate when you come home.",
   choices:[
    {l:`Buy the iPhone and trust his rate`, g:1, fx:{cash:-A(1100), home:4, peace:-6}, r:"He receives the phone and posts it immediately. The naira payment is \"coming\"."},
@@ -778,7 +778,7 @@ const mishap = () => { const c = C(), workplace = STU() ? 'class' : 'work'; retu
   choices:[
    {l:"Call the bank at the till", fx:{peace:-4}, r:"Forty minutes on hold with jazz music. Then a man named Kevin asks if you have been to Nigeria recently."},
    {l:"Leave the basket and go", fx:{peace:-6, cash:A(40)}, r:"You save money by accident. Dinner is bread and determination."},
-   {l:"Call a Nigerian friend for help", fx:{home:2, peace:2}, r:"Your friend pays and says, \"No wahala, it happens to all of us.\" It really does."}]},
+   {l:"God abeg. Call a Nigerian friend", fx:{home:2, peace:2}, r:"Your friend pays and says, \"No wahala, it happens to all of us.\" It really does."}]},
  {day:26, text:`The nearest Nigerian hair salon or barber in ${T()} is 90 minutes away and charges like a lawyer.`,
   choices:[
    {l:`Travel 90 minutes for a proper job`, fx:{cash:-A(120), peace:8}, r:"Four hours, three Nollywood films, and one aunty telling everyone's business. You leave looking like money."},
@@ -1147,7 +1147,7 @@ function pathScenes(){
        {l:`Send ${N(150)} and a video`, fx:{cash:-A(150), home:5, peace:-4}, r:"They play your video at the reception. You watch the livestream alone and cry at the part where they mention you."},
        {l:"Tell her the truth about your papers", fx:{home:-3, peace:7, future:2}, r:"She is quiet for a long time. Then she says, \"Stay there and do it properly. We will be here.\""},
        {l:"Say work will not let you travel", fx:{home:-2, peace:-4}, r:"It is the third family event you have missed with the same excuse. Somebody has started to notice."}]});
-    out.push({day:24, text: S.f.status==='scam' ? "The \"lawyer\" has stopped picking your calls. His number now belongs to a pizza place." : S.f.status==='lawyer' ? "Your adviser calls. She has looked at your case, and there may be a path. It will take time, money, and patience, but it is real." : "The legal aid clinic gives you a free appointment. The adviser explains your options in plain words, and for the first time you understand them.",
+    out.push({day:24, text: S.f.status==='scam' ? "E don be. The \"lawyer\" has stopped picking your calls, and his number now belongs to a pizza place." : S.f.status==='lawyer' ? "Your adviser calls. She has looked at your case, and there may be a path. It will take time, money, and patience, but it is real." : "The legal aid clinic gives you a free appointment. The adviser explains your options in plain words, and for the first time you understand them.",
       choices: S.f.status==='scam' ? [
        {l:`Report him, get real help`, fx:{cash:-A(200), peace:4, future:10}, set:{status:'lawyer'}, r:"The adviser has heard his name before. She cannot get your money back, but she can help you move forward properly."},
        {l:"Keep quiet", fx:{peace:-8, future:-6}, r:`You carry it alone. The ${M(A(3000))} is gone, and so is the sleep you used to have.`},
@@ -1186,7 +1186,7 @@ const fundScenes = () => { const c = C(), out = [], f = FUND();
        {l:`Pay the ${N(500)} in full`, fx:{cash:-A(500), peace:4, future:4}, set:{loan:'paid'}, r:"The secretary sends a thumbs up. Your guarantor sends a longer one."},
        {l:"Pay half and explain", fx:{cash:-A(250), peace:-4, home:-3}, set:{loan:'half'}, r:"They accept, \"this one time\". The phrase \"this one time\" now haunts you."},
        {l:"Ignore the reminder", fx:{peace:-10, home:-6}, set:{loan:'late'}, r:"Your phone buzzes for three days. You stop opening WhatsApp in public."}]});
-    out.push({day:25, when: s => s.f.loan==='late', from:c.mum, sub:`${c.home} · 9:00am`, text:`${c.exclaim} The cooperative people came to our house today. They said you are owing. In front of the neighbours!`,
+    out.push({day:25, when: s => s.f.loan==='late', from:c.mum, sub:`${c.home} · 9:00am`, text:`E don be! The cooperative people came to our house today. They said you are owing. In front of the neighbours!`,
       choices:[
        {l:`Pay the ${N(500)} immediately`, fx:{cash:-A(500), home:4, peace:2}, set:{loan:'paid'}, r:"The neighbours are still talking, but at least now they are saying you paid."},
        {l:"Agree a payment plan", fx:{peace:3, future:3, home:-2}, set:{loan:'plan'}, r:"Monthly instalments, signed and witnessed. Your mother can face the neighbours again."},
@@ -1386,6 +1386,14 @@ const convertScene = () => ({day:4, credit:'Nafeezie', own:1, text:`Your first s
    {l:"Stop converting. Peace of mind", fx:{cash:-A(10), peace:4}, r:"You pay and walk out like a local. Your account will discuss it with you later."},
    {l:"Convert only the big things", fx:{peace:2, future:3}, r:"Rent and phones, you convert. Bread, you just buy. Your sanity says thank you."}]});
 
+/* ---------- Urgent 2k ---------- */
+const urgent2k = () => ({day:9, ask:1, from:"Old classmate", sub:"Last message: 2019", text:"Hey dear, long time! Hope you are good. Abeg, urgent 2k.",
+  choices:[
+   {l:"Send the 2k. It is small money", fx:{home:2, peace:-2}, r:"You send it. A week later the same message arrives, now \"urgent 5k\". The 2k was a test, and you passed."},
+   {l:"Ask what the emergency is", fx:{peace:1, future:1}, r:"He replies with a voice note that is four minutes long. The emergency is data."},
+   {l:"Leave it on read", fx:{home:-2, peace:3}, r:"He posts a status about people who japa and forget where they came from. Beef don set."},
+   {l:"Reply \"God abeg, I need urgent 2k too\"", fx:{home:-1, peace:5}, r:"He sends a laughing emoji and goes quiet. Two people, two countries, both looking for 2k."}]});
+
 /* ---------- WhatsApp survival ---------- */
 const whatsapp = () => { const c = C(); return [
  {day:10, text:`You finally take a fine picture in ${T()}, with good light, a new outfit, and a face that says abroad is treating you well. It belongs on your WhatsApp status. The trouble is that home reads every status as a signal for billing.`,
@@ -1452,7 +1460,7 @@ function scenes(){
   const arrived = s => s.landing===1 && [1,2].includes(pickV('air',5));   // an arrival story already covered day 1
   const alts = routeAlts();
   base.concat(alts).forEach(sc => { if(sc.day===1 && !sc.core){ const w = sc.when; sc.when = s => !arrived(s) && (!w || w(s)); } });
-  return base.concat(alts, pathScenes(), fundScenes(), guestStay(), [convertScene(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  return base.concat(alts, pathScenes(), fundScenes(), guestStay(), [convertScene(), urgent2k(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -2015,6 +2023,10 @@ const GLOSSARY = [
  ['E be like film trick','"It is like a movie stunt." Said when something too shocking to be real happens.'],
  ['E shock you','"It shocked you." For the moment a price or a person surprises you badly.'],
  ['Everywhere first blur','When shock hits so hard that everything goes blurry for a moment.'],
+ ['God abeg','"God, please." A sigh for help when life abroad gets heavy.'],
+ ['Beef don set · Beef ti set','A grudge has started. Somebody is offended and now keeping score, in Pidgin and Yoruba.'],
+ ['Urgent 2k','"Send me ₦2,000 urgently." The classic message from someone you have not heard from in years. It is never urgent, and it is never only 2k.'],
+ ['E don be','"Trouble!" Said the moment wahala lands.'],
  ['Blue ticks','WhatsApp\'s sign that you have read a message. A powerful weapon in family politics.'],
  ['Status','WhatsApp\'s 24-hour photo updates. At home, also read as a request for an invoice.'],
  ['Cooperative society','A members\' savings and loan group. Very patient, until they visit your mother.']
