@@ -475,7 +475,7 @@ const ROUTES = {
 
 const ORIGIN_LIST = [["Abia","Aba"],["Adamawa","Yola","YOL"],["Akwa Ibom","Uyo","QUO"],["Anambra","Onitsha"],["Bauchi","Bauchi","BCU"],["Bayelsa","Yenagoa"],["Benue","Makurdi","MDI"],["Borno","Maiduguri","MIU"],["Cross River","Calabar","CBQ"],["Delta","Asaba","ABB"],["Ebonyi","Abakaliki"],["Edo","Benin City","BNI"],["Ekiti","Ado-Ekiti"],["Enugu","Enugu","ENU"],["FCT","Abuja","ABV"],["Gombe","Gombe","GMO"],["Imo","Owerri","QOW"],["Jigawa","Dutse"],["Kaduna","Kaduna","KAD"],["Kano","Kano","KAN"],["Katsina","Katsina","DKA"],["Kebbi","Birnin Kebbi"],["Kogi","Lokoja"],["Kwara","Ilorin","ILR"],["Lagos","Lagos","LOS"],["Nasarawa","Lafia"],["Niger","Minna","MXJ"],["Ogun","Abeokuta"],["Ondo","Akure","AKR"],["Osun","Osogbo"],["Oyo","Ibadan","IBA"],["Plateau","Jos","JOS"],["Rivers","Port Harcourt","PHC"],["Sokoto","Sokoto","SKO"],["Taraba","Jalingo"],["Yobe","Damaturu"],["Zamfara","Gusau"]];
 const ORIGINS = Object.fromEntries(ORIGIN_LIST.map(([st,city,code])=>[city, code || city.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()]));
-let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:"Abuja", culture:"general", path:"work", fund:"savings", gender:"any", daily:false, duo:0, custom:false};
+let R, L, S, idx, phase, last, history = [], pick = {route:null, place:null, origin:(() => { try{ return localStorage.getItem('nyhl-origin') || 'Abuja'; }catch(e){ return 'Abuja'; } })(), culture:"general", path:"work", fund:"savings", gender:"any", daily:false, duo:0, custom:false};
 let shown = null;
 const O = () => S.origin;
 const MULT = [0, .75, 1, 1.35];
@@ -1761,7 +1761,7 @@ function render(){
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
       ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
       <div class="when quick-ask">Want to play more? Play your own landing</div><div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
-      <label class="when" for="origin">Leaving from</label>
+      <label class="when" for="origin">Leaving from · sets your family's voice in every game</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
       ${loadHistory().some(g=>g.daily && dayKey(g.t)===dayKey(Date.now())) ? `<label class="when" for="pname">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">` : ''}
       <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select">${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
@@ -1789,7 +1789,7 @@ function render(){
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
     </div>`;
     document.getElementById('origin').onchange = e => {
-      pick.origin = e.target.value;
+      pick.origin = e.target.value; try{ localStorage.setItem('nyhl-origin', pick.origin); }catch(err){}
       const st = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0];
       pick.culture = STATE_CULTURE[st] || 'general';
     };
@@ -2039,16 +2039,18 @@ function intro(sc, compact){
 
 // Every verdict has a score range, so the title always matches the number.
 // A story verdict only applies when the score falls inside its range; otherwise the score ladder decides.
-const LADDER = [[85,'Abroad Strategist'],[70,'Settling In'],[0,'Still Finding Your Feet']];
+const LADDER = [[90,'Abroad Strategist'],[80,'Making Moves'],[70,'Settling In'],[60,'Still Finding Your Feet'],[0,'Hanging In There']];
 const VERDICT_LINES = {
   'Abroad Strategist':"You protected your money, your peace, and your future. Your mates are taking notes.",
+  'Making Moves':"You are building faster than most people in their first month. Keep the momentum.",
   'Settling In':"The ground is getting firmer under your feet. You are not there yet, but you can see it from here.",
+  'Hanging In There':"It was a rough first month, and you are still here. Month two will be kinder.",
   'Still Finding Your Feet':"Thirty days in, and you are still standing. That counts for more than people at home will ever know."
 };
 function verdictBand(title){
   const b = {'The Family ATM':[0,59], 'Stronger Than The Agent':[45,89], 'Scholar and Sponsor':[40,79], 'Fees Still Pending':[0,64], 'Owing the Cooperative':[0,54],
-    'Running on Prayers':[0,49], 'Hustle Without Peace':[0,59], 'Ghost Mode Activated':[0,64], 'Making It By Force':[55,84], 'Serial Japa Champion':[65,100],
-    'Abroad Strategist':[85,100], 'Settling In':[70,84], 'Still Finding Your Feet':[0,69]}[title];
+    'Running on Prayers':[0,49], 'Hustle Without Peace':[0,59], 'Ghost Mode Activated':[0,64], 'Making It By Force':[55,79], 'Serial Japa Champion':[70,100],
+    'Abroad Strategist':[90,100], 'Making Moves':[80,89], 'Settling In':[70,79], 'Still Finding Your Feet':[60,69], 'Hanging In There':[0,59]}[title];
   return b || [0,100];
 }
 function verdict(){
@@ -2150,13 +2152,15 @@ async function drawCard(title, line, journey, rec){
 
 /* ---------- Verdict collection ---------- */
 const VERDICTS = [
- ['Abroad Strategist','Score 85 or more.'],
- ['Settling In','Score between 70 and 84.'],
+ ['Abroad Strategist','Score 90 or more.'],
+ ['Making Moves','Score between 80 and 89.'],
+ ['Settling In','Score between 70 and 79.'],
  ['The Family ATM','Send the big money home and keep your family very, very happy.'],
  ['Running on Prayers','Finish the month with almost nothing left.'],
  ['Hustle Without Peace','Chase the money until your peace runs out.'],
  ['Ghost Mode Activated','Ignore home until the family group forgets you.'],
- ['Still Finding Your Feet','Score under 70.'],
+ ['Still Finding Your Feet','Score between 60 and 69.'],
+ ['Hanging In There','Score under 60. Survive a rough month.'],
  ['Serial Japa Champion','Japa again from the result screen and keep building.'],
  ['Making It By Force','Sell everything to come, then build your future anyway.'],
  ['Scholar and Sponsor','Go on a full scholarship and send your stipend home.'],
