@@ -636,7 +636,7 @@ const farm = () => { const c = C(); return [
    {l:"Send your neighbour to look", fx:{cash:-A(20), future:6}, set:{farm:'counted'}, r:"Your neighbour confirms that snails do not run. They are exactly where you left them."}]}
 ].map(ASK)[pickV('D',5)]; };
 
-const promise = () => ({day:22, ask:1, when: s => s.f.promise, from:C().mum, sub:`${C().home} · 6:30am`, text:"It is next week.",
+const promise = () => ({day:22, core:1, ask:1, when: s => s.f.promise, from:C().mum, sub:`${C().home} · 6:30am`, text:"It is next week.",
   choices:[
    {l:"Send it now", fx:{cash:-A(135), home:4}, r:"She replies with a single prayer emoji. Peace is restored."},
    {l:"Tell her you can't afford it", fx:{home:-10, peace:3}, r:"She says she will tell them herself. You know she will tell them it was your fault."}]});
@@ -1339,14 +1339,14 @@ const whatsapp = () => { const c = C(); return [
 ][pickV('WA',2)]; };
 
 /* ---------- Japada: running back home ---------- */
-const padaScene = () => { const c = C(), when = s => s.landing===1 && (s.peace < 50 || s.cash < RENT());
+const padaScene = () => { const c = C(), late = 1, when = s => s.landing===1 && (s.peace < 50 || s.cash < RENT());
   return [
-  {day:26, when, from:"Old classmate", sub:`Back in ${O()}`, text:`I don do japada o! One year abroad was enough for me. I am back in ${O()}, eating ${c.food} and sleeping with both eyes closed. Peace of mind is wealth. You, how far?`,
+  {day:26, late, when, from:"Old classmate", sub:`Back in ${O()}`, text:`I don do japada o! One year abroad was enough for me. I am back in ${O()}, eating ${c.food} and sleeping with both eyes closed. Peace of mind is wealth. You, how far?`,
   choices:[
    {l:"Price tickets home. Quietly", fx:{peace:5, future:-6}, set:{pada:true}, r:"You check flights at 2am and do not book. But now you know the price, and that is a kind of comfort."},
    {l:"Call him and ask how it really is", fx:{peace:3, home:2}, r:"He says the first month back is sweet and the third month is hard. Nobody tells you that part either."},
    {l:"Face it head on. Give it all", fx:{peace:-2, future:7}, r:"You close the chat, make tea, and send two more applications. You did not come this far to only come this far."}]},
-  {day:26, when, text:`Late at night you scroll through old photos from ${O()}. Your car, your office, your house help, and a Sunday lunch with everybody laughing. You were comfortable there. Here, you are starting from zero.`,
+  {day:26, late, when, text:`Late at night you scroll through old photos from ${O()}. Your car, your office, your house help, and a Sunday lunch with everybody laughing. You were comfortable there. Here, you are starting from zero.`,
   choices:[
    {l:"Say it out loud", fx:{peace:4, future:-5}, set:{pada:true}, r:"Saying it does not make it a plan. But it lets some of the pressure out, and you finally fall asleep."},
    {l:"Remember why you came", fx:{peace:2, future:6}, r:"For some it was the children, for some it was safety, for some it was a future. Whatever yours was, it will still be there tomorrow."},
@@ -1355,29 +1355,29 @@ const padaScene = () => { const c = C(), when = s => s.landing===1 && (s.peace <
 
 /* ---------- Stranded at arrivals ---------- */
 const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the airport', uk:'Heathrow', ca: T()==='Toronto' ? 'Pearson' : 'the airport'}[R.key];
-  return {day:0, label:'Arrival day', when: s => s.landing===1 && pickV('air',3)===1, text:`You land at ${port}. The man who arranged your trip said someone would pick you up. He is not picking up his calls. The people you know are hours away, and the only person in ${T()} is at work until 6pm.`,
+  return {day:1, core:1, when: s => s.landing===1 && pickV('air',5)===1, text:`You land at ${port}. The man who arranged your trip said someone would pick you up. He is not picking up his calls. The people you know are hours away, and the only person in ${T()} is at work until 6pm.`,
   choices:[
-   {l:"Wait for your friend", fx:{peace:-6, home:2}, r:"Three hours on an airport bench with two suitcases and a dying phone. When she arrives, you hug her like family."},
-   {l:`Take a taxi, ${M(A(85))}`, fx:{cash:-A(85), peace:3}, r:"The driver plays Afrobeats when he hears your accent. It is the best money you will spend this month."},
-   {l:"Keep calling the man", fx:{peace:-9}, r:"Fourteen calls. He replies at midnight, \"Sorry, network.\" That is your first lesson about people who \"arrange things\"."}]}; };
+   {l:"Wait for your friend", fx:{peace:-6, home:2}, set:{stay: R.key==='ca' ? 'basement' : 'room'}, r:"Three hours on an airport bench with two suitcases and a dying phone. When she arrives, you hug her like family."},
+   {l:`Take a taxi, ${M(A(85))}`, fx:{cash:-A(85), peace:3}, set:{stay: R.key==='ca' ? 'basement' : 'room'}, r:"The driver plays Afrobeats when he hears your accent. It is the best money you will spend this month."},
+   {l:"Keep calling the man", fx:{peace:-9}, set:{stay: R.key==='ca' ? 'basement' : 'room'}, r:"Fourteen calls. He replies at midnight, \"Sorry, network.\" That is your first lesson about people who \"arrange things\"."}]}; };
 
 /* ---------- Real stories: the host who vanished, and the guest who stayed ---------- */
 const TOLD = 'Nafeezie';
 // the host and the guest match the player: a woman player gets a woman host and a female cousin
 const PRO = () => S.gender==='woman' ? {he:'she', He:'She', his:'her', him:'her'} : {he:'he', He:'He', his:'his', him:'him'};
-const barNight = () => { const p = PRO(); return {day:0, label:'Arrival day', credit:TOLD, told:1, when: s => s.landing===1 && pickV('air',3)===2,
+const barNight = () => { const p = PRO(); return {day:1, core:1, credit:TOLD, told:1, when: s => s.landing===1 && pickV('air',5)===2,
   text:`For weeks, a family friend in ${T()} planned your arrival with you on WhatsApp. ${p.He} picks you up, and you see that ${p.his} home is one small room shared with ${p.his} children. "No wahala, we will manage," ${p.he} says. That evening ${p.he} takes you out for welcome drinks, steps out to make a call, and never comes back. E be like film trick.`,
   choices:[
-   {l:`Wait. ${p.He} must be coming back`, fx:{peace:-12}, r:"Everywhere first blur. You sleep on a bench in the bar with your suitcase between your knees. In the morning, reality wakes you up, and you start figuring things out from zero."},
-   {l:"Call everyone you know", fx:{cash:-A(60), peace:-5, home:2}, r:"At 1am, a friend of a friend picks up and sends you an address. You arrive by taxi with your suitcase and a very long story."},
-   {l:"Book the cheapest room nearby", fx:{cash:-A(90), peace:-2, future:2}, r:"A tired receptionist gives you a room above a takeaway. You lie awake and finally understand what \"we will manage\" meant."}]}; };
+   {l:`Wait. ${p.He} must be coming back`, fx:{peace:-12}, set:{stay: R.key==='ca' ? 'basement' : 'room'}, r:"Everywhere first blur. You sleep on a bench in the bar with your suitcase between your knees. In the morning, reality wakes you up, and you start figuring things out from zero."},
+   {l:"Call everyone you know", fx:{cash:-A(60), peace:-5, home:2}, set:{stay: R.key==='ca' ? 'basement' : 'room'}, r:"At 1am, a friend of a friend picks up and sends you an address. You arrive by taxi with your suitcase and a very long story."},
+   {l:"Book the cheapest room nearby", fx:{cash:-A(90), peace:-2, future:2}, set:{stay: R.key==='ca' ? 'basement' : 'room'}, r:"A tired receptionist gives you a room above a takeaway. You lie awake and finally understand what \"we will manage\" meant."}]}; };
 const guestStay = () => { const c = C(), p = PRO(), host = s => pickV('HOST',2)===0; return [
  {day:30, label:'Two months later', ask:1, credit:TOLD, told:1, when: host, from:c.friend, sub:"Secondary school friend", text:`You have finally found your feet in ${T()}. Then a message comes in. "${c.please}, my cousin just landed and ${p.he} has nowhere to stay. Can ${p.he} stay with you for one month? Just one month, while ${p.he} finds ${p.his} feet."`,
   choices:[
    {l:"Say yes. One month only", fx:{cash:-A(100), home:4, peace:-4}, set:{guest:'yes'}, r:`${p.He} arrives with two Ghana Must Go bags and a big smile. ${p.He} eats well, sleeps well, and thanks you every single day.`},
    {l:"Say yes, with an end date", fx:{home:2, peace:-1, future:2}, set:{guest:'dated'}, r:`${p.He} signs your note like a contract. It feels awkward, and it also feels safe.`},
    {l:"Say no. No space", fx:{home:-5, peace:3}, r:"Your friend says he understands. Then he tells two people that abroad has changed you."}]},
- {day:30, label:'Three months later', credit:TOLD, told:1, when: s => host(s) && s.f.guest==='yes', text:`It has been a month. Your guest has ${p.his} own side of the wardrobe now, your food budget has doubled, and ${p.he} has not mentioned moving out once.`,
+ {day:30, label:'Three months later', core:1, credit:TOLD, told:1, when: s => host(s) && s.f.guest==='yes', text:`It has been a month. Your guest has ${p.his} own side of the wardrobe now, your food budget has doubled, and ${p.he} has not mentioned moving out once.`,
   choices:[
    {l:`Give ${p.him} two weeks' notice`, fx:{peace:4, home:-3}, set:{guest:'notice'}, r:`${p.He} looks hurt for one evening. By the end of the week, ${p.he} has viewed three rooms.`},
    {l:"Let it slide. Maybe next month", fx:{cash:-A(150), peace:-8}, set:{guest:'stayed'}, r:"Next month becomes the month after. The host who told us this story had a one-month guest who stayed for eight."},
@@ -1386,7 +1386,10 @@ const guestStay = () => { const c = C(), p = PRO(), host = s => pickV('HOST',2)=
 
 function scenes(){
   const base = [arrival(), barNight()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : CA());
-  return base.concat(routeAlts(), pathScenes(), fundScenes(), guestStay(), [convertScene(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  const arrived = s => s.landing===1 && [1,2].includes(pickV('air',5));   // an arrival story already covered day 1
+  const alts = routeAlts();
+  base.concat(alts).forEach(sc => { if(sc.day===1 && !sc.core){ const w = sc.when; sc.when = s => !arrived(s) && (!w || w(s)); } });
+  return base.concat(alts, pathScenes(), fundScenes(), guestStay(), [convertScene(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -1507,10 +1510,37 @@ function header(day){
   </div>
   <div class="progress" aria-hidden="true"><i style="width:${pct}%"></i></div>`;
 }
+/* ---------- At most 15 questions a game: a fixed core, plus extras picked at random ---------- */
+const MAX_Q = 15;
+const CORE_SETS = ['job','sibling','farm','promise','fees','status','cos','loan','house','stipendHome'];
+function isCore(sc){
+  if(sc.auto || sc.core || sc.day<=1 || sc.day===28 || (sc.day===30 && !sc.label)) return true;
+  if(sc.day===3 && sc.from===C().mum) return true;
+  const list = typeof sc.choices==='function' ? [] : (sc.choices||[]);
+  return list.some(c => c.set && CORE_SETS.some(k => k in c.set));
+}
+const sceneKey = sc => sc.day + '|' + (sc.from||'') + '|' + String(sc.text||sc.auto).slice(0, 48);
+function planExtras(){   // choose this game's extras once, at the start
+  const all = scenes(), core = all.filter(sc => !sc.auto && isCore(sc) && (!sc.when || sc.when(S))).length;
+  const pool = all.filter(sc => !isCore(sc) && (sc.late || !sc.when || sc.when(S)));
+  const seed = (S.daily ? S.daily : String(S.seed)) + '|x' + S.landing;
+  pool.sort((a,b) => hashStr(seed + sceneKey(a)) - hashStr(seed + sceneKey(b)));
+  S.xPick = pool.slice(0, Math.max(0, MAX_Q - 1 - core)).map(sceneKey);
+}
+function showable(sc){
+  if(sc.when && !sc.when(S)) return false;
+  if(sc.auto) return true;
+  const q = S.q || 0, final = sc.day===30 && !sc.label;
+  if(q >= MAX_Q) return false;
+  if(q >= MAX_Q - 1 && !final) return false;   // always keep room for Mummy's final call
+  if(isCore(sc)) return true;
+  return (S.xPick||[]).includes(sceneKey(sc));
+}
 function nextIndex(from){
   SCENES = scenes();
+  if(!S.xPick) planExtras();
   let i = from;
-  while(i < SCENES.length && SCENES[i].when && !SCENES[i].when(S)) i++;
+  while(i < SCENES.length && !showable(SCENES[i])) i++;
   return i;
 }
 
@@ -1696,7 +1726,7 @@ function render(){
     app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
       const c = list[+btn.dataset.i]; SFX.tap(); setTimeout(()=>SFX.result(c.fx), 90);
       history.push(JSON.stringify({S, idx}));
-      apply(c.fx||{}); Object.assign(S.f, c.set||{}); tally(sc, c);
+      apply(c.fx||{}); Object.assign(S.f, c.set||{}); tally(sc, c); S.q = (S.q||0) + 1;
       last = {r:c.r, fx:c.fx||{}, picked:c.l}; phase='result'; render(); scrollTo(0,0);
     });
     return;
