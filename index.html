@@ -563,15 +563,18 @@ function dailyPlan(ds){   // everyone gets the same country, place, route and fu
 }
 function untilMidnight(){ const n = new Date(), m = new Date(n); m.setHours(24,0,0,0); const mins = Math.max(1, Math.round((m-n)/60000)); return Math.floor(mins/60) + 'h ' + (mins%60) + 'm'; }
 setInterval(() => { const e = document.getElementById('cd'); if(e) e.textContent = untilMidnight(); }, 30000);
-/* ---------- Your time abroad: every Today's Landing you play adds one month ---------- */
-const ABROAD_BADGES = [[1,'First Month Abroad'],[6,'Six Months In'],[12,'One Year Abroad'],[24,'Two Years Strong'],[36,'Three Years, Still Here'],[60,'Five-Year Veteran']];
+/* ---------- Your time abroad: every Today's Landing you play adds two weeks ---------- */
+// milestones are counted in daily games played (each one is two weeks abroad)
+const ABROAD_BADGES = [[2,'First Month Abroad'],[7,'Three Months In'],[13,'Six Months In'],[26,'One Year Abroad'],[52,'Two Years Strong'],[78,'Three Years, Still Here'],[130,'Five-Year Veteran']];
 const abroadMonths = () => new Set(loadHistory().filter(g=>g.daily).map(g=>dayKey(g.t))).size;
-const monthsLabel = n => { const y = Math.floor(n/12), m = n%12; return [y ? `${y} year${y>1?'s':''}` : '', m ? `${m} month${m>1?'s':''}` : ''].filter(Boolean).join(' and ') || 'Not yet started'; };
+const monthsLabel = n => { const w = n*2, y = Math.floor(w/52), rest = w - y*52, m = Math.floor((rest+0.5)/4.33), wk = Math.round(rest - m*4.33);
+  if(!n) return 'Not yet started'; if(!y && !m) return `${w} weeks`;
+  return [y ? `${y} year${y>1?'s':''}` : '', m ? `${m} month${m>1?'s':''}` : '', !y && wk>=2 ? `${wk} weeks` : ''].filter(Boolean).join(' and '); };
 function abroadHTML(newBadge){
   const n = abroadMonths(), next = ABROAD_BADGES.find(([k]) => k > n), got = ABROAD_BADGES.filter(([k]) => k <= n);
   return `<div class="abroad"><div class="when">Your time abroad</div><b>${monthsLabel(n)}</b>
     ${newBadge ? `<p class="abnew">🎉 New milestone: ${newBadge}</p>` : ''}
-    <span>Every Today's Landing you play adds one month.${next ? ` ${next[0]-n} more to reach ${next[1]}.` : ' You have reached every milestone.'}</span>
+    <span>Every Today's Landing you play adds two weeks.${next ? ` ${next[0]-n} more game${next[0]-n===1?'':'s'} to reach ${next[1]}.` : ' You have reached every milestone.'}</span>
     ${got.length ? `<div class="abadges">${got.map(([,t])=>`<i>🏅 ${t}</i>`).join('')}</div>` : ''}</div>`;
 }
 function dayLabel(ds){ const [y,m,d]=ds.split('-').map(Number); return d+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]; }
