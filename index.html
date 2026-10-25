@@ -347,6 +347,9 @@ details.custom summary{font-weight:700}
 .abadges i{font-style:normal;font-size:13px;font-weight:600;background:var(--bubble);border-radius:999px;padding:4px 10px}
 .namebox{display:grid;gap:6px;margin:4px 0}
 .namebox .row{grid-template-columns:1fr auto}
+.me{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:15px}
+.me button{background:none;border:0;color:var(--accent);font-weight:700;text-decoration:underline;padding:4px 0}
+.me.open{display:grid;gap:8px;justify-content:stretch}
 .hero-remind{font-size:13px;opacity:.9;text-align:center}
 .hero-remind button,.hero-remind a{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
 .hero .pushbtn{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
@@ -1746,11 +1749,18 @@ function render(){
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
       <p>Everybody wants to japa. Nobody tells you what happens after you land. Home thinks you are rich. Your bank account would like a word.</p>
       <p class="mirror"><b>More than a game.</b> A 5-minute reality check on your money, your peace of mind, your standing at home, and the future you came to build.</p>
+      ${(() => { const nm = getName(), set = (() => { try{ return !!localStorage.getItem('nyhl-origin') || !!nm; }catch(e){ return !!nm; } })(), open = !set || pick.editMe;
+        const from = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[pick.origin,pick.origin]);
+        return open ? `<div class="me open"><div class="when">Your details · used in every game</div>
+          <label class="when" for="pname">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">
+          <label class="when" for="origin">Leaving from · sets your family's voice</label>
+      <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
+          ${set ? `<button class="ghost" type="button" id="medone">Save</button>` : ''}</div>`
+        : `<div class="me"><span>👤 <b>${esc(nm || 'Anonymous lander')}</b> · leaving from ${esc(from[1])}</span><button type="button" id="meedit">Change</button></div>`; })()}
       ${(() => { const ds = todayStr(), plan = dailyPlan(ds), pl = places(plan.rk).find(x=>x.name===plan.place), done = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).pop();
         const where = (pl.town===pl.name ? pl.name : pl.town + ', ' + pl.name) + ', ' + ROUTES[plan.rk].label;
         return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>Everyone lands in ${where} today</b>
         <span>${done ? `You played today and scored ${scoreOf(done)}/100. A new country and new surprises arrive in <em id="cd">${untilMidnight()}</em>.` : `One shared game a day. Same place and same surprises for everyone, so you can compare scores with friends. A new country arrives in <em id="cd">${untilMidnight()}</em>.`}</span>
-        ${done ? '' : `<label class="when" for="pname" style="color:#E8BB69">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">`}
         <button class="primary" id="dailygo" type="button">${done ? "See how everyone did today" : "Play Today's Landing"}</button>
         ${done ? '' : pushButtonHTML()}
         ${done ? `${pushButtonHTML()}<div class="hero-remind">Or add a calendar reminder · <button type="button" id="hr-ics">Apple or Outlook</button> · <a id="hr-g" target="_blank" rel="noopener" href="${remindGoogle()}">Google</a></div>` : ''}</div>`; })()}
@@ -1762,9 +1772,6 @@ function render(){
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
       ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
       <div class="when quick-ask">Want to play more? Play your own landing</div><div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
-      <label class="when" for="origin">Leaving from · sets your family's voice in every game</label>
-      <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
-      ${loadHistory().some(g=>g.daily && dayKey(g.t)===dayKey(Date.now())) ? `<label class="when" for="pname">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">` : ''}
       <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select">${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
       <div class="foot">Pick, tap, and land. Anything you skip is a surprise. About 5 minutes.</div>
       <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-intro')">Have a japa story? Tell us, and it could become a scene →</a>
@@ -1789,7 +1796,9 @@ function render(){
       <div class="foot credit">Created by <b>Nafeezie</b> · © 2026</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
     </div>`;
-    document.getElementById('origin').onchange = e => {
+    const me1 = document.getElementById('meedit'); if(me1) me1.onclick = () => { pick.editMe = true; render(); };
+    const me2 = document.getElementById('medone'); if(me2) me2.onclick = () => { const pn0 = document.getElementById('pname'); if(pn0) setName(pn0.value); try{ localStorage.setItem('nyhl-origin', pick.origin); }catch(e){} pick.editMe = false; render(); };
+    const og = document.getElementById('origin'); if(og) og.onchange = e => {
       pick.origin = e.target.value; try{ localStorage.setItem('nyhl-origin', pick.origin); }catch(err){}
       const st = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0];
       pick.culture = STATE_CULTURE[st] || 'general';
