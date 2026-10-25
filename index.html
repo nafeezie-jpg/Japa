@@ -512,7 +512,17 @@ const CULTURES = {
 };
 const C = () => Object.assign({}, CULTURES[S.culture||'general'], {home: S.origin});
 const hashStr = t => { let h = 2166136261; for(const ch of t){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
-const pickV = (key, n) => { S.v = S.v || {}; if(S.v[key]===undefined) S.v[key] = S.duo ? (hashStr(S.duoDay+'|duo|'+key) % n + S.duo - 1) % n : S.daily ? hashStr(S.daily+'|'+key) % n : Math.floor(Math.random()*n); return S.v[key]; };
+// what this phone has seen lately, so regular games serve fresh scenes and fresh versions first
+const RECENT = (() => { try{ return JSON.parse(localStorage.getItem('nyhl-recent')||'{}'); }catch(e){ return {}; } })();
+RECENT.v = RECENT.v || {}; RECENT.k = RECENT.k || [];
+function rememberGame(){
+  if(S.daily) return;
+  for(const k in (S.v||{})){ const a = RECENT.v[k] = (RECENT.v[k]||[]).filter(x=>x!==S.v[k]); a.push(S.v[k]); if(a.length > 4) a.shift(); }
+  RECENT.k = RECENT.k.filter(k => !(S.seen||[]).includes(k)).concat(S.seen||[]).slice(-60);
+  try{ localStorage.setItem('nyhl-recent', JSON.stringify(RECENT)); }catch(e){}
+}
+const freshPick = (key, n) => { const recent = (RECENT.v[key]||[]).slice(-(n-1)); const ok = [...Array(n).keys()].filter(i => !recent.includes(i)); const from = ok.length ? ok : [...Array(n).keys()]; return from[Math.floor(Math.random()*from.length)]; };
+const pickV = (key, n) => { S.v = S.v || {}; if(S.v[key]===undefined) S.v[key] = S.duo ? (hashStr(S.duoDay+'|duo|'+key) % n + S.duo - 1) % n : S.daily ? hashStr(S.daily+'|'+key) % n : freshPick(key, n); return S.v[key]; };
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function dayLabel(ds){ const [y,m,d]=ds.split('-').map(Number); return d+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]; }
 
@@ -1524,7 +1534,8 @@ function planExtras(){   // choose this game's extras once, at the start
   const all = scenes(), core = all.filter(sc => !sc.auto && isCore(sc) && (!sc.when || sc.when(S))).length;
   const pool = all.filter(sc => !isCore(sc) && (sc.late || !sc.when || sc.when(S)));
   const seed = (S.daily ? S.daily : String(S.seed)) + '|x' + S.landing;
-  pool.sort((a,b) => hashStr(seed + sceneKey(a)) - hashStr(seed + sceneKey(b)));
+  const seenBefore = sc => !S.daily && RECENT.k.includes(sceneKey(sc)) ? 1 : 0;
+  pool.sort((a,b) => seenBefore(a) - seenBefore(b) || hashStr(seed + sceneKey(a)) - hashStr(seed + sceneKey(b)));
   S.xPick = pool.slice(0, Math.max(0, MAX_Q - 1 - core)).map(sceneKey);
 }
 function showable(sc){
@@ -1726,7 +1737,7 @@ function render(){
     app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
       const c = list[+btn.dataset.i]; SFX.tap(); setTimeout(()=>SFX.result(c.fx), 90);
       history.push(JSON.stringify({S, idx}));
-      apply(c.fx||{}); Object.assign(S.f, c.set||{}); tally(sc, c); S.q = (S.q||0) + 1;
+      apply(c.fx||{}); Object.assign(S.f, c.set||{}); tally(sc, c); S.q = (S.q||0) + 1; (S.seen = S.seen||[]).push(sceneKey(sc));
       last = {r:c.r, fx:c.fx||{}, picked:c.l}; phase='result'; render(); scrollTo(0,0);
     });
     return;
@@ -2032,7 +2043,7 @@ const VERDICTS = [
 /* ---------- My games: a personal journal kept on this device ---------- */
 function loadHistory(){ try{ return JSON.parse(localStorage.getItem('nyhl-history')||'[]'); }catch(e){ return []; } }
 function saveGame(title){
-  if(S.savedGame) return; S.savedGame = true;
+  if(S.savedGame) return; S.savedGame = true; rememberGame();
   const h = loadHistory();
   h.push({t:Date.now(), r:R.key, trip:S.trail.map(x=>x.town).concat([L.town]).join(' → '), path:P(), v:title,
     cash:Math.round(S.cash), cur:R.cur, rent:+(S.cash/RENT()).toFixed(1), name:getName(), peace:S.peace, home:S.home, future:S.future, daily:!!S.daily});
