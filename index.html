@@ -1386,6 +1386,13 @@ const convertScene = () => ({day:4, credit:'Nafeezie', own:1, text:`Your first s
    {l:"Stop converting. Peace of mind", fx:{cash:-A(10), peace:4}, r:"You pay and walk out like a local. Your account will discuss it with you later."},
    {l:"Convert only the big things", fx:{peace:2, future:3}, r:"Rent and phones, you convert. Bread, you just buy. Your sanity says thank you."}]});
 
+/* ---------- God when? ---------- */
+const godWhen = () => ({day:19, text:`You are scrolling Instagram on the bus home. Someone who landed in ${T()} the same month as you is posing with the keys to a new car and a house with a garden. Your thumb stops moving.`,
+  choices:[
+   {l:"Comment \"God when? 🙏\"", fx:{peace:2}, r:"Forty people reply \"Amen\". None of them has a house either."},
+   {l:"Message them and ask how", fx:{peace:1, future:4}, r:"They reply with a long message about two jobs, no holidays, and five years of rice. It is less glamorous than the photo, and more useful."},
+   {l:"Mute them for your peace", fx:{peace:4}, r:"Your feed is calmer. Your ambition is still there, just quieter."}]});
+
 /* ---------- Urgent 2k ---------- */
 const urgent2k = () => ({day:9, ask:1, from:"Old classmate", sub:"Last message: 2019", text:"Hey dear, long time! Hope you are good. Abeg, urgent 2k.",
   choices:[
@@ -1460,7 +1467,7 @@ function scenes(){
   const arrived = s => s.landing===1 && [1,2].includes(pickV('air',5));   // an arrival story already covered day 1
   const alts = routeAlts();
   base.concat(alts).forEach(sc => { if(sc.day===1 && !sc.core){ const w = sc.when; sc.when = s => !arrived(s) && (!w || w(s)); } });
-  return base.concat(alts, pathScenes(), fundScenes(), guestStay(), [convertScene(), urgent2k(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  return base.concat(alts, pathScenes(), fundScenes(), guestStay(), [convertScene(), urgent2k(), godWhen(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -2023,6 +2030,7 @@ const GLOSSARY = [
  ['E be like film trick','"It is like a movie stunt." Said when something too shocking to be real happens.'],
  ['E shock you','"It shocked you." For the moment a price or a person surprises you badly.'],
  ['Everywhere first blur','When shock hits so hard that everything goes blurry for a moment.'],
+ ['God when?','Said when you see someone living the life you want but cannot afford yet. Half prayer, half envy.'],
  ['God abeg','"God, please." A sigh for help when life abroad gets heavy.'],
  ['Beef don set · Beef ti set','A grudge has started. Somebody is offended and now keeping score, in Pidgin and Yoruba.'],
  ['Urgent 2k','"Send me ₦2,000 urgently." The classic message from someone you have not heard from in years. It is never urgent, and it is never only 2k.'],
