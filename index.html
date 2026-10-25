@@ -349,6 +349,7 @@ details.custom summary{font-weight:700}
 .namebox .row{grid-template-columns:1fr auto}
 .hero-remind{font-size:13px;opacity:.9;text-align:center}
 .hero-remind button,.hero-remind a{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+.hero .pushbtn{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
 .hometip{display:grid;gap:8px;background:var(--bubble);border-radius:14px;padding:14px}
 .hometip p{margin:0;font-size:15px}
 .hometip .row{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
@@ -1751,7 +1752,7 @@ function render(){
         <span>${done ? `You played today and scored ${scoreOf(done)}/100. A new country and new surprises arrive in <em id="cd">${untilMidnight()}</em>.` : `One shared game a day. Same place and same surprises for everyone, so you can compare scores with friends. A new country arrives in <em id="cd">${untilMidnight()}</em>.`}</span>
         ${done ? '' : `<label class="when" for="pname" style="color:#E8BB69">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">`}
         <button class="primary" id="dailygo" type="button">${done ? "See how everyone did today" : "Play Today's Landing"}</button>
-        ${done ? `<div class="hero-remind">Remind me every day at 8pm · <button type="button" id="hr-ics">Apple or Outlook</button> · <a id="hr-g" target="_blank" rel="noopener" href="${remindGoogle()}">Google</a></div>` : ''}</div>`; })()}
+        ${done ? `${pushButtonHTML()}<div class="hero-remind">Or add a calendar reminder · <button type="button" id="hr-ics">Apple or Outlook</button> · <a id="hr-g" target="_blank" rel="noopener" href="${remindGoogle()}">Google</a></div>` : ''}</div>`; })()}
       ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>` : ''}
       <button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>
       ${streakHTML('intro')}
@@ -2244,6 +2245,36 @@ function remindIcs(){
 }
 const remindGoogle = () => 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent("Today's Landing ✈️") + '&details=' + encodeURIComponent('A new game is waiting. Play at https://nowyouhavelanded.com') + '&recur=' + encodeURIComponent('RRULE:FREQ=DAILY');
 function downloadIcs(){ track('remind-ics'); try{ const blob = new Blob([remindIcs()], {type:'text/calendar'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'todays-landing.ics'; document.body.appendChild(a); a.click(); a.remove(); }catch(e){} }
+/* ---------- Daily notifications (web push) ---------- */
+const VAPID_PUBLIC = 'BMvAwrfPt9vio2gXVGAhPoB3NZcwX9iuJGIsf8bZKAbK3dNzhZO5FvApTh_qeOpIb-YbJpHbTXAyezwYgpSM5LY';
+let swReg = null;
+try{ if('serviceWorker' in navigator && window.isSecureContext) navigator.serviceWorker.register('/sw.js').then(r => { swReg = r; }).catch(()=>{}); }catch(e){}
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const pushOn = () => { try{ return localStorage.getItem('nyhl-push') === 'on' && Notification.permission === 'granted'; }catch(e){ return false; } };
+const b64ToBytes = b => { const pad = '='.repeat((4 - b.length % 4) % 4), raw = atob((b + pad).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from([...raw].map(c => c.charCodeAt(0))); };
+async function enablePush(btn){
+  const say = t => { const m = document.getElementById('pushmsg'); if(m) m.textContent = t; };
+  if(!pushSupported()){
+    say(/iPhone|iPad|iPod/.test(navigator.userAgent) && !isStandalone() ? 'On iPhone, add the game to your home screen first, open it from there, then tap this again.' : 'This browser cannot show notifications. Use the calendar reminder instead.');
+    return;
+  }
+  try{
+    if(btn) btn.disabled = true;
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted'){ say('Notifications are blocked. You can allow them in your browser settings.'); if(btn) btn.disabled = false; return; }
+    const reg = swReg || await navigator.serviceWorker.register('/sw.js'); await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64ToBytes(VAPID_PUBLIC)});
+    const j = sub.toJSON();
+    const res = await fetch(SB_URL + '/rest/v1/push_subs', {method:'POST', headers:{apikey:SB_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'},
+      body: JSON.stringify({endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth, tz: -new Date().getTimezoneOffset(), hour: 20})});
+    if(!res.ok && res.status !== 409) throw new Error('save ' + res.status);
+    try{ localStorage.setItem('nyhl-push', 'on'); }catch(e){}
+    track('push-on'); say("Done. We will nudge you at 8pm when there is a new Today's Landing.");
+    if(btn){ btn.textContent = 'Notifications on ✓'; }
+  }catch(e){ say('That did not work. Try again in a moment, or use the calendar reminder.'); if(btn) btn.disabled = false; }
+}
+const pushButtonHTML = () => pushOn() ? `<p class="small" style="margin:0;font-size:13px;opacity:.9">🔔 Daily notifications are on.</p>` : `<button class="ghost pushbtn" type="button" onclick="enablePush(this)">🔔 Turn on daily notifications</button><p class="small" id="pushmsg" style="margin:0;font-size:13px;opacity:.9"></p>`;
+
 // add to home screen: Android offers an install prompt, iPhone needs Share then Add to Home Screen
 let installEvt = null;
 try{ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; }); }catch(e){}
@@ -2563,6 +2594,7 @@ function renderEnd(app){
     <div id="movebox" hidden class="routes"></div>
     <div id="padabox" hidden class="result padabox"></div>
     ${homeTipHTML()}
+    ${pushOn() ? '' : `<div class="hometip"><div class="when">Never miss Today's Landing</div><p>Get one nudge a day at 8pm when a new landing arrives.</p>${pushButtonHTML()}</div>`}
     ${remindHTML()}
     <a class="storylink" href="https://tally.so/r/q5480d" target="_blank" rel="noopener">Have a japa story? Share it and it could become a scene in the game →</a>
     <div class="toast" id="toast" role="status"></div>
