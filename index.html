@@ -1744,6 +1744,7 @@ function render(){
       <div class="stamp">Arrived · Day 01</div>
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
       <p>Everybody wants to japa. Nobody tells you what happens after you land. Home thinks you are rich. Your bank account would like a word.</p>
+      <p class="mirror"><b>More than a game.</b> A 5-minute reality check on your money, your peace of mind, your standing at home, and the future you came to build.</p>
       ${(() => { const ds = todayStr(), plan = dailyPlan(ds), pl = places(plan.rk).find(x=>x.name===plan.place), done = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).pop();
         const where = (pl.town===pl.name ? pl.name : pl.town + ', ' + pl.name) + ', ' + ROUTES[plan.rk].label;
         return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>Everyone lands in ${where} today</b>
@@ -1751,7 +1752,13 @@ function render(){
         ${done ? '' : `<label class="when" for="pname" style="color:#E8BB69">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">`}
         <button class="primary" id="dailygo" type="button">${done ? "See how everyone did today" : "Play Today's Landing"}</button>
         ${done ? `<div class="hero-remind">Remind me every day at 8pm · <button type="button" id="hr-ics">Apple or Outlook</button> · <a id="hr-g" target="_blank" rel="noopener" href="${remindGoogle()}">Google</a></div>` : ''}</div>`; })()}
-      <p class="mirror"><b>More than a game.</b> A 5-minute reality check on your money, your peace of mind, your standing at home, and the future you came to build.</p>
+      ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>` : ''}
+      <button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>
+      ${streakHTML('intro')}
+      ${abroadMonths() ? abroadHTML() : ''}
+      ${roadHTML()}
+      ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
+      ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
       <div class="when quick-ask">Want to play more? Play your own landing</div><div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
       <label class="when" for="origin">Leaving from</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
@@ -1773,12 +1780,6 @@ function render(){
           <p>Each meter is out of 100, and each has its own healthy mark. Future starts at 20, so 40 is already good. Home is best between 50 and 85, because a family that adores you in month one usually means you are overgiving. There are no right answers. Every choice follows you to the end of the game.</p>
         </div>
       </details>
-      ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
-      ${streakHTML('intro')}
-      ${abroadMonths() ? abroadHTML() : ''}
-      ${roadHTML()}
-      <button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>
-      ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
       <details class="how">
         <summary>Naija words in this game</summary>
         <div class="how-body">${glossaryHTML()}</div>
