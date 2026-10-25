@@ -592,7 +592,7 @@ const mummyThanks = () => { const c = C(); return [
   choices:[
    {l:`Send ${N(200)} and skip meals`, fx:{cash:-A(200), home:12}, r:`${c.mum} sends six voice notes of prayer, and your uncle announces your name at the gathering. You have not seen a paycheck yet.`},
    {l:`Send ${N(50)} and a voice note`, fx:{cash:-A(50), home:4, peace:2}, r:`${c.bless} Your uncle says nothing, which is louder.`},
-   {l:"Tell her abroad is not paying yet", fx:{home:-8, peace:6}, r:`There is a long silence on the line. Then she says, "${c.ok}. We will pray." You feel lighter and guilty at the same time.`}]},
+   {l:"Tell her abroad is not paying yet", fx:{home:-8, peace:6}, r:`"You dey whine?" she asks. Then a long silence, and finally, "${c.ok}. We will pray." You feel lighter and guilty at the same time.`}]},
  {day:3, from:c.mum, sub:`${c.home} · 6:10am`, text:`${cap(c.endear)}, the generator in the family house has finally packed up. Your uncles met yesterday and agreed that the person abroad should buy the new one.`,
   choices:[
    {l:`Buy the generator for the family`, fx:{cash:-A(300), home:12}, r:"The whole compound has light again. Your uncles now call you \"our person abroad\" in every sentence."},
@@ -633,14 +633,14 @@ const sibling = () => { const c = C(); return [
    {l:`Pay a lawyer ${N(60)} to check it`, fx:{cash:-A(60), home:-6, future:6}, set:{sibling:'checked'}, r:`The lawyer finds the same plot has been sold to three people already. You keep your ${N(2000)} and your sanity.`}]},
  {day:12, from:c.sib, sub:`Your brother · ${c.home}`, text:`${c.please}, I wan japa too. The agent say if I pay ${N(700)} now, he go process everything. IELTS, visa, all. Na guarantee.`,
   choices:[
-   {l:`Pay "the agent" ${N(700)}`, fx:{cash:-A(700), home:10}, set:{sibling:'sent'}, r:`${c.sib} is so happy he cries on the phone. The agent sends a receipt written on an exercise book page.`},
+   {l:`Pay "the agent" ${N(700)}`, fx:{cash:-A(700), home:10}, set:{sibling:'sent'}, r:`${c.sib} is so happy he cries on the phone. The agent sends a receipt written on an exercise book page. Dey play.`},
    {l:"Ask for the agent's licence", fx:{home:-3, future:2}, set:{sibling:'video'}, r:"The agent sends a photo of a signboard. The signboard is leaning on a wall, not attached to anything."},
    {l:`Pay the exam centre directly`, fx:{cash:-A(250), home:-2, future:6}, set:{sibling:'checked'}, r:`You pay the exam centre directly and send ${c.sib} the official guide. If anyone japas next, it will be the real way.`}]},
  {day:12, from:c.sib, sub:`Your brother · ${c.home}`, text:`Buy me Corolla make I start Uber. I go send you returns every week. Just ${N(2500)}. E go pay for itself in six months.`,
   choices:[
    {l:`Send the ${N(2500)} for the car`, fx:{cash:-A(2500), home:12}, set:{sibling:'sent'}, r:`${c.sib} posts the car with the caption "God did". The first weekly return is "next week".`},
    {l:"Ask for the car papers. All of them", fx:{home:-3}, set:{sibling:'video'}, r:"He sends a photo of the steering wheel and says that is the important part."},
-   {l:`Pay a mechanic ${N(40)} to check it`, fx:{cash:-A(40), home:-5, future:6}, set:{sibling:'checked'}, r:"The mechanic says the \"2020 Corolla\" is a 2004 with a new face. You keep your money and ask for a better deal."}]}
+   {l:`Pay a mechanic ${N(40)} to check it`, fx:{cash:-A(40), home:-5, future:6}, set:{sibling:'checked'}, r:"The mechanic says the \"2020 Corolla\" is a 2004 with a new face. When you tell your brother, he only replies, \"E shock you?\" You keep your money."}]}
 ].map(ASK)[pickV('B',5)]; };
 
 const contribution = () => { const c = C(); return [
@@ -2045,6 +2045,9 @@ const GLOSSARY = [
  ['E be like film trick','"It is like a movie stunt." Said when something too shocking to be real happens.'],
  ['E shock you','"It shocked you." For the moment a price or a person surprises you badly.'],
  ['Everywhere first blur','When shock hits so hard that everything goes blurry for a moment.'],
+ ['You dey whine?','"Are you kidding me?" For when someone cannot be serious.'],
+ ['Dey play','"Keep fooling yourself." Said when someone believes something too good to be true.'],
+ ['E shock you?','"Are you surprised?" Usually sarcastic, meaning "what did you expect?"'],
  ['God when?','Said when you see someone living the life you want but cannot afford yet. Half prayer, half envy.'],
  ['God abeg','"God, please." A sigh for help when life abroad gets heavy.'],
  ['Beef don set · Beef ti set','A grudge has started. Somebody is offended and now keeping score, in Pidgin and Yoruba.'],
