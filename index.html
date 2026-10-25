@@ -18,6 +18,12 @@
 <meta name="twitter:description" content="Everybody wants to japa. Nobody tells you what happens after you land. Play free.">
 <meta name="twitter:image" content="https://nowyouhavelanded.com/og.png">
 <link rel="canonical" href="https://nowyouhavelanded.com/">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Landed">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0E5A3A">
 <title>Now You Have Landed</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -341,6 +347,11 @@ details.custom summary{font-weight:700}
 .abadges i{font-style:normal;font-size:13px;font-weight:600;background:var(--bubble);border-radius:999px;padding:4px 10px}
 .namebox{display:grid;gap:6px;margin:4px 0}
 .namebox .row{grid-template-columns:1fr auto}
+.hero-remind{font-size:13px;opacity:.9;text-align:center}
+.hero-remind button,.hero-remind a{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+.hometip{display:grid;gap:8px;background:var(--bubble);border-radius:14px;padding:14px}
+.hometip p{margin:0;font-size:15px}
+.hometip .row{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
 .lb-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
 .lb-tab:first-child{grid-column:1/-1}
 .lb-tab{background:var(--bubble);border:1.5px solid transparent;border-radius:12px;padding:10px;text-align:left;display:grid;gap:2px}
@@ -1738,9 +1749,10 @@ function render(){
         return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>Everyone lands in ${where} today</b>
         <span>${done ? `You played today and scored ${scoreOf(done)}/100. A new country and new surprises arrive in <em id="cd">${untilMidnight()}</em>.` : `One shared game a day. Same place and same surprises for everyone, so you can compare scores with friends. A new country arrives in <em id="cd">${untilMidnight()}</em>.`}</span>
         ${done ? '' : `<label class="when" for="pname" style="color:#E8BB69">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">`}
-        <button class="primary" id="dailygo" type="button">${done ? "See how everyone did today" : "Play Today's Landing"}</button></div>`; })()}
+        <button class="primary" id="dailygo" type="button">${done ? "See how everyone did today" : "Play Today's Landing"}</button>
+        ${done ? `<div class="hero-remind">Remind me every day at 8pm · <button type="button" id="hr-ics">Apple or Outlook</button> · <a id="hr-g" target="_blank" rel="noopener" href="${remindGoogle()}">Google</a></div>` : ''}</div>`; })()}
       <p class="mirror"><b>More than a game.</b> A 5-minute reality check on your money, your peace of mind, your standing at home, and the future you came to build.</p>
-      <div class="when quick-ask">Or play your own landing</div><div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
+      <div class="when quick-ask">Want to play more? Play your own landing</div><div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
       <label class="when" for="origin">Leaving from</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
       ${loadHistory().some(g=>g.daily && dayKey(g.t)===dayKey(Date.now())) ? `<label class="when" for="pname">Your name on the leaderboard</label><input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="Type your name or nickname" value="${getName().replace(/"/g,'&quot;')}">` : ''}
@@ -1780,6 +1792,8 @@ function render(){
       pick.culture = STATE_CULTURE[st] || 'general';
     };
     const pn = document.getElementById('pname'); if(pn) pn.onchange = e => { e.target.value = setName(e.target.value); };
+    const hri = document.getElementById('hr-ics'); if(hri) hri.onclick = downloadIcs;
+    const hrg = document.getElementById('hr-g'); if(hrg) hrg.addEventListener('click', ()=>track('remind-google-card'));
     const dg = document.getElementById('dailygo');
     if(dg) dg.onclick = () => {
       if(loadHistory().some(g=>g.daily && dayKey(g.t)===dayKey(Date.now()))){ openBoard(); return; }
@@ -2227,6 +2241,22 @@ function remindIcs(){
     `DTSTART:${ymd}T200000`,`DTEND:${ymd}T201000`,'RRULE:FREQ=DAILY','SUMMARY:Today\'s Landing ✈️','DESCRIPTION:A new game is waiting. Play at https://nowyouhavelanded.com',
     'URL:https://nowyouhavelanded.com','BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Today\'s Landing','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
 }
+const remindGoogle = () => 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent("Today's Landing ✈️") + '&details=' + encodeURIComponent('A new game is waiting. Play at https://nowyouhavelanded.com') + '&recur=' + encodeURIComponent('RRULE:FREQ=DAILY');
+function downloadIcs(){ track('remind-ics'); try{ const blob = new Blob([remindIcs()], {type:'text/calendar'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'todays-landing.ics'; document.body.appendChild(a); a.click(); a.remove(); }catch(e){} }
+// add to home screen: Android offers an install prompt, iPhone needs Share then Add to Home Screen
+let installEvt = null;
+try{ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; }); }catch(e){}
+const isStandalone = () => { try{ return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; }catch(e){ return false; } };
+function homeTipHTML(){
+  let seen = false; try{ seen = localStorage.getItem('nyhl-hometip') === 'done'; }catch(e){}
+  if(seen || isStandalone()) return '';
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  return `<div class="hometip" id="hometip"><div class="when">Keep the game one tap away</div>
+    <p>${ios ? 'Tap the <b>Share</b> button in Safari, then <b>Add to Home Screen</b>. The game sits on your phone like an app.' : installEvt ? 'Add the game to your home screen, and it sits on your phone like an app.' : 'Open your browser menu and choose <b>Add to Home screen</b>. The game sits on your phone like an app.'}</p>
+    <div class="row">${!ios && installEvt ? `<button class="primary" type="button" onclick="installApp()">Add to home screen</button>` : ''}<button class="ghost" type="button" onclick="closeHomeTip()">Got it</button></div></div>`;
+}
+function closeHomeTip(){ try{ localStorage.setItem('nyhl-hometip','done'); }catch(e){} const t = document.getElementById('hometip'); if(t) t.remove(); }
+function installApp(){ if(!installEvt) return; installEvt.prompt(); track('install-prompt'); installEvt.userChoice.then(()=>closeHomeTip()).catch(()=>{}); installEvt = null; }
 function remindHTML(){
   const g = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent("Today's Landing ✈️") + '&details=' + encodeURIComponent('A new game is waiting. Play at https://nowyouhavelanded.com') + '&recur=' + encodeURIComponent('RRULE:FREQ=DAILY');
   return `<div class="remind"><div class="when">Never miss Today's Landing</div><p>Add a daily 8pm reminder to your calendar. You can change the time there.</p>
@@ -2531,6 +2561,7 @@ function renderEnd(app){
     </div>
     <div id="movebox" hidden class="routes"></div>
     <div id="padabox" hidden class="result padabox"></div>
+    ${homeTipHTML()}
     ${remindHTML()}
     <a class="storylink" href="https://tally.so/r/q5480d" target="_blank" rel="noopener">Have a japa story? Share it and it could become a scene in the game →</a>
     <div class="toast" id="toast" role="status"></div>

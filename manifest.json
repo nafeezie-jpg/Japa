@@ -1,0 +1,13 @@
+{
+  "name": "Now You Have Landed",
+  "short_name": "Landed",
+  "description": "Everybody wants to japa. Nobody tells you what happens after you land.",
+  "start_url": "/?source=homescreen",
+  "display": "standalone",
+  "background_color": "#102F28",
+  "theme_color": "#102F28",
+  "icons": [
+    {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
