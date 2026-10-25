@@ -327,6 +327,18 @@ details.custom summary{font-weight:700}
 .credit-tag{font-size:13px;color:var(--accent);font-weight:600}
 .lbbox{display:grid;gap:10px;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:var(--card)}
 .lbbox p{margin:0;font-size:15px}
+.hero{background:var(--green);color:#fff;border-radius:16px;padding:18px 16px;display:grid;gap:8px;box-shadow:0 10px 26px rgba(16,47,40,.2)}
+.hero .when{color:var(--gold)}
+.hero b{font-family:var(--display);font-size:24px;line-height:1.15;color:#fff}
+.hero span{font-size:15px;opacity:.9}
+.hero em{font-style:normal;font-weight:700;color:var(--gold)}
+.hero .primary{background:var(--gold);color:#1B332B;margin-top:4px}
+.abroad{display:grid;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.abroad b{font-family:var(--display);font-size:22px}
+.abroad span{font-size:14px;color:var(--muted)}
+.abnew{margin:0;font-weight:700;color:var(--accent)}
+.abadges{display:flex;flex-wrap:wrap;gap:6px}
+.abadges i{font-style:normal;font-size:13px;font-weight:600;background:var(--bubble);border-radius:999px;padding:4px 10px}
 .lb-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
 .lb-tab:first-child{grid-column:1/-1}
 .lb-tab{background:var(--bubble);border:1.5px solid transparent;border-radius:12px;padding:10px;text-align:left;display:grid;gap:2px}
@@ -524,6 +536,27 @@ function rememberGame(){
 const freshPick = (key, n) => { const recent = (RECENT.v[key]||[]).slice(-(n-1)); const ok = [...Array(n).keys()].filter(i => !recent.includes(i)); const from = ok.length ? ok : [...Array(n).keys()]; return from[Math.floor(Math.random()*from.length)]; };
 const pickV = (key, n) => { S.v = S.v || {}; if(S.v[key]===undefined) S.v[key] = S.duo ? (hashStr(S.duoDay+'|duo|'+key) % n + S.duo - 1) % n : S.daily ? hashStr(S.daily+'|'+key) % n : freshPick(key, n); return S.v[key]; };
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+/* ---------- Today's Landing: one shared game a day, numbered like Wordle ---------- */
+const DAILY_EPOCH = '2026-10-24';
+const dsUTC = ds => { const [y,m,d] = ds.split('-').map(Number); return Date.UTC(y, m-1, d); };
+const dailyNo = ds => Math.round((dsUTC(ds) - dsUTC(DAILY_EPOCH)) / 864e5) + 1;
+function dailyPlan(ds){   // everyone gets the same country, place, route and funding on the same day
+  const rk = ['us','uk','ca'][hashStr(ds+'|rk') % 3], ps = places(rk), po = pathOptions(rk);
+  return {rk, place: ps[hashStr(ds+'|pl') % ps.length].name, path: po[hashStr(ds+'|pa') % po.length][0], fund: ['savings','savings','sold','borrowed','kept'][hashStr(ds+'|fu') % 5]};
+}
+function untilMidnight(){ const n = new Date(), m = new Date(n); m.setHours(24,0,0,0); const mins = Math.max(1, Math.round((m-n)/60000)); return Math.floor(mins/60) + 'h ' + (mins%60) + 'm'; }
+setInterval(() => { const e = document.getElementById('cd'); if(e) e.textContent = untilMidnight(); }, 30000);
+/* ---------- Your time abroad: every Today's Landing you play adds one month ---------- */
+const ABROAD_BADGES = [[1,'First Month Abroad'],[6,'Six Months In'],[12,'One Year Abroad'],[24,'Two Years Strong'],[36,'Three Years, Still Here'],[60,'Five-Year Veteran']];
+const abroadMonths = () => new Set(loadHistory().filter(g=>g.daily).map(g=>dayKey(g.t))).size;
+const monthsLabel = n => { const y = Math.floor(n/12), m = n%12; return [y ? `${y} year${y>1?'s':''}` : '', m ? `${m} month${m>1?'s':''}` : ''].filter(Boolean).join(' and ') || 'Not yet started'; };
+function abroadHTML(newBadge){
+  const n = abroadMonths(), next = ABROAD_BADGES.find(([k]) => k > n), got = ABROAD_BADGES.filter(([k]) => k <= n);
+  return `<div class="abroad"><div class="when">Your time abroad</div><b>${monthsLabel(n)}</b>
+    ${newBadge ? `<p class="abnew">🎉 New milestone: ${newBadge}</p>` : ''}
+    <span>Every Today's Landing you play adds one month.${next ? ` ${next[0]-n} more to reach ${next[1]}.` : ' You have reached every milestone.'}</span>
+    ${got.length ? `<div class="abadges">${got.map(([,t])=>`<i>🏅 ${t}</i>`).join('')}</div>` : ''}</div>`;
+}
 function dayLabel(ds){ const [y,m,d]=ds.split('-').map(Number); return d+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]; }
 
 /* ---------- Shared scenes (each has several versions, picked at random per game) ---------- */
@@ -1660,14 +1693,17 @@ function render(){
       <div class="stamp">Arrived · Day 01</div>
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
       <p>Everybody wants to japa. Nobody tells you what happens after you land. Home thinks you are rich. Your bank account would like a word.</p>
+      ${(() => { const ds = todayStr(), plan = dailyPlan(ds), pl = places(plan.rk).find(x=>x.name===plan.place), done = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).pop();
+        return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>${ROUTES[plan.rk].label} · ${pl.town===pl.name ? pl.name : pl.town}</b>
+        <span>${done ? `You landed today with ${scoreOf(done)}/100. Next landing in <em id="cd">${untilMidnight()}</em>.` : `Everyone gets this same game today. Play it, then compare with friends. New landing in <em id="cd">${untilMidnight()}</em>.`}</span>
+        <button class="primary" id="dailygo" type="button">${done ? "See how everyone did today" : "Play Today's Landing"}</button></div>`; })()}
       <p class="mirror"><b>More than a game.</b> A 5-minute reality check on your money, your peace of mind, your standing at home, and the future you came to build.</p>
       <label class="when" for="origin">Leaving from</label>
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
       <label class="when" for="pname">Your name for the leaderboard (optional)</label>
       <input id="pname" class="select" type="text" maxlength="20" autocomplete="given-name" placeholder="So the game knows who landed" value="${getName().replace(/"/g,'&quot;')}">
-      <div class="when quick-ask">Tap where you are landing</div>
+      <div class="when quick-ask">Or choose your own landing</div>
       <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select">${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
-      <label class="check daily quickdaily" for="qdaily"><input type="checkbox" id="qdaily"${pick.daily?' checked':''}> <span><b>Today's Landing · ${dayLabel(todayStr())}</b> Same game as everyone today</span></label>
       <div class="foot">Pick, tap, and land. Anything you skip is a surprise. About 5 minutes.</div>
       <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-intro')">Have a japa story? Tell us, and it could become a scene →</a>
       <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-edition')">Not from Nigeria? Help us build your country's edition →</a>
@@ -1686,6 +1722,7 @@ function render(){
       </details>
       ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
       ${streakHTML('intro')}
+      ${abroadMonths() ? abroadHTML() : ''}
       ${roadHTML()}
       <button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>
       ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
@@ -1702,7 +1739,13 @@ function render(){
       pick.culture = STATE_CULTURE[st] || 'general';
     };
     const pn = document.getElementById('pname'); if(pn) pn.onchange = e => { e.target.value = setName(e.target.value); };
-    const qd = document.getElementById('qdaily'); if(qd) qd.onchange = e => { pick.daily = e.target.checked; };
+    const dg = document.getElementById('dailygo');
+    if(dg) dg.onclick = () => {
+      if(loadHistory().some(g=>g.daily && dayKey(g.t)===dayKey(Date.now()))){ openBoard(); return; }
+      const ds = todayStr(), plan = dailyPlan(ds), st = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0];
+      SFX.land(); pick.daily = true; pick.path = plan.path; pick.fund = plan.fund; pick.culture = STATE_CULTURE[st] || 'general'; pick.duo = 0;
+      track('daily-' + dailyNo(ds)); begin(plan.rk, plan.place); render(); scrollTo(0,0);
+    };
     app.querySelectorAll('.quick-btn').forEach(b=>b.onclick=()=>{
       SFX.tap(); pick.qroute = (pick.qroute===b.dataset.q ? null : b.dataset.q); render();
       const qp = document.getElementById('qpanel'); if(qp) qp.scrollIntoView({behavior:'smooth', block:'nearest'});
@@ -1718,7 +1761,7 @@ function render(){
       pick.gender = ge || 'any';
       const st = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0];
       pick.culture = cv || STATE_CULTURE[st] || 'general';
-      pick.duo = 0;
+      pick.duo = 0; pick.daily = false;
       track('quick-'+rk);
       begin(rk, pl || any(places(rk)).name); render(); scrollTo(0,0);
     };
@@ -2006,10 +2049,10 @@ async function drawCard(title, line, journey, rec){
   x.fillStyle=green; x.fillRect(0,0,W,H);
   x.beginPath(); x.arc(0,H*0.62,46,0,Math.PI*2); x.arc(W,H*0.62,46,0,Math.PI*2); x.fillStyle=paper; x.fill();
   x.setLineDash([18,14]); x.strokeStyle='rgba(255,255,255,.35)'; x.lineWidth=3; x.beginPath(); x.moveTo(70,H*0.62); x.lineTo(W-70,H*0.62); x.stroke(); x.setLineDash([]);
-  x.fillStyle=gold; x.font="700 30px 'DM Sans', sans-serif"; x.fillText(S.daily ? `NOW YOU HAVE LANDED · TODAY'S LANDING ${dayLabel(S.daily).toUpperCase()}` : 'NOW YOU HAVE LANDED', 80, 110);
+  x.fillStyle=gold; x.font="700 30px 'DM Sans', sans-serif"; x.fillText(S.daily ? `NOW YOU HAVE LANDED · TODAY'S LANDING #${dailyNo(S.daily)}` : 'NOW YOU HAVE LANDED', 80, 110);
   x.fillStyle='rgba(255,255,255,.85)'; x.font="600 34px 'DM Sans', sans-serif";
   wrapText(x, journey, 900).slice(0,2).forEach((l,i)=>x.fillText(l, 80, 168+i*44));
-  x.fillStyle=gold; x.font="700 28px 'DM Sans', sans-serif"; x.fillText(`${getName() ? getName().toUpperCase()+"'S" : 'MY'} DAY 30 VERDICT · SCORE ${nowScore()}/100${S.rank ? ` · #${S.rank} THIS WEEK` : ''}`, 80, 300);
+  x.fillStyle=gold; x.font="700 28px 'DM Sans', sans-serif"; x.fillText(`${getName() ? getName().toUpperCase()+"'S" : 'MY'} DAY 30 VERDICT · SCORE ${nowScore()}/100${S.daily && S.beat!=null ? ` · BEAT ${S.beat}% TODAY` : S.rank ? ` · #${S.rank} THIS WEEK` : ''}`, 80, 300);
   x.fillStyle='#FFFFFF'; x.font="800 88px 'Playfair Display', Georgia, serif";
   let y=400; wrapText(x, title, 920).slice(0,3).forEach(l=>{ x.fillText(l, 80, y); y+=100; });
   x.fillStyle='rgba(255,255,255,.92)'; x.font="600 40px 'DM Sans', sans-serif"; y+=10;
@@ -2248,7 +2291,8 @@ function postBoxHTML(){
   const st = S.st || {r:0, s:0, g:0};
   const facts = `<p>This game you said no to home <b>${st.r}</b> time${st.r===1?'':'s'}, sent <b>${NGN0(st.s)}</b> home, fell for <b>${st.g}</b> trap${st.g===1?'':'s'}, and spotted <b>${st.p||0}</b>.</p>`;
   const who = esc(getName() || 'Anonymous lander');
-  const status = S.rank ? `<p class="lb-rankline">You are <b>#${S.rank}</b> on this week's board, out of ${S.rankOf} landing${S.rankOf===1?'':'s'}.</p><p class="small" style="color:var(--muted);font-size:13px">Posted as ${who}.${getName()?'':' Add your name at the start of your next game to show it here.'}</p>`
+  const today = S.daily && S.dailyN ? `<p class="lb-rankline">${S.beat===null ? `You are the first to play Today's Landing #${dailyNo(S.daily)}.` : `Today's Landing #${dailyNo(S.daily)}: you beat <b>${S.beat}%</b> of today's ${S.dailyN} players.`}</p>` : '';
+  const status = S.rank ? `${today}<p class="lb-rankline">You are <b>#${S.rank}</b> on this week's board, out of ${S.rankOf} landing${S.rankOf===1?'':'s'}.</p><p class="small" style="color:var(--muted);font-size:13px">Posted as ${who}.${getName()?'':' Add your name at the start of your next game to show it here.'}</p>`
     : S.postFail ? `<p>${S.postFail}</p><button class="ghost" type="button" id="lbretry">Try again</button>`
     : `<p>Adding you to this week's board as ${who}...</p>`;
   return `<div class="lbbox" id="lbbox"><div class="when">Weekly leaderboard</div>${status}${facts}<button class="ghost" type="button" onclick="openBoard()">🏆 See this week's board</button></div>`;
@@ -2270,6 +2314,11 @@ async function autoPost(title, onRank){
     try{ const out = await res.json(); myPostAt = Date.parse(out[0].created_at); rememberPost(out[0].created_at); }catch(e){}
     const rows = await loadBoard(true);
     S.rank = 1 + rows.filter(r=>r.score > score).length; S.rankOf = rows.length;
+    if(S.daily){ try{
+      const a = new Date(); a.setHours(0,0,0,0); const z = new Date(a.getTime() + 864e5);
+      const dr = await (await fetch(SB_URL + '/rest/v1/landings?select=score&daily=eq.true&created_at=gte.' + encodeURIComponent(boardFrom(a).toISOString()) + '&created_at=lt.' + encodeURIComponent(z.toISOString()) + '&limit=5000', {headers:{apikey:SB_KEY}})).json();
+      S.dailyN = dr.length; S.beat = dr.length > 1 ? Math.round(dr.filter(r=>r.score < score).length / (dr.length-1) * 100) : null;
+    }catch(e){} }
     paint(); if(onRank) onRank(S.rank);
   }catch(e){ S.postFail = 'We could not reach the board. Check your connection.'; paint(); }
 }
@@ -2381,9 +2430,9 @@ function renderEnd(app){
   setTimeout(()=>SFX.verdict(S.cash > 0 && (S.peace + S.home + S.future) / 3 >= 50), 250);
   const where = `${L.town}, ${R.country}`;
   const journey = S.trail.map(t=>t.town).concat([L.town]).join(' → ');
-  const share = `${S.daily ? `Today's Landing, ${dayLabel(S.daily)}. ` : ''}I played Now You Have Landed (${journey}) and I am "${title}". ${line} Finished 30 days with ${money(S.cash)}, Peace ${S.peace}, Home ${S.home}, Future ${S.future}. Wetin be your own?`;
+  const share = `${S.daily ? `Today's Landing #${dailyNo(S.daily)}. ` : ''}I played Now You Have Landed (${journey}) and I am "${title}". ${line} Finished 30 days with ${money(S.cash)}, Peace ${S.peace}, Home ${S.home}, Future ${S.future}. Wetin be your own?`;
   app.innerHTML = `<div class="scene fade">
-    <div class="when">Day 30 · Your result${S.daily ? ` · Today's Landing, ${dayLabel(S.daily)}` : ''}</div>
+    <div class="when">Day 30 · Your result${S.daily ? ` · Today's Landing #${dailyNo(S.daily)}` : ''}</div>
     <div class="journey-line">${journey}</div>
     <div class="verdict">
       <div class="label">Now You Have Landed · verdict for scores ${verdictBand(title)[0]} to ${verdictBand(title)[1]}</div>
@@ -2406,6 +2455,7 @@ function renderEnd(app){
     ${postBoxHTML()}
     ${roadHTML()}
     ${streakHTML('end')}
+    ${S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return abroadHTML(firstToday && hit ? hit[1] : ''); })() : ''}
     ${collectionHTML(title, isNewVerdict)}
     <div class="cardwrap"><img id="cardimg" alt="Your result card" hidden></div>
     <button class="primary" id="sharecard">Share my result card</button>
@@ -2459,7 +2509,7 @@ function renderEnd(app){
     const t = document.getElementById('toast');
     if(!cardBlob){ t.textContent = "Your card is still being made. Try again in a second."; return; }
     if(cardFile && navigator.canShare && navigator.canShare({files:[cardFile]})){
-      navigator.share({files:[cardFile], text:`${S.daily ? `Today's Landing, ${dayLabel(S.daily)}. ` : ''}My verdict: ${title}.${S.rank ? ` I am #${S.rank} on this week's leaderboard.` : ''} What is yours? ${SITE}`}).catch(()=>{});
+      navigator.share({files:[cardFile], text:`${S.daily ? `Today's Landing #${dailyNo(S.daily)}${S.beat!=null ? `, beat ${S.beat}% of players` : ''}. ` : ''}My verdict: ${title}.${S.rank ? ` I am #${S.rank} on this week's leaderboard.` : ''} What is yours? ${SITE}`}).catch(()=>{});
       return;
     }
     try{
@@ -2469,7 +2519,7 @@ function renderEnd(app){
     }catch(e){ t.textContent = "Press and hold the card above to save it."; }
   };
   const enc = encodeURIComponent;
-  const shareNow = () => S.rank ? share.replace(' Wetin be your own?', ` I am #${S.rank} on this week's leaderboard. Wetin be your own?`) : share;
+  const shareNow = () => { let t = S.rank ? share.replace(' Wetin be your own?', ` I am #${S.rank} on this week's leaderboard. Wetin be your own?`) : share; if(S.daily && S.beat!=null) t = t.replace(`Today's Landing #${dailyNo(S.daily)}. `, `Today's Landing #${dailyNo(S.daily)}: I beat ${S.beat}% of today's players. `); return t; };
   let text = shareNow() + ' Play here: ' + SITE;
   const setLinks = () => {
     text = shareNow() + ' Play here: ' + SITE;
@@ -2495,7 +2545,7 @@ function renderEnd(app){
       const rk = btn.dataset.r;
       box.innerHTML = `<label class="when" for="place2">${ROUTES[rk].ask}</label><select id="place2" class="select">${placeOptions(rk)}</select><button class="primary" id="go2">Land in ${ROUTES[rk].label}</button>`;
       document.getElementById('go2').onclick = ()=>{
-        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture, sold:S.sold, fund:S.fund, gender:S.gender, daily:S.daily, duo:S.duo, duoDay:S.duoDay};
+        const prev = {origin:S.origin, trail:S.trail, peace:S.peace, home:S.home, future:S.future, landing:S.landing, culture:S.culture, sold:S.sold, fund:S.fund, gender:S.gender, daily:null, duo:S.duo, duoDay:S.duoDay};
         const pl = document.getElementById('place2').value;
         SFX.land(); begin(rk, pl, prev); render(); scrollTo(0,0);
       };
