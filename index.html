@@ -358,6 +358,9 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .ladder span{font-size:22px}
 .ladder b{font-size:15px}
 .ladder small{font-size:12px;color:var(--muted);text-align:right}
+.cost{display:grid;gap:8px;background:var(--card);border:1.5px dashed var(--gold);border-radius:14px;padding:12px 14px}
+.cost-chips{display:flex;flex-wrap:wrap;gap:6px}
+.cost-chips span{font-size:14px;font-weight:600;background:var(--bubble);border-radius:999px;padding:5px 10px}
 .coll-mini{background:var(--bubble);border-radius:12px;padding:10px 12px;font-size:15px;text-align:center}
 @media (max-width:360px){.coll-grid{grid-template-columns:1fr}}
 .foot{font-size:13px;color:var(--muted);text-align:center}
@@ -617,6 +620,7 @@ function begin(rk, pname, prev){
   const start = Math.round(ROUTES[rk].start * PATHS[path].mult * ({savings:1, sold:1.4, borrowed:1.3, kept:0.9}[fund]||1) / 50) * 50;
   S = prev ? {cash:start, start, path, sold, fund, peace:prev.peace, home:prev.home, future:prev.future, f:{}, origin, trail, landing:prev.landing+1, culture, gender, daily, seed, duo, duoDay}
            : {cash:start, start, path, sold, fund, peace:70, home:60, future:20, f:{}, origin, trail, landing:1, culture, gender, daily, seed, duo, duoDay};
+  S.p0 = {peace:S.peace, home:S.home, future:S.future};
   S.st = {r:0, s:0, g:0, p:0};   // requests refused, money sent home (USD), traps fallen for, traps spotted
   shown = null;
   history = [];
@@ -972,6 +976,31 @@ const finalCall = () => ({day:30, from:C().mum, sub:"Video call", text:`Let me s
      ? {l:"Show her the snow outside", fx:{peace:5, home:4}, r:"She screams. \"Is that sugar?\" Then she asks why you are wearing three jackets indoors."}
      : {l: L.car ? "Show her your car" : "Show her the city from your window", fx:{peace:5, home:4}, r: s.f.car==='bought' ? "She inspects the car like a quality control officer and approves it. \"So this is where the ajo went.\"" : "She says, \"God will provide a car.\" You say amen with your whole chest."}]});
 
+// Day 30 ends differently each game. Mummy's call is one of five endings.
+const finale = () => { const c = C(); const v = [
+ finalCall,
+ () => ({day:30, from:"Payroll", sub:"Your first full payslip", text:`Your first full payslip lands. After tax, it is ${M(A(1900))}, which is less than the number you told everybody at home.`,
+  choices:[
+   {l:"Move a third into savings first", fx:{peace:5, future:8}, r:"Your savings app shows a little confetti animation. It is the most anyone has celebrated you all month."},
+   {l:"Send some home to announce it", fx:{cash:-A(300), home:8, peace:-3}, r:"The family WhatsApp group goes wild. Somebody changes the group photo to your face."},
+   {l:"Buy yourself one nice thing", fx:{cash:-A(120), peace:6}, r:"You buy proper shoes. Your feet send a formal thank-you letter."}]}),
+ () => ({day:30, from:"Unknown number", sub:"Just landed", text:`"Good evening. Your aunty gave me your number. I landed in ${T()} yesterday. ${c.please}, how una dey cope?" One month ago, that was you.`,
+  choices:[
+   {l:"Send them your honest survival list", fx:{peace:4, future:5, home:2}, r:"Rent first, sleep second, and say no to the first loan request. They reply with twelve thank-you emojis. You realise you know things now."},
+   {l:"Tell them \"Abroad is sweet, you will enjoy\"", fx:{peace:-3, home:1}, r:"They send a thumbs up. Two weeks later they message again. \"Why you no tell me?\""},
+   {l:`Invite them over for ${c.food}`, fx:{cash:-A(40), peace:6, home:3}, r:"They eat like someone who has survived on sandwiches all week. You both laugh about the airport until midnight."}]}),
+ () => ({day:30, text:`Your phone shows a memory from one month ago. It is a selfie at the airport, smiling like someone who has never paid for ${R.key==='uk' ? 'council tax' : R.key==='ca' ? 'winter boots' : 'health insurance'}.`,
+  choices:[
+   {l:"Post it with an honest caption", fx:{peace:6, home:2}, r:"You write, \"One month in. Still standing. Still learning.\" Your old teacher comments, \"Proud of you.\" You read it four times."},
+   {l:"Post it with \"Living the dream ✈️\"", fx:{home:5, peace:-4}, r:"Forty likes and three people asking you to \"remember them\". You put the phone face down."},
+   {l:"Keep it to yourself", fx:{peace:4, future:2}, r:"You look at that hopeful face for a long time and decide that person would be proud of you."}]}),
+ () => ({day:30, from:"Family WhatsApp group", sub:"48 unread messages", text:`${c.aunty} posts, "Our abroad person has gone quiet o. Has abroad finished you, or have you finished abroad?" Eleven people react with 😂.`,
+  choices:[
+   {l:"Send a voice note with your real update", fx:{home:6, peace:3}, r:"Your voice note is four minutes long. The first reply says, \"Network don cut, abeg type am.\""},
+   {l:"Post a photo of you in a nice coat", fx:{home:5, peace:-2}, r:"\"Abroad don show for your body!\" Nobody asks how you are really doing."},
+   {l:"Mute the group for a week", fx:{peace:6, home:-6}, r:`Peace and quiet. Three days later, ${c.mum} calls to ask why you have "left the family".`}]})
+ ]; return v[pickV('finale', v.length)](); };
+
 /* ---------- United States ---------- */
 const US = () => [
  {day:1, when: s => pickV('us1',2)===0, text:`${soldLine()}${({lottery:`Your name came out in the visa lottery, so you land in ${T()} with a green card, ${M(S.start)}, and no job. Back home, everyone heard "lottery" and assumed you won money.`,visitor:`You came to ${T()} on a visitor visa "to see the place". You have ${M(S.start)}, a return ticket, and a quiet plan not to use it.`,work:`You resign from a good job in ${O()} and land in ${T()} with ${M(S.start)}${SOLD()?'':', which is your ajo payout plus everything you sold before leaving,'} and a Nigerian passport.`,scholar:`You land in ${T()} on a full scholarship with a teaching assistantship. Your stipend starts next month, and everybody at home has already budgeted it. You have ${M(S.start)} until then.`,partial:`You land in ${T()} with a scholarship that covers half your tuition. The other half, and everything else, is on you. You have ${M(S.start)}.`,study:`You land in ${T()} on a student visa. Part of your tuition is paid, and your family has promised the rest "before the deadline". You have ${M(S.start)} for everything else.`})[P()]} Your cousin ${C().cousin} says you can stay with her until you find your feet. She has a husband, three children, and two bedrooms.`,
@@ -1029,7 +1058,7 @@ const US = () => [
  farm(), promise(),
  {day:25, auto:'pay2'},
  {day:27, when: s => s.f.sibling==='sent' || s.f.sibling==='video', auto:'roof'},
- friend(), finalCall()
+ friend(), finale()
 ];
 
 /* ---------- United Kingdom ---------- */
@@ -1101,7 +1130,7 @@ const UK = () => [
  farm(), promise(),
  {day:25, auto:'pay2'},
  {day:27, when: s => s.f.sibling==='sent' || s.f.sibling==='video', auto:'roof'},
- friend(), finalCall()
+ friend(), finale()
 ];
 
 /* ---------- Canada ---------- */
@@ -1160,7 +1189,7 @@ const CA = () => [
  farm(), promise(),
  {day:25, auto:'pay2'},
  {day:27, when: s => s.f.sibling==='sent' || s.f.sibling==='video', auto:'roof'},
- friend(), finalCall()
+ friend(), finale()
 ];
 
 let SCENES = [];
@@ -2225,6 +2254,17 @@ function verdict(){
   const t = LADDER.find(([min]) => sc >= min)[1];
   return [t, VERDICT_LINES[t]];
 }
+function costParts(){
+  const st = S.st || {r:0, s:0, g:0}, p0 = S.p0 || {peace:70}, out = [];
+  if(S.cash < 0) out.push(['💳', `${money(-S.cash)} in debt`]);
+  if(S.peace < p0.peace) out.push(['🧘🏾', `Peace ${p0.peace} → ${S.peace}`]);
+  if(st.r) out.push(['🙅🏾', `Said no to home ${st.r} time${st.r>1?"s":""}`]);
+  if(st.s > 0) out.push(['💸', `Sent ${NGN0(st.s)} home`]);
+  if(st.g) out.push(['🪤', `Fell for ${st.g} trap${st.g>1?'s':''}`]);
+  if(!out.length) out.push(['🕊️', 'Almost nothing. You protected yourself']);
+  return out;
+}
+const costText = () => costParts().map(x => x[1]).join(', ');
 function receipts(){
   const f = S.f, out = [], c = C(), vB = (S.v&&S.v.B)||0, vD = (S.v&&S.v.D)||0;
   if(f.sibling==='sent') out.push([`${c.sib} is still at roofing. The goat is doing well.`, `${c.sib}'s POS business is now a phone accessories stand.`, "You own one third of a plot that belongs to three people.", "You paid a japa agent who japa'd with your money.", "The Uber Corolla only drives to one address."][vB]);
@@ -2296,8 +2336,9 @@ async function drawCard(title, line, journey, rec){
     if(suf){ const w=x.measureText(v).width; x.fillStyle='rgba(255,255,255,.6)'; x.font="700 24px 'DM Sans', sans-serif"; x.fillText(suf, bx+24+w, by+98); }
     x.fillStyle = b.cls==='high' ? '#9BE3B8' : b.cls==='mid' ? gold : '#F2A08F'; x.font="700 21px 'DM Sans', sans-serif";
     wrapText(x, b.label.replace(/"/g,''), 180).slice(0,2).forEach((l,j)=>x.fillText(l, bx+20, by+132+j*24)); });
-  x.fillStyle='rgba(255,255,255,.85)'; x.font="600 30px 'DM Sans', sans-serif"; y=H*0.62+275;
-  rec.slice(0,2).forEach(r=>{ wrapText(x, '› '+r, 920).slice(0,1).forEach(l=>{ x.fillText(l, 80, y); y+=42; }); });
+  y=H*0.62+270; x.fillStyle=gold; x.font="700 24px 'DM Sans', sans-serif"; x.fillText('WHAT IT COST ME', 80, y); y+=44;
+  x.fillStyle='rgba(255,255,255,.9)'; x.font="600 30px 'DM Sans', sans-serif";
+  wrapText(x, costText(), 920).slice(0,2).forEach(l=>{ x.fillText(l, 80, y); y+=42; });
   x.fillStyle=gold; x.font="800 38px 'Playfair Display', Georgia, serif"; x.fillText("What's your verdict?", 80, H-90);
   x.fillStyle='#FFFFFF'; x.font="600 32px 'DM Sans', sans-serif"; x.fillText('Play free at nowyouhavelanded.com', 80, H-44);
   x.fillStyle='rgba(255,255,255,.6)'; x.font="500 24px 'DM Sans', sans-serif"; x.textAlign='right'; x.fillText('Created by Nafeezie', W-80, H-44); x.textAlign='left';
@@ -2857,7 +2898,7 @@ function renderEnd(app){
   setTimeout(()=>SFX.verdict(S.cash > 0 && (S.peace + S.home + S.future) / 3 >= 50), 250);
   const where = `${L.town}, ${R.country}`;
   const journey = S.trail.map(t=>t.town).concat([L.town]).join(' → ');
-  const share = `${S.daily ? `Today's Landing #${dailyNo(S.daily)}. ` : ''}I played Now You Have Landed (${journey}) and I am "${title}". ${line} Finished 30 days with ${money(S.cash)}, Peace ${S.peace}, Home ${S.home}, Future ${S.future}. Wetin be your own?`;
+  const share = `${S.daily ? `Today's Landing #${dailyNo(S.daily)}. ` : ''}I played Now You Have Landed (${journey}) and I am "${title}". ${line} What it cost me: ${costText()}. Wetin be your own?`;
   app.innerHTML = `<div class="scene fade">
     <div class="when">Day 30 · Your result${S.daily ? ` · Today's Landing #${dailyNo(S.daily)}` : ''}</div>
     <div class="journey-line">${journey}</div>
@@ -2868,6 +2909,7 @@ function renderEnd(app){
       <p>${line}</p>
       ${rec.length?`<div class="receipts">${rec.slice(0,2).map(r=>`<div>${r}</div>`).join('')}</div>`:''}
     </div>
+    <div class="cost"><div class="when">💸 What it cost you</div><div class="cost-chips">${costParts().map(([i,t]) => `<span>${i} ${t}</span>`).join('')}</div></div>
     ${tomorrowHTML({newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `${hit[1]}! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
     <div class="score">
       <div class="sc-top"><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div>
