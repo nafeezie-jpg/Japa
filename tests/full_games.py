@@ -29,13 +29,13 @@ async def run():
        await pg.select_option('#qfund', ['','savings','sold','borrowed','kept'][g%5])
        await pg.select_option('#qplace', index=(g*7) % (await pg.locator('#qplace option').count()))
        await pg.click('#qgo')
-      backed=False; steps=0
+      steps=0
       for _ in range(120):
         if await pg.locator('#lbbox').count(): break
         if await pg.locator('.art.vn').count() and random.random()<.3: await pg.click('.art.vn')
+        if await pg.locator('#back').count(): issues.append(f'game {g}: a back button is still showing'); break
         ch=pg.locator('.choice')
         if await ch.count(): await ch.nth(random.randrange(await ch.count())).click(); steps+=1
-        elif not backed and await pg.locator('#back').count() and steps==3: await pg.click('#back'); backed=True
         elif await pg.locator('#next').count(): await pg.click('#next')
       else: issues.append(f'game {g} never ended')
       await pg.wait_for_timeout(900)

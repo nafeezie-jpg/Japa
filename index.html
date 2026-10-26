@@ -2242,7 +2242,7 @@ function render(){
     const list = typeof sc.choices==='function' ? sc.choices(S) : sc.choices;
     const ord = list.map((c,i)=>i).sort((a,b)=> hashStr((S.seed||0)+'|'+sc.day+'|'+list[a].l) - hashStr((S.seed||0)+'|'+sc.day+'|'+list[b].l));
     const note = !inCh() && sc.day<=1 && !sc.from && idx===nextIndex(0) ? `${S.life ? `<div class="local"><b>📖 My Life Abroad · Month 1</b>This is the start of one long life. Your money, your meters, and the choices you make this month follow you into every chapter.</div>` : ''}${S.daily && S.landing===1 ? `<div class="local"><b>Today's Landing #${dailyNo(S.daily)}</b>Everyone playing today lands here and meets the same surprises. Your score is compared with theirs at the end.</div>` : ''}${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
-    app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}${glossLink()}</div>`;
+    app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${glossLink()}</div>`;
     wireBack();
     SFX.ambient(ambientFor(sc));
     if(sc.from && !(S.landing===1 && sc.day===1 && !inCh())) setTimeout(()=> isCall(sc) ? SFX.ring() : SFX.ping(), 150);
@@ -2258,7 +2258,7 @@ function render(){
   const picked = last.picked ? `<div class="when">You chose · ${last.picked}</div>` : '';
   const body = art(sc) + (last.auto ? `<div class="when">${sc.label || 'Day '+sc.day}</div>` : intro(sc,true)) + picked +
     `<div class="result">${last.r}</div><div class="chips">${chips(last.fx)}</div>
-     <button class="primary" id="next">${nextIndex(idx+1)>=SCENES.length ? (S.life ? (inCh() ? '📖 Close this chapter' : '📖 See how your life begins') : 'See how your 30 days went') : 'Continue'}</button>${history.length?`<button class="backbtn" id="back">← Change this choice</button>`:''}`;
+     <button class="primary" id="next">${nextIndex(idx+1)>=SCENES.length ? (S.life ? (inCh() ? '📖 Close this chapter' : '📖 See how your life begins') : 'See how your 30 days went') : 'Continue'}</button>`;
   app.innerHTML = header(sc.day) + `<div class="scene fade">${body}</div>`;
   wireBack();
   document.getElementById('next').onclick = ()=>{
