@@ -324,6 +324,40 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .movesteps b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--gold);color:#1B332B;display:grid;place-items:center;font-size:14px}
 #moveover textarea{width:100%;font-family:var(--mono);font-size:12px;margin:6px 0 8px;resize:vertical}
 #moveover .tm-msg{color:var(--ink);margin-top:8px}
+.tm-rep{font-size:15px}
+.tm-rep b{color:var(--gold)}
+#aboutover{align-items:center}
+.aboutp{padding:10px;max-height:96vh}
+.aboutcard{background:var(--green);color:#fff;border-radius:16px;padding:16px 14px;display:grid;gap:10px}
+.ab-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.ab-top .xbtn{background:rgba(255,255,255,.12);color:#fff}
+.aboutcard h2{font-family:var(--display);font-size:26px;line-height:1.1;margin:0}
+.ab-tag{margin:0;font-size:15px;opacity:.9}
+.ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ab-grid div{display:grid;gap:2px;align-content:start;background:rgba(255,255,255,.08);border-radius:12px;padding:10px}
+.ab-grid span{font-size:24px;line-height:1}
+.ab-grid b{font-size:14px;color:var(--gold);line-height:1.25}
+.ab-grid small{font-size:12.5px;opacity:.88;line-height:1.35}
+.ab-strip{display:flex;flex-wrap:wrap;gap:6px}
+.ab-strip{flex-wrap:nowrap!important;justify-content:space-between}
+.ab-strip span{white-space:nowrap;font-size:12px;font-weight:600;background:rgba(255,255,255,.1);border-radius:999px;padding:5px 10px}
+.ab-real{margin:0;font-size:13px;opacity:.9;font-style:italic}
+.ab-foot{display:flex;flex-wrap:wrap;gap:4px 10px;justify-content:space-between;align-items:baseline;border-top:1px dashed rgba(255,255,255,.3);padding-top:10px;font-size:13px}
+.ab-foot b{color:var(--gold);font-size:15px}
+.ab-btns{margin-top:10px}
+.howlist{display:grid;gap:10px;margin:8px 0}
+.howlist div{display:flex;gap:10px;align-items:flex-start}
+.howlist span{font-size:24px;line-height:1.2}
+.howlist p{margin:0;font-size:15px}
+.howsmall{font-size:13px;color:var(--muted);margin:6px 0 8px}
+.four em{font-style:normal;font-size:11px;color:var(--accent);font-weight:700;margin-top:2px;text-align:center}
+.ladder{display:grid;gap:4px;margin:6px 0 12px;border-left:3px solid var(--line);padding-left:10px}
+.ladder div{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:6px;padding:6px 8px;border-radius:10px;opacity:.6}
+.ladder div.done{opacity:1}
+.ladder div.me{opacity:1;background:var(--bubble);outline:2px solid var(--gold)}
+.ladder span{font-size:22px}
+.ladder b{font-size:15px}
+.ladder small{font-size:12px;color:var(--muted);text-align:right}
 .coll-mini{background:var(--bubble);border-radius:12px;padding:10px 12px;font-size:15px;text-align:center}
 @media (max-width:360px){.coll-grid{grid-template-columns:1fr}}
 .foot{font-size:13px;color:var(--muted);text-align:center}
@@ -640,7 +674,11 @@ function untilMidnight(){ const n = new Date(), m = new Date(n); m.setHours(24,0
 setInterval(() => { const e = document.getElementById('cd'); if(e) e.textContent = untilMidnight(); }, 30000);
 /* ---------- Your time abroad: every Today's Landing you play adds two weeks ---------- */
 // milestones are counted in daily games played (each one is two weeks abroad)
-const ABROAD_BADGES = [[2,'First Month Abroad'],[7,'Three Months In'],[13,'Six Months In'],[26,'One Year Abroad'],[52,'Two Years Strong'],[78,'Three Years, Still Here'],[130,'Five-Year Veteran']];
+// [daily games, time milestone, reputation, icon]
+const ABROAD_BADGES = [[2,'First Month Abroad','JJC','🐣'],[7,'Three Months In','Still Converting to Naira','🧮'],[13,'Six Months In','Knows the Bus Routes','🚌'],[26,'One Year Abroad','Proper Abroad Person','🧥'],[52,'Two Years Strong','Sends Advice Home','📢'],[78,'Three Years, Still Here','Weather Complainer','🌦️'],[130,'Five-Year Veteran','Japa Elder','🧓🏾']];
+const JUST_LANDED = [0,'Just landed','Just Landed','🛬'];
+const myRep = n => ABROAD_BADGES.filter(([k]) => k <= n).pop() || JUST_LANDED;
+const timeOf = k => { const w = k*2; return w < 52 ? (w < 8 ? w+' weeks' : Math.round(w/4.33)+' months') : Math.round(w/52)+' year'+(w>=104?'s':''); };
 const abroadMonths = () => new Set(loadHistory().filter(g=>g.daily).map(g=>dayKey(g.t))).size;
 const monthsLabel = n => { const w = n*2, y = Math.floor(w/52), rest = w - y*52, m = Math.floor((rest+0.5)/4.33), wk = Math.round(rest - m*4.33);
   if(!n) return 'Not yet started'; if(!y && !m) return `${w} weeks`;
@@ -1860,6 +1898,7 @@ function render(){
         <button class="primary" id="dailygo" type="button">✈️ Play Today's Landing</button>
         ${pushButtonHTML()}</div>`; })()}
       ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>${progressTilesHTML()}` : `<button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>`}
+      <button class="ghost journalbtn" type="button" onclick="openAbout()">ℹ️ What is this game?</button>
       <details class="how more" id="moredet"${pick.qroute || pick.moreOpen ? ' open' : ''}>
         <summary>🎮 Play more · pick your own country</summary>
         <div class="how-body">
@@ -1869,12 +1908,13 @@ function render(){
         </div>
       </details>
       <details class="how about">
-        <summary>ℹ️ About · stories · Naija words</summary>
+        <summary>📖 How it works · stories · Naija words</summary>
         <div class="how-body">
         <button class="ghost" type="button" onclick="openMove()">📲 Move my progress to another phone or app</button>
         <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-intro')">Have a japa story? Tell us, and it could become a scene →</a>
         <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-edition')">Not from Nigeria? Help us build your country's edition →</a>
-        <details class="how">
+        <button class="ghost" type="button" onclick="openHow()">📖 How it works</button>
+        <details class="how" hidden>
           <summary>How it works</summary>
           <div class="how-body">
             <p>Life abroad asks questions. Your phone asks more. Every answer moves four meters.</p>
@@ -2692,8 +2732,8 @@ function tomorrowHTML(opts){
       <div><span class="tm-ic">🔥</span><b>${streak}</b><small>day streak</small></div>
       <div><span class="tm-ic">🌍</span><b>${days*2}w</b><small>abroad</small></div>
     </div>
-    ${next ? `<div class="tm-road"><div class="tm-bar"><i style="width:${Math.max(6,pct)}%"></i></div><span>🏅 ${next[1]} · ${days}/${next[0]} days</span></div>` : `<div class="tm-road"><span>🏅 Every milestone reached</span></div>`}
-    ${opts.newBadge ? `<p class="abnew">🎉 New milestone: ${opts.newBadge}</p>` : ''}
+    <div class="tm-road"><span class="tm-rep">${myRep(days)[3]} You are: <b>${myRep(days)[2]}</b></span>${next ? `<div class="tm-bar"><i style="width:${Math.max(6,pct)}%"></i></div><span>Next: ${next[3]} ${next[2]} at ${timeOf(next[0])} · ${days}/${next[0]} days</span>` : ''}</div>
+    ${opts.newBadge ? `<p class="abnew">🎉 ${opts.newBadge}</p>` : ''}
     <div class="tm-btns">${btns}</div>
     <p class="tm-msg" id="pushmsg"></p>
     ${opts.bottom || ''}
@@ -2706,15 +2746,65 @@ function homeScreenTip(){
   track('home-tip');
 }
 
+/* ---------- About (a card worth a screenshot) and How it works ---------- */
+function overlay(id, label, html){
+  let o = document.getElementById(id);
+  if(!o){ o = document.createElement('div'); o.id=id; o.className='overlay'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-label',label);
+    document.body.appendChild(o); o.addEventListener('click', e=>{ if(e.target===o) o.hidden=true; }); }
+  o.innerHTML = html; o.querySelectorAll('.xbtn,[data-close]').forEach(b => b.onclick = ()=>{ o.hidden = true; }); o.hidden = false; return o;
+}
+function openAbout(){
+  track('about');
+  const o = overlay('aboutover', 'About the game', `<div class="sheet-panel aboutp"><div class="aboutcard">
+    <div class="ab-top"><span>✈️ Now You Have Landed</span><button class="xbtn" aria-label="Close">✕</button></div>
+    <h2>Your first 30 days abroad, as a game.</h2>
+    <p class="ab-tag">Everybody wants to japa. Nobody tells you what happens after you land.</p>
+    <div class="ab-grid">
+      <div><span>🐣</span><b>Just landed?</b><small>Learn the rules before they cost you.</small></div>
+      <div><span>😂</span><b>Been abroad for years?</b><small>Laugh at the JJC you used to be.</small></div>
+      <div><span>🧳</span><b>Planning to japa?</b><small>Know what to expect before you board.</small></div>
+      <div><span>👀</span><b>Staying home?</b><small>See what life abroad really looks like.</small></div>
+    </div>
+    <div class="ab-strip"><span>🇺🇸 🇬🇧 🇨🇦</span><span>⏱️ 5 min</span><span>📅 Daily</span><span>🆓 Free</span></div>
+    <p class="ab-real">Built from real japa stories. Your family's calls, your money, your peace.</p>
+    <div class="ab-foot"><b>nowyouhavelanded.com</b><span>Created by Nafeezie</span></div>
+  </div>
+  <div class="row ab-btns"><button class="primary" type="button" data-close>✈️ Play</button><button class="ghost" type="button" onclick="openHow()">📖 How it works</button></div></div>`);
+}
+function openHow(){
+  track('how');
+  const n = abroadMonths(), me = myRep(n);
+  overlay('howover', 'How it works', `<div class="sheet-panel journal"><div class="sheet-head"><b>📖 How it works</b><button class="xbtn" aria-label="Close">✕</button></div>
+    <div class="howlist">
+      <div><span>🎮</span><p><b>One game is your first 30 days abroad.</b> Fifteen choices, about five minutes.</p></div>
+      <div><span>📊</span><p><b>Every choice moves four meters.</b></p></div>
+    </div>
+    <div class="four">
+      <span>💵<small>Cash</small><em>3 months' rent</em></span><span>🧘🏾<small>Peace</small><em>60+</em></span><span>🏠<small>Home</small><em>50 to 85</em></span><span>🚀<small>Future</small><em>40+</em></span>
+    </div>
+    <p class="howsmall">The numbers are the healthy marks. Above 85, home may be loving you at your own expense.</p>
+    <div class="howlist">
+      <div><span>📅</span><p><b>Today's Landing.</b> Everyone plays the same game each day. A new country arrives at midnight.</p></div>
+      <div><span>🌍</span><p><b>Each day you play adds two weeks abroad.</b> Your reputation grows the longer you stay.</p></div>
+    </div>
+    <div class="ladder">${[JUST_LANDED].concat(ABROAD_BADGES).map(([k,,r,ic]) => `<div class="${r===me[2]?'me':k<=n?'done':''}"><span>${ic}</span><b>${r}</b><small>${k ? timeOf(k)+' · '+k+' days' : 'Day one'}</small></div>`).join('')}</div>
+    <div class="howlist">
+      <div><span>🏆</span><p><b>Weekly leaderboard.</b> The best Today's Landing score of the week wins the 👑 crown.</p></div>
+      <div><span>🏅</span><p><b>Collect 10 verdicts and 7 badges.</b> Your verdict says how your month went. Badges reward what you did.</p></div>
+      <div><span>🎮</span><p><b>Play more anytime.</b> Pick your own country to practise or relive your JJC days. Those games do not add time abroad.</p></div>
+    </div>
+  </div>`);
+}
+
 /* ---------- Your progress, at a glance ---------- */
 function progressTilesHTML(){
   const h = loadHistory(); if(!h.length) return '';
   const r = roadInfo(), got = loadVerdicts(), n = VERDICTS.filter(([t]) => got.includes(t)).length + BADGES.filter(([t]) => got.includes(t)).length;
   return `<div class="ptiles">
-    <button type="button" onclick="openJournal()"><span>📈</span><b>${r.level[1]}</b><small>avg ${r.avg} · best ${r.best}</small></button>
+    <button type="button" onclick="openHow()"><span>${myRep(abroadMonths())[3]}</span><b>${myRep(abroadMonths())[2]}</b><small>${abroadMonths() ? monthsLabel(abroadMonths())+' abroad' : 'play Today\'s Landing'}</small></button>
+    <button type="button" onclick="openJournal()"><span>📈</span><b>${r.level[1]}</b><small>avg ${r.avg} · ${h.length} game${h.length>1?'s':''}</small></button>
     <button type="button" onclick="openCollection()"><span>🏅</span><b>${n}/${VERDICTS.length + BADGES.length}</b><small>collected</small></button>
     <button type="button" onclick="openBoard()"><span>🏆</span><b>Leaderboard</b><small>this week</small></button>
-    <button type="button" onclick="openJournal()"><span>📒</span><b>${h.length} game${h.length>1?'s':''}</b><small>your history</small></button>
   </div>`;
 }
 function openCollection(){
@@ -2778,7 +2868,7 @@ function renderEnd(app){
       <p>${line}</p>
       ${rec.length?`<div class="receipts">${rec.slice(0,2).map(r=>`<div>${r}</div>`).join('')}</div>`:''}
     </div>
-    ${tomorrowHTML({newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? hit[1] : ''; })() : ''})}
+    ${tomorrowHTML({newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `${hit[1]}! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
     <div class="score">
       <div class="sc-top"><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div>
       <div class="gauge"><i style="width:${Math.max(2,Math.min(100,nowScore()))}%"></i><em style="left:60%"></em></div>
@@ -2894,6 +2984,8 @@ function start(data){
   if(/[?&]winners/.test(location.search)){ renderWinners(document.getElementById('app')); return; }
   if(data && data.rk && data.pn){ R = ROUTES[data.rk]; L = places(data.rk).find(p=>p.name===data.pn); S = data.S; idx = data.idx; phase = data.phase; last = data.last; history = data.history||[]; }
   render();
+  if(/[?&]about/.test(location.search)) openAbout();
+  if(/[?&]how/.test(location.search)) openHow();
 }
 window.claude?.hot?.snapshot?.(()=>({rk:R&&R.key, pn:L&&L.name, S, idx, phase, last, history}));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
