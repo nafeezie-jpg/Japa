@@ -58,3 +58,7 @@ create trigger landings_guard before insert on public.landings
 -- Shine Eye (added later): how many traps the player spotted.
 alter table public.landings add column if not exists spotted smallint not null default 0 check (spotted between 0 and 15);
 grant insert (spotted) on public.landings to anon, authenticated;
+
+-- Europe route (added later). Run this part on its own so Europe games can join the board.
+alter table public.landings drop constraint if exists landings_route_check;
+alter table public.landings add constraint landings_route_check check (route in ('us', 'uk', 'ca', 'eu'));
