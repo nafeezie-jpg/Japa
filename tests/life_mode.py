@@ -46,7 +46,7 @@ async def run():
           elif ch and not backed and steps == 2 and await pg.locator('#back').count(): await pg.click('#back'); backed = True; steps -= 1
           elif await pg.locator('#next').count(): await pg.click('#next')
         else: issues.append(f'life {g} ch{ch}: never ended')
-        if ch and steps != 9: issues.append(f'life {g} ch{ch}: {steps} choices, expected 9')
+        if ch and steps not in (9, 10): issues.append(f'life {g} ch{ch}: {steps} choices, expected 9 or 10')
         if await pg.locator('#lbbox').count(): issues.append(f'life {g} ch{ch}: leaderboard box on a life screen')
         lf = await pg.evaluate('loadLife()')
         if not lf or lf['ch'] != ch: issues.append(f'life {g}: saved chapter {lf and lf["ch"]}, expected {ch}')

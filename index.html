@@ -1336,6 +1336,42 @@ const EU = () => { const c = C(), lang = L.lang, shared = Math.round(RENT()*0.75
  friend(), finale()
 ].filter(Boolean); };
 
+
+/* ---------- Nafeezie's JJC Chronicles: real scenes from her first months in Maryland ---------- */
+const OWN_FROM = '2026-10-27';   // Today's Landings before this date keep the game they had
+const lolaScene = when => ({day:1, core:1, credit:'Nafeezie', own:1, when, art:'car',
+  text:`Lola picks you up from the airport after she closes from work. You are meeting her for the first time, although she walked you through admissions on the phone after you spent over ${M(600)} on application fees out of ignorance. Her house is an hour from campus and off the bus route. She leaves for work at 8am, and your master's classes run from 5pm to 8pm.`,
+  choices:[
+   {l:"Leave with her at 8am every day", fx:{peace:-4, home:2, future:4}, set:{stay:'lola'}, r:"You loiter on campus from morning until your 5pm class. She closes at 5 and loiters until 8, then drives you home. You will rarely find people who make sacrifices like that for you."},
+   {l:`Uber back every night, ${M(A(30))}`, fx:{cash:-A(300), peace:2}, set:{stay:'lola'}, r:"Your evenings are your own, and your account feels every single ride."},
+   {l:`Ask classmates for a room nearby, ${M(RENT())}`, fx:{cash:-RENT(), peace:2, future:4}, set:{stay:'room'}, r:"A classmate finds you a room closer to school, on the bus route. Lola helps you move and refuses your fuel money."}]});
+// Chapter 1: thirty dollars a day
+const ownUber = () => ({day:9, label:'Month 3', art:'car', credit:'Nafeezie', own:1,
+  text:`${STU() ? 'A classmate gets you shifts at his store as his alternate.' : 'Your shifts are on the other side of town.'} Getting there costs about ${M(A(30))} a day on Uber. Now you understand why people look like they have made it soon after landing, driving around or posing beside a car. The weather is kinder on the skin too, so everyone looks fresher. Do not fall for it.`,
+  choices:[
+   {l:`Buy a cheap car with your ajo, ${M(A(2500))}`, fx:{cash:-A(2500), peace:6, future:4}, set:{car:'bought', uber30:1}, r:"Someone connects you with a 2008 Mazda 5. It looks good and gets you from point A to point B. You are new to cars, so you cannot read its warning signs yet."},
+   {l:"Keep Ubering and save first", fx:{cash:-A(600), peace:-2, future:2}, set:{uber30:1}, r:"Thirty a day, every day. Your savings grow slowly, and your Uber rating grows fast."},
+   {l:"Take the bus and leave early", fx:{peace:-6, future:1}, set:{uber30:1}, r:"You leave two hours early for every shift. A manager tells you some jobs will not even hire you unless you can get there easily. You write that down."}]});
+// Chapter 2: the fan belt, and the stranger who came back
+const ownFanBelt = () => { const role = STU() ? 'The school library calls to say you have been offered a role there. It is on campus, it helps with your papers, and it is a job you can put on your CV.' : 'A company you interviewed with calls. The job in your field is yours.';
+  return [
+  {day:5, label:'Month 5', art:'car', credit:'Nafeezie', own:1, text:`${role} You must sign the contract today, before the office closes. The car has been giving you signs all week, and you do not know what they mean.`,
+   choices:[
+    {l:"Drive. The car will manage", fx:{peace:-4}, set:{fanbelt:'drove'}, r:"Halfway down the highway, there is a loud noise and smoke rises from the bonnet. You make it to the shoulder before the car stops completely. Then you just stand there looking at it."},
+    {l:`Take an Uber, ${M(A(28))} each way`, fx:{cash:-A(56), future:8}, set:{fanbelt:'uber', job:STU() ? 'campus' : 'field'}, r:"You sign the contract with ten minutes to spare. The car sits at home, still giving signs you cannot read."},
+    {l:"Ask if you can come tomorrow", fx:{peace:2, future:3}, set:{fanbelt:'wait'}, r:"They agree, politely. You spend the night praying the offer is still there. It is, just."}]},
+  {day:5, label:'Month 5', art:'car', credit:'Nafeezie', own:1, when: s => s.f.fanbelt==='drove', text:"It is February and still cold. The tow truck is on its way, and the office closes soon. Then a stranger pulls up beside you. He saw you stranded from the other side of the road and took the next exit to come back. He looks at the car and asks, \"Where's your fan belt?\" It is lying on the road a few steps away.",
+   choices:[
+    {l:"Accept his ride to the office", fx:{cash:A(200), peace:6, future:10}, set:{car:'junked', job:STU() ? 'campus' : 'field'}, r:"He drops you off just in time. You sign the contract and take the bus home, after leaving home in your own car. It is one of the kindest things anyone has ever done for you. Two days later the mechanic calls. The engine has knocked, they junk the car, and they send you $200. That was your ajo money."},
+    {l:"Wait with the car for the tow", fx:{cash:A(200), peace:-6, future:-3}, set:{car:'junked'}, r:"The tow truck arrives as the office closes. You beg for tomorrow on the phone from the roadside. Two days later the mechanic calls. The engine has knocked, they junk the car, and they send you $200. That was your ajo money."},
+    {l:`Keep his number and call an Uber`, fx:{cash:A(200)-A(28), peace:2, future:8}, set:{car:'junked', job:STU() ? 'campus' : 'field'}, r:"You make it with minutes to spare and save his number as \"Highway angel\". Two days later the mechanic calls. The engine has knocked, they junk the car, and they send you $200. That was your ajo money."}]}
+  ]; };
+// Chapter 2: the bus that never came
+const ownBusStop = () => ({day:8, label:'Month 6', art:'snow', credit:'Nafeezie', own:1, text:"Your shift ends, and it has started to snow. You stand outside waiting for the bus, with no idea it has been cancelled. Your gloves are the cheap kind you buy as a newbie, the kind that do nothing.",
+  choices:[
+   {l:"Keep waiting. It must come", fx:{peace:-10}, r:"It never comes. By the time you give up, your fingers are too numb to work your phone. By sheer miracle, you get home that night."},
+   {l:`Book a ride now, ${M(A(28))}`, fx:{cash:-A(28), peace:2}, r:"You book it while your fingers still work. At home you order proper gloves, the kind that cost money and actually do something."},
+   {l:"Call a classmate with a car", fx:{home:2, peace:3}, r:"She comes in twenty minutes with the heater on full. You sit there until you can feel your hands again."}]});
 let SCENES = [];
 /* ---------- How you japa'd ---------- */
 const PATHS = {
@@ -1764,8 +1800,10 @@ function scenes(){
   if(inCh()) return CHAPTERS[S.life.ch].scenes();
   const base = [arrival(), barNight()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : R.key==='eu' ? EU() : CA());
   const arrived = s => s.landing===1 && [1,2].includes(pickV('air',5));   // an arrival story already covered day 1
+  const lola = s => R.key==='us' && STU() && s.landing===1 && !arrived(s) && (!s.daily || s.daily >= OWN_FROM) && pickV('lola',2)===0;
   const alts = routeAlts();
-  base.concat(alts).forEach(sc => { if(sc.day===1 && !sc.core){ const w = sc.when; sc.when = s => !arrived(s) && (!w || w(s)); } });
+  base.concat(alts).forEach(sc => { if(sc.day===1 && !sc.core){ const w = sc.when; sc.when = s => !arrived(s) && !lola(s) && (!w || w(s)); } });
+  base.push(lolaScene(lola));
   return base.concat(alts, pathScenes(), fundScenes(), guestStay(), [convertScene(), urgent2k(), godWhen(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
@@ -1827,6 +1865,7 @@ function autoEvent(kind){
       if(f.stay==='cousin'){ text += ` ${C().cousin}'s husband asks if you will "contribute to bills". $300.`; fx.cash -= 300; }
       if(f.stay==='motel'){ text += ` You finally move into a room. ${M(RENT()*2)} for deposit and first month.`; fx.cash -= RENT()*2; }
       if(f.stay==='prepaid'){ text += " Rent is already paid. You sleep like a baby."; fx.peace = (fx.peace||0) + 4; }
+      if(f.stay==='lola'){ text += " Lola refuses rent, so you fill her tank and buy the groceries. $150."; fx.cash -= 150; }
       if(f.stay==='room'){ text += ` Rent is due. ${M(RENT())}.`; fx.cash -= RENT(); }
       if(f.car==='bought'){ text += " Car insurance is $180, which feels like a personal insult."; fx.cash -= 180; }
     } else if(k==='uk'){
@@ -1865,7 +1904,7 @@ function autoEvent(kind){
   }
   if(kind==='life1' || kind==='life2'){
     const m = kind==='life1' ? 2 : 3, pay = lifePay()*m;
-    const rentM = (f.stay==='cousin' || f.stay==='host') ? A(300) : (f.stay==='prepaid' && kind==='life1') ? 0 : RENT();
+    const rentM = (f.stay==='cousin' || f.stay==='host' || f.stay==='lola') ? A(300) : (f.stay==='prepaid' && kind==='life1') ? 0 : RENT();
     const upkeep = kind==='life2' && f.upkeep==='set' ? A(150)*m : 0, out = (rentM + A(380))*m + upkeep, net = pay - out;
     text = `${kind==='life1' ? 'Months two and three' : 'Months four, five, and six'} go by. ${pay ? `Your pay brings in ${M(pay)}.` : 'No pay comes in.'} Rent, food, transport, and data take ${M(out - upkeep)}.`
       + (upkeep ? ` ${C().mum}'s upkeep leaves on the 25th, every month, like clockwork.` : '')
@@ -3376,7 +3415,7 @@ const lifeCh1 = () => { const c = C(), End = cap(c.endear), noPay = lifePay()===
      {l:"Speak up in the meeting", fx:{peace:-3, future:6}, r:`You say, "Thank you for building on my point." The room goes quiet. Your manager writes something down.`},
      {l:"Email your manager the original", fx:{peace:1, future:5}, r:"The timestamp does the talking. Here, the email is the evidence."},
      {l:"Let it go and pray", fx:{peace:-4, future:-3}, r:"You pray about it. He presents your next idea too."}]});
-  out.push([
+  if(R.key==='us' && L.car && (S.f.car!=='bought' || S.f.uber30)) out.push(ownUber()); else out.push([
    {day:9, label:'Month 3', art:'car', text:`A friend from the Naija group in ${T()} does food deliveries at night. "Just two evenings a week," he says, yawning through the whole sentence.`,
     choices:[
      STU() ? {l:"Tutor online in the evenings", fx:{cash:A(300), peace:-3, future:3}, r:"Your students are in three time zones and one of them is your cousin's son. The money is small and steady."}
@@ -3426,7 +3465,7 @@ const lifeCh2 = () => { const c = C(), End = cap(c.endear), work = STU() ? 'scho
      {l:"Sort it yourself at midnight", fx:{peace:-4, future:6}, r:"You finish at 2am, proud and confused. Months later, a small refund arrives, and you feel like a genius."},
      {l:`Pay a professional, ${M(A(120))}`, fx:{cash:-A(120), peace:4, future:3}, r:"He asks for receipts. You hand him a carrier bag. He sighs and starts."},
      {l:"Ask the Naija accountant you know", fx:{home:2, peace:2, future:4}, r:"He does it for free, then asks if your company is hiring."}]});
-  out.push(pickV('L2d',2) ? {day:5, label:'Month 5', art:'car', text:`Your first car insurance quote arrives. It is higher than your rent, because the company cannot see your driving history in ${O()}.`,
+  if(R.key==='us' && (S.f.car==='bought' || S.f.fanbelt)) out.push(...ownFanBelt()); else out.push(pickV('L2d',2) ? {day:5, label:'Month 5', art:'car', text:`Your first car insurance quote arrives. It is higher than your rent, because the company cannot see your driving history in ${O()}.`,
     choices:[
      {l:"Pay it monthly and cry", fx:{cash:-A(300), peace:-2, future:3}, set:{licence:'yes'}, r:"You are insured and slightly poorer every month. Your car is now the most protected thing you own."},
      {l:"Shop around for a week", fx:{peace:-2, future:4}, set:{licence:'yes'}, r:"Nineteen websites later, you find one that is only mildly offensive. You take it."},
@@ -3456,7 +3495,7 @@ const lifeCh2 = () => { const c = C(), End = cap(c.endear), work = STU() ? 'scho
      {l:`Dinner with a ${STU() ? 'classmate' : 'colleague'}'s family`, fx:{peace:6, future:2}, r:"They put a paper crown on your head, and you do not ask questions. The food is mild, and the welcome is warm."},
      {l:"Naija house party till 6am", fx:{cash:-A(30), peace:7, home:3}, r:"Jollof, suya, and a DJ who plays the same Wizkid song four times. Nobody complains."},
      {l:"Work the holiday for double pay", fx:{cash:A(250), peace:-5}, r:"Double pay in a quiet building. At midnight you video call home, and they are still dancing."}]});
-  out.push({day:8, label:'Month 6', art:'snow', text:"Your first winter cold arrives with full ceremony. Your head is heavy, your nose is running, and nobody is bringing you pepper soup.",
+  if(R.key==='us' && L.cold>0 && S.f.car!=='bought') out.push(ownBusStop()); else out.push({day:8, label:'Month 6', art:'snow', text:"Your first winter cold arrives with full ceremony. Your head is heavy, your nose is running, and nobody is bringing you pepper soup.",
     choices:[
      {l:`Let ${c.mum} diagnose you on video`, fx:{home:5, peace:2}, r:"She diagnoses you in thirty seconds and lists eight remedies. Six of them involve ginger."},
      {l:"Make the pepper soup yourself", fx:{cash:-A(25), peace:6}, r:"You sweat it out over the pot. It tastes almost like your mother's, close enough to make you cry."},
