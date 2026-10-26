@@ -492,6 +492,35 @@ details.custom summary{font-weight:700}
 /* dark mode: green text on dark green is unreadable, so headings switch to gold */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) :is(.how summary,.route-btn b,.local b,.journey-line,.lb-tab b,.gloss dt,.storylink,.vbadge.got b){color:var(--gold)}}
 :root[data-theme="dark"] :is(.how summary,.route-btn b,.local b,.journey-line,.lb-tab b,.gloss dt,.storylink,.vbadge.got b){color:var(--gold)}
+/* My Life Abroad */
+.life{background:var(--card);border:1.5px solid var(--gold);border-radius:16px;padding:16px;display:grid;gap:10px}
+.life h3{margin:0;font-family:var(--display);font-size:21px;line-height:1.2}
+.life p{margin:0;font-size:15px;color:var(--muted)}
+.life .lhead{color:var(--accent)}
+.lwhere{font-size:15px}
+.llock{font-weight:600;color:var(--ink)!important}
+.llock em{font-style:normal;color:var(--accent);font-weight:700}
+.lsmall{font-size:12px;color:var(--muted);margin-top:-4px}
+.lroad{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.lroad div{display:grid;justify-items:center;gap:3px;text-align:center;min-width:0}
+.lroad span{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:19px;background:var(--bubble);border:2px solid var(--line)}
+.lroad .done span{background:var(--green);border-color:var(--gold)}
+.lroad .next span{border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 35%,transparent);animation:lpulse 1.8s ease-in-out infinite}
+.lroad .lock span{opacity:.45;filter:grayscale(1)}
+.lroad small{font-size:10.5px;color:var(--muted);line-height:1.2}
+.tmrw .lroad small{color:#fff;opacity:.8}
+@keyframes lpulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--gold) 15%,transparent)}}
+@media (prefers-reduced-motion: reduce){.lroad .next span{animation:none}}
+.lflags{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lflags button{font:inherit;color:inherit;cursor:pointer;display:grid;justify-items:center;gap:2px;background:var(--bubble);border:1.5px solid var(--line);border-radius:12px;padding:10px 4px}
+.lflags button.on{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+.lflags span{font-size:26px;line-height:1.1}
+.lflags b{font-size:13px}
+.lpanel{display:grid;gap:8px}
+.lstats{display:flex;flex-wrap:wrap;gap:6px}
+.lstats span{font-family:var(--mono);font-size:13px;background:var(--bubble);border-radius:999px;padding:4px 10px}
+.lshare{grid-template-columns:2fr 1fr!important}
+.lreset{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;justify-self:center;padding:2px}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -675,7 +704,7 @@ function dailyPlan(ds){   // everyone gets the same country, place, route and fu
   return {rk, place: ps[hashStr(ds+'|pl') % ps.length].name, path: po[hashStr(ds+'|pa') % po.length][0], fund: ['savings','savings','sold','borrowed','kept'][hashStr(ds+'|fu') % 5]};
 }
 function untilMidnight(){ const n = new Date(), m = new Date(n); m.setHours(24,0,0,0); const mins = Math.max(1, Math.round((m-n)/60000)); return Math.floor(mins/60) + 'h ' + (mins%60) + 'm'; }
-setInterval(() => { const e = document.getElementById('cd'); if(e) e.textContent = untilMidnight(); }, 30000);
+setInterval(() => { ['cd','lcd'].forEach(id => { const e = document.getElementById(id); if(e) e.textContent = untilMidnight(); }); }, 30000);
 /* ---------- Japa experience: every Today's Landing is a new first month lived. Titles grow with them. ---------- */
 // milestones are counted in Today's Landings played, one per day
 // [daily games, time milestone, reputation, icon]
@@ -1606,6 +1635,7 @@ const guestStay = () => { const c = C(), p = PRO(), host = s => pickV('HOST',2)=
 ]; };
 
 function scenes(){
+  if(inCh()) return CHAPTERS[S.life.ch].scenes();
   const base = [arrival(), barNight()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : CA());
   const arrived = s => s.landing===1 && [1,2].includes(pickV('air',5));   // an arrival story already covered day 1
   const alts = routeAlts();
@@ -1689,6 +1719,16 @@ function autoEvent(kind){
       if(f.stay==='airbnb'){ text += ` You finally rent a basement. ${M(RENT()*2)} for deposit and first month.`; fx.cash -= RENT()*2; }
     }
   }
+  if(kind==='life1' || kind==='life2'){
+    const m = kind==='life1' ? 2 : 3, pay = lifePay()*m;
+    const rentM = (f.stay==='cousin' || f.stay==='host') ? A(300) : (f.stay==='prepaid' && kind==='life1') ? 0 : RENT();
+    const upkeep = kind==='life2' && f.upkeep==='set' ? A(150)*m : 0, out = (rentM + A(380))*m + upkeep, net = pay - out;
+    text = `${kind==='life1' ? 'Months two and three' : 'Months four, five, and six'} go by. ${pay ? `Your pay brings in ${M(pay)}.` : 'No pay comes in.'} Rent, food, transport, and data take ${M(out - upkeep)}.`
+      + (upkeep ? ` ${C().mum}'s upkeep leaves on the 25th, every month, like clockwork.` : '')
+      + (rentM===0 ? ' The rent you paid upfront is finally paying you back.' : '')
+      + (net >= 0 ? ' What is left is yours, for now.' : ' The difference comes out of your savings, quietly.');
+    fx = {cash: net};
+  }
   if(kind==='roof'){
     const v = (S.v&&S.v.B)||0, c = C();
     if(f.sibling==='sent'){
@@ -1714,13 +1754,13 @@ function chips(fx){
   }).join('');
 }
 function header(day){
-  const pct = Math.min(100, (day/30)*100);
+  const pct = inCh() ? Math.min(100, day*10) : Math.min(100, (day/30)*100);
   const cls = k => !shown ? '' : S[k] > shown[k] ? ' up' : S[k] < shown[k] ? ' down' : '';
   const c = {cash:cls('cash'), peace:cls('peace'), home:cls('home'), future:cls('future')};
   shown = {cash:S.cash, peace:S.peace, home:S.home, future:S.future};
   const b = v => `<div class="bar"><i style="width:${v}%"></i></div>`;
   return `<div class="pass">
-    <div class="pass-top"><div class="brand">${getName() ? getName().toUpperCase()+' HAS LANDED' : 'LANDED'}</div><div class="day">${day===0 ? 'ARRIVAL DAY' : `DAY ${String(day).padStart(2,'0')} / 30`}</div></div>
+    <div class="pass-top"><div class="brand">${getName() ? getName().toUpperCase()+' HAS LANDED' : 'LANDED'}</div><div class="day">${inCh() ? `CHAPTER ${S.life.ch} OF ${CHAPTERS.length-1}` : day===0 ? 'ARRIVAL DAY' : `DAY ${String(day).padStart(2,'0')} / 30`}</div></div>
     <div class="route">${S.trail.map(t=>t.code).join(' → ')} → ${R.country} · ${L.town===L.name?L.name:L.town+', '+L.name}</div>
     <div class="stats">
       <div class="stat${c.cash}"><span>Cash</span><b>${money(S.cash)}</b></div>
@@ -1751,7 +1791,7 @@ function planExtras(){   // choose this game's extras once, at the start
 }
 function showable(sc){
   if(sc.when && !sc.when(S)) return false;
-  if(sc.auto) return true;
+  if(sc.auto || inCh()) return true;
   const q = S.q || 0, final = sc.day===30 && !sc.label;
   if(q >= MAX_Q) return false;
   if(q >= MAX_Q - 1 && !final) return false;   // always keep room for Mummy's final call
@@ -1760,7 +1800,7 @@ function showable(sc){
 }
 function nextIndex(from){
   SCENES = scenes();
-  if(!S.xPick) planExtras();
+  if(!S.xPick && !inCh()) planExtras();
   let i = from;
   while(i < SCENES.length && !showable(SCENES[i])) i++;
   return i;
@@ -1926,6 +1966,7 @@ function render(){
         <div class="hero-chips">${streakInfo().n ? `<span>🔥 Keep your ${streakInfo().n}-day streak</span>` : ''}<span>👥 Same game for everyone</span><span>⏳ New one in <em id="cd">${untilMidnight()}</em></span></div>
         <button class="primary" id="dailygo" type="button">✈️ Play Today's Landing</button>
         ${pushButtonHTML()}</div>`; })()}
+      ${lifeCardHTML()}
       ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>${progressTilesHTML()}` : `<button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>`}
       <button class="ghost journalbtn" type="button" onclick="openAbout()">ℹ️ What is this game?</button>
       <details class="how more" id="moredet"${pick.qroute || pick.moreOpen ? ' open' : ''}>
@@ -2006,7 +2047,7 @@ function render(){
     };
     return;
   }
-  if(phase==='end'){ return renderEnd(app); }
+  if(phase==='end'){ return S.life ? renderLifeEnd(app) : renderEnd(app); }
   SCENES = scenes();
   const sc = SCENES[idx];
   if(phase==='scene' && sc.auto){
@@ -2016,11 +2057,11 @@ function render(){
   if(phase==='scene'){
     const list = typeof sc.choices==='function' ? sc.choices(S) : sc.choices;
     const ord = list.map((c,i)=>i).sort((a,b)=> hashStr((S.seed||0)+'|'+sc.day+'|'+list[a].l) - hashStr((S.seed||0)+'|'+sc.day+'|'+list[b].l));
-    const note = sc.day<=1 && !sc.from && idx===nextIndex(0) ? `${S.daily && S.landing===1 ? `<div class="local"><b>Today's Landing #${dailyNo(S.daily)}</b>Everyone playing today lands here and meets the same surprises. Your score is compared with theirs at the end.</div>` : ''}${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
+    const note = !inCh() && sc.day<=1 && !sc.from && idx===nextIndex(0) ? `${S.life ? `<div class="local"><b>📖 My Life Abroad · Month 1</b>This is the start of one long life. Your money, your meters, and the choices you make this month follow you into every chapter.</div>` : ''}${S.daily && S.landing===1 ? `<div class="local"><b>Today's Landing #${dailyNo(S.daily)}</b>Everyone playing today lands here and meets the same surprises. Your score is compared with theirs at the end.</div>` : ''}${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
     app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${history.length?`<button class="backbtn" id="back">← Back to the last choice</button>`:''}${glossLink()}</div>`;
     wireBack();
     SFX.ambient(ambientFor(sc));
-    if(sc.from && !(S.landing===1 && sc.day===1)) setTimeout(()=> isCall(sc) ? SFX.ring() : SFX.ping(), 150);
+    if(sc.from && !(S.landing===1 && sc.day===1 && !inCh())) setTimeout(()=> isCall(sc) ? SFX.ring() : SFX.ping(), 150);
     else if(!sc.from && /\bcalls\b|phone rings/.test(sc.text||'')) setTimeout(()=>SFX.ring(), 150);
     app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
       const c = list[+btn.dataset.i]; SFX.tap(); setTimeout(()=>SFX.result(c.fx), 90);
@@ -2031,9 +2072,9 @@ function render(){
     return;
   }
   const picked = last.picked ? `<div class="when">You chose · ${last.picked}</div>` : '';
-  const body = art(sc) + (last.auto ? `<div class="when">Day ${sc.day}</div>` : intro(sc,true)) + picked +
+  const body = art(sc) + (last.auto ? `<div class="when">${sc.label || 'Day '+sc.day}</div>` : intro(sc,true)) + picked +
     `<div class="result">${last.r}</div><div class="chips">${chips(last.fx)}</div>
-     <button class="primary" id="next">${nextIndex(idx+1)>=SCENES.length?'See how your 30 days went':'Continue'}</button>${history.length?`<button class="backbtn" id="back">← Change this choice</button>`:''}`;
+     <button class="primary" id="next">${nextIndex(idx+1)>=SCENES.length ? (S.life ? (inCh() ? '📖 Close this chapter' : '📖 See how your life begins') : 'See how your 30 days went') : 'Continue'}</button>${history.length?`<button class="backbtn" id="back">← Change this choice</button>`:''}`;
   app.innerHTML = header(sc.day) + `<div class="scene fade">${body}</div>`;
   wireBack();
   document.getElementById('next').onclick = ()=>{
@@ -2045,9 +2086,10 @@ function render(){
 
 /* ---------- Scene illustrations ---------- */
 function artKind(sc){
+  if(sc.art) return sc.art;
   if(sc.auto==='roof') return S.f.sibling==='sent' && ((S.v&&S.v.B)||0)===0 ? 'goat' : 'phone';
   if(sc.auto) return 'coins';
-  if(sc.day<=1) return 'plane';
+  if(sc.day<=1 && !inCh()) return 'plane';
   if(sc.day===17) return 'star';
   if(sc.from){
     const f = sc.from, c = C();
@@ -2832,6 +2874,7 @@ function openHow(){
     <div class="howlist">
       <div><span>🏆</span><p><b>Weekly leaderboard.</b> The best Today's Landing score of the week wins the 👑 crown.</p></div>
       <div><span>🏅</span><p><b>Collect 10 verdicts and 7 badges.</b> Your verdict says how your month went. Badges reward what you did.</p></div>
+      <div><span>📖</span><p><b>My Life Abroad.</b> Once you are a JJC, live one long life, a chapter a day. Your money and meters carry from chapter to chapter.</p></div>
       <div><span>🎮</span><p><b>Play more anytime.</b> Pick your own country to practise or relive your JJC days. Those games do not count toward your title.</p></div>
     </div>
   </div>`);
@@ -2857,7 +2900,7 @@ function openCollection(){
 }
 
 /* ---------- Move my progress to another browser or the home screen app ---------- */
-const MOVE_KEYS = ['nyhl-history','nyhl-verdicts','nyhl-posts','nyhl-recent','nyhl-name','nyhl-origin'];
+const MOVE_KEYS = ['nyhl-history','nyhl-verdicts','nyhl-posts','nyhl-recent','nyhl-name','nyhl-origin','nyhl-life'];
 function progressCode(){
   const d = {}; MOVE_KEYS.forEach(k => { try{ const v = localStorage.getItem(k); if(v) d[k] = v; }catch(e){} });
   return 'NYHL1:' + btoa(unescape(encodeURIComponent(JSON.stringify(d))));
@@ -2870,6 +2913,7 @@ function importProgress(code){
   const put = (k, v) => { try{ localStorage.setItem(k, typeof v==='string' ? v : JSON.stringify(v)); }catch(e){} };
   if(d['nyhl-history']){ const mine = arr('nyhl-history'), seen = new Set(mine.map(g=>g.t)); const all = mine.concat(JSON.parse(d['nyhl-history']).filter(g=>!seen.has(g.t))).sort((a,b)=>a.t-b.t); put('nyhl-history', all.slice(-200)); }
   ['nyhl-verdicts','nyhl-posts','nyhl-recent'].forEach(k => { if(d[k]) put(k, [...new Set(arr(k).concat(JSON.parse(d[k])))].slice(-300)); });
+  if(d['nyhl-life']){ const inc = JSON.parse(d['nyhl-life']), mine = loadLife(); if(inc && (!mine || inc.ch > mine.ch || (inc.ch===mine.ch && (inc.log||[]).slice(-1)[0]?.t > (mine.log||[]).slice(-1)[0]?.t))) put('nyhl-life', inc); }
   ['nyhl-name','nyhl-origin'].forEach(k => { let has = ''; try{ has = localStorage.getItem(k)||''; }catch(e){} if(d[k] && !has) put(k, d[k]); });
 }
 function openMove(){
@@ -3019,6 +3063,393 @@ function renderEnd(app){
     });
   };
 }
+
+/* ---------- My Life Abroad: one continuing life, a chapter a day ---------- */
+// Month 1 is a normal first month played inside the mode. Each later chapter picks up the saved life:
+// same place, same money, same meters, and the flags from every earlier choice.
+const LIFE_KEY = 'nyhl-life';
+const LIFE_UNLOCK = 2;   // JJC: two Today's Landings
+const CHAPTERS = [
+  {title:'The First Month', when:'Month 1', icon:'🛬'},
+  {title:'Payslip and Rent', when:'Months 2 to 3', icon:'🧾', scenes:() => lifeCh1()},
+  {title:'First Winter and Paperwork', when:'Month 6', icon:'🧣', scenes:() => lifeCh2()},
+  {title:'The Anniversary', when:'Year 1', icon:'🎂'},
+  {title:'Promotion, Pressure, and Land', when:'Year 2', icon:'💍'},
+  {title:'Papers, Family, or Japada', when:'Year 3+', icon:'🛂'}
+];
+const inCh = () => !!(S && S.life && S.life.ch > 0);
+function loadLife(){ try{ return JSON.parse(localStorage.getItem(LIFE_KEY)||'null'); }catch(e){ return null; } }
+function saveLife(lf){ try{ localStorage.setItem(LIFE_KEY, JSON.stringify(lf)); }catch(e){} }
+const lifeOpen = () => abroadMonths() >= LIFE_UNLOCK;
+function lifeNext(lf){
+  const n = lf.ch + 1, c = CHAPTERS[n];
+  if(!c) return {n, done:true};
+  if(!c.scenes) return {n, soon:true};
+  return {n, ready: lf.doneOn !== todayStr()};
+}
+// what one month of life pays in, before rent and bills
+function lifePay(){
+  const f = S.f, p = P();
+  let inc = {field:2700, salaried:2700, warehouse:1900, care:1800, campus:900, cashus:1200, cash:1200, none:0}[f.job];
+  if(inc === undefined) inc = {work:2400, lottery:1600, scholar:0, partial:0, study:700, care:1500, visitor:300}[p] ?? 1500;
+  if(f.job==='none' && p==='visitor') inc = 300;
+  if(p==='scholar') inc += 1500;
+  if(p==='partial') inc += 700;
+  return A(inc);
+}
+// month one comes back: chosen once per chapter from what the player did before
+function lifeCallback(){
+  const f = S.f;
+  if(f.sibling==='sent') return 'sib';
+  if(f.guest==='yes' || f.guest==='stayed') return 'guest';
+  if(f.farm==='sent') return 'farm';
+  if(f.loan==='late' || f.loan==='half') return 'loan';
+  if(f.house==='brother' || f.house==='waiting') return 'house';
+  if(f.car==='bought') return 'car';
+  if(f.sibling==='checked' || f.sibling==='video') return 'sibok';
+  return 'k2';
+}
+function lifeComeback(){ const c = C(), p = PRO(), k = S.cbk || 'k2', base = {day:4, label:'Month 2'};
+  const v = {
+    sib: {from:c.sib, sub:`Your brother · ${c.home}`, ask:1, text:`Remember the project you sent money for in your first month? ${c.sib} has good news. It is "almost finished". It only needs ${N(500)} for small balance.`,
+      choices:[
+       {l:`Send the ${N(500)} balance`, fx:{cash:-A(500), home:6, peace:-6}, r:"The balance arrives safely. Two weeks later, the balance has its own balance."},
+       {l:`Pay ${N(30)} for someone to check`, fx:{cash:-A(30), home:-4, future:6}, set:{sibling:'checked'}, r:"Your neighbour visits and sends a video. Nothing has moved since month one except the weeds."},
+       {l:"Ask for a live video, now", fx:{home:-3, peace:2}, set:{sibling:'video'}, r:`${c.sib} says the network is bad at the site. The network has been bad at the site for two months.`}]},
+    sibok: {from:c.sib, sub:`Your brother · ${c.home}`, text:`${c.sib} has not asked you for money in two months. Then he calls, very politely, to ask what work he can do from home.`,
+      choices:[
+       {l:"Pay for a real course, directly", fx:{cash:-A(150), home:6, future:3}, r:"You pay the training centre yourself. He sends the certificate, and this time the stamp is in one font."},
+       {l:"Send him five job links", fx:{home:2, peace:2, future:2}, r:"He applies to two. One calls back. You feel like a proud recruiter."},
+       {l:"Tell him to ask the agent", fx:{home:-4, peace:4}, r:"He laughs, then stops laughing. Some jokes cost money."}]},
+    guest: {text:`Your one-month guest is now in month three. ${p.He} receives post at your address, and ${p.his} cousin is "just visiting this weekend".`, art:'house',
+      choices:[
+       {l:`Give ${p.him} a moving date`, fx:{peace:6, home:-3}, set:{guest:'notice'}, r:`${p.He} is quiet for one evening. By Friday ${p.he} has found a room, and you sleep diagonally for the first time in months.`},
+       {l:"Ask for half the rent", fx:{cash:A(250), peace:2, home:-2}, set:{guest:'paying'}, r:`${p.He} pays in instalments and gratitude. The instalments are smaller than the gratitude.`},
+       {l:"Let it be. Maybe next month", fx:{cash:-A(150), peace:-8}, set:{guest:'stayed'}, r:"Next month arrives. So does the cousin, who has unpacked."}]},
+    farm: {from:c.farmer, sub:`Farm manager · ${c.home}`, ask:1, text:"Good evening boss. Thieves came in the night. They took fifty birds and the generator. We need small money to start again.",
+      choices:[
+       {l:`Send ${N(300)} to start again`, fx:{cash:-A(300)}, r:"He thanks you warmly. The next week, your neighbour sees the generator at his brother's shop."},
+       {l:"Send your neighbour to look", fx:{cash:-A(20), future:5}, set:{farm:'counted'}, r:"Your neighbour counts the birds. All present. The generator is humming in the manager's sitting room."},
+       {l:"Sell the farm. Enough", fx:{cash:A(400), home:-4, peace:8, future:4}, set:{farm:'sold'}, r:"You sell everything to a serious woman who counts every bird herself. The peace is worth more than the birds."}]},
+    loan: {from:"Cooperative society", sub:`${c.home} branch`, text:"Second reminder on your relocation loan. Your guarantor has called the secretary four times, and the secretary has called your mother five.",
+      choices:[
+       {l:`Clear two months, ${N(1000)}`, fx:{cash:-A(1000), peace:8, home:4, future:4}, set:{loan:'paid'}, r:"Your guarantor sends a voice note that is mostly relief. You can open WhatsApp in public again."},
+       {l:"Set up a monthly plan", fx:{cash:-A(500), peace:4, future:3}, set:{loan:'plan'}, r:"It is signed, witnessed, and printed. Your mother laminates her copy."},
+       {l:"Change your number", fx:{peace:-8, home:-8, future:-4}, r:"The cooperative has your mother's number, your aunty's number, and the number of your old school. They are patient people."}]},
+    house: {from:c.cousin, sub:`Looking after your house · ${c.home}`, text: S.f.house==='brother' ? `${c.sib} is still "protecting" your house. He has painted the sitting room his favourite colour and put a DStv subscription in your name.` : `The tenant in your house still has not paid. He says he is waiting for the economy. The economy says hello.`,
+      choices:[
+       {l:`Hire an agent, ${N(80)}`, fx:{cash:-A(80), future:7, peace:3}, set:{house:'managed'}, r:"The agent sorts it out in two weeks. Rent starts landing, and so does your peace."},
+       {l:"Call a family meeting", fx:{home:-4, peace:-3, future:3}, r:"The meeting lasts five hours. Everybody agrees with you, and nothing changes."},
+       {l:"Leave it until you visit", fx:{peace:-4, future:-3}, r:"Your house waits for you. So does the problem."}]},
+    car: {text:`The Corolla from your first month coughs twice on the highway and goes quiet. The mechanic says "transmission" the way doctors say "we need to talk".`, art:'car',
+      choices:[
+       {l:`Fix it, ${M(A(1200))}`, fx:{cash:-A(1200), peace:4, future:2}, r:"It runs again, smoother than before. You pat the dashboard every morning now."},
+       {l:"Sell it for parts", fx:{cash:A(600), peace:-6}, set:{car:'bus'}, r:"A man pays cash in twenty minutes. You learn the bus routes and miss your car like a relative."},
+       {l:"Call a Naija mechanic friend", fx:{cash:-A(400), home:2, peace:3}, r:"He fixes it in his driveway for a third of the price, plus a plate of your jollof."}]},
+    k2: {from:"Old classmate", sub:"Last message: month one", ask:1, text:"Hey dear! Long time again. Hope you are good. Remember the urgent 2k? This one is urgent 5k.",
+      choices:[
+       {l:"Send it. Peace is worth 5k", fx:{home:2, peace:-3}, r:"He sends a thumbs up. Inflation has reached the urgent requests too."},
+       {l:"Ask what happened to the 2k", fx:{peace:3}, r:"He says the 2k is in a business now. The business is also urgent."},
+       {l:"Reply \"God abeg, I need urgent 10k\"", fx:{home:-1, peace:5}, r:"He leaves you on read. You understand each other perfectly."}]}
+  };
+  return Object.assign(base, v[k] || v.k2);
+}
+
+/* Chapter 1 · Months 2 to 3 · Payslip and Rent */
+const lifeCh1 = () => { const c = C(), End = cap(c.endear), noPay = lifePay()===0, out = [];
+  const lines = {us:'federal tax, state tax, Social Security, Medicare', uk:'income tax, National Insurance, a pension you joined without knowing', ca:'federal tax, provincial tax, CPP, EI'}[R.key];
+  out.push({day:1, label:'Month 2', art:'coins', text: noPay ? "Month two. Your bank app shows money going out and nothing coming in. Every tap of your card feels like a small surgery."
+      : `Your payslip has more lines than your CV. There is ${lines}, and a line called "other" that nobody can explain. What reaches your account is a smaller number with a big attitude.`,
+    choices: noPay ? [
+     {l:"Write down every expense", fx:{peace:-2, future:6}, r:"Three days later, you know where every coin goes. Mostly data and bus fare."},
+     {l:"Ask the community for leads", fx:{home:2, peace:2, future:4}, r:"Someone knows someone who needs weekend help. It is small, and it is a start."},
+     {l:"Stop checking the app", fx:{peace:3, future:-4}, r:"What you do not see cannot hurt you. Until a payment bounces."}] : [
+     {l:"Learn what every line means", fx:{peace:-2, future:6}, r:"You spend Sunday with a government website and a highlighter. By evening, you understand tax better than your uncle the accountant."},
+     {l:"Ask the Naija group chat", fx:{peace:2, home:1, future:3}, r:"Fourteen people reply with eleven different answers. One of them is right, and he sends a voice note to explain."},
+     {l:"Ignore it. Money is money", fx:{peace:3, future:-4}, r:"You never read a payslip again. Next year, a polite letter arrives to say you owe."}]});
+  out.push({day:2, auto:'life1', label:'Months 2 and 3'});
+  out.push([
+   {day:3, label:'Month 2', ask:1, from:c.mum, sub:`${c.home} · 6:15am`, text:`${End}, from now on you will send me upkeep every month. I have chosen the 25th. That is when you people abroad get paid, abi?`,
+    choices:[
+     {l:`Set up ${N(150)} every month`, fx:{cash:-A(300), home:10, peace:-3}, set:{upkeep:'set'}, r:"She tells everybody that her child now sends upkeep. Two aunties ask for your number the same day."},
+     {l:`Send ${N(60)} when you can`, fx:{cash:-A(60), home:3, peace:2}, r:`She says "when you can" is not a date. You send it on the 25th anyway, out of respect and fear.`},
+     {l:"Say you get paid on the 28th", fx:{home:-2, peace:4}, r:`"${c.ok}," she says. "The 28th, then." You have negotiated three days.`}]},
+   {day:3, label:'Month 2', ask:1, from:c.sib, sub:`Your brother · ${c.home}`, text:`School fees go dey come every term now. ${c.mum} say make I tell you directly, since you be the one wey dey abroad.`,
+    choices:[
+     {l:`Pay the whole term, ${N(350)}`, fx:{cash:-A(350), home:9, peace:-3}, set:{upkeep:'set'}, r:`${c.sib} sends a photo of the receipt and a list of next term's books.`},
+     {l:"Pay half, straight to the school", fx:{cash:-A(175), home:4, future:2}, r:"The bursar sends a receipt with your name spelt three ways. The money arrived, and that is what matters."},
+     {l:"Ask what he is contributing", fx:{home:-5, peace:3}, r:"He says his contribution is prayer. You say prayer does not pay the bursar. The call ends early."}]}
+  ][pickV('L1u',2)]);
+  out.push(lifeComeback());
+  out.push(S.f.stay==='cousin' ? {day:5, label:'Month 3', art:'house', text:`${c.cousin}'s husband has started leaving apartment listings on the dining table. He circles the cheap ones in red, with love.`,
+    choices:[
+     {l:`Move out, ${M(RENT()*2)} upfront`, fx:{cash:-RENT()*2, peace:10, home:2, future:3}, set:{stay:'room'}, r:"Your own room, your own key, and nobody counting your plates. You buy a bedsheet in your favourite colour."},
+     {l:`Pay ${c.cousin} ${M(A(300))} a month`, fx:{cash:-A(600), peace:2, home:3}, r:"The listings disappear from the table. The husband now greets you by name."},
+     {l:"Pretend you did not see them", fx:{peace:-6, home:-4}, r:"The listings move to your pillow."}]}
+   : [
+   {day:5, label:'Month 3', art:'house', text:`Your landlord sends a polite email with an impolite number. From next month, your rent goes up by ${M(A(120))}.`,
+    choices:[
+     {l:"Pay it and tell God", fx:{cash:-A(240), peace:-2}, r:"God has heard. The landlord has also heard, from your bank."},
+     {l:"Negotiate with your best manners", fx:{cash:-A(120), peace:2, future:3}, r:"You remind him that you pay on time and never call about the heater. He meets you halfway, which in this market is a miracle."},
+     {l:"Start hunting for a new place", fx:{cash:-A(150), peace:-5, future:4}, r:"Every viewing has a queue. One landlord asks for six months upfront and a reference from your last landlord, who is in Nigeria and does not do email."}]},
+   {day:5, label:'Month 3', art:'house', text:"Your housemate moves in with her boyfriend with two days' notice. The full rent is now yours, and so is the fridge.",
+    choices:[
+     {l:"Pay it all while you search", fx:{cash:-RENT(), peace:-2}, r:"Two weeks of interviews. One candidate asks if you mind his python. It is a snake."},
+     {l:"Take someone from the Naija group", g:1, fx:{cash:-Math.round(RENT()/2), peace:-5, home:2}, r:"He moves in on Saturday with a speaker the size of a fridge. Your weekends now have a DJ."},
+     {l:"Advertise and check references", sp:1, fx:{cash:-Math.round(RENT()/2), peace:3, future:3}, r:"A quiet nurse moves in. She labels her food and pays early. You thank God out loud."}]}
+  ][pickV('L1r',2)]);
+  out.push({day:6, label:'Month 3', art:'group', text: pickV('L1a',2) ? `Aunty Bimpe runs the ajo for the Naija community in ${T()}. She keeps the records in a notebook with a flower on the cover. Ten members pay ${M(A(300))} a month, and slot nine is yours.`
+      : `The Nigerians in ${T()} are starting a monthly ajo. Ten members pay ${M(A(300))} each a month, and one person collects the whole pot each time. You are new, so you are offered slot nine.`,
+    choices:[
+     {l:"Take slot nine. Patience pays", fx:{cash:-A(600), future:8}, set:{ajo:'in'}, r:"You pay on time for two months. Slot nine is far away, and your saving habit is already close."},
+     {l:"Beg for slot two", fx:{cash:-A(600), future:3, home:2}, set:{ajo:'in'}, r:"The organiser says slot two is reserved. It is reserved for her sister."},
+     {l:"Save on your own instead", fx:{peace:2, future:4}, r:"Your savings account has no WhatsApp group. That is its best feature."}]});
+  out.push([
+   {day:7, label:'Month 3', art:'hall', text:`The Nigerian association in ${T()} needs a new treasurer. You are new, so you are trusted. Also, nobody else wants it.`,
+    choices:[
+     {l:"Accept. Become treasurer", fx:{peace:-4, future:5, home:3}, set:{assoc:'treasurer'}, r:"You inherit a cashbook, three old disputes, and 400 people who now message you directly."},
+     {l:"Help with events only", fx:{peace:2, future:3}, set:{assoc:'member'}, r:"You cook fried rice for the Independence party and become famous. Now you cook for every party."},
+     {l:"Say you are too busy", fx:{peace:4, home:-2}, r:"They accept. Then they put you on the welfare committee while you are out of the room."}]},
+   {day:7, label:'Month 3', art:'star', text:"An aunty you met once invites you to her daughter's birthday. When you arrive, you see your name on the programme. You are the MC.",
+    choices:[
+     {l:"MC with full Naija energy", fx:{peace:5, home:3, future:2}, set:{assoc:'member'}, r:"You spray jokes like money. Three people ask you to MC their own parties, for free."},
+     {l:"Hide near the small chops", fx:{peace:2}, r:"Three other people are hiding there too. You become friends over puff-puff."},
+     {l:"Slip out quietly", fx:{peace:-1, home:-3}, r:"The aunty announces your departure on the microphone."}]}
+  ][pickV('L1c',2)]);
+  out.push(STU() ? {day:8, label:'Month 3', art:'school', text:"Your first essay comes back with \"good effort\" written at the top, and a mark you would never show your mother.",
+    choices:[
+     {l:"Book office hours", fx:{peace:-2, future:7}, r:"The lecturer explains that they want your argument here, in your own words. It changes everything."},
+     {l:"Ask a classmate to see theirs", fx:{future:4}, r:"She got a high mark with half the words. You start to understand the game."},
+     {l:"Blame the marking", fx:{peace:2, future:-4}, r:"Next essay, same mark. The marking is very consistent."}]}
+   : (P()==='visitor' || ['none','cash','cashus'].includes(S.f.job)) ? {day:8, label:'Month 3', art:'work', text:"At the shop where you help out, the owner introduces his nephew as the new supervisor. You trained the nephew last week.",
+    choices:[
+     {l:"Ask for more hours instead", fx:{cash:A(200), peace:-3}, r:"He gives you Sundays. The nephew takes Sundays off."},
+     {l:"Look elsewhere, quietly", fx:{peace:-2, future:6}, r:"You send applications on your break. The nephew asks you how to use the till."},
+     {l:"Teach the nephew properly", fx:{peace:2, home:1, future:2}, r:"He learns fast and says thank you every day. You may have made a friend by accident."}]}
+   : {day:8, label:'Month 3', art:'work', text:"In the team meeting, a colleague presents your idea. Slowly, confidently, and in his own words.",
+    choices:[
+     {l:"Speak up in the meeting", fx:{peace:-3, future:6}, r:`You say, "Thank you for building on my point." The room goes quiet. Your manager writes something down.`},
+     {l:"Email your manager the original", fx:{peace:1, future:5}, r:"The timestamp does the talking. Here, the email is the evidence."},
+     {l:"Let it go and pray", fx:{peace:-4, future:-3}, r:"You pray about it. He presents your next idea too."}]});
+  out.push([
+   {day:9, label:'Month 3', art:'car', text:`A friend from the Naija group in ${T()} does food deliveries at night. "Just two evenings a week," he says, yawning through the whole sentence.`,
+    choices:[
+     STU() ? {l:"Tutor online in the evenings", fx:{cash:A(300), peace:-3, future:3}, r:"Your students are in three time zones and one of them is your cousin's son. The money is small and steady."}
+           : {l:"Sign up for two evenings", fx:{cash:A(500), peace:-7, future:2}, r:"You learn every pothole in town and the doorbell habits of a thousand strangers. The money is real."},
+     {l:"Sell foodstuff from your room", fx:{cash:A(300), peace:-3, home:2}, r:"Crayfish, garri, and ogbono, sold on WhatsApp. Your room smells like a market, and your account smells like progress."},
+     {l:"Rest. Your body is not a machine", fx:{peace:7}, r:"You sleep nine hours and wake up a new person. Your back sends a thank-you note."}]},
+   {day:9, label:'Month 3', ask:1, from:c.aunty, sub:"Business opportunity", text:`I have a business opportunity for you. You will be your own boss. You only need the starter pack, ${N(250)}.`,
+    choices:[
+     {l:"Buy the starter pack", g:1, fx:{cash:-A(250), peace:-4, home:4}, r:"The starter pack is forty tubs of supplements. Your boss is your aunty."},
+     {l:"Ask how the money is made", sp:1, fx:{peace:2, future:3}, r:"She talks for twenty minutes about mindset. The money is made by recruiting you."},
+     {l:"Say you are allergic to pyramids", fx:{peace:5, home:-3}, r:"She says it is a circle. You say circles are worse."}]}
+  ][pickV('L1h',2)]);
+  out.push({day:10, label:'End of month 3', art:'phone', text:`End of month three. You open your banking app and look at the number for a long time. It says ${money(S.cash)}.`,
+    choices:[
+     {l:"Screenshot it for the future", fx:{peace:2, future:3}, r: S.cash >= RENT()*3 ? "Three months of rent, saved. Future you will want proof that this happened." : "One day you will look back at this number and laugh. You hope that day comes soon."},
+     {l:"Call home with a full report", fx:{home:5, peace:1}, r:`${c.mum} listens to everything, then asks one question. "So when are you coming home?" It has been three months.`},
+     {l:"Make a real budget", fx:{peace:-1, future:6}, r:"Columns, categories, and a line called \"family emergencies\" that you make bigger twice."}]});
+  return out;
+};
+
+/* Chapter 2 · Month 6 · First Winter and Paperwork */
+const lifeCh2 = () => { const c = C(), End = cap(c.endear), work = STU() ? 'school' : 'work', cold = R.key!=='us' || L.cold>0, out = [];
+  out.push({day:1, auto:'life2', label:'Months 4 to 6'});
+  out.push({day:2, label:'Month 4', art: cold ? 'snow' : 'sun', text: {
+      us: cold ? "Your first winter gas bill arrives. It is bigger than your phone bill, your internet, and your feelings combined." : "Your electricity bill arrives after a month of the AC and the heater fighting each other. Both of them won.",
+      uk: "Your energy bill arrives. The smart meter has been judging you all month, and now it has numbers.",
+      ca: "Your landlord says heating is included. Then he sets the thermostat to 17 degrees and locks the box."}[R.key],
+    choices:[
+     {l:"Buy thermal everything", fx:{cash:-A(80), peace:6}, r:"Thermal vest, thermal socks, and a hot water bottle you name after your grandmother."},
+     {l: R.key==='ca' ? "Buy a space heater" : "Heating on. Peace on", fx:{cash:-A(220), peace:5, future:-1}, r:"Your room is warm and your account is cold. You choose warm."},
+     {l:"Ask home for heavy wrappers", fx:{home:4, peace:3}, r:`${c.mum} sends two thick wrappers in a cousin's luggage. They smell like home, and they are warmer than anything in the shops.`}]});
+  out.push({day:3, label:'Month 4', art:'star', text:`The sun now leaves before you finish ${STU() ? 'your last lecture' : 'work'}, and your mood leaves with it. You have not seen daylight on a weekday in three weeks.`,
+    choices:[
+     {l:"Start vitamin D like everyone", fx:{cash:-A(10), peace:5}, r:"Your coworker swears by it. Two weeks later, you swear by it too."},
+     {l:"Join a gym for the light", fx:{cash:-A(40), peace:6, future:2}, r:"Bright lights, loud music, and people running towards nothing. You feel awake for the first time in weeks."},
+     {l:"Sleep eleven hours a night", fx:{peace:-3}, r:`You sleep in the dark and wake up in the dark. You are now a bat with ${STU() ? 'a timetable' : 'a job'}.`},
+     {l:"Call home every lunchtime", fx:{home:5, peace:3}, r:"The sun shines behind your mother on video. You stand in it for ten minutes."}]});
+  out.push(pickV('L2f',2) ? {day:4, label:'Month 5', art:'card', text:"Your bank needs proof of address. Proof of address needs a bank statement. The bank statement needs proof of address.",
+    choices:[
+     {l:"Call the bank and hold", fx:{peace:-4, future:3}, r:`Fifty minutes of hold music later, a manager accepts a letter from your ${STU() ? 'university' : 'employer'}. You frame it.`},
+     {l:"Put your name on a bill", fx:{peace:2, future:2}, r:"You add your name to the internet bill. It takes a week, and now the internet company loves you too."},
+     {l:"Ask your landlord for a letter", fx:{peace:3, home:1, future:2}, r:"He writes it by hand on lined paper. The bank accepts it, to everyone's surprise."}]}
+   : {day:4, label:'Month 5', art:'house', text: R.key==='uk' ? "A letter from HMRC says your tax code was wrong for months. It does not say in whose favour. You read it four times."
+      : "Your first tax return asks for every address you have lived at. You have had four in six months, and one of them was a couch.",
+    choices:[
+     {l:"Sort it yourself at midnight", fx:{peace:-4, future:6}, r:"You finish at 2am, proud and confused. Months later, a small refund arrives, and you feel like a genius."},
+     {l:`Pay a professional, ${M(A(120))}`, fx:{cash:-A(120), peace:4, future:3}, r:"He asks for receipts. You hand him a carrier bag. He sighs and starts."},
+     {l:"Ask the Naija accountant you know", fx:{home:2, peace:2, future:4}, r:"He does it for free, then asks if your company is hiring."}]});
+  out.push(pickV('L2d',2) ? {day:5, label:'Month 5', art:'car', text:`Your first car insurance quote arrives. It is higher than your rent, because the company cannot see your driving history in ${O()}.`,
+    choices:[
+     {l:"Pay it monthly and cry", fx:{cash:-A(300), peace:-2, future:3}, set:{licence:'yes'}, r:"You are insured and slightly poorer every month. Your car is now the most protected thing you own."},
+     {l:"Shop around for a week", fx:{peace:-2, future:4}, set:{licence:'yes'}, r:"Nineteen websites later, you find one that is only mildly offensive. You take it."},
+     {l:"Stay on the bus for now", fx:{cash:A(50), peace:-3}, r:"The bus is late, and your money is safe. You choose your battles."}]}
+   : {day:5, label:'Month 5', art:'car', text:`You drove in ${O()} for years, through traffic, potholes, and checkpoints. Today the examiner fails you for rolling through a stop sign.`,
+    choices:[
+     {l:`Book again, ${M(A(90))}`, fx:{cash:-A(90), peace:-2, future:5}, set:{licence:'yes'}, r:"The second time, you stop at every sign like it is a checkpoint. You pass, and the examiner shakes your hand."},
+     {l:"Take proper lessons first", fx:{cash:-A(250), peace:2, future:6}, set:{licence:'yes'}, r:"Your instructor says you drive with a lot of confidence. He means it as a warning. You pass next time."},
+     {l:"Argue with the examiner", fx:{peace:-5}, r:`You explain that in ${O()}, a stop sign is a suggestion. He writes that down too.`}]});
+  out.push(pickV('L2x',2) ? {day:6, label:'Month 5', ask:1, from:c.aunty, sub:`Family elder · ${c.home}`, text:`Good news. I told the committee you will sponsor the ${c.party} celebration this year. They have printed your name on the banner already.`,
+    choices:[
+     {l:`Sponsor it, ${N(400)}`, fx:{cash:-A(400), home:10, peace:-2}, r:"Your name is on the banner, the cake, and the MC's lips. You watch the livestream from your bed."},
+     {l:`Send ${N(100)} and blessings`, fx:{cash:-A(100), home:3}, r:"They move your name to the bottom of the banner, in a smaller font."},
+     {l:"Ask them to remove the banner", fx:{home:-8, peace:4}, r:"They cover your name with masking tape. Everybody reads it anyway."}]}
+   : {day:6, label:'Month 5', ask:1, from:c.mum, sub:`${c.home} · voice note`, text:`${End}, December is coming. Your cousins are coming home from everywhere. Should I tell everybody you are coming?`,
+    choices:[
+     {l:`Book the flight, ${M(A(1300))}`, fx:{cash:-A(1300), home:12, peace:3}, set:{december:'going'}, r:"She tells everyone before you finish paying. Your arrival now has a committee."},
+     {l:`Say ${work} will not allow it`, fx:{home:-4, peace:-3}, r:`She says she will pray for your ${work}. Then for your ${STU() ? 'lecturers' : 'manager'}, by name.`},
+     {l:`Send ${N(200)} for the party`, fx:{cash:-A(200), home:6}, r:"Your money attends the party. It has a better time than you would have."}]});
+  out.push({day:7, label:'Month 6', art: S.f.december==='going' ? 'plane' : 'food', when: s => s.f.december==='going', text:`You land in ${O()} for December. Within one hour, you have been fed three times and asked for money four times.`,
+    choices:[
+     {l:"Give everyone a little something", fx:{cash:-A(400), home:8, peace:-3}, r:"Your wallet goes round the family like a collection plate. Everybody is happy, especially the cousin who asked twice."},
+     {l:"Hide at your mother's house", fx:{peace:6, home:-2}, r:`${c.mum} feeds you ${c.food} until you cannot move. The aunties visit anyway, in shifts.`},
+     {l:"Announce that abroad is hard", fx:{home:-4, peace:4}, r:"Nobody believes you. Your shoes are too clean."}]});
+  out.push({day:7, label:'Month 6', art:'food', when: s => s.f.december!=='going', text:`Your first big holiday away from home. Back in ${O()}, everybody is together and the music is loud. Here, the ${STU() ? 'campus' : 'office'} is empty and the streets are quiet.`,
+    choices:[
+     {l:`Dinner with a ${STU() ? 'classmate' : 'colleague'}'s family`, fx:{peace:6, future:2}, r:"They put a paper crown on your head, and you do not ask questions. The food is mild, and the welcome is warm."},
+     {l:"Naija house party till 6am", fx:{cash:-A(30), peace:7, home:3}, r:"Jollof, suya, and a DJ who plays the same Wizkid song four times. Nobody complains."},
+     {l:"Work the holiday for double pay", fx:{cash:A(250), peace:-5}, r:"Double pay in a quiet building. At midnight you video call home, and they are still dancing."}]});
+  out.push({day:8, label:'Month 6', art:'snow', text:"Your first winter cold arrives with full ceremony. Your head is heavy, your nose is running, and nobody is bringing you pepper soup.",
+    choices:[
+     {l:`Let ${c.mum} diagnose you on video`, fx:{home:5, peace:2}, r:"She diagnoses you in thirty seconds and lists eight remedies. Six of them involve ginger."},
+     {l:"Make the pepper soup yourself", fx:{cash:-A(25), peace:6}, r:"You sweat it out over the pot. It tastes almost like your mother's, close enough to make you cry."},
+     {l:`Go to ${work} anyway`, fx:{peace:-6, future:2}, r:`You cough through the whole day. Someone wipes down your desk while you watch.`}]});
+  out.push(pickV('L2s',2) ? {day:9, label:'Month 6', art:'chat', text:`Someone new at ${work} asks where to buy proper rice and a coat that actually works. Six months ago, you were the one asking.`,
+    choices:[
+     {l:"Take them to the African shop", fx:{cash:-A(20), peace:5, home:2}, r:"You walk the aisles like a tour guide. They buy everything you point at, including the overpriced crayfish."},
+     {l:"Send them your survival list", fx:{peace:3, future:3}, r:"Rent first, coat second, and say no to the first loan request. They print it. Nobody has ever printed you before."},
+     {l:"Tell them to suffer small first", fx:{peace:2, home:-1}, r:"You both laugh. Then you take them shopping anyway."}]}
+   : {day:9, label:'Month 6', ask:1, from:c.aunty, sub:`Family elder · ${c.home}`, text:`My friend's son lands in ${T()} on Friday. I have given him your address. He will not disturb you at all.`,
+    choices:[
+     {l:"Pick him up at the airport", fx:{cash:-A(60), home:6, peace:-2}, r:"He walks out of arrivals in a thin jacket, smiling like you did six months ago. You give him your scarf."},
+     {l:"Send him your survival list", fx:{peace:3, home:2, future:3}, r:"Rent first, coat second, and say no to the first loan request. He replies, \"Is it that serious?\" It is."},
+     {l:"Say your house is full", fx:{home:-6, peace:4}, r:"Your aunty sighs for a full minute on a voice note. He finds a room by Sunday without your help."}]});
+  out.push({day:10, label:'Six months abroad', from:c.mum, sub:"Video call", text:`Six months abroad. ${c.mum} squints at the screen. "Why are you talking like that? Your accent has changed."`,
+    choices:[
+     {l:"Deny it completely", fx:{peace:2}, r:"\"I have not changed,\" you say, in an accent you do not recognise."},
+     {l:"Switch to full Pidgin", fx:{home:6, peace:3}, r:`She relaxes at once. "Ehen! That is my child." You talk for an hour about nothing.`},
+     {l:"Tell her six months of truth", fx:{home:4, peace:6}, r:"She is quiet, then proud. \"You are doing well,\" she says. You almost believe her."}]});
+  return out;
+};
+
+/* ---------- The life card on the home screen ---------- */
+function lifeRoad(lf){
+  const nx = lf ? lifeNext(lf).n : 0;
+  return `<div class="lroad">${CHAPTERS.map((c,i) => `<div class="${lf && i<=lf.ch ? 'done' : i===nx ? 'next' : 'lock'}"><span>${c.icon}</span><small>${c.when}</small></div>`).join('')}</div>`;
+}
+function lifeCardHTML(){
+  const n = abroadMonths(), lf = loadLife(), head = `<div class="when lhead">📖 My Life Abroad</div>`;
+  if(!lifeOpen()) return `<div class="life" id="lifecard">${head}<h3>One life abroad. A new chapter every day.</h3>${lifeRoad(null)}
+    <p class="llock">🔒 Unlocks when you become a JJC 🐣. Play Today's Landing on ${LIFE_UNLOCK} different days.</p>
+    <div class="coll-bar"><i style="width:${Math.max(6, Math.round(Math.min(n, LIFE_UNLOCK)/LIFE_UNLOCK*100))}%"></i></div><small class="lsmall">${Math.min(n, LIFE_UNLOCK)} of ${LIFE_UNLOCK} days played</small></div>`;
+  if(!lf){
+    const rk = pick.lroute;
+    return `<div class="life" id="lifecard">${head}<h3>Live one life, from arrivals to years later.</h3>${lifeRoad(null)}
+      <p>Your money, your meters, and your choices follow you into every chapter. Where does your life start?</p>
+      <div class="lflags">${Object.values(ROUTES).map(r => `<button type="button" class="${rk===r.key?'on':''}" onclick="lifePick('${r.key}')"><span>${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.country}</b></button>`).join('')}</div>
+      ${rk ? `<div class="lpanel"><label class="when" for="lplace">${ROUTES[rk].ask}</label><select id="lplace" class="select">${placeOptions(rk)}</select>
+        <label class="when" for="lpath">How did you japa?</label><select id="lpath" class="select"><option value="">Surprise me</option>${pathOptions(rk).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select>
+        <label class="when" for="lfund">How did you fund the move?</label><select id="lfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select>
+        <label class="when" for="lgender">I am a</label><select id="lgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select>
+        <button class="primary" type="button" id="lifego" onclick="lifeStart()">🛬 Start my life in ${ROUTES[rk].label}</button></div>` : ''}</div>`;
+  }
+  const nx = lifeNext(lf), c = CHAPTERS[nx.n], P0 = lf.S, cur = ROUTES[lf.rk].cur, pl = places(lf.rk).find(p=>p.name===lf.place) || {town:lf.place, name:lf.place};
+  const where = `📍 ${pl.town===pl.name ? pl.name : pl.town+', '+pl.name}, ${ROUTES[lf.rk].country}`;
+  const stats = `<div class="lstats"><span>💵 ${P0.cash<0?'-':''}${cur}${Math.abs(Math.round(P0.cash)).toLocaleString('en-GB')}</span><span>🧘🏾 ${P0.peace}</span><span>🏠 ${P0.home}</span><span>🚀 ${P0.future}</span></div>`;
+  const body = nx.done ? `<p>Your life abroad is complete.</p>`
+    : nx.soon ? `<p class="llock">✍🏾 Chapter ${nx.n}, ${c.title}, is being written. Your life is saved and waiting.</p>`
+    : nx.ready ? `<button class="primary" type="button" id="lifeplay" onclick="lifePlay()">${c.icon} Play Chapter ${nx.n} · ${c.title}</button>`
+    : `<p class="llock">⏳ Chapter ${nx.n}, ${c.title}, unlocks in <em id="lcd">${untilMidnight()}</em></p>`;
+  return `<div class="life" id="lifecard">${head}<b class="lwhere">${where}</b>${stats}${lifeRoad(lf)}${body}
+    <button type="button" class="lreset" onclick="lifeReset()">Start a different life</button></div>`;
+}
+function lifePick(rk){ SFX.tap(); pick.lroute = pick.lroute===rk ? null : rk; render(); const p = document.getElementById('lplace') || document.getElementById('lifecard'); if(p) p.scrollIntoView({behavior:'smooth', block:'center'}); }
+function lifeStart(){
+  const rk = pick.lroute; if(!rk) return;
+  const any = a => a[Math.floor(Math.random()*a.length)], val = id => (document.getElementById(id)||{}).value || '';
+  const st = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0], pn = document.getElementById('pname'); if(pn) setName(pn.value);
+  pick.path = val('lpath') || any(pathOptions(rk))[0]; pick.fund = val('lfund') || any(['savings','savings','sold','borrowed','kept']);
+  pick.gender = val('lgender') || 'any'; pick.culture = STATE_CULTURE[st] || 'general'; pick.daily = false; pick.duo = 0;
+  SFX.land(); track('life-start-'+rk);
+  begin(rk, val('lplace') || ROUTES[rk].def); S.life = {ch:0}; S.c0 = S.cash;
+  render(); scrollTo(0,0);
+}
+function lifePlay(){
+  const lf = loadLife(); if(!lf) return; const nx = lifeNext(lf); if(!nx.ready) return;
+  R = ROUTES[lf.rk]; L = places(lf.rk).find(p=>p.name===lf.place); if(!L) return;
+  S = JSON.parse(JSON.stringify(lf.S));
+  Object.assign(S, {life:{ch:nx.n}, seed:Math.floor(Math.random()*1e9), v:{}, q:0, seen:[], st:{r:0, s:0, g:0, p:0}, daily:null, duo:0, landing:1});
+  S.p0 = {peace:S.peace, home:S.home, future:S.future}; S.c0 = S.cash; S.cbk = lifeCallback();
+  SFX.land(); track('life-ch'+nx.n);
+  shown = null; history = []; last = null; idx = nextIndex(0); phase = 'scene'; render(); scrollTo(0,0);
+}
+function lifeReset(){
+  if(!confirm('Start a different life? Your current life abroad will be gone.')) return;
+  try{ localStorage.removeItem(LIFE_KEY); }catch(e){} pick.lroute = null; track('life-reset'); render();
+}
+function mtilesHTML(){
+  return `<div class="mtiles">${[['cash','💵','Cash',money(S.cash)],['peace','🧘🏾','Peace',S.peace],['home','🏠','Home',S.home],['future','🚀','Future',S.future]].map(([k,ic,n,v])=>{ const b = band(k, S[k]); return `
+    <button type="button" class="mtile ${b.cls}" data-hint="${esc(b.meaning)}"><span class="mt-ic" aria-hidden="true">${ic}</span><span class="mt-n">${n}</span><b>${v}</b>
+      ${k==='cash' ? `<div class="mbar"><i style="width:${Math.max(3,Math.min(100, S.cash/RENT()/3*100))}%"></i><em style="left:99%"></em></div>` : `<div class="mbar"><i style="width:${S[k]}%"></i><em style="left:${MARKS[k][1]}%"></em>${k==='home'?`<em class="cap" style="left:${HOME_CAP}%"></em>`:''}</div>`}
+      <span class="tag">${b.label}</span></button>`; }).join('')}</div>`;
+}
+const lifeLine = sc => S.cash < 0 ? (sc >= 60 ? "Your peace and your people are holding. Your bank account is not, so the next chapter is where the climb starts." : "Money is in the red, and the weeks were heavy. You are still here, and the story keeps going.")
+  : sc >= 80 ? "Your money, your peace, and your family are all in order. People are starting to ask you for advice."
+  : sc >= 65 ? "The ground is getting firmer. You can see the next chapter from here."
+  : sc >= 50 ? "Some weeks were hard, and you are still standing. That counts."
+  : "It was a rough stretch. The good news is that the story keeps going.";
+
+/* ---------- The end of a chapter ---------- */
+function renderLifeEnd(app){
+  const ch = S.life.ch, c = CHAPTERS[ch], score = nowScore();
+  if(!S.lifeSaved){
+    S.lifeSaved = true; rememberGame();
+    const prev = loadLife(), st = {};
+    ['cash','start','path','sold','fund','peace','home','future','f','origin','trail','culture','gender'].forEach(k => st[k] = S[k]);
+    const log = (ch > 0 && prev ? prev.log || [] : []).concat([{ch, t:Date.now(), cash:Math.round(S.cash), peace:S.peace, home:S.home, future:S.future, score}]);
+    saveLife({v:1, rk:R.key, place:L.name, ch, doneOn:todayStr(), started: ch > 0 && prev ? prev.started : Date.now(), S:st, log});
+    track('life-done-'+ch); setTimeout(()=>SFX.verdict(score >= 60), 250);
+  }
+  const lf = loadLife(), nx = lifeNext(lf), nc = CHAPTERS[nx.n];
+  const d = {cash: Math.round(S.cash - (S.c0 ?? S.start)), peace:S.peace - S.p0.peace, home:S.home - S.p0.home, future:S.future - S.p0.future};
+  const next = nx.done ? `<div class="tm-head">🎉 Your life abroad is complete</div>`
+    : nx.soon ? `<div class="tm-head">✍🏾 Chapter ${nx.n} is being written</div><p class="tm-msg" style="display:block">${nc.icon} ${nc.title} is coming soon. Your life is saved on this phone, and it will be waiting.</p>`
+    : `<div class="tm-head">${nc.icon} Next: Chapter ${nx.n} · ${nc.title}</div>`;
+  const SITE = 'https://nowyouhavelanded.com';
+  const share = `I just lived ${ch ? `Chapter ${ch}, ${c.title},` : 'my first month'} of My Life Abroad on Now You Have Landed. ${L.town}, ${R.country}. Life score ${score}/100. What would you do? ${SITE}`;
+  app.innerHTML = `<div class="scene fade">
+    <div class="when">📖 My Life Abroad · ${c.when}</div>
+    <div class="journey-line">${S.trail.map(t=>t.town).concat([L.town]).join(' → ')}</div>
+    <div class="verdict">
+      <div class="label">${ch ? `Chapter ${ch} complete` : 'Month 1 complete · your life has begun'}</div>
+      <div class="v-ic" aria-hidden="true">${c.icon}</div>
+      <h2>${c.title}</h2>
+      <p>${lifeLine(score)}</p>
+    </div>
+    <div class="cost"><div class="when">📈 What this chapter did to you</div><div class="chips">${chips(d) || '<span class="chip">Nothing moved. Steady hands.</span>'}</div></div>
+    <div class="score">
+      <div class="sc-top"><span class="when">Life score</span><b>${score}<small>/100</small></b></div>
+      <div class="gauge"><i style="width:${Math.max(2,Math.min(100,score))}%"></i><em style="left:60%"></em></div>
+    </div>
+    ${mtilesHTML()}
+    <div class="lesson">💡 ${cap(lesson().replace(/^Your lesson: /,''))}</div>
+    <div class="tmrw">${next}
+      ${!nx.done && !nx.soon ? `<div class="tm-tiles"><div><span class="tm-ic">⏳</span><b id="lcd">${untilMidnight()}</b><small>until it opens</small></div><div><span class="tm-ic">📖</span><b>${ch+1}/${CHAPTERS.length}</b><small>stages lived</small></div><div><span class="tm-ic">🧭</span><b>${score}</b><small>life score</small></div></div>` : ''}
+      ${lifeRoad(lf)}
+      <p class="tm-msg" style="display:block">Your meters, your money, and every choice carry into the next chapter.</p>
+    </div>
+    <div class="share-row lshare"><a class="sbtn wa" id="l-wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(share)}">Share on WhatsApp</a><button class="sbtn" id="l-copy" type="button">Copy</button></div>
+    <a class="storylink" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-life')">Lived ${c.when.toLowerCase()} abroad for real? Tell us, and it could become a scene →</a>
+    <button class="primary" id="lhome" type="button">🏠 Back home</button>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
+  </div>`;
+  document.getElementById('l-wa').addEventListener('click', () => track('life-share-wa'));
+  document.getElementById('l-copy').onclick = () => { const t = document.getElementById('toast'); try{ navigator.clipboard.writeText(share).then(()=>{ t.textContent = 'Copied. Paste it anywhere.'; }).catch(()=>{ t.textContent = share; }); }catch(e){ t.textContent = share; } };
+  document.getElementById('lhome').onclick = () => { SFX.tap(); fresh(); pick.lroute = null; pick.daily = false; render(); scrollTo(0,0); };
+}
+
 
 function start(data){
   fresh();
