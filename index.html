@@ -258,6 +258,72 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .coll-note{margin:0;font-size:13px;color:var(--muted)}
 .coll-gap{margin-top:10px}
 .vbadge.locked b{letter-spacing:0;font-size:14px}
+.vbadge{font:inherit;color:inherit;text-align:center;cursor:pointer;justify-items:center;padding:10px 6px}
+.vbadge .vic{font-size:30px;line-height:1.1}
+.vbadge.locked .vic{filter:grayscale(1);opacity:.35}
+.vbadge b{font-size:13px}
+.vbadge.locked b{font-size:12px}
+.coll-grid{grid-template-columns:repeat(3,1fr)!important}
+.v-ic{font-size:44px;line-height:1}
+.tmrw{display:grid;gap:12px;background:var(--green);color:#fff;border-radius:16px;padding:16px;box-shadow:0 16px 40px rgba(16,47,40,.15)}
+.tm-head{font-family:var(--display);font-size:20px;font-weight:800;line-height:1.2}
+.tm-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tm-tiles div,.tm-done{display:grid;justify-items:center;gap:2px;background:rgba(255,255,255,.08);border-radius:12px;padding:10px 4px;text-align:center}
+.tm-ic{font-size:22px;line-height:1}
+.tm-tiles b{font-family:var(--display);font-size:22px;color:var(--gold);line-height:1.1}
+.tm-tiles small{font-size:12px;opacity:.8}
+.tm-road{display:grid;gap:6px;font-size:13px;opacity:.95}
+.tm-bar{height:8px;border-radius:4px;background:rgba(255,255,255,.15);overflow:hidden}
+.tm-bar i{display:block;height:100%;background:var(--gold)}
+.tm-btns{display:flex;flex-wrap:wrap;gap:8px}
+.tbtn{flex:1 1 30%;min-width:96px;font:inherit;font-size:14px;font-weight:700;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:10px 6px;text-align:center;text-decoration:none;cursor:pointer}
+.tbtn.on{border-style:dashed;opacity:.8;font-weight:600}
+.tm-msg{margin:0;font-size:13px;opacity:.9}
+.tm-msg:empty{display:none}
+.tmrw .abnew{color:var(--gold)}
+.tm-done{display:flex!important;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:2px 6px}
+.tm-done b{font-family:var(--display);font-size:44px;color:var(--gold);line-height:1}
+.tm-done span{flex-basis:100%;font-size:14px;opacity:.9}
+.score{display:grid!important;gap:8px}
+.sc-top{display:flex;justify-content:space-between;align-items:baseline}
+.gauge{position:relative;height:10px;border-radius:5px;background:rgba(255,255,255,.15)}
+.gauge i{display:block;height:100%;border-radius:5px;background:var(--gold)}
+.gauge em{position:absolute;top:-3px;width:2px;height:16px;background:#fff}
+.gauge-k{position:relative;display:flex;justify-content:space-between;font-size:11px;opacity:.75}
+.gauge-k span[style]{position:absolute;transform:translateX(-50%)}
+.mtiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mtile{font:inherit;color:inherit;text-align:left;cursor:pointer;display:grid;gap:4px;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--muted);border-radius:12px;padding:10px 12px;min-width:0}
+.mtile.high{border-top-color:var(--good)} .mtile.mid{border-top-color:var(--gold)} .mtile.low{border-top-color:var(--bad)}
+.mt-ic{font-size:24px;line-height:1}
+.mt-n{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mtile b{font-family:var(--mono);font-size:22px;line-height:1.1}
+.mtile .tag{font-size:12px;font-weight:700}
+.mtile.high .tag{color:var(--good)} .mtile.mid .tag{color:var(--gold)} .mtile.low .tag{color:var(--bad)}
+.mtile .mbar i{background:var(--muted)}
+.mtile.high .mbar i{background:var(--good)} .mtile.mid .mbar i{background:var(--gold)} .mtile.low .mbar i{background:var(--bad)}
+.lb-big{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lb-big div,.lb-facts div{display:grid;justify-items:center;text-align:center;background:var(--bubble);border-radius:12px;padding:10px 4px;gap:2px}
+.lb-big b{font-family:var(--display);font-size:30px;color:var(--accent);line-height:1}
+.lb-big small,.lb-facts small{font-size:12px;color:var(--muted);line-height:1.25}
+.lb-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.lb-facts span{font-size:20px;line-height:1}
+.lb-facts b{font-size:15px}
+.four{display:flex;justify-content:space-between;gap:6px;margin:4px 0 2px}
+.four span{display:grid;justify-items:center;font-size:26px;line-height:1.1;flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 2px}
+.four small{font-size:11px;font-weight:700;color:var(--muted);margin-top:4px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:6px}
+.hero-chips span{font-size:13px;background:rgba(255,255,255,.1);border-radius:999px;padding:5px 10px}
+.hero-chips em{font-style:normal;color:var(--gold);font-weight:700}
+.ptiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ptiles button{font:inherit;color:inherit;cursor:pointer;display:grid;justify-items:center;text-align:center;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 6px}
+.ptiles span{font-size:26px;line-height:1.1}
+.ptiles b{font-family:var(--display);font-size:17px}
+.ptiles small{font-size:12px;color:var(--muted)}
+.movesteps{display:grid;gap:8px;margin:4px 0 12px}
+.movesteps div{display:flex;gap:10px;align-items:center;font-size:15px}
+.movesteps b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--gold);color:#1B332B;display:grid;place-items:center;font-size:14px}
+#moveover textarea{width:100%;font-family:var(--mono);font-size:12px;margin:6px 0 8px;resize:vertical}
+#moveover .tm-msg{color:var(--ink);margin-top:8px}
 .coll-mini{background:var(--bubble);border-radius:12px;padding:10px 12px;font-size:15px;text-align:center}
 @media (max-width:360px){.coll-grid{grid-template-columns:1fr}}
 .foot{font-size:13px;color:var(--muted);text-align:center}
@@ -342,7 +408,7 @@ details.custom summary{font-weight:700}
 .hero b{font-family:var(--display);font-size:24px;line-height:1.15;color:#fff}
 .hero span{font-size:15px;opacity:.9}
 .hero em{font-style:normal;font-weight:700;color:var(--gold)}
-.hero .primary{background:var(--gold);color:#1B332B;margin-top:4px}
+.tmrw .primary,.hero .primary{background:var(--gold);color:#1B332B;margin-top:4px}
 .abroad{display:grid;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
 .abroad b{font-family:var(--display);font-size:22px}
 .abroad span{font-size:14px;color:var(--muted)}
@@ -1775,7 +1841,8 @@ function render(){
     app.innerHTML = `<div class="intro fade">
       <div class="stamp">Arrived · Day 01</div>
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
-      <p>Everybody wants to japa. Nobody tells you what happens after you land. A five-minute reality check on your money, your peace of mind, your family, and the future you came to build.</p>
+      <p>Everybody wants to japa. Nobody tells you what happens after you land.</p>
+      <div class="four"><span>💵<small>Cash</small></span><span>🧘🏾<small>Peace</small></span><span>🏠<small>Home</small></span><span>🚀<small>Future</small></span><span>⏱️<small>5 min</small></span></div>
       ${(() => { const nm = getName(), set = (() => { try{ return !!localStorage.getItem('nyhl-origin') || !!nm; }catch(e){ return !!nm; } })(), open = !set || pick.editMe;
         const from = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[pick.origin,pick.origin]);
         return open ? `<div class="me open"><div class="when">Your details · used in every game</div>
@@ -1786,20 +1853,15 @@ function render(){
         : `<div class="me"><span>👤 <b>${esc(nm || 'Anonymous lander')}</b> · leaving from ${esc(from[1])}</span><button type="button" id="meedit">Change</button></div>`; })()}
       ${(() => { const ds = todayStr(), plan = dailyPlan(ds), pl = places(plan.rk).find(x=>x.name===plan.place), done = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).pop();
         const where = (pl.town===pl.name ? pl.name : pl.town + ', ' + pl.name) + ', ' + ROUTES[plan.rk].label;
-        return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>Everyone lands in ${where} today</b>
-        <span>${done ? `You played today and scored ${scoreOf(done)}/100. A new country and new surprises arrive in <em id="cd">${untilMidnight()}</em>.` : `One shared game a day. Same place and same surprises for everyone, so you can compare scores with friends. A new country arrives in <em id="cd">${untilMidnight()}</em>.`}</span>
-        <button class="primary" id="dailygo" type="button">${done ? "See how everyone did today" : "Play Today's Landing"}</button>
-        ${done ? '' : pushButtonHTML()}
-        ${done ? `${pushButtonHTML()}<div class="hero-remind">Or add a calendar reminder · <button type="button" id="hr-ics">Apple or Outlook</button> · <a id="hr-g" target="_blank" rel="noopener" href="${remindGoogle()}">Google</a></div>` : ''}</div>`; })()}
-      ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>` : ''}
-      <button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>
-      ${streakHTML('intro')}
-      ${abroadMonths() ? abroadHTML() : ''}
-      ${roadHTML()}
-      ${loadVerdicts().length ? `<div class="coll-mini">Verdicts <b>${VERDICTS.filter(([t])=>loadVerdicts().includes(t)).length} of ${VERDICTS.length}</b> · Badges <b>${BADGES.filter(([t])=>loadVerdicts().includes(t)).length} of ${BADGES.length}</b>. Can you collect them all?</div>` : ''}
-      ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
+        if(done) return tomorrowHTML({top: `<div class="when" style="color:var(--gold)">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><div class="tm-done"><b>${scoreOf(done)}</b><small>/100 today</small><span>📍 ${where}</span></div>`,
+          bottom: `<button class="primary" id="dailygo" type="button">🏆 See how everyone did today</button>`});
+        return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>📍 Everyone lands in ${where} today</b>
+        <div class="hero-chips">${streakInfo().n ? `<span>🔥 Keep your ${streakInfo().n}-day streak</span>` : ''}<span>👥 Same game for everyone</span><span>⏳ New one in <em id="cd">${untilMidnight()}</em></span></div>
+        <button class="primary" id="dailygo" type="button">✈️ Play Today's Landing</button>
+        ${pushButtonHTML()}</div>`; })()}
+      ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>${progressTilesHTML()}` : `<button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>`}
       <details class="how more" id="moredet"${pick.qroute || pick.moreOpen ? ' open' : ''}>
-        <summary>Want to play more? Play your own landing</summary>
+        <summary>🎮 Play more · pick your own country</summary>
         <div class="how-body">
         <div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
       <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select">${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
@@ -1807,8 +1869,9 @@ function render(){
         </div>
       </details>
       <details class="how about">
-        <summary>About the game · share a story, how it works, Naija words</summary>
+        <summary>ℹ️ About · stories · Naija words</summary>
         <div class="how-body">
+        <button class="ghost" type="button" onclick="openMove()">📲 Move my progress to another phone or app</button>
         <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-intro')">Have a japa story? Tell us, and it could become a scene →</a>
         <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-edition')">Not from Nigeria? Help us build your country's edition →</a>
         <details class="how">
@@ -2215,6 +2278,8 @@ const VERDICTS = [
  ['Ghost Mode Activated','Keep saying no to home and send almost nothing.'],
  ['Making It By Force','Come with no way back, and build your future anyway.']
 ];
+const VICON = {"Abroad Strategist": "♟️", "Making Moves": "🚀", "Settling In": "🏡", "Still Finding Your Feet": "👣", "Hanging In There": "🧗🏾", "The Family ATM": "🏧", "Running on Prayers": "🙏🏾", "Hustle Without Peace": "😵\u200d💫", "Ghost Mode Activated": "👻", "Making It By Force": "💪🏾", "Stronger Than The Agent": "🕵🏾", "Scholar and Sponsor": "🎓", "Fees Still Pending": "🧾", "Owing the Cooperative": "💳", "Serial Japa Champion": "🔁", "Been Everywhere": "🌍", "Best Landing": "👑"};
+const vIcon = t => VICON[t] || '🛬';
 // Badges are things you did. One game can earn several.
 const BADGES = [
  ['Stronger Than The Agent','Go the UK care route and expose the fake agent.', () => P()==='care' && S.f.cos==='reported'],
@@ -2465,13 +2530,13 @@ function saveEndName(){
 }
 function postBoxHTML(){
   const st = S.st || {r:0, s:0, g:0};
-  const facts = `<p>This game you said no to home <b>${st.r}</b> time${st.r===1?'':'s'}, sent <b>${NGN0(st.s)}</b> home, fell for <b>${st.g}</b> trap${st.g===1?'':'s'}, and spotted <b>${st.p||0}</b>.</p>`;
+  const facts = `<div class="lb-facts"><div><span>🙅🏾</span><b>${st.r}</b><small>said no</small></div><div><span>💸</span><b>${NGN0(st.s).replace(/,000,000$/,'m').replace(/,000$/,'k')}</b><small>sent home</small></div><div><span>🪤</span><b>${st.g}</b><small>fell for</small></div><div><span>👀</span><b>${st.p||0}</b><small>spotted</small></div></div>`;
   const who = esc(getName() || 'Anonymous lander');
-  const today = S.daily && S.dailyN ? `<p class="lb-rankline">${S.beat===null ? `You are the first to play Today's Landing #${dailyNo(S.daily)}.` : `Today's Landing #${dailyNo(S.daily)}: you beat <b>${S.beat}%</b> of today's ${S.dailyN} players.`}</p>` : '';
-  const status = S.rank ? `${today}<p class="lb-rankline">You are <b>#${S.rank}</b> on this week's board, out of ${S.rankOf} player${S.rankOf===1?'':'s'}.</p><p class="small" style="color:var(--muted);font-size:13px">Posted as ${who}.</p>${getName() ? '' : `<div class="namebox"><label class="when" for="endname">Want your name on the board next time?</label><div class="row"><input id="endname" class="select" type="text" maxlength="20" placeholder="Your name or nickname"><button class="ghost" type="button" onclick="saveEndName()">Save</button></div><p class="small" id="endnamemsg" style="color:var(--muted);font-size:13px;margin:0"></p></div>`}`
+  const today = S.daily && S.dailyN ? (S.beat===null ? `<div><b>1st</b><small>to play today</small></div>` : `<div><b>${S.beat}%</b><small>of today's ${S.dailyN} players beaten</small></div>`) : '';
+  const status = S.rank ? `<div class="lb-big"><div><b>#${S.rank}</b><small>this week, of ${S.rankOf}</small></div>${today}</div><p class="small" style="color:var(--muted);font-size:13px;margin:0">Posted as ${who}.</p>${getName() ? '' : `<div class="namebox"><label class="when" for="endname">Want your name on the board next time?</label><div class="row"><input id="endname" class="select" type="text" maxlength="20" placeholder="Your name or nickname"><button class="ghost" type="button" onclick="saveEndName()">Save</button></div><p class="small" id="endnamemsg" style="color:var(--muted);font-size:13px;margin:0"></p></div>`}`
     : S.postFail ? `<p>${S.postFail}</p><button class="ghost" type="button" id="lbretry">Try again</button>`
     : `<p>Adding you to this week's board as ${who}...</p>`;
-  return `<div class="lbbox" id="lbbox"><div class="when">Weekly leaderboard</div>${status}${facts}<button class="ghost" type="button" onclick="openBoard()">🏆 See this week's board</button></div>`;
+  return `<div class="lbbox" id="lbbox"><div class="when">🏆 Weekly leaderboard</div>${status}${facts}<button class="ghost" type="button" onclick="openBoard()">See this week's board</button></div>`;
 }
 // every finished game goes on the board automatically, then reports its rank
 async function autoPost(title, onRank){
@@ -2594,19 +2659,105 @@ function earnBadges(){ return BADGES.filter(([,,ok]) => ok && ok()).map(([t]) =>
 function collectionHTML(current, isNew, earned){
   const got = loadVerdicts(), now = new Map(earned || []);
   const card = ([t,h], cur, fresh) => { const has = got.includes(t);
-    return `<div class="vbadge ${has?'got':'locked'}${cur?' cur':''}${has && t==='Best Landing'?' crown':''}"><b>${has ? t : '🔒'}</b>${fresh ? '<span class="newtag">New!</span>' : ''}<small>${has ? (cur ? 'Earned this game' : 'Unlocked') : h}</small></div>`; };
+    return `<button type="button" class="vbadge ${has?'got':'locked'}${cur?' cur':''}${has && t==='Best Landing'?' crown':''}" data-hint="${esc(has ? t : 'Locked. Hint: '+h)}"><span class="vic" aria-hidden="true">${vIcon(t)}</span>${has ? `<b>${t}</b>` : '<b>🔒</b>'}${fresh ? '<span class="newtag">New!</span>' : ''}</button>`; };
   const vGot = VERDICTS.filter(([t]) => got.includes(t)).length, bGot = BADGES.filter(([t]) => got.includes(t)).length;
   return `<div class="collection">
-    <div class="coll-head"><div class="when">Your verdicts</div><b>${vGot} of ${VERDICTS.length}</b></div>
-    <p class="coll-note">How your month went. One per game.</p>
+    <div class="coll-head"><div class="when">Verdicts · one per game</div><b>${vGot}/${VERDICTS.length}</b></div>
     <div class="coll-bar"><i style="width:${Math.round(vGot/VERDICTS.length*100)}%"></i></div>
     <div class="coll-grid">${VERDICTS.map(v => card(v, v[0]===current, v[0]===current && isNew)).join('')}</div>
-    <div class="coll-head coll-gap"><div class="when">Your badges</div><b>${bGot} of ${BADGES.length}</b></div>
-    <p class="coll-note">Things you did. One game can earn several.</p>
+    <div class="coll-head coll-gap"><div class="when">Badges · earn several</div><b>${bGot}/${BADGES.length}</b></div>
     <div class="coll-bar"><i style="width:${Math.round(bGot/BADGES.length*100)}%"></i></div>
     <div class="coll-grid">${BADGES.map(v => card(v, now.has(v[0]), now.get(v[0]))).join('')}</div>
-    <p class="coll-note">Your collection stays with you forever. Only the Best Landing crown is weekly.</p>
+    <p class="coll-note">Tap a 🔒 for a hint. Your collection is yours forever.</p>
   </div>`;
+}
+document.addEventListener('click', e => { const v = e.target.closest && e.target.closest('.vbadge'); if(v && v.dataset.hint) vnToast(v.dataset.hint); });
+
+/* ---------- Come back tomorrow: one card with the countdown, streak, time abroad, and reminders ---------- */
+function tomorrowHTML(opts){
+  opts = opts || {};
+  const {n: streak, playedToday} = streakInfo(), days = abroadMonths(), next = ABROAD_BADGES.find(([k]) => k > days), prevK = (ABROAD_BADGES.filter(([k]) => k <= days).pop() || [0])[0];
+  const pct = next ? Math.round((days - prevK) / (next[0] - prevK) * 100) : 100;
+  const ios = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+  const btns = [
+    !pushOn() ? `<button type="button" class="tbtn" onclick="enablePush(this)">🔔 Remind</button>` : `<span class="tbtn on">🔔 Reminders on</span>`,
+    ios ? `<button type="button" class="tbtn" onclick="downloadIcs()">📅 Calendar</button>` : `<a class="tbtn" target="_blank" rel="noopener" href="${remindGoogle()}" onclick="track('remind-google')">📅 Calendar</a>`,
+    isStandalone() ? '' : `<button type="button" class="tbtn" onclick="homeScreenTip()">📲 Add app</button>`
+  ].filter(Boolean).join('');
+  return `<div class="tmrw">
+    ${opts.top || ''}
+    <div class="tm-head">${playedToday ? '✅ Done for today. Come back tomorrow!' : '✈️ A new landing every day'}</div>
+    <div class="tm-tiles">
+      <div><span class="tm-ic">⏳</span><b id="cd">${untilMidnight()}</b><small>next landing</small></div>
+      <div><span class="tm-ic">🔥</span><b>${streak}</b><small>day streak</small></div>
+      <div><span class="tm-ic">🌍</span><b>${days*2}w</b><small>abroad</small></div>
+    </div>
+    ${next ? `<div class="tm-road"><div class="tm-bar"><i style="width:${Math.max(6,pct)}%"></i></div><span>🏅 ${next[1]} · ${days}/${next[0]} days</span></div>` : `<div class="tm-road"><span>🏅 Every milestone reached</span></div>`}
+    ${opts.newBadge ? `<p class="abnew">🎉 New milestone: ${opts.newBadge}</p>` : ''}
+    <div class="tm-btns">${btns}</div>
+    <p class="tm-msg" id="pushmsg"></p>
+    ${opts.bottom || ''}
+  </div>`;
+}
+function homeScreenTip(){
+  if(installEvt){ installApp(); return; }
+  const m = document.getElementById('pushmsg'); if(!m) return;
+  m.innerHTML = /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'In Safari, tap <b>Share</b> then <b>Add to Home Screen</b>.' : 'Open your browser menu and tap <b>Add to Home screen</b>.';
+  track('home-tip');
+}
+
+/* ---------- Your progress, at a glance ---------- */
+function progressTilesHTML(){
+  const h = loadHistory(); if(!h.length) return '';
+  const r = roadInfo(), got = loadVerdicts(), n = VERDICTS.filter(([t]) => got.includes(t)).length + BADGES.filter(([t]) => got.includes(t)).length;
+  return `<div class="ptiles">
+    <button type="button" onclick="openJournal()"><span>📈</span><b>${r.level[1]}</b><small>avg ${r.avg} · best ${r.best}</small></button>
+    <button type="button" onclick="openCollection()"><span>🏅</span><b>${n}/${VERDICTS.length + BADGES.length}</b><small>collected</small></button>
+    <button type="button" onclick="openBoard()"><span>🏆</span><b>Leaderboard</b><small>this week</small></button>
+    <button type="button" onclick="openJournal()"><span>📒</span><b>${h.length} game${h.length>1?'s':''}</b><small>your history</small></button>
+  </div>`;
+}
+function openCollection(){
+  let o = document.getElementById('collover');
+  if(!o){ o = document.createElement('div'); o.id='collover'; o.className='overlay'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-label','Your collection');
+    document.body.appendChild(o); o.addEventListener('click', e=>{ if(e.target===o) o.hidden=true; }); }
+  o.innerHTML = `<div class="sheet-panel journal"><div class="sheet-head"><b>Your collection</b><button class="xbtn" aria-label="Close">✕</button></div>${collectionHTML('', false, [])}</div>`;
+  o.querySelector('.xbtn').onclick = ()=>{ o.hidden=true; }; o.hidden = false; track('collection');
+}
+
+/* ---------- Move my progress to another browser or the home screen app ---------- */
+const MOVE_KEYS = ['nyhl-history','nyhl-verdicts','nyhl-posts','nyhl-recent','nyhl-name','nyhl-origin'];
+function progressCode(){
+  const d = {}; MOVE_KEYS.forEach(k => { try{ const v = localStorage.getItem(k); if(v) d[k] = v; }catch(e){} });
+  return 'NYHL1:' + btoa(unescape(encodeURIComponent(JSON.stringify(d))));
+}
+function importProgress(code){
+  const raw = String(code||'').trim().replace(/\s+/g,'');
+  if(!raw.startsWith('NYHL1:')) throw new Error('bad');
+  const d = JSON.parse(decodeURIComponent(escape(atob(raw.slice(6)))));
+  const arr = k => { try{ return JSON.parse(localStorage.getItem(k)||'[]'); }catch(e){ return []; } };
+  const put = (k, v) => { try{ localStorage.setItem(k, typeof v==='string' ? v : JSON.stringify(v)); }catch(e){} };
+  if(d['nyhl-history']){ const mine = arr('nyhl-history'), seen = new Set(mine.map(g=>g.t)); const all = mine.concat(JSON.parse(d['nyhl-history']).filter(g=>!seen.has(g.t))).sort((a,b)=>a.t-b.t); put('nyhl-history', all.slice(-200)); }
+  ['nyhl-verdicts','nyhl-posts','nyhl-recent'].forEach(k => { if(d[k]) put(k, [...new Set(arr(k).concat(JSON.parse(d[k])))].slice(-300)); });
+  ['nyhl-name','nyhl-origin'].forEach(k => { let has = ''; try{ has = localStorage.getItem(k)||''; }catch(e){} if(d[k] && !has) put(k, d[k]); });
+}
+function openMove(){
+  let o = document.getElementById('moveover');
+  if(!o){ o = document.createElement('div'); o.id='moveover'; o.className='overlay'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-label','Move my progress');
+    document.body.appendChild(o); o.addEventListener('click', e=>{ if(e.target===o) o.hidden=true; }); }
+  o.innerHTML = `<div class="sheet-panel"><div class="sheet-head"><b>📲 Move my progress</b><button class="xbtn" aria-label="Close">✕</button></div>
+    <div class="movesteps"><div><b>1</b><span>Copy your code here</span></div><div><b>2</b><span>Open the game where you want it, like your home screen app</span></div><div><b>3</b><span>Paste the code there</span></div></div>
+    <button class="primary" type="button" id="mvcopy">Copy my code</button>
+    <div class="when" style="margin-top:14px">Got a code? Paste it here</div>
+    <textarea id="mvin" class="select" rows="3" placeholder="NYHL1:..."></textarea>
+    <button class="ghost" type="button" id="mvgo">Bring my progress here</button>
+    <p class="tm-msg" id="mvmsg"></p></div>`;
+  const msg = t => { o.querySelector('#mvmsg').textContent = t; };
+  o.querySelector('.xbtn').onclick = ()=>{ o.hidden=true; };
+  o.querySelector('#mvcopy').onclick = () => { const c = progressCode(); track('move-copy');
+    try{ navigator.clipboard.writeText(c).then(()=>msg('Copied ✓ Now paste it in the other place.')).catch(()=>{ o.querySelector('#mvin').value = c; msg('Select the code above and copy it.'); }); }catch(e){ o.querySelector('#mvin').value = c; msg('Select the code above and copy it.'); } };
+  o.querySelector('#mvgo').onclick = () => { try{ importProgress(o.querySelector('#mvin').value); track('move-import'); msg('Done ✓ Your progress is here.'); setTimeout(()=>{ o.hidden = true; if(phase==='intro') render(); }, 900); }catch(e){ msg('That code did not work. Copy it again and paste the whole thing.'); } };
+  o.hidden = false; track('move-open');
 }
 
 function renderEnd(app){
@@ -2621,28 +2772,26 @@ function renderEnd(app){
     <div class="when">Day 30 · Your result${S.daily ? ` · Today's Landing #${dailyNo(S.daily)}` : ''}</div>
     <div class="journey-line">${journey}</div>
     <div class="verdict">
-      <div class="label">Now You Have Landed · verdict for scores ${verdictBand(title)[0]} to ${verdictBand(title)[1]}</div>
+      <div class="label">Your verdict · scores ${verdictBand(title)[0]} to ${verdictBand(title)[1]}</div>
+      <div class="v-ic" aria-hidden="true">${vIcon(title)}</div>
       <h2>${title}</h2>
       <p>${line}</p>
-      ${rec.length?`<div class="receipts">${rec.map(r=>`<div>${r}</div>`).join('')}</div>`:''}
+      ${rec.length?`<div class="receipts">${rec.slice(0,2).map(r=>`<div>${r}</div>`).join('')}</div>`:''}
     </div>
-    <div class="sheet">
-      <div class="when">What your choices did</div>
-      ${[['cash','Cash',money(S.cash)],['peace','Peace',S.peace+'/100'],['home','Home',S.home+'/100'],['future','Future',S.future+'/100']].map(([k,n,v])=>{ const b=band(k, S[k]); return `
-      <div class="meter ${b.cls}">
-        <div class="meter-top"><b>${n}</b><span class="val">${v}</span><span class="tag">${b.label}</span></div>
-        ${k==='cash' ? '' : `<div class="mbar"><i style="width:${S[k]}%"></i><em style="left:${MARKS[k][1]}%" title="Healthy from ${MARKS[k][1]}"></em>${k==='home'?`<em class="cap" style="left:${HOME_CAP}%" title="Above ${HOME_CAP} means you may be overgiving"></em>`:''}</div>`}
-        <p>${b.meaning}</p>
-      </div>`; }).join('')}
-      <p class="bench">Healthy marks: Peace ${MARKS.peace[1]}, Future ${MARKS.future[1]} (you started at 20), and Home between ${MARKS.home[1]} and ${HOME_CAP}. Above ${HOME_CAP}, home may be loving you at your own expense. For cash, healthy is three months' rent saved.</p>
-      <div class="lesson">${lesson()}</div>
+    ${tomorrowHTML({newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? hit[1] : ''; })() : ''})}
+    <div class="score">
+      <div class="sc-top"><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div>
+      <div class="gauge"><i style="width:${Math.max(2,Math.min(100,nowScore()))}%"></i><em style="left:60%"></em></div>
+      <div class="gauge-k"><span>0</span><span style="left:60%">60 healthy</span><span>100</span></div>
     </div>
-    <div class="score"><div><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div><p>Healthy on all four meters is about 60. A perfect 100 needs all four to be excellent.</p></div>
+    <div class="mtiles">
+      ${[['cash','💵','Cash',money(S.cash)],['peace','🧘🏾','Peace',S.peace],['home','🏠','Home',S.home],['future','🚀','Future',S.future]].map(([k,ic,n,v])=>{ const b=band(k, S[k]); return `
+      <button type="button" class="mtile ${b.cls}" data-hint="${esc(b.meaning)}"><span class="mt-ic" aria-hidden="true">${ic}</span><span class="mt-n">${n}</span><b>${v}</b>
+        ${k==='cash' ? `<div class="mbar"><i style="width:${Math.max(3,Math.min(100, S.cash/RENT()/3*100))}%"></i><em style="left:99%"></em></div>` : `<div class="mbar"><i style="width:${S[k]}%"></i><em style="left:${MARKS[k][1]}%"></em>${k==='home'?`<em class="cap" style="left:${HOME_CAP}%"></em>`:''}</div>`}
+        <span class="tag">${b.label}</span></button>`; }).join('')}
+    </div>
+    <div class="lesson">💡 ${cap(lesson().replace(/^Your lesson: /,''))}</div>
     ${postBoxHTML()}
-    ${roadHTML()}
-    ${streakHTML('end')}
-    ${S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return abroadHTML(firstToday && hit ? hit[1] : ''); })() : ''}
-    ${collectionHTML(title, isNewVerdict, earned)}
     <div class="cardwrap"><img id="cardimg" alt="Your result card" hidden></div>
     <button class="primary" id="sharecard">Share my result card</button>
     <div class="share">
@@ -2655,19 +2804,17 @@ function renderEnd(app){
       </div>
     </div>
     <div class="row">
-      <button class="ghost" id="move">Japa again to another country</button>
-      <button class="ghost" id="pada">${S.f.pada ? 'Japada. You went back a year later' : 'Japada. What if you went back after a year?'}</button>
-      <button class="ghost" id="again">Start a new life</button>
-      <button class="ghost" type="button" onclick="openJournal()">My games and averages</button>
+      <button class="ghost" id="move">✈️ Japa again to another country</button>
+      <button class="ghost" id="pada">🏠 ${S.f.pada ? 'Japada. You went back a year later' : 'Japada. Go back after a year?'}</button>
+      <button class="ghost" id="again">🔄 Start a new life</button>
+      <button class="ghost" type="button" onclick="openJournal()">📒 My games</button>
     </div>
     <div id="movebox" hidden class="routes"></div>
     <div id="padabox" hidden class="result padabox"></div>
-    ${homeTipHTML()}
-    ${pushOn() ? '' : `<div class="hometip"><div class="when">Never miss Today's Landing</div><p>Get one nudge a day at 8pm when a new landing arrives.</p>${pushButtonHTML()}</div>`}
-    ${remindHTML()}
+    ${collectionHTML(title, isNewVerdict, earned)}
+    ${roadHTML()}
     <a class="storylink" href="https://tally.so/r/q5480d" target="_blank" rel="noopener">Have a japa story? Share it and it could become a scene in the game →</a>
     <div class="toast" id="toast" role="status"></div>
-    <div class="foot">Everybody wants to japa. Nobody tells you what happens after you land.</div>
     <div class="foot credit">Created by <b>Nafeezie</b> · © 2026</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
   </div>`;
