@@ -10,7 +10,7 @@ async def run():
   async with async_playwright() as p:
     b = await p.chromium.launch()
     for g in range(12):
-      route = ['us','uk','ca'][g % 3]
+      route = ['us','uk','ca','eu'][g % 4]
       ctx = await b.new_context(viewport={'width':390,'height':900}, color_scheme=['light','dark'][g % 2]); pg = await ctx.new_page()
       errs = []; pg.on('pageerror', lambda e, errs=errs: errs.append(str(e)))
       posts = []
@@ -27,7 +27,7 @@ async def run():
       hist = [dict(t=now - k*DAY, r='us', trip='Lagos → Baltimore', path='work', v='Settling In', cash=900, cur='$', rent=1.2, name='', peace=60, home=55, future=40, daily=True) for k in (1, 2)]
       await pg.evaluate('h => localStorage.setItem("nyhl-history", JSON.stringify(h))', hist)
       await pg.reload()
-      await pg.click(f'#lifecard .lflags button >> nth={["us","uk","ca"].index(route)}')
+      await pg.click(f'#lifecard .lflags button >> nth={["us","uk","ca","eu"].index(route)}')
       await pg.select_option('#lplace', index=(g*7) % await pg.locator('#lplace option').count())
       await pg.select_option('#lpath', index=g % await pg.locator('#lpath option').count())
       await pg.select_option('#lfund', index=g % 5)

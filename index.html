@@ -511,7 +511,7 @@ details.custom summary{font-weight:700}
 .tmrw .lroad small{color:#fff;opacity:.8}
 @keyframes lpulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--gold) 15%,transparent)}}
 @media (prefers-reduced-motion: reduce){.lroad .next span{animation:none}}
-.lflags{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lflags{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .lflags button{font:inherit;color:inherit;cursor:pointer;display:grid;justify-items:center;gap:2px;background:var(--bubble);border:1.5px solid var(--line);border-radius:12px;padding:10px 4px}
 .lflags button.on{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
 .lflags span{font-size:26px;line-height:1.1}
@@ -603,6 +603,7 @@ function placeFrom(arr){ const [name,cost,cold,car,town,note] = arr; return {nam
 function places(key){
   if(key==='us') return US_PLACES.map(placeFrom);
   if(key==='ca') return CA_PLACES.map(placeFrom);
+  if(key==='eu') return EU_PLACES.map(x => Object.assign({car:false, note:''}, x));
   const out = [];
   for(const g in UK_GROUPS) for(const n of UK_GROUPS[g]){
     const cost = UK_COST3.includes(n)?3:UK_COST1.includes(n)?1:2;
@@ -614,7 +615,8 @@ function places(key){
 const ROUTES = {
   us:{key:'us', country:'USA', cur:'$', k:1, start:5000, rent:700, label:'United States', ask:'Which state?', sub:'Cars, credit scores, and "US experience"', def:'Maryland'},
   uk:{key:'uk', country:'UK', cur:'£', k:0.8, start:2500, rent:520, label:'United Kingdom', ask:'Which county?', sub:'Rain, tiny houses, and cars from the wrong side', def:'Norfolk'},
-  ca:{key:'ca', country:'Canada', cur:'C$', k:1.35, start:4000, rent:1100, label:'Canada', ask:'Which province or territory?', sub:'Basement apartments and minus 30', def:'Ontario'}
+  ca:{key:'ca', country:'Canada', cur:'C$', k:1.35, start:4000, rent:1100, label:'Canada', ask:'Which province or territory?', sub:'Basement apartments and minus 30', def:'Ontario'},
+  eu:{key:'eu', country:'Europe', cur:'€', k:0.92, start:3500, rent:650, label:'Europe', ask:'Which country?', sub:'Languages, appointments, and shops that close on Sunday', def:'Germany'}
 };
 
 const ORIGIN_LIST = [["Abia","Aba"],["Adamawa","Yola","YOL"],["Akwa Ibom","Uyo","QUO"],["Anambra","Onitsha"],["Bauchi","Bauchi","BCU"],["Bayelsa","Yenagoa"],["Benue","Makurdi","MDI"],["Borno","Maiduguri","MIU"],["Cross River","Calabar","CBQ"],["Delta","Asaba","ABB"],["Ebonyi","Abakaliki"],["Edo","Benin City","BNI"],["Ekiti","Ado-Ekiti"],["Enugu","Enugu","ENU"],["FCT","Abuja","ABV"],["Gombe","Gombe","GMO"],["Imo","Owerri","QOW"],["Jigawa","Dutse"],["Kaduna","Kaduna","KAD"],["Kano","Kano","KAN"],["Katsina","Katsina","DKA"],["Kebbi","Birnin Kebbi"],["Kogi","Lokoja"],["Kwara","Ilorin","ILR"],["Lagos","Lagos","LOS"],["Nasarawa","Lafia"],["Niger","Minna","MXJ"],["Ogun","Abeokuta"],["Ondo","Akure","AKR"],["Osun","Osogbo"],["Oyo","Ibadan","IBA"],["Plateau","Jos","JOS"],["Rivers","Port Harcourt","PHC"],["Sokoto","Sokoto","SKO"],["Taraba","Jalingo"],["Yobe","Damaturu"],["Zamfara","Gusau"]];
@@ -628,7 +630,7 @@ const RENT = () => Math.round(R.rent*MULT[L.cost]/10)*10;
 const NGN_PER_USD = 1500;
 const N = x => '₦' + (Math.round(x*NGN_PER_USD/5000)*5000).toLocaleString('en-GB') + ' (about ' + M(A(x)) + ')';
 const NG = x => '₦' + (Math.round(x*NGN_PER_USD/5000)*5000).toLocaleString('en-GB');
-const HRS = x => Math.max(1, Math.round(A(x)/({us:15, uk:12, ca:17}[R.key])));
+const HRS = x => Math.max(1, Math.round(A(x)/({us:15, uk:12, ca:17, eu:13}[R.key])));
 const M = x => R.cur + Math.abs(Math.round(x)).toLocaleString('en-GB');
 const T = () => L.town;
 
@@ -697,10 +699,11 @@ const pickV = (key, n) => { S.v = S.v || {}; if(S.v[key]===undefined) S.v[key] =
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 /* ---------- Today's Landing: one shared game a day, numbered like Wordle ---------- */
 const DAILY_EPOCH = '2026-10-24';
+const EU_FROM = '2026-11-02';   // first Today's Landing that can send everyone to Europe
 const dsUTC = ds => { const [y,m,d] = ds.split('-').map(Number); return Date.UTC(y, m-1, d); };
 const dailyNo = ds => Math.round((dsUTC(ds) - dsUTC(DAILY_EPOCH)) / 864e5) + 1;
 function dailyPlan(ds){   // everyone gets the same country, place, route and funding on the same day
-  const rk = ['us','uk','ca'][hashStr(ds+'|rk') % 3], ps = places(rk), po = pathOptions(rk);
+  const rks = ds >= EU_FROM ? ['us','uk','ca','eu'] : ['us','uk','ca'], rk = rks[hashStr(ds+'|rk') % rks.length], ps = places(rk), po = pathOptions(rk);
   return {rk, place: ps[hashStr(ds+'|pl') % ps.length].name, path: po[hashStr(ds+'|pa') % po.length][0], fund: ['savings','savings','sold','borrowed','kept'][hashStr(ds+'|fu') % 5]};
 }
 function untilMidnight(){ const n = new Date(), m = new Date(n); m.setHours(24,0,0,0); const mins = Math.max(1, Math.round((m-n)/60000)); return Math.floor(mins/60) + 'h ' + (mins%60) + 'm'; }
@@ -1221,16 +1224,128 @@ const CA = () => [
  friend(), finale()
 ];
 
+/* ---------- Europe ---------- */
+// One route, many countries. Each country card carries its language, the appointment everyone dreads,
+// whether shops close on Sunday or for lunch, and how people get around, so shared scenes stay specific.
+const EU_PLACES = [
+ {name:'Germany', town:'Berlin', cost:2, cold:2, lang:'German', hi:'Hallo', office:'an Anmeldung appointment', closed:'sun', move:'late', note:"Germany runs on paperwork, rules, and Sunday silence. Buy a folder before you buy a coat."},
+ {name:'France', town:'Paris', cost:3, cold:1, lang:'French', hi:'Bonjour', office:'a préfecture appointment', closed:'sun', move:'strike', fr:1, note:"Your JSS French is about to be tested. Every conversation starts with bonjour, or it does not start at all."},
+ {name:'Italy', town:'Rome', cost:2, cold:1, lang:'Italian', hi:'Ciao', office:'a Questura appointment', closed:'noon', move:'strike', note:"Italy will feed you very well and process your papers very slowly. Both are an art."},
+ {name:'Spain', town:'Madrid', cost:2, cold:0, lang:'Spanish', hi:'Hola', office:'an appointment for your NIE', closed:'noon', move:'pass', note:"Lunch is at 3pm, dinner starts when you are usually asleep, and the sun is free."},
+ {name:'Netherlands', town:'Amsterdam', cost:3, cold:1, lang:'Dutch', hi:'Hoi', office:'a registration appointment at the gemeente', closed:'', move:'bike', note:"Everyone speaks English, everyone cycles, and every job ad still asks for Dutch."},
+ {name:'Belgium', town:'Brussels', cost:2, cold:1, lang:'French and Dutch', hi:'Bonjour', office:'an appointment at the commune', closed:'sun', move:'strike', fr:1, note:"Brussels speaks French, Dutch, and English, sometimes in one sentence. Your JSS French finally has a job."},
+ {name:'Portugal', town:'Lisbon', cost:2, cold:0, lang:'Portuguese', hi:'Olá', office:'a residence appointment', closed:'', move:'pass', note:"Lisbon is warm, hilly, and full of pastries. The hills are free. The rent is not."},
+ {name:'Austria', town:'Vienna', cost:2, cold:2, lang:'German', hi:'Grüß Gott', office:'a registration appointment for your Meldezettel', closed:'sun', move:'punctual', note:"Vienna is clean, calm, and very serious about Sunday rest. Do not vacuum on Sunday."},
+ {name:'Ireland', town:'Dublin', cost:3, cold:1, lang:'English', hi:'Hello', office:'an IRP appointment', closed:'', move:'pass', en:1, note:"Ireland speaks English, mostly. The accent takes two weeks, and the rent takes your salary."}
+];
+const EN = () => !!L.en;
+const EU = () => { const c = C(), lang = L.lang, shared = Math.round(RENT()*0.75/10)*10; return [
+ {day:1, art:'house', text: soldLine() + ({
+    work:`You land in ${T()} with a work permit, ${M(S.start)}, and a job that starts in two weeks. Everybody at home thinks Europe means Paris, and you have stopped correcting them.`,
+    scholar:`You land in ${T()} on a full scholarship with ${M(S.start)} and a box of Indomie. Your lectures are in English. Everything else in your life is in ${lang}.`,
+    partial:`You land in ${T()} with half your fees covered and ${M(S.start)}. Tuition here is kinder than you feared. Rent is meaner than you hoped.`,
+    study:`You land in ${T()} on a student visa with ${M(S.start)} and part of your fees paid. Your family promised the rest "before the deadline".`,
+    visitor:`You land in ${T()} on a Schengen visa with ${M(S.start)}. Everybody at home calls it "the visa that opens all of Europe". It also closes.`})[P()] +
+    (EN() ? ` Every room in ${T()} has forty people at the viewing.` : ` The only room you can afford is advertised in ${lang}. Google Translate says it comes with "warm rent" and a landlord who "loves order".`),
+  choices:[
+   {l:`Take the room, ${M(RENT())} a month`, fx:{cash:-RENT(), peace:3, future:5}, set:{stay:'room'}, r: EN() ? "You beat thirty-nine people to it with a reference letter and a very firm handshake. The room is tiny, and it is yours." : "You sign a contract you cannot read. A friend checks it later and says it is fine. You breathe for the first time in a week."},
+   {l:`Share a flat with students, ${M(shared)}`, fx:{cash:-shared, peace:-4}, set:{stay:'shared'}, r:"Four housemates from four countries. The only language you all share is passive-aggressive notes on the fridge."},
+   {l:"Stay with a Nigerian contact", fx:{peace:-8, home:2}, set:{stay:'cousin'}, r:"Free bed in a flat already holding five people and one bicycle. You sleep beside the bicycle."}]},
+ {day:2, art:'card', text:`To open a bank account in ${L.name}, you need ${L.office}. The next free slot is in six weeks. Without a bank account, nobody can pay you.`,
+  choices:[
+   {l:"Refresh the booking site at 6am", fx:{peace:-4, future:6}, set:{office:'got'}, r:"On day four, at 6:02am, a slot appears. You take it with the speed of a man catching a danfo."},
+   {l:`Pay a "fixer" ${M(A(150))} for a slot`, g:1, fx:{cash:-A(150), peace:2, future:-4}, set:{office:'fixer'}, r:"He books you a slot. It is the same slot anyone could have booked for free next Tuesday."},
+   {l:"Ask the Naija group how", sp:1, fx:{peace:2, home:2, future:5}, set:{office:'got'}, r:"Someone says to walk in at 7am with every document in a folder. You arrive at 6:45. The folder impresses everyone."}]},
+ mummyThanks(),
+ EN() ? {day:4, art:'chat', text:`Your colleague asks, "What's the craic?" You came to an English-speaking country, and you still need a translator.`,
+  choices:[
+   {l:"Say \"grand\" to everything", fx:{peace:4}, r:"It works. In Ireland, \"grand\" answers most questions, including the ones that are not questions."},
+   {l:"Ask him to say it slowly", fx:{peace:-2, future:2}, r:"He says it slowly. It does not help. He explains that craic means news, or fun, or gossip. You decide it means everything."},
+   {l:"Answer in full Pidgin", fx:{peace:3, home:2}, r:"He listens, nods, and says, \"Grand so.\" Neither of you knows what happened. You are friends now."}]}
+ : {day:4, art:'chat', text: L.fr ? `A woman at the bakery asks you something in fast French. You remember Madame in JSS2, the French classes everybody laughed through, and the "je m'appelle" you never moved past. You understand one word. It is "bonjour".`
+     : `Nobody at the shop speaks English to you, and you know three words of ${lang}. You remember the French classes in JSS2 that everybody laughed through. Any language would help now. Even French.`,
+  choices:[
+   {l:"Point, smile, and nod", fx:{peace:-4}, r:"You leave with something you did not ask for and a strong promise to yourself to learn the language."},
+   {l:"Use Google Translate out loud", fx:{peace:2, future:1}, r:"Your phone speaks for you. The cashier replies to the phone, not to you."},
+   {l:"Message your old French teacher", fx:{home:4, peace:3}, r:"She laughs for a full minute, then says, \"I told all of you.\" She sends you a list of verbs."}]},
+ {day:6, art:'car', text: {late:`Your train is twenty minutes late, and the people around you are furious. In ${O()}, this would count as early.`,
+   strike:`The trains are on strike today. Nobody around you is surprised. Your ${STU() ? 'lecture' : 'shift'} starts in an hour.`,
+   bike:`In ${T()}, everybody cycles. Children, grandmothers, and a man carrying a fridge. You have not ridden a bicycle since primary school.`,
+   punctual:`The train leaves at 8:03. You arrive at 8:04 and watch it go, perfectly on time. Nobody here waits for anybody.`,
+   pass:`Getting around ${T()} means buses, trams, and a monthly pass that costs ${M(A(50))}, or walking up hills that hate you.`}[L.move],
+  choices:[
+   {l:"Buy a second-hand bike", fx:{cash:-A(70), peace:3, future:2}, r: L.move==='bike' ? "You fall twice on day one. By day ten you ride with one hand and a phone in the other, like a local." : "You cycle everywhere. Your legs are now European."},
+   {l:"Buy the monthly pass", fx:{cash:-A(50), peace:4}, r:"The pass lives in your wallet next to your mother's photo. Both of them get you through the day."},
+   {l:"Walk and save the money", fx:{peace:-5, future:1}, r:"You learn the city on foot. Your shoes learn it too."}]},
+ STU() ? {day:8, text: EN() ? "Your student visa allows part-time work. Every part-time job wants \"Irish experience\", which you cannot get without a part-time job." : `Your student permit allows part-time work. Every part-time job ad in ${T()} wants ${lang}.`,
+  choices:[
+   {l:"Deliver food on a bike", fx:{peace:-6}, set:{job:'campus'}, r:"The app does not care what language you speak. The rain does not care either."},
+   {l:"Student assistant, in English", fx:{peace:-2, future:6}, set:{job:'campus'}, r:"Fewer hours and less money, but a professor now knows your name and your work."},
+   {l:"Cash job at an African shop. Risky", fx:{cash:A(500), peace:-12, future:-12}, set:{job:'campus', risky:true}, r:"The owner pays you in cash and jollof. The fear of losing your permit follows you everywhere."}]}
+ : P()==='visitor' ? {day:8, text:"Your Schengen visa does not let you work. The jobs that take you anyway pay cash, below minimum wage, and everybody knows you cannot complain.",
+  choices:[
+   {l:"Braid hair from home", fx:{peace:-4, home:2}, set:{job:'cashus'}, r:"Word spreads fast. Your living room becomes a salon on Saturdays, and nobody asks for papers."},
+   {l:"Work in a restaurant kitchen", fx:{peace:-8, future:-4}, set:{job:'cashus'}, r:"You wash dishes until midnight. The owner calls you \"my friend\" in three languages and pays you less than everyone else."},
+   {l:"Live on savings, fix your papers", fx:{peace:-3, future:6}, set:{job:'none'}, r:"Every euro you spend is one you cannot replace. But you stay out of trouble and keep your record clean."}]}
+ : {day:8, text: EN() ? `Your new team in ${T()} goes "for a pint" every Friday after work. You do not drink, and you do not want to miss everything.` : `Your job is in English. Everything else is in ${lang}, including your payslip, your health insurance letter, and every conversation at lunch.`,
+  choices: EN() ? [
+   {l:"Go and order a Coke", fx:{peace:3, future:5}, set:{job:'salaried'}, r:"Nobody cares what is in your glass. By the second Friday, you know everybody's mother's name."},
+   {l:"Suggest jollof Friday instead", fx:{peace:4, home:2, future:3}, set:{job:'salaried'}, r:"Half the team comes. The other half asks for the recipe on Monday."},
+   {l:"Go home and rest", fx:{peace:2, future:-3}, set:{job:'salaried'}, r:"You rest well. On Monday, everybody is laughing about a joke from Friday."}] : [
+   {l:"Sign up for evening classes", fx:{cash:-A(150), peace:-3, future:8}, set:{job:'salaried', langclass:true}, r:"Three evenings a week of grammar. Your brain hurts in a new language, and that is how you know it is working."},
+   {l:"Ask a colleague for slang", fx:{peace:4, future:3}, set:{job:'salaried'}, r:"He teaches you the important words. Three of them are rude. You learn those first."},
+   {l:"Eat lunch with your phone", fx:{peace:-4}, set:{job:'salaried'}, r:"You laugh at memes from home while the table laughs at something you will never know."}]},
+ L.closed ? {day:10, art:'food', text: L.closed==='sun' ? `It is Sunday. You need rice, and every shop in ${T()} is closed. The streets are so quiet that you can hear your own stomach.`
+     : `It is 3pm, and you need a SIM card. The shop is closed until 5. The owner is having lunch, then a rest, like a sensible person.`,
+  choices:[
+   {l:"Eat whatever is in the cupboard", fx:{peace:-4}, r:"Dinner is half a packet of pasta and two Maggi cubes. It is a creative meal."},
+   {l:"Find the one open petrol station", fx:{cash:-A(15), peace:2}, r:"You pay petrol station prices for rice. It tastes like victory and overcharge."},
+   {l:"Plan ahead like a local", fx:{peace:2, future:4}, r:"You start shopping on Saturdays like everyone else. You are becoming European, one shopping list at a time."}]} : null,
+ sibling(),
+ {day:13, art:'house', text: EN() ? "A neighbour leaves a note on your door, in English so polite that it somehow sounds angry. It is about your bins." : `A neighbour leaves a note on your door in ${lang}. It has three exclamation marks and a drawing of a bin.`,
+  choices:[
+   {l:"Translate it and apologise", fx:{peace:2, future:2}, r:"It is about recycling. Brown glass, green glass, and white glass go in three different bins. You did not know glass had tribes."},
+   {l:"Knock and ask in person", fx:{peace:4, home:1}, r:"She explains with her hands and a lot of patience. By the end she offers you cake. You are neighbours now."},
+   {l:"Ignore it", fx:{peace:-4}, r:"A second note arrives. This one has a photo of your bin bag."}]},
+ {day:14, from:c.mum, sub:`${c.home} · voice note`, text:`${cap(c.endear)}, so this Europe, is it the same as London? Why didn't you just go to the UK like your cousin?`,
+  choices:[
+   {l:"Explain that Europe is many countries", fx:{home:-1, peace:2}, r:"She listens patiently. Then she tells everybody you are in London."},
+   {l:"Say yes, it is basically London", fx:{home:3, peace:3}, r:"She is happy. Your aunty asks you to check on her son in Manchester."},
+   {l:"Send her a photo of the city", fx:{home:4}, r:"She says it looks \"very old\". She means it as a compliment, mostly."}]},
+ {day:15, auto:'pay1'},
+ contribution(),
+ {day:18, text: EN() ? `You have a fever, and the next GP appointment in ${T()} is in eleven days.` : `You have a fever, and the pharmacist only speaks ${lang}. You explain your symptoms by pointing at your body and making noises.`,
+  choices:[
+   {l: EN() ? "Ask the pharmacist instead" : "Point and perform", fx:{peace:-2}, r: EN() ? "The pharmacist is quick, kind, and asks which state you are from. She is from Edo." : "She understands everything from your performance and gives you the right tablets. You are a gifted actor."},
+   {l:"Call a Nigerian nurse in the group", fx:{home:3, peace:4}, r:"She video calls you, sorts everything out, and scolds you for not wearing a hat."},
+   {l:"Treat it with ginger at home", fx:{peace:-4, home:2}, r:"Ginger, lemon, and stubbornness. You recover in nine days instead of three."}]},
+ doubt(20, EN() ? `You sit on a wet bench in ${T()} after another rejection email.` : `You sit in a ${lang} class where the teenagers learn faster than you.`, "You write them in the back of your phrasebook. Safety, a future, and a passport that opens more doors."),
+ farm(), promise(),
+ {day:22, art:'food', text:`The nearest African shop to your place is two trains away. The Nigerian community is small enough that everybody knows your business by Friday.`,
+  choices:[
+   {l:"Make the trip every Saturday", fx:{cash:-A(30), peace:6, home:2}, r:"Palm oil, garri, and gossip. You come back with full bags and the full story of everybody's papers."},
+   {l:"Join the community WhatsApp", fx:{peace:2, home:4, future:3}, set:{network:true}, r:"Two hundred Nigerians in one group. Someone has a room, someone has a job, and someone has opinions about your hair."},
+   {l:"Cook with local ingredients", fx:{peace:-3, future:2}, r:"Egusi made with pumpkin seeds from the supermarket. It is related to egusi, distantly."}]},
+ {day:23, art:'phone', text: EN() ? "An official letter about your permit arrives, written in English so formal that it might as well be Latin." : `An official letter arrives in ${lang}. The translation app turns it into a court summons. Your hands start shaking.`,
+  choices:[
+   {l:"Take it to the migrant help office", fx:{peace:4, future:6}, r:"The adviser reads it in ten seconds. It is a reminder to renew something in four months. You laugh until you cry."},
+   {l:"Ask the Naija group", fx:{peace:2, home:2}, r:"Thirty people reply with thirty translations. Two are correct, and one is a prayer."},
+   {l:"Put it in a drawer and pray", fx:{peace:-6, future:-4}, r:"The drawer keeps it safe for three weeks. Then a second letter arrives, angrier."}]},
+ {day:25, auto:'pay2'},
+ {day:27, when: s => s.f.sibling==='sent' || s.f.sibling==='video', auto:'roof'},
+ friend(), finale()
+].filter(Boolean); };
+
 let SCENES = [];
 /* ---------- How you japa'd ---------- */
 const PATHS = {
-  work:    {us:'With a job offer or a green card', uk:'On a skilled worker visa', ca:'With permanent residence', mult:1},
+  work:    {us:'With a job offer or a green card', uk:'On a skilled worker visa', ca:'With permanent residence', eu:'With a work permit', mult:1},
   scholar: {all:'On a full scholarship', mult:0.6},
   partial: {all:'With partial funding', mult:0.55},
   study:   {all:'Self-funded, without the full fees', mult:0.5},
   care:    {uk:'On a care worker visa', mult:0.5},
   lottery: {us:'Won the visa lottery', mult:0.8},
-  visitor: {us:'Came on a visitor visa and stayed', uk:'Came to visit and stayed', ca:'Came to visit and stayed', mult:0.6}
+  visitor: {us:'Came on a visitor visa and stayed', uk:'Came to visit and stayed', ca:'Came to visit and stayed', eu:'Came on a Schengen visa and stayed', mult:0.6}
 };
 function pathOptions(rk){ return Object.entries(PATHS).filter(([k,v])=>v.all||v[rk]).map(([k,v])=>[k, v[rk]||v.all]); }
 const P = () => S.path || 'work';
@@ -1276,7 +1391,7 @@ function pathScenes(){
        {l:"Work extra hours", fx:{cash:A(250), peace:-6, future:-2}, r:"Weekends disappear. So does your social life, which was mostly WhatsApp anyway."}]});
   }
   if(p==='work' || p==='lottery'){
-    const papers = {us:'green card', uk:'visa', ca:'PR card'}[R.key];
+    const papers = {us:'green card', uk:'visa', ca:'PR card', eu:'residence permit'}[R.key];
     out.push([
      {day:11, text:`You have a ${papers}, but no credit history. The apartment, the phone contract, and the car dealer all say the same thing in different words. "We cannot see you."`,
       choices:[
@@ -1303,7 +1418,7 @@ function pathScenes(){
        {l:"Say the money comes in parts", fx:{home:3, peace:-4, future:-2}, r:"Now the whole family is waiting for instalments that do not exist."}]});
   }
   if(p==='visitor'){
-    const pro = {us:'immigration attorney', uk:'regulated immigration adviser', ca:'licensed immigration lawyer'}[R.key];
+    const pro = {us:'immigration attorney', uk:'regulated immigration adviser', ca:'licensed immigration lawyer', eu:'registered immigration lawyer'}[R.key];
     out.push({day:11, text:`A man at a party says he is a lawyer and can "fix your papers" for ${M(A(3000))} cash. No office, no receipt, and he only takes calls at night.`,
       choices:[
        {l:"Pay him the cash", fx:{cash:-A(3000), peace:4, future:-12}, set:{status:'scam'}, r:"He takes the money, shakes your hand, and promises good news by month end."},
@@ -1416,7 +1531,18 @@ const countryMoment = () => { const k = R.key; const pool = {
      {l:"Go to a free tax clinic", fx:{future:5, peace:2}, r:"A volunteer files everything for free and tells you a credit is coming. Canada gives back. Slowly."},
      {l:"Pay a tax preparer C$80", fx:{cash:-80, peace:4, future:3}, r:"He asks if you have receipts. You have a shoebox. He sighs and starts."},
      {l:"Taxes? You just got here", fx:{peace:-3, future:-4}, r:"Next year you discover you missed money you were owed. Lesson learned."}]}]
-  }[k]; const usable = (k==='us' && (P()==='visitor' || S.f.job==='cashus')) ? pool.slice(1) : pool; return usable[pickV('X'+k, usable.length)]; };
+  , eu:[
+   {day:29, text: EN() ? `A GP visit in ${T()} costs ${M(A(65))}. Your colleague says private health insurance is "worth it" and sends you three links.` : `A letter says health insurance is mandatory in ${L.name}. It is monthly, it costs ${M(A(120))}, and it is written in ${L.lang}.`,
+    choices:[
+     {l:"Take the full cover", fx:{cash:-A(120), peace:6, future:4}, r:"You do not get sick this month. You still feel smarter."},
+     {l:"Pick the cheapest plan", fx:{cash:-A(60), peace:-1}, r:"The cheapest plan covers the basics. You decide to only have basic problems."},
+     {l:"Ask the Naija group which one", fx:{cash:-A(90), home:2, peace:3, future:3}, r:"Forty opinions later, one aunty sends a comparison table. She is an actuary. Of course she is."}]},
+   {day:29, when: () => !EN(), text:`To get permanent residence one day, you will need a ${L.lang} certificate. The exam costs ${M(A(200))}, and the course costs more.`,
+    choices:[
+     {l:"Book the course now", fx:{cash:-A(250), peace:-2, future:10}, r:"Your first lesson is the alphabet. You are thirty-something and proud of it."},
+     {l:"Find a language exchange partner", fx:{peace:4, future:6}, r:`You teach her Pidgin, and she teaches you ${L.lang}. She learns faster. She now says "wahala" at work.`},
+     {l:"Worry about it next year", fx:{peace:2, future:-4}, r:"Next year arrives faster than your grammar."}]}]
+  }[k]; const usable = (k==='us' && (P()==='visitor' || S.f.job==='cashus')) ? pool.slice(1) : pool; const ok = usable.filter(sc => !sc.when || sc.when(S)); return ok[pickV('X'+k, ok.length)]; };
 
 /* ---------- Alternate versions of route scenes ---------- */
 const routeAlts = () => { const c = C(), k = R.key, out = [];
@@ -1604,7 +1730,7 @@ const padaScene = () => { const c = C(), late = 1, when = s => s.landing===1 && 
   ][pickV('PD',2)]; };
 
 /* ---------- Stranded at arrivals ---------- */
-const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the airport', uk:'Heathrow', ca: T()==='Toronto' ? 'Pearson' : 'the airport'}[R.key];
+const arrival = () => { const port = {us: L.name==='Maryland' ? 'BWI' : 'the airport', uk:'Heathrow', ca: T()==='Toronto' ? 'Pearson' : 'the airport', eu:'the airport'}[R.key];
   return {day:1, core:1, when: s => s.landing===1 && pickV('air',5)===1, text:`You land at ${port}. The man who arranged your trip said someone would pick you up. He is not picking up his calls. The people you know are hours away, and the only person in ${T()} is at work until 6pm.`,
   choices:[
    {l:"Wait for your friend", fx:{peace:-6, home:2}, set:{stay: R.key==='ca' ? 'basement' : 'room'}, r:"Three hours on an airport bench with two suitcases and a dying phone. When she arrives, you hug her like family."},
@@ -1636,7 +1762,7 @@ const guestStay = () => { const c = C(), p = PRO(), host = s => pickV('HOST',2)=
 
 function scenes(){
   if(inCh()) return CHAPTERS[S.life.ch].scenes();
-  const base = [arrival(), barNight()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : CA());
+  const base = [arrival(), barNight()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : R.key==='eu' ? EU() : CA());
   const arrived = s => s.landing===1 && [1,2].includes(pickV('air',5));   // an arrival story already covered day 1
   const alts = routeAlts();
   base.concat(alts).forEach(sc => { if(sc.day===1 && !sc.core){ const w = sc.when; sc.when = s => !arrived(s) && (!w || w(s)); } });
@@ -1645,7 +1771,13 @@ function scenes(){
 
 function autoEvent(kind){
   const f = S.f, k = R.key; let text = '', fx = {};
-  if(kind==='pay1'){
+  if(kind==='pay1' && k==='eu'){
+    if(f.job==='salaried'){ text = `No salary yet. In ${L.name}, payday is the end of the month, and the month is very long.`; fx = {cash:0, peace:-2}; }
+    else if(f.job==='campus'){ text = "First part-time pay. €450. It covers groceries and half a textbook."; fx = {cash:450}; }
+    else if(f.job==='cashus'){ text = "Cash in an envelope. €500 for two weeks of long days. No payslip, and no room to complain."; fx = {cash:500, peace:-4}; }
+    else { text = "No pay. Your savings are now your salary, and they are not getting a raise."; fx = {cash:0, peace:-5}; }
+  }
+  else if(kind==='pay1'){
     if(k==='us'){
       if(f.job==='warehouse'){ text = "First paycheck. $1,100 after tax. You stare at the tax line for a long time."; fx = {cash:1100, peace:-3}; }
       else if(f.job==='care'){ text = "First paycheck. $900. Aunty asks how much you got before you have even opened the app."; fx = {cash:900}; }
@@ -1670,7 +1802,19 @@ function autoEvent(kind){
       if(f.stay==='airbnb'){ const m = Math.round(450*MULT[L.cost]); text += ` The Airbnb wants ${M(m)} for another week.`; fx.cash -= m; }
     }
   }
-  if(kind==='pay2'){
+  if(kind==='pay2' && k==='eu'){
+    if(f.job==='salaried'){ text = EN() ? "Your first salary lands. €2,050 after tax, USC, and PRSI. Three new words on one payslip." : `Your first salary lands. €2,050 after tax, health insurance, and pension. The payslip is in ${L.lang}, so you just trust the number.`; fx = {cash:2050, peace:6, future:4}; }
+    else if(f.job==='campus'){ text = "Second part-time pay, €450. Your supervisor asks if you can cover extra hours during exams."; fx = {cash:450, future:2}; }
+    else if(f.job==='cashus'){ text = "Another envelope, €480. The owner says business is slow, and you both know you will not ask twice."; fx = {cash:480, peace:-4}; }
+    else if(P()==='visitor'){ text = "No pay again. A friend lets you help at her stall for €120, and you count every note twice."; fx = {cash:120, peace:-4}; }
+    else { text = "No pay. Your savings are now your salary, and they are not getting a raise."; fx = {cash:0, peace:-5}; }
+    if(P()==='scholar'){ text += " Your scholarship stipend lands too, €1,300."; fx.cash += 1300; }
+    if(P()==='partial'){ text += " Your partial stipend lands too, €650."; fx.cash += 650; }
+    if(f.stay==='room'){ text += ` Rent is due. ${M(RENT())}.`; fx.cash -= RENT(); }
+    if(f.stay==='shared'){ const r = Math.round(RENT()*0.75/10)*10; text += ` Rent is due. ${M(r)}, and somebody has eaten your yoghurt.`; fx.cash -= r; }
+    if(f.stay==='cousin'){ text += " Your host asks for €150 for bills. You pay it gladly."; fx.cash -= 150; }
+  }
+  else if(kind==='pay2'){
     if(k==='us'){
       if(f.job==='warehouse'){ text = "Second paycheck, $1,100. Your body has stopped asking questions."; fx = {cash:1100, peace:-3}; }
       else if(f.job==='care'){ text = "Second paycheck, $900. The old man gives you a $50 tip and calls you his favourite."; fx = {cash:950, peace:3}; }
@@ -1959,7 +2103,7 @@ function render(){
           ${set ? `<button class="ghost" type="button" id="medone">Save</button>` : ''}</div>`
         : `<div class="me"><span>👤 <b>${esc(nm || 'Anonymous lander')}</b> · leaving from ${esc(from[1])}</span><button type="button" id="meedit">Change</button></div>`; })()}
       ${(() => { const ds = todayStr(), plan = dailyPlan(ds), pl = places(plan.rk).find(x=>x.name===plan.place), done = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).pop();
-        const where = (pl.town===pl.name ? pl.name : pl.town + ', ' + pl.name) + ', ' + ROUTES[plan.rk].label;
+        const where = (pl.town===pl.name ? pl.name : pl.town + ', ' + pl.name) + (plan.rk==='eu' ? '' : ', ' + ROUTES[plan.rk].label);
         if(done) return tomorrowHTML({top: `<div class="when" style="color:var(--gold)">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><div class="tm-done"><b>${scoreOf(done)}</b><small>/100 today</small><span>📍 ${where}</span></div>`,
           bottom: `<button class="primary" id="dailygo" type="button">🏆 See how everyone did today</button>`});
         return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>📍 Everyone lands in ${where} today</b>
@@ -1973,7 +2117,7 @@ function render(){
         <summary>🎮 Play more · pick your own country</summary>
         <div class="how-body">
         <div class="foot" style="text-align:left;margin:-2px 0 4px">Planning to japa? Try your exact route before you go. Already abroad? Relive your JJC days. Any country, as often as you like.</div>
-      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select">${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
+      <div class="quick">${Object.values(ROUTES).map(r=>`<button class="quick-btn" data-q="${r.key}"><span class="flag" aria-hidden="true">${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦',eu:'🇪🇺'}[r.key]}</span><b>${r.label}</b><span class="go" aria-hidden="true">${pick.qroute===r.key?'↓':'→'}</span></button>${pick.qroute===r.key ? `<div class="route-panel" id="qpanel"><label class="when" for="qplace">${r.ask}</label><select id="qplace" class="select">${placeOptions(r.key).replace(/ selected/g,'')}</select><label class="when" for="qpath">How did you japa?</label><select id="qpath" class="select"><option value="">Surprise me</option>${pathOptions(r.key).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qfund">How did you fund the move?</label><select id="qfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><label class="when" for="qgender">I am a</label><select id="qgender" class="select"><option value="any">Rather not say</option><option value="woman"${pick.gender==='woman'?' selected':''}>Woman</option><option value="man"${pick.gender==='man'?' selected':''}>Man</option></select><label class="when" for="qculture">Your family's voice</label><select id="qculture" class="select"><option value="">Match where I am leaving from</option>${Object.entries(CULTURES).filter(([k])=>k!=='general').map(([k,v])=>`<option value="${k}">${v.label}</option>`).concat([`<option value="general">General Nigerian</option>`]).join('')}</select><button class="primary" id="qgo">Land in ${r.label}</button></div>` : ''}`).join('')}</div>
         <div class="foot">Pick, tap, and land. Anything you skip is a surprise. About 5 minutes.</div>
         </div>
       </details>
@@ -2624,7 +2768,7 @@ function boardHTML(){
   if(!boardRows) return `<p>Loading this week's board...</p>`;
   const b = BOARDS.find(x=>x.key===boardTab);
   const rows = bestPerPlayer(boardRows, b).slice(0,10);
-  const flag = {us:'🇺🇸', uk:'🇬🇧', ca:'🇨🇦'};
+  const flag = {us:'🇺🇸', uk:'🇬🇧', ca:'🇨🇦', eu:'🇪🇺'};
   const list = rows.length ? rows.map((r,i)=>`<div class="lb-row${myPostAt && Date.parse(r.created_at)===myPostAt ? ' me' : ''}"><span class="lb-rank">${i+1}</span><div><b>${esc(r.name)}</b><small>${flag[r.route]||''} ${esc(r.town)} · ${esc(r.verdict)}</small></div><span class="lb-val">${b.show(r)}</span></div>`).join('')
     : `<p>${b.key==='spotted' ? 'Nobody has spotted a trap yet this week. Play with your eyes open to be the first.' : 'Nobody is on this board yet this week. Finish a game to be the first.'}</p>`;
   const cr = boardCrown ? `<div class="lb-crown">👑 Last week's Best Landing: <b>${esc(boardCrown.name)}</b>, ${boardCrown.score}/100</div>` : '';
@@ -2672,7 +2816,7 @@ async function autoPost(title, onRank){
     const send = b => fetch(SB_URL + '/rest/v1/landings?select=created_at', {method:'POST', headers:{apikey:SB_KEY, 'Content-Type':'application/json', Prefer:'return=representation'}, body:JSON.stringify(b)});
     let res = await send(body);
     if(res.status===400){ const t = await res.clone().text(); if(/spotted/i.test(t)){ delete body.spotted; res = await send(body); } }
-    if(res.status>=400 && res.status<500){ S.postFail = 'The board is busy right now, so this game was not added.'; paint(); return; }
+    if(res.status>=400 && res.status<500){ const t = R.key==='eu' ? await res.clone().text().catch(()=>'') : ''; S.postFail = /route/i.test(t) ? 'Europe joins the leaderboard very soon. This game was not added.' : 'The board is busy right now, so this game was not added.'; paint(); return; }
     if(!res.ok) throw new Error('post ' + res.status);
     S.posted = true; track('leaderboard-post');
     try{ const out = await res.json(); myPostAt = Date.parse(out[0].created_at); rememberPost(out[0].created_at); }catch(e){}
@@ -2706,7 +2850,7 @@ async function renderWinners(app){
   if(!wins.length){ app.innerHTML = `<div class="scene fade"><div class="when">Weekly winners · ${range}</div><p>Nobody posted a landing that week.${thisWeek?'':' Try <a href="?winners=this">this week so far</a>.'}</p></div>`; return; }
   try{ await Promise.all(["800 80px 'Playfair Display'","600 40px 'DM Sans'","800 40px 'DM Sans'"].map(f=>document.fonts.load(f))); }catch(e){}
   const W=1080, H=1350, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d');
-  const green='#102F28', gold='#E8BB69', paper='#F8F4E9', flagTxt = {us:'USA', uk:'UK', ca:'CANADA'};
+  const green='#102F28', gold='#E8BB69', paper='#F8F4E9', flagTxt = {us:'USA', uk:'UK', ca:'CANADA', eu:'EUROPE'};
   x.fillStyle=green; x.fillRect(0,0,W,H);
   x.fillStyle=gold; x.font="700 30px 'DM Sans', sans-serif"; x.fillText('NOW YOU HAVE LANDED', 80, 110);
   x.fillStyle='#FFFFFF'; x.font="800 84px 'Playfair Display', Georgia, serif"; x.fillText(thisWeek ? 'Winners so far' : 'Weekly winners', 80, 210);
@@ -2848,7 +2992,7 @@ function openAbout(){
       <div><span>🧳</span><b>Planning to japa?</b><small>Know what to expect before you board.</small></div>
       <div><span>👀</span><b>Staying home?</b><small>See what life abroad really looks like.</small></div>
     </div>
-    <div class="ab-strip"><span>🇺🇸 🇬🇧 🇨🇦</span><span>⏱️ 5 min</span><span>📅 Daily</span><span>📖 Story mode</span><span>🆓 Free</span></div>
+    <div class="ab-strip"><span>🇺🇸 🇬🇧 🇨🇦 🇪🇺</span><span>⏱️ 5 min</span><span>📅 Daily</span><span>📖 Story mode</span><span>🆓 Free</span></div>
     <p class="ab-real">Built from real japa stories. Your family's calls, your money, your peace.</p>
     <div class="ab-foot"><b>nowyouhavelanded.com</b><span>Created by Nafeezie</span></div>
   </div>
@@ -3157,7 +3301,7 @@ function lifeComeback(){ const c = C(), p = PRO(), k = S.cbk || 'k2', base = {da
 
 /* Chapter 1 · Months 2 to 3 · Payslip and Rent */
 const lifeCh1 = () => { const c = C(), End = cap(c.endear), noPay = lifePay()===0, out = [];
-  const lines = {us:'federal tax, state tax, Social Security, Medicare', uk:'income tax, National Insurance, a pension you joined without knowing', ca:'federal tax, provincial tax, CPP, EI'}[R.key];
+  const lines = {us:'federal tax, state tax, Social Security, Medicare', uk:'income tax, National Insurance, a pension you joined without knowing', ca:'federal tax, provincial tax, CPP, EI', eu: EN() ? 'income tax, USC, PRSI' : `income tax, health insurance, and pension, all in ${L.lang},`}[R.key];
   out.push({day:1, label:'Month 2', art:'coins', text: noPay ? "Month two. Your bank app shows money going out and nothing coming in. Every tap of your card feels like a small surgery."
       : `Your payslip has more lines than your CV. There is ${lines}, and a line called "other" that nobody can explain. What reaches your account is a smaller number with a big attitude.`,
     choices: noPay ? [
@@ -3258,7 +3402,8 @@ const lifeCh2 = () => { const c = C(), End = cap(c.endear), work = STU() ? 'scho
   out.push({day:2, label:'Month 4', art: cold ? 'snow' : 'sun', text: {
       us: cold ? "Your first winter gas bill arrives. It is bigger than your phone bill, your internet, and your feelings combined." : "Your electricity bill arrives after a month of the AC and the heater fighting each other. Both of them won.",
       uk: "Your energy bill arrives. The smart meter has been judging you all month, and now it has numbers.",
-      ca: "Your landlord says heating is included. Then he sets the thermostat to 17 degrees and locks the box."}[R.key],
+      ca: "Your landlord says heating is included. Then he sets the thermostat to 17 degrees and locks the box.",
+      eu: L.cold===0 ? `Nobody told you that houses in ${L.name} are built for summer. Your flat is colder inside than the street outside.` : EN() ? "Your heating bill arrives. It is bigger than your Christmas plans." : `Your heating bill arrives with a summary in ${L.lang}. You only understand the number, and the number is enough.`}[R.key],
     choices:[
      {l:"Buy thermal everything", fx:{cash:-A(80), peace:6}, r:"Thermal vest, thermal socks, and a hot water bottle you name after your grandmother."},
      {l: R.key==='ca' ? "Buy a space heater" : "Heating on. Peace on", fx:{cash:-A(220), peace:5, future:-1}, r:"Your room is warm and your account is cold. You choose warm."},
@@ -3347,7 +3492,7 @@ function lifeCardHTML(){
     const rk = pick.lroute;
     return `<div class="life" id="lifecard">${head}<h3>Live one life, from arrivals to years later.</h3>${lifeRoad(null)}
       <p>Your money, your meters, and your choices follow you into every chapter. Where does your life start?</p>
-      <div class="lflags">${Object.values(ROUTES).map(r => `<button type="button" class="${rk===r.key?'on':''}" onclick="lifePick('${r.key}')"><span>${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦'}[r.key]}</span><b>${r.country}</b></button>`).join('')}</div>
+      <div class="lflags">${Object.values(ROUTES).map(r => `<button type="button" class="${rk===r.key?'on':''}" onclick="lifePick('${r.key}')"><span>${{us:'🇺🇸',uk:'🇬🇧',ca:'🇨🇦',eu:'🇪🇺'}[r.key]}</span><b>${r.country}</b></button>`).join('')}</div>
       ${rk ? `<div class="lpanel"><label class="when" for="lplace">${ROUTES[rk].ask}</label><select id="lplace" class="select">${placeOptions(rk)}</select>
         <label class="when" for="lpath">How did you japa?</label><select id="lpath" class="select"><option value="">Surprise me</option>${pathOptions(rk).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select>
         <label class="when" for="lfund">How did you fund the move?</label><select id="lfund" class="select"><option value="">Surprise me</option>${FUNDS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select>
@@ -3355,7 +3500,7 @@ function lifeCardHTML(){
         <button class="primary" type="button" id="lifego" onclick="lifeStart()">🛬 Start my life in ${ROUTES[rk].label}</button></div>` : ''}</div>`;
   }
   const nx = lifeNext(lf), c = CHAPTERS[nx.n], P0 = lf.S, cur = ROUTES[lf.rk].cur, pl = places(lf.rk).find(p=>p.name===lf.place) || {town:lf.place, name:lf.place};
-  const where = `📍 ${pl.town===pl.name ? pl.name : pl.town+', '+pl.name}, ${ROUTES[lf.rk].country}`;
+  const where = `📍 ${pl.town===pl.name ? pl.name : pl.town+', '+pl.name}${lf.rk==='eu' ? '' : ', '+ROUTES[lf.rk].country}`;
   const stats = `<div class="lstats"><span>💵 ${P0.cash<0?'-':''}${cur}${Math.abs(Math.round(P0.cash)).toLocaleString('en-GB')}</span><span>🧘🏾 ${P0.peace}</span><span>🏠 ${P0.home}</span><span>🚀 ${P0.future}</span></div>`;
   const body = nx.done ? `<p>Your life abroad is complete.</p>`
     : nx.soon ? `<p class="llock">✍🏾 Chapter ${nx.n}, ${c.title}, is being written. Your life is saved and waiting.</p>`

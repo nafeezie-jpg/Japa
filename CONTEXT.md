@@ -3,7 +3,7 @@
 Read this, then read index.html, before changing anything.
 
 ## The game
-- Browser game about a Nigerian's first 30 days in the US, UK, or Canada. Live at nowyouhavelanded.com.
+- Browser game about a Nigerian's first 30 days in the US, UK, Canada, or Europe. Live at nowyouhavelanded.com.
 - Built by Nafeezie (Nafeesat). The repo is nafeezie-jpg/Japa and is served by GitHub Pages from main. The domain is on Namecheap.
 - Everything lives in one file, index.html, written in vanilla JS. Other files: sw.js (push notifications), manifest.json and icons (home screen app), supabase/ (SQL and the daily-push edge function).
 - Analytics: GoatCounter site "nowyouhavelanded". Player stories come in through Tally form q5480d.
@@ -55,6 +55,14 @@ Read this, then read index.html, before changing anything.
   - Table `landings` allows insert and select only, with a guard trigger. The boards are Best landing, Most streetwise, Hardest heart, Softest heart, and Most trusting. The board reset time is BOARD_FROM.
   - Table `push_subs` stores push subscriptions. Edge function `daily-push` runs hourly through pg_cron and sends at 8pm local time.
 - **Family voice.** CULTURES (yoruba, igbo, hausa, general) are chosen from the player's state of origin. Gendered stories use PRO().
+
+## Europe
+- One route (`eu`, currency €). Players pick a country the way they pick a US state. EU_PLACES holds a card per country: language, hello, the appointment everyone dreads (`office`), whether shops close on Sunday or at lunch (`closed`), how people get around (`move`), `fr` for French-speaking, and `en` for Ireland.
+- Countries: Germany, France, Italy, Spain, Netherlands, Belgium, Portugal, Austria, Ireland. Add one by adding a card.
+- The language barrier carries the route. Ireland (EN()) gets English versions of the language scenes.
+- Scenes live in EU(). Pay events, the day 29 moment, and both life chapters have Europe versions.
+- Today's Landing only sends everyone to Europe from EU_FROM (2026-11-02), so days already played keep their plan. Move it to the day after merging if that date has passed.
+- The leaderboard table only accepted us, uk, and ca. Run the "Europe route" part at the end of supabase/landings.sql once, or Europe games show "Europe joins the leaderboard very soon" instead of a rank.
 
 ## Testing
 - `python3 tests/full_games.py` plays 24 random full games with the leaderboard mocked. It must print `ISSUES: none`.

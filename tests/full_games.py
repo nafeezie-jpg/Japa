@@ -12,7 +12,7 @@ async def run():
       await r.fulfill(status=200, content_type='application/json', body=json.dumps([dict(x,created_at="2026-10-24T22:00:00Z", spotted=x.get('spotted',0)) for x in posts]))
     games=0
     for g in range(24):
-      route=['us','uk','ca'][g%3]
+      route=['us','uk','ca','eu'][g%4]
       ctx=await b.new_context(viewport={'width':390,'height':900}, color_scheme=['light','dark'][g%2]); pg=await ctx.new_page()
       errs=[]; pg.on('pageerror', lambda e, errs=errs: errs.append(str(e)))
       await pg.route('**/rest/v1/**', h); await pg.route('**/gc.zgo.at/**', lambda r: r.abort()); await pg.route('**/fonts.g*/**', lambda r: r.abort())
