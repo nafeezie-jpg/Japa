@@ -676,8 +676,8 @@ function dailyPlan(ds){   // everyone gets the same country, place, route and fu
 }
 function untilMidnight(){ const n = new Date(), m = new Date(n); m.setHours(24,0,0,0); const mins = Math.max(1, Math.round((m-n)/60000)); return Math.floor(mins/60) + 'h ' + (mins%60) + 'm'; }
 setInterval(() => { const e = document.getElementById('cd'); if(e) e.textContent = untilMidnight(); }, 30000);
-/* ---------- Your time abroad: every Today's Landing you play adds two weeks ---------- */
-// milestones are counted in daily games played (each one is two weeks abroad)
+/* ---------- Japa experience: every Today's Landing is a new first month lived. Titles grow with them. ---------- */
+// milestones are counted in Today's Landings played, one per day
 // [daily games, time milestone, reputation, icon]
 const ABROAD_BADGES = [[2,'First Month Abroad','JJC','🐣'],[7,'Three Months In','Still Converting to Naira','🧮'],[13,'Six Months In','Knows the Bus Routes','🚌'],[26,'One Year Abroad','Proper Abroad Person','🧥'],[52,'Two Years Strong','Sends Advice Home','📢'],[78,'Three Years, Still Here','Weather Complainer','🌦️'],[130,'Five-Year Veteran','Japa Veteran','🧓🏾']];
 const JUST_LANDED = [0,'Just landed','Just Landed','🛬'];
@@ -689,9 +689,9 @@ const monthsLabel = n => { const w = n*2, y = Math.floor(w/52), rest = w - y*52,
   return [y ? `${y} year${y>1?'s':''}` : '', m ? `${m} month${m>1?'s':''}` : '', !y && wk>=2 ? `${wk} weeks` : ''].filter(Boolean).join(' and '); };
 function abroadHTML(newBadge){
   const n = abroadMonths(), next = ABROAD_BADGES.find(([k]) => k > n), got = ABROAD_BADGES.filter(([k]) => k <= n);
-  return `<div class="abroad"><div class="when">Your time abroad</div><b>${monthsLabel(n)}</b>
+  return `<div class="abroad"><div class="when">Your japa experience</div><b>${n} landing${n===1?'':'s'}</b>
     ${newBadge ? `<p class="abnew">🎉 New milestone: ${newBadge}</p>` : ''}
-    <span>Each day you play Today's Landing adds two weeks abroad. Replays on the same day do not count.</span>
+    <span>Each Today's Landing is a new first month abroad. Live through more of them to earn your next title.</span>
     ${next ? `<span class="abnext">Next: <b>${next[1]}</b>, ${n} of ${next[0]} days played.</span>` : '<span class="abnext">You have reached every milestone.</span>'}
     ${got.length ? `<div class="abadges">${got.map(([,t])=>`<i>🏅 ${t}</i>`).join('')}</div>` : ''}</div>`;
 }
@@ -2771,9 +2771,9 @@ function tomorrowHTML(opts){
     <div class="tm-tiles">
       <div><span class="tm-ic">⏳</span><b id="cd">${untilMidnight()}</b><small>next landing</small></div>
       <div><span class="tm-ic">🔥</span><b>${streak}</b><small>day streak</small></div>
-      <div><span class="tm-ic">🌍</span><b>${days*2}w</b><small>abroad</small></div>
+      <div><span class="tm-ic">🛬</span><b>${days}</b><small>landing${days===1?'':'s'} lived</small></div>
     </div>
-    <div class="tm-road"><span class="tm-rep">${myRep(days)[3]} You are: <b>${myRep(days)[2]}</b></span>${next ? `<div class="tm-bar"><i style="width:${Math.max(6,pct)}%"></i></div><span>Next: ${next[3]} ${next[2]} at ${timeOf(next[0])} · ${days}/${next[0]} days</span>` : ''}</div>
+    <div class="tm-road"><span class="tm-rep">${myRep(days)[3]} You are: <b>${myRep(days)[2]}</b></span>${next ? `<div class="tm-bar"><i style="width:${Math.max(6,pct)}%"></i></div><span>Next title: ${next[3]} ${next[2]} · ${days}/${next[0]} landings</span>` : ''}</div>
     ${opts.newBadge ? `<p class="abnew">🎉 ${opts.newBadge}</p>` : ''}
     <div class="tm-btns">${btns}</div>
     <p class="tm-msg" id="pushmsg"></p>
@@ -2826,13 +2826,13 @@ function openHow(){
     <p class="howsmall">The numbers are the healthy marks. Above 85, home may be loving you at your own expense.</p>
     <div class="howlist">
       <div><span>📅</span><p><b>Today's Landing.</b> Everyone plays the same game each day. A new country arrives at midnight.</p></div>
-      <div><span>🌍</span><p><b>Each day you play adds two weeks abroad.</b> Your reputation grows the longer you stay.</p></div>
+      <div><span>🛬</span><p><b>Every Today's Landing is a new first month abroad.</b> The more first months you live through, the more you know, and your title grows.</p></div>
     </div>
-    <div class="ladder">${[JUST_LANDED].concat(ABROAD_BADGES).map(([k,,r,ic]) => `<div class="${r===me[2]?'me':k<=n?'done':''}"><span>${ic}</span><b>${r}</b><small>${k ? timeOf(k)+' · '+k+' days' : 'Day one'}</small></div>`).join('')}</div>
+    <div class="ladder">${[JUST_LANDED].concat(ABROAD_BADGES).map(([k,,r,ic]) => `<div class="${r===me[2]?'me':k<=n?'done':''}"><span>${ic}</span><b>${r}</b><small>${k ? k+' landings' : 'Your first one'}</small></div>`).join('')}</div>
     <div class="howlist">
       <div><span>🏆</span><p><b>Weekly leaderboard.</b> The best Today's Landing score of the week wins the 👑 crown.</p></div>
       <div><span>🏅</span><p><b>Collect 10 verdicts and 7 badges.</b> Your verdict says how your month went. Badges reward what you did.</p></div>
-      <div><span>🎮</span><p><b>Play more anytime.</b> Pick your own country to practise or relive your JJC days. Those games do not add time abroad.</p></div>
+      <div><span>🎮</span><p><b>Play more anytime.</b> Pick your own country to practise or relive your JJC days. Those games do not count toward your title.</p></div>
     </div>
   </div>`);
 }
@@ -2842,7 +2842,7 @@ function progressTilesHTML(){
   const h = loadHistory(); if(!h.length) return '';
   const r = roadInfo(), got = loadVerdicts(), n = VERDICTS.filter(([t]) => got.includes(t)).length + BADGES.filter(([t]) => got.includes(t)).length;
   return `<div class="ptiles">
-    <button type="button" onclick="openHow()"><span>${myRep(abroadMonths())[3]}</span><b>${myRep(abroadMonths())[2]}</b><small>${abroadMonths() ? monthsLabel(abroadMonths())+' abroad' : 'play Today\'s Landing'}</small></button>
+    <button type="button" onclick="openHow()"><span>${myRep(abroadMonths())[3]}</span><b>${myRep(abroadMonths())[2]}</b><small>${abroadMonths() ? abroadMonths()+' landing'+(abroadMonths()===1?'':'s')+' lived' : 'play Today\'s Landing'}</small></button>
     <button type="button" onclick="openJournal()"><span>📈</span><b>${r.level[1]}</b><small>avg ${r.avg} · ${h.length} game${h.length>1?'s':''}</small></button>
     <button type="button" onclick="openCollection()"><span>🏅</span><b>${n}/${VERDICTS.length + BADGES.length}</b><small>collected</small></button>
     <button type="button" onclick="openBoard()"><span>🏆</span><b>Leaderboard</b><small>this week</small></button>
@@ -2910,7 +2910,7 @@ function renderEnd(app){
       ${rec.length?`<div class="receipts">${rec.slice(0,2).map(r=>`<div>${r}</div>`).join('')}</div>`:''}
     </div>
     <div class="cost"><div class="when">💸 What it cost you</div><div class="cost-chips">${costParts().map(([i,t]) => `<span>${i} ${t}</span>`).join('')}</div></div>
-    ${tomorrowHTML({newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `${hit[1]}! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
+    ${tomorrowHTML({newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `New title! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
     <div class="score">
       <div class="sc-top"><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div>
       <div class="gauge"><i style="width:${Math.max(2,Math.min(100,nowScore()))}%"></i><em style="left:60%"></em></div>
