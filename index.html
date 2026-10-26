@@ -34,6 +34,7 @@
 html,body{margin:0}
 [hidden]{display:none!important}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--paper);z-index:70;pointer-events:none}
 /* Layout: one phone-width column styled like a boarding pass and a WhatsApp thread, passport green and stamp gold */
 :root{
   --paper:#F8F4E9; --card:#FFFEFA; --ink:#1B332B; --muted:#6B7A72; --line:#DCE2D7;
@@ -251,9 +252,12 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .vbadge.got{background:var(--bubble)}
 .vbadge.got b{color:var(--green2)}
 .vbadge.locked{background:transparent;border:1.5px dashed var(--line)}
-.vbadge.locked b{color:var(--muted);letter-spacing:.2em}
+.vbadge.locked b{color:var(--muted)}
 .vbadge.cur{outline:2px solid var(--gold)}
 .newtag{position:absolute;top:-8px;right:8px;background:var(--gold);color:#1B332B;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px}
+.coll-note{margin:0;font-size:13px;color:var(--muted)}
+.coll-gap{margin-top:10px}
+.vbadge.locked b{letter-spacing:0;font-size:14px}
 .coll-mini{background:var(--bubble);border-radius:12px;padding:10px 12px;font-size:15px;text-align:center}
 @media (max-width:360px){.coll-grid{grid-template-columns:1fr}}
 .foot{font-size:13px;color:var(--muted);text-align:center}
@@ -579,7 +583,8 @@ function abroadHTML(newBadge){
   const n = abroadMonths(), next = ABROAD_BADGES.find(([k]) => k > n), got = ABROAD_BADGES.filter(([k]) => k <= n);
   return `<div class="abroad"><div class="when">Your time abroad</div><b>${monthsLabel(n)}</b>
     ${newBadge ? `<p class="abnew">🎉 New milestone: ${newBadge}</p>` : ''}
-    <span>Every Today's Landing you play adds two weeks.${next ? ` ${next[0]-n} more game${next[0]-n===1?'':'s'} to reach ${next[1]}.` : ' You have reached every milestone.'}</span>
+    <span>Each day you play Today's Landing adds two weeks abroad. Replays on the same day do not count.</span>
+    ${next ? `<span class="abnext">Next: <b>${next[1]}</b>, ${n} of ${next[0]} days played.</span>` : '<span class="abnext">You have reached every milestone.</span>'}
     ${got.length ? `<div class="abadges">${got.map(([,t])=>`<i>🏅 ${t}</i>`).join('')}</div>` : ''}</div>`;
 }
 function dayLabel(ds){ const [y,m,d]=ds.split('-').map(Number); return d+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]; }
@@ -1791,7 +1796,7 @@ function render(){
       ${streakHTML('intro')}
       ${abroadMonths() ? abroadHTML() : ''}
       ${roadHTML()}
-      ${loadVerdicts().length ? `<div class="coll-mini">You have unlocked <b>${loadVerdicts().length} of ${VERDICTS.length}</b> verdicts. Can you collect them all?</div>` : ''}
+      ${loadVerdicts().length ? `<div class="coll-mini">Verdicts <b>${VERDICTS.filter(([t])=>loadVerdicts().includes(t)).length} of ${VERDICTS.length}</b> · Badges <b>${BADGES.filter(([t])=>loadVerdicts().includes(t)).length} of ${BADGES.length}</b>. Can you collect them all?</div>` : ''}
       ${loadHistory().length ? `<button class="ghost journalbtn" type="button" onclick="openJournal()">My games (${loadHistory().length}) · see your averages and trends</button>` : ''}
       <details class="how more" id="moredet"${pick.qroute || pick.moreOpen ? ' open' : ''}>
         <summary>Want to play more? Play your own landing</summary>
@@ -2108,15 +2113,10 @@ function verdict(){
   const f = S.f, low = A(300), mid = A(900), sc = nowScore();
   const story = [
    [f.sibling==='sent' && S.home>=65 && S.cash<mid, "The Family ATM", `Everybody at home is thriving. You are eating Indomie in ${T()}.`],
-   [P()==='care' && f.cos==='reported', "Stronger Than The Agent", "Somebody sold you a dream that did not exist. You reported it, found the real thing, and kept your head up."],
-   [P()==='scholar' && f.stipendHome && S.home>=60, "Scholar and Sponsor", "You came on a scholarship and somehow became the family's scholarship too."],
-   [(P()==='study' || P()==='partial') && (f.fees==='pending' || f.fees==='paused'), "Fees Still Pending", "Student by day, worker by night, and negotiator with the finance office in between."],
-   [FUND()==='borrowed' && (f.loan==='late' || f.loan==='half'), "Owing the Cooperative", "You borrowed to japa, and the japa is now borrowing your peace. One repayment at a time."],
    [S.cash<low, "Running on Prayers", "You made it to day 30 on faith, leftover jollof, and a very patient bank."],
    [S.peace<35, "Hustle Without Peace", "The money is coming in. Your body has filed a formal complaint."],
    [S.home<35 || ((S.st||{}).r >= 4 && ((S.st||{}).s||0) < 200 && S.home < 55), "Ghost Mode Activated", "Your account is healthy. The family WhatsApp group thinks you have died."],
-   [(SOLD() || P()==='care' || P()==='visitor') && S.future>=30, "Making It By Force", "There is no going back, so you are going forward. Slowly, stubbornly, and with your whole chest."],
-   [S.landing>1 && S.future>=40, "Serial Japa Champion", `${S.landing} landings and still standing. You have started over more times than most people have moved house.`]
+   [(SOLD() || P()==='care' || P()==='visitor') && S.future>=30, "Making It By Force", "There is no going back, so you are going forward. Slowly, stubbornly, and with your whole chest."]
   ];
   for(const [ok, t, l] of story){ const [lo, hi] = verdictBand(t); if(ok && sc >= lo && sc <= hi) return [t, l]; }
   const t = LADDER.find(([min]) => sc >= min)[1];
@@ -2202,23 +2202,28 @@ async function drawCard(title, line, journey, rec){
 }
 
 /* ---------- Verdict collection ---------- */
+// Verdicts say how your month went. You get exactly one per game.
 const VERDICTS = [
- ['Abroad Strategist','Score 90 or more.'],
- ['Making Moves','Score between 80 and 89.'],
- ['Settling In','Score between 70 and 79.'],
- ['The Family ATM','Send the big money home and keep your family very, very happy.'],
- ['Running on Prayers','Finish the month with almost nothing left.'],
- ['Hustle Without Peace','Chase the money until your peace runs out.'],
- ['Ghost Mode Activated','Say no to home again and again, and send almost nothing.'],
- ['Still Finding Your Feet','Score between 60 and 69.'],
- ['Hanging In There','Score under 60. Survive a rough month.'],
- ['Serial Japa Champion','Japa again from the result screen and keep building.'],
- ['Making It By Force','Sell everything to come, then build your future anyway.'],
- ['Scholar and Sponsor','Go on a full scholarship and send your stipend home.'],
- ['Fees Still Pending','Go as a student and leave your fees unpaid.'],
- ['Owing the Cooperative','Borrow money for the move and fall behind on the repayment.'],
- ['Stronger Than The Agent','Take the UK care visa route and report the fake agent.'],
- ['Best Landing','Post the best Today\'s Landing score of the week. The weekly crown.']
+ ['Abroad Strategist','Score 90 or more. Rare air.'],
+ ['Making Moves','Score in the 80s.'],
+ ['Settling In','Score in the 70s.'],
+ ['Still Finding Your Feet','Score in the 60s.'],
+ ['Hanging In There','Score under 60 and live to tell the story.'],
+ ['The Family ATM','Keep home very, very happy while your own account cries.'],
+ ['Running on Prayers','Reach day 30 with almost nothing left.'],
+ ['Hustle Without Peace','Let the money win and your peace lose.'],
+ ['Ghost Mode Activated','Keep saying no to home and send almost nothing.'],
+ ['Making It By Force','Come with no way back, and build your future anyway.']
+];
+// Badges are things you did. One game can earn several.
+const BADGES = [
+ ['Stronger Than The Agent','Go the UK care route and expose the fake agent.', () => P()==='care' && S.f.cos==='reported'],
+ ['Scholar and Sponsor','Win a full scholarship and share the stipend with home.', () => P()==='scholar' && !!S.f.stipendHome],
+ ['Fees Still Pending','Study abroad and leave the fees for later.', () => (P()==='study' || P()==='partial') && (S.f.fees==='pending' || S.f.fees==='paused')],
+ ['Owing the Cooperative','Borrow to japa and fall behind on the repayment.', () => FUND()==='borrowed' && (S.f.loan==='late' || S.f.loan==='half')],
+ ['Serial Japa Champion','Japa again from the result screen.', () => S.landing > 1],
+ ['Been Everywhere','Land in the US, the UK, and Canada.', () => ['us','uk','ca'].every(k => loadHistory().some(g => g.r===k))],
+ ['Best Landing','Post the best Today\'s Landing score of the week.', null]
 ];
 
 /* ---------- My games: a personal journal kept on this device ---------- */
@@ -2413,7 +2418,7 @@ async function checkCrowns(){
   if(won && saveVerdict('Best Landing')){
     track('crown-won');
     const app = document.getElementById('app'), intro = app && app.querySelector('.intro');
-    if(intro){ const d = document.createElement('div'); d.className = 'crownwin fade'; d.innerHTML = `<b>👑 You were Best Landing for the week!</b><span>${won.score}/100 was the best Today's Landing score of the week. Your gold badge is in your verdict collection.</span>`; intro.insertBefore(d, intro.children[1]); SFX.good(); }
+    if(intro){ const d = document.createElement('div'); d.className = 'crownwin fade'; d.innerHTML = `<b>👑 You were Best Landing for the week!</b><span>${won.score}/100 was the best Today's Landing score of the week. Your gold crown is in your badges.</span>`; intro.insertBefore(d, intro.children[1]); SFX.good(); }
   }
 }
 let boardRows = null, boardTab = 'score', myPostAt = 0, boardCrown = null;
@@ -2585,20 +2590,29 @@ function roadHTML(){
 
 function loadVerdicts(){ try{ return JSON.parse(localStorage.getItem('nyhl-verdicts')||'[]'); }catch(e){ return []; } }
 function saveVerdict(t){ const v = loadVerdicts(); const isNew = !v.includes(t); if(isNew){ v.push(t); try{ localStorage.setItem('nyhl-verdicts', JSON.stringify(v)); }catch(e){} } return isNew; }
-function collectionHTML(current, isNew){
-  const got = loadVerdicts();
+function earnBadges(){ return BADGES.filter(([,,ok]) => ok && ok()).map(([t]) => [t, saveVerdict(t)]); }
+function collectionHTML(current, isNew, earned){
+  const got = loadVerdicts(), now = new Map(earned || []);
+  const card = ([t,h], cur, fresh) => { const has = got.includes(t);
+    return `<div class="vbadge ${has?'got':'locked'}${cur?' cur':''}${has && t==='Best Landing'?' crown':''}"><b>${has ? t : '🔒'}</b>${fresh ? '<span class="newtag">New!</span>' : ''}<small>${has ? (cur ? 'Earned this game' : 'Unlocked') : h}</small></div>`; };
+  const vGot = VERDICTS.filter(([t]) => got.includes(t)).length, bGot = BADGES.filter(([t]) => got.includes(t)).length;
   return `<div class="collection">
-    <div class="coll-head"><div class="when">Your verdict collection</div><b>${got.length} of ${VERDICTS.length} unlocked</b></div>
-    <div class="coll-bar"><i style="width:${Math.round(got.length/VERDICTS.length*100)}%"></i></div>
-    <div class="coll-grid">${VERDICTS.map(([t,h])=>{ const has=got.includes(t), cur=t===current;
-      return `<div class="vbadge ${has?'got':'locked'}${cur?' cur':''}${has && t==='Best Landing'?' crown':''}"><b>${has ? t : '? ? ?'}</b>${cur && isNew ? '<span class="newtag">New!</span>' : ''}<small>${has ? (cur ? 'Just unlocked this game' : 'Unlocked') : 'Hint: '+h}</small></div>`; }).join('')}</div>
+    <div class="coll-head"><div class="when">Your verdicts</div><b>${vGot} of ${VERDICTS.length}</b></div>
+    <p class="coll-note">How your month went. One per game.</p>
+    <div class="coll-bar"><i style="width:${Math.round(vGot/VERDICTS.length*100)}%"></i></div>
+    <div class="coll-grid">${VERDICTS.map(v => card(v, v[0]===current, v[0]===current && isNew)).join('')}</div>
+    <div class="coll-head coll-gap"><div class="when">Your badges</div><b>${bGot} of ${BADGES.length}</b></div>
+    <p class="coll-note">Things you did. One game can earn several.</p>
+    <div class="coll-bar"><i style="width:${Math.round(bGot/BADGES.length*100)}%"></i></div>
+    <div class="coll-grid">${BADGES.map(v => card(v, now.has(v[0]), now.get(v[0]))).join('')}</div>
+    <p class="coll-note">Your collection stays with you forever. Only the Best Landing crown is weekly.</p>
   </div>`;
 }
 
 function renderEnd(app){
   const [title, line] = verdict(), rec = receipts();
   track('finish-'+title.toLowerCase().replace(/[^a-z]+/g,'-'));
-  const isNewVerdict = saveVerdict(title); saveGame(title);
+  const isNewVerdict = saveVerdict(title); saveGame(title); const earned = earnBadges();
   setTimeout(()=>SFX.verdict(S.cash > 0 && (S.peace + S.home + S.future) / 3 >= 50), 250);
   const where = `${L.town}, ${R.country}`;
   const journey = S.trail.map(t=>t.town).concat([L.town]).join(' → ');
@@ -2628,7 +2642,7 @@ function renderEnd(app){
     ${roadHTML()}
     ${streakHTML('end')}
     ${S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return abroadHTML(firstToday && hit ? hit[1] : ''); })() : ''}
-    ${collectionHTML(title, isNewVerdict)}
+    ${collectionHTML(title, isNewVerdict, earned)}
     <div class="cardwrap"><img id="cardimg" alt="Your result card" hidden></div>
     <button class="primary" id="sharecard">Share my result card</button>
     <div class="share">
