@@ -699,7 +699,7 @@ const pickV = (key, n) => { S.v = S.v || {}; if(S.v[key]===undefined) S.v[key] =
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 /* ---------- Today's Landing: one shared game a day, numbered like Wordle ---------- */
 const DAILY_EPOCH = '2026-10-24';
-const EU_FROM = '2026-11-02';   // first Today's Landing that can send everyone to Europe
+const EU_FROM = '2026-10-27';   // first Today's Landing that can send everyone to Europe
 const dsUTC = ds => { const [y,m,d] = ds.split('-').map(Number); return Date.UTC(y, m-1, d); };
 const dailyNo = ds => Math.round((dsUTC(ds) - dsUTC(DAILY_EPOCH)) / 864e5) + 1;
 function dailyPlan(ds){   // everyone gets the same country, place, route and funding on the same day

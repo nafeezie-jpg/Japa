@@ -61,7 +61,7 @@ Read this, then read index.html, before changing anything.
 - Countries: Germany, France, Italy, Spain, Netherlands, Belgium, Portugal, Austria, Ireland. Add one by adding a card.
 - The language barrier carries the route. Ireland (EN()) gets English versions of the language scenes.
 - Scenes live in EU(). Pay events, the day 29 moment, and both life chapters have Europe versions.
-- Today's Landing only sends everyone to Europe from EU_FROM (2026-11-02), so days already played keep their plan. Move it to the day after merging if that date has passed.
+- Today's Landing only sends everyone to Europe from EU_FROM (2026-10-27), so days already played keep their plan. Move it to the day after merging if that date has passed.
 - The leaderboard table only accepted us, uk, and ca. Run the "Europe route" part at the end of supabase/landings.sql once, or Europe games show "Europe joins the leaderboard very soon" instead of a rank.
 
 ## Testing
