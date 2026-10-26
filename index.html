@@ -675,7 +675,7 @@ setInterval(() => { const e = document.getElementById('cd'); if(e) e.textContent
 /* ---------- Your time abroad: every Today's Landing you play adds two weeks ---------- */
 // milestones are counted in daily games played (each one is two weeks abroad)
 // [daily games, time milestone, reputation, icon]
-const ABROAD_BADGES = [[2,'First Month Abroad','JJC','🐣'],[7,'Three Months In','Still Converting to Naira','🧮'],[13,'Six Months In','Knows the Bus Routes','🚌'],[26,'One Year Abroad','Proper Abroad Person','🧥'],[52,'Two Years Strong','Sends Advice Home','📢'],[78,'Three Years, Still Here','Weather Complainer','🌦️'],[130,'Five-Year Veteran','Japa Elder','🧓🏾']];
+const ABROAD_BADGES = [[2,'First Month Abroad','JJC','🐣'],[7,'Three Months In','Still Converting to Naira','🧮'],[13,'Six Months In','Knows the Bus Routes','🚌'],[26,'One Year Abroad','Proper Abroad Person','🧥'],[52,'Two Years Strong','Sends Advice Home','📢'],[78,'Three Years, Still Here','Weather Complainer','🌦️'],[130,'Five-Year Veteran','Japa Veteran','🧓🏾']];
 const JUST_LANDED = [0,'Just landed','Just Landed','🛬'];
 const myRep = n => ABROAD_BADGES.filter(([k]) => k <= n).pop() || JUST_LANDED;
 const timeOf = k => { const w = k*2; return w < 52 ? (w < 8 ? w+' weeks' : Math.round(w/4.33)+' months') : Math.round(w/52)+' year'+(w>=104?'s':''); };
