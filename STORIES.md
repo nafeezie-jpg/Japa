@@ -12,3 +12,6 @@ Never put emails or other contact details in this file or in the game.
 | DqOxKzN | anonymous | partly | Canada, citizenship as a small win. Echoed in Chapter 5 papers approval. Thin on detail. |
 | ArR4aJy | Kabee2fly | used | No bidet, just tissue and vibes (UK, day 5). First paycheck joy fits the existing payday events. |
 | own | Nafeezie | used | JJC Chronicles: Lola, $30 a day on Uber, the fan belt, the bus that never came, plus the naira converter and the shared kitchen |
+
+## Runs
+- 2026-10-27: no new submissions (all four above were already logged). Added two fresh first-month versions so daily players see new things from 2026-10-28: UK day 4 (saying "Good morning, ma" at the bus stop, pool uk4) and Canada day 4 (the tip screen at lunch, pool ca4).

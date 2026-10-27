@@ -1104,7 +1104,7 @@ const UK = () => [
    {l:"Stay with your cousin", fx:{peace:-8}, set:{stay:'cousin'}, r: STU() ? "Free rent, but every lecture costs you four hours on trains." : "Free rent, but every shift costs you four hours on trains."},
    {l:`Share a house with strangers, ${M(Math.round(RENT()*0.78/10)*10)}`, fx:{cash:-Math.round(RENT()*0.78/10)*10, peace:-4}, set:{stay:'shared'}, r:"One housemate labels his milk. Another cooks fish at midnight. You are the only one who cleans the bathroom."}]},
  mummyThanks(),
- {day:4, when: s => pickV('uk4',2)===0, text:`You step off the pavement and look left, the way you have done your whole life. A car comes from the right and the driver says something very British through the window.`,
+ {day:4, when: s => pickV('uk4',grow(s,2,'2026-10-28'))===0, text:`You step off the pavement and look left, the way you have done your whole life. A car comes from the right and the driver says something very British through the window.`,
   choices:[
    {l:"Follow an old lady across", fx:{peace:3, future:2}, r:"You attach yourself to an old lady with a shopping trolley. She crosses safely, and so do you."},
    {l:"Wait for the green man", fx:{peace:2}, r:"You wait four minutes on an empty road while everyone else crosses. But you are alive."},
@@ -1176,7 +1176,7 @@ const CA = () => [
    {l:"Stay with a host family", fx:{peace:-6, home:3}, set:{stay:'host'}, r:"They are kind and generous. They also wake up at 5am for prayer, and so do you now."},
    {l:`Airbnb for two weeks, ${M(Math.round(900*MULT[L.cost]))}`, fx:{cash:-Math.round(900*MULT[L.cost]), peace:-3}, set:{stay:'airbnb'}, r:"Two weeks of someone else's furniture and a long list of house rules taped to the fridge."}]},
  mummyThanks(),
- {day:4, when: s => pickV('ca4',2)===0, text:`You get your SIN, open a bank account, and walk into a phone shop. The cheapest decent plan costs more than your entire data budget in ${O()} for a year.`,
+ {day:4, when: s => pickV('ca4',grow(s,2,'2026-10-28'))===0, text:`You get your SIN, open a bank account, and walk into a phone shop. The cheapest decent plan costs more than your entire data budget in ${O()} for a year.`,
   choices:[
    {l:"Pay C$75 a month for data", fx:{cash:-75, peace:4}, r:"You have data everywhere. Your bank account felt that."},
    {l:"Get a cheap prepaid plan", fx:{cash:-30, peace:-2}, r:"It works well, except in buildings, basements, and anywhere you actually are."},
@@ -1342,6 +1342,7 @@ const EU = () => { const c = C(), lang = L.lang, shared = Math.round(RENT()*0.75
 
 /* ---------- Nafeezie's JJC Chronicles: real scenes from her first months in Maryland ---------- */
 const OWN_FROM = '2026-10-27';   // Today's Landings before this date keep the game they had
+const grow = (s, n, d) => (!s.daily || s.daily >= d) ? n + 1 : n;   // a version pool gains one version for Today's Landings from date d
 const lolaScene = when => ({day:1, core:1, credit:'Nafeezie', own:1, when, art:'car',
   text:`Lola picks you up from the airport after she closes from work. You are meeting her for the first time, although she walked you through admissions on the phone after you spent over ${M(600)} on application fees out of ignorance. Her house is an hour from campus and off the bus route. She leaves for work at 8am, and your master's classes run from 5pm to 8pm.`,
   choices:[
@@ -1625,17 +1626,27 @@ const routeAlts = () => { const c = C(), k = R.key, out = [];
      {l: L.cold>0 ? "Buy a $40 space heater" : "Buy a $40 fan", fx:{cash:-40, peace:6}, r:"It hums all night. You love it like a family member."},
      {l: L.cold>0 ? "Sleep in your coat" : "Sleep with a wet towel", fx:{peace:-8}, r:"You wake up feeling like a Nollywood survival film."},
      {l:"Email the landlord with photos", fx:{peace:-2, future:4}, r:"Two follow-ups later, it is fixed. You learn that written complaints work magic here."}]});
-  if(k==='uk') out.push({day:4, when: s => pickV('uk4',2)===1, text:"At the supermarket, the self-checkout machine says \"unexpected item in the bagging area\" for the fourth time. The item is your shopping.",
+  if(k==='uk') out.push({day:4, when: s => pickV('uk4',grow(s,2,'2026-10-28'))===1, text:"At the supermarket, the self-checkout machine says \"unexpected item in the bagging area\" for the fourth time. The item is your shopping.",
     choices:[
      {l:"Call the staff member", fx:{peace:2}, r:"She taps her card, sighs, and says, \"Happens all the time, love.\" You are now her love."},
      {l:"Use the staffed till", fx:{peace:4}, r:"The cashier chats about the weather. You realise this is how British people show affection."},
      {l:"Abandon the shopping in protest", fx:{peace:-4, cash:A(20)}, r:"You save money and lose dinner. The machine wins this round."}]});
+  if(k==='uk') out.push({day:4, when: s => (!s.daily || s.daily >= '2026-10-28') && pickV('uk4',grow(s,2,'2026-10-28'))===2, text:`You say "Good morning, ma" to a woman at the bus stop in ${T()}, warmly, the way ${c.mum} taught you. She looks at you as if you have asked for her PIN.`,
+    choices:[
+     {l:"Greet everyone anyway", fx:{peace:2, home:3}, r:"By Friday, the old man from number 12 greets you first. One down, sixty-seven million to go."},
+     {l:"Learn to say \"You alright?\"", fx:{peace:3, future:2}, r:"You try it on the bus driver. He says \"Yeah, you?\" and nobody waits for an answer. You are British now."},
+     {l:"Save your greetings for home", fx:{peace:-3, home:2}, r:`Every "good morning" now goes to ${c.mum} on the 6am call. She gets so many that she asks if you are okay.`}]});
   if(k==='uk') out.push({day:6, when: s => pickV('uk6',2)===1, text:`Buses around ${T()} are manageable. The trains are another story. A return ticket to visit your cousin costs more than your weekly food.`,
     choices:[
      {l:"Buy a railcard if you qualify", fx:{cash:-30, future:3, peace:3}, r:"You will now calculate the savings out loud to anyone who listens."},
      {l:"Take the coach", fx:{cash:-15, peace:-5}, r:"The coach smells like crisps and regret, but it is cheap."},
      {l:"Stay local and explore on foot", fx:{peace:2, future:2}, r:"You discover a park, a Polish shop, and a Nigerian hair salon three streets away. Victory."}]});
-  if(k==='ca') out.push({day:4, when: s => pickV('ca4',2)===1, text:"Your bank offers a newcomer package with a credit card and a C$500 limit. Your coworker says credit history is everything here.",
+  if(k==='ca') out.push({day:4, when: s => (!s.daily || s.daily >= '2026-10-28') && pickV('ca4',grow(s,2,'2026-10-28'))===2, text:`A coworker takes you for lunch in ${T()}. When the bill comes, the card machine turns to face you and asks for a tip. 18, 20, or 25 percent. Back in ${O()}, a smile and "thank you, my brother" did the job.`,
+    choices:[
+     {l:"Press 25% to look rich", fx:{cash:-15, peace:-4}, r:"The waiter says \"Have a great day!\" with real feeling. You eat Indomie for dinner to balance the books."},
+     {l:"Press 18% like a local", fx:{cash:-10, peace:3, future:1}, r:"Your coworker nods. You have passed a test nobody told you about."},
+     {l:"Hunt for the no tip button", fx:{peace:-6}, r:"It is there, very small, at the bottom of the screen. You press it and feel the whole restaurant watching. You will not be eating here again."}]});
+  if(k==='ca') out.push({day:4, when: s => pickV('ca4',grow(s,2,'2026-10-28'))===1, text:"Your bank offers a newcomer package with a credit card and a C$500 limit. Your coworker says credit history is everything here.",
     choices:[
      {l:"Take the card, pay it off monthly", fx:{future:8, peace:2}, r:"You buy groceries with it and pay it off immediately. Your credit score is born."},
      {l:"Avoid credit cards", fx:{peace:3, future:-3}, r:"Safe for now. Later, a landlord asks for your credit score and you have none."},
