@@ -1,5 +1,5 @@
 // Now You Have Landed: sends the daily "Today's Landing is ready" nudge.
-// Runs every hour from a database schedule and only notifies players whose local time is 8pm.
+// Runs every hour from a database schedule and only notifies players whose local time matches their saved hour (10am).
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
 

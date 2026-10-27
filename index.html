@@ -2702,7 +2702,7 @@ function remindIcs(){
   const p = n => String(n).padStart(2,'0'), ymd = `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;
   const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
   return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Now You Have Landed//EN','BEGIN:VEVENT',`UID:nyhl-${Date.now()}@nowyouhavelanded.com`,`DTSTAMP:${stamp}`,
-    `DTSTART:${ymd}T200000`,`DTEND:${ymd}T201000`,'RRULE:FREQ=DAILY','SUMMARY:Today\'s Landing ✈️','DESCRIPTION:A new game is waiting. Play at https://nowyouhavelanded.com',
+    `DTSTART:${ymd}T100000`,`DTEND:${ymd}T101000`,'RRULE:FREQ=DAILY','SUMMARY:Today\'s Landing ✈️','DESCRIPTION:A new game is waiting. Play at https://nowyouhavelanded.com',
     'URL:https://nowyouhavelanded.com','BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Today\'s Landing','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
 }
 const remindGoogle = () => 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent("Today's Landing ✈️") + '&details=' + encodeURIComponent('A new game is waiting. Play at https://nowyouhavelanded.com') + '&recur=' + encodeURIComponent('RRULE:FREQ=DAILY');
@@ -2728,10 +2728,10 @@ async function enablePush(btn){
     const sub = await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64ToBytes(VAPID_PUBLIC)});
     const j = sub.toJSON();
     const res = await fetch(SB_URL + '/rest/v1/push_subs', {method:'POST', headers:{apikey:SB_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'},
-      body: JSON.stringify({endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth, tz: -new Date().getTimezoneOffset(), hour: 20})});
+      body: JSON.stringify({endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth, tz: -new Date().getTimezoneOffset(), hour: 10})});
     if(!res.ok && res.status !== 409) throw new Error('save ' + res.status);
     try{ localStorage.setItem('nyhl-push', 'on'); }catch(e){}
-    track('push-on'); say("Done. We will nudge you at 8pm when there is a new Today's Landing.");
+    track('push-on'); say("Done. We will nudge you at 10am when there is a new Today's Landing.");
     if(btn){ btn.textContent = 'Notifications on ✓'; }
   }catch(e){ say('That did not work. Try again in a moment, or use the calendar reminder.'); if(btn) btn.disabled = false; }
 }
@@ -2753,7 +2753,7 @@ function closeHomeTip(){ try{ localStorage.setItem('nyhl-hometip','done'); }catc
 function installApp(){ if(!installEvt) return; installEvt.prompt(); track('install-prompt'); installEvt.userChoice.then(()=>closeHomeTip()).catch(()=>{}); installEvt = null; }
 function remindHTML(){
   const g = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent("Today's Landing ✈️") + '&details=' + encodeURIComponent('A new game is waiting. Play at https://nowyouhavelanded.com') + '&recur=' + encodeURIComponent('RRULE:FREQ=DAILY');
-  return `<div class="remind"><div class="when">Never miss Today's Landing</div><p>Add a daily 8pm reminder to your calendar. You can change the time there.</p>
+  return `<div class="remind"><div class="when">Never miss Today's Landing</div><p>Add a daily 10am reminder to your calendar. You can change the time there.</p>
     <div class="row"><button class="ghost" type="button" id="remind-ics">Apple or Outlook</button><a class="ghost" id="remind-g" href="${g}" target="_blank" rel="noopener">Google Calendar</a></div></div>`;
 }
 function wireRemind(){

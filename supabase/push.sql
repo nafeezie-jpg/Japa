@@ -21,3 +21,7 @@ select cron.schedule('daily-landing-push', '0 * * * *', $$
     headers := '{"Content-Type":"application/json","x-cron-secret":"YOUR_CRON_SECRET"}'::jsonb,
     body := '{}'::jsonb);
 $$);
+
+-- Reminder moved from 8pm to 10am local time (Oct 2026). Run once.
+update public.push_subs set hour = 10 where hour = 20;
+alter table public.push_subs alter column hour set default 10;

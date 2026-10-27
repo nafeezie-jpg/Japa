@@ -53,7 +53,7 @@ Read this, then read index.html, before changing anything.
 - **Supabase.**
   - Project mydzixaknqldrcfakirn. The publishable key is in index.html.
   - Table `landings` allows insert and select only, with a guard trigger. The boards are Best landing, Most streetwise, Hardest heart, Softest heart, and Most trusting. The board reset time is BOARD_FROM.
-  - Table `push_subs` stores push subscriptions. Edge function `daily-push` runs hourly through pg_cron and sends at 8pm local time.
+  - Table `push_subs` stores push subscriptions. Edge function `daily-push` runs hourly through pg_cron and sends at 10am local time (the hour column; it was 20 until 27 Oct 2026).
 - **Family voice.** CULTURES (yoruba, igbo, hausa, general) are chosen from the player's state of origin. Gendered stories use PRO().
 
 ## Europe
