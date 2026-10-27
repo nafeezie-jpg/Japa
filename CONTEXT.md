@@ -48,7 +48,7 @@ Read this, then read index.html, before changing anything.
   - Play again buttons
   - Collection
   - Road to making it
-- **Home screen.** Your details, then the Today's Landing hero (or the tomorrow card once played), progress tiles, "What is this game?" (openAbout, also /?about), "Practice any route" (id moredet), and "How it works" (openHow, also /?how).
+- **Home screen.** Your details, then the Today's Landing hero (or the tomorrow card once played), progress tiles, the My Life Abroad card, "What is this game?" (openAbout, also /?about), "Practice any route" (id moredet), and "How it works" (openHow, also /?how).
 - **Move my progress.** openMove copies a NYHL1 code between Safari and the home screen app, which keep separate storage on iPhone.
 - **Supabase.**
   - Project mydzixaknqldrcfakirn. The publishable key is in index.html.

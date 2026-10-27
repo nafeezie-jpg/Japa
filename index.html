@@ -2182,8 +2182,8 @@ function render(){
         <div class="hero-chips">${streakInfo().n ? `<span>🔥 Keep your ${streakInfo().n}-day streak</span>` : ''}<span>👥 Same game for everyone</span><span>⏳ New one in <em id="cd">${untilMidnight()}</em></span></div>
         <button class="primary" id="dailygo" type="button">✈️ Play Today's Landing</button>
         ${pushButtonHTML()}</div>`; })()}
-      ${lifeCardHTML()}
       ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>${progressTilesHTML()}` : `<button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>`}
+      ${lifeCardHTML()}
       <button class="ghost journalbtn" type="button" onclick="openAbout()">ℹ️ What is this game?</button>
       <details class="how more" id="moredet"${pick.qroute || pick.moreOpen ? ' open' : ''}>
         <summary>🎮 Practice any route · pick your own country</summary>
