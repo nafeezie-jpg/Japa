@@ -524,6 +524,8 @@ details.custom summary{font-weight:700}
 .lsteps div{display:grid;justify-items:center;gap:1px;text-align:center}
 .lsteps span{font-size:18px}.lsteps b{color:var(--gold);font-size:15px}.lsteps small{font-size:10px;opacity:.8}
 .noundo{margin:2px 0 0;text-align:center;font-size:13px;font-weight:600;color:var(--muted)}
+.infobtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.infobtns .journalbtn{margin:0}
 .lreset{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;justify-self:center;padding:2px}
 </style>
 
@@ -2184,7 +2186,7 @@ function render(){
         ${pushButtonHTML()}</div>`; })()}
       ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>${progressTilesHTML()}` : `<button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>`}
       ${lifeCardHTML()}
-      <button class="ghost journalbtn" type="button" onclick="openAbout()">ℹ️ What is this game?</button>
+      <div class="infobtns"><button class="ghost journalbtn" type="button" onclick="openAbout()">ℹ️ What is this game?</button><button class="ghost journalbtn" type="button" onclick="openHow()">📖 How it works</button></div>
       <details class="how more" id="moredet"${pick.qroute || pick.moreOpen ? ' open' : ''}>
         <summary>🎮 Practice any route · pick your own country</summary>
         <div class="how-body">
@@ -2195,25 +2197,11 @@ function render(){
         </div>
       </details>
       <details class="how about">
-        <summary>📖 How it works · stories · Naija words</summary>
+        <summary>➕ More · share a story, Naija words, move progress</summary>
         <div class="how-body">
         <button class="ghost" type="button" onclick="openMove()">📲 Move my progress to another phone or app</button>
         <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-intro')">Have a japa story? Tell us, and it could become a scene →</a>
         <a class="storylink introstory" href="https://tally.so/r/q5480d" target="_blank" rel="noopener" onclick="track('story-form-edition')">Not from Nigeria? Help us build your country's edition →</a>
-        <button class="ghost" type="button" onclick="openHow()">📖 How it works</button>
-        <details class="how" hidden>
-          <summary>How it works</summary>
-          <div class="how-body">
-            <p>Life abroad asks questions. Your phone asks more. Every answer moves four meters.</p>
-            <dl>
-              <dt>Cash</dt><dd>Whatever survives "just send something small".</dd>
-              <dt>Peace</dt><dd>Your sanity. It drops when your mouth says yes and your heart says no.</dd>
-              <dt>Home</dt><dd>Family ratings. Money pushes it up. Voice notes do absolutely nothing.</dd>
-              <dt>Future</dt><dd>What you are really building. Nobody at home can see it, which is why it grows.</dd>
-            </dl>
-            <p>Each meter is out of 100, and each has its own healthy mark. Future starts at 20, so 60 takes real building. Home is best between 65 and 85, because a family that adores you in month one usually means you are overgiving. There are no right answers. Every choice follows you to the end of the game.</p>
-          </div>
-        </details>
         <details class="how">
           <summary>Naija words in this game</summary>
           <div class="how-body">${glossaryHTML()}</div>
