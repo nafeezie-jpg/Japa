@@ -523,6 +523,7 @@ details.custom summary{font-weight:700}
 .lsteps{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;border-top:1px dashed color-mix(in srgb,var(--green-ink) 40%,transparent);padding-top:12px}
 .lsteps div{display:grid;justify-items:center;gap:1px;text-align:center}
 .lsteps span{font-size:18px}.lsteps b{color:var(--gold);font-size:15px}.lsteps small{font-size:10px;opacity:.8}
+.noundo{margin:2px 0 0;text-align:center;font-size:13px;font-weight:600;color:var(--muted)}
 .lreset{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;justify-self:center;padding:2px}
 </style>
 
@@ -2151,6 +2152,8 @@ function soundButton(){
 const isCall = sc => /call/i.test(sc.sub||'') || /\bcalls\b|phone rings/.test(sc.text||'');
 const AMBIENT = ['rain','snow','car','sun','food','plane','phone'];
 function ambientFor(sc){ if(!sc || sc.auto) return null; const k = artKind(sc); if(!AMBIENT.includes(k)) return null; if(k==='phone' && isCall(sc)) return null; return k; }
+// shown once, under the first choice of every game and chapter
+const FINAL_LINES = ["🔒 Choices are final. Abroad has no undo button.", "🔒 Once you choose, e don set. No undo, just like real life.", "🔒 No going back on your choices. You cannot unsend money either.", "🔒 Choose well. Real life does not have a back button."];
 function render(){
   try{ if(window.speechSynthesis && speechSynthesis.speaking) speechSynthesis.cancel(); }catch(e){}
   soundButton();
@@ -2272,7 +2275,7 @@ function render(){
     const list = typeof sc.choices==='function' ? sc.choices(S) : sc.choices;
     const ord = list.map((c,i)=>i).sort((a,b)=> hashStr((S.seed||0)+'|'+sc.day+'|'+list[a].l) - hashStr((S.seed||0)+'|'+sc.day+'|'+list[b].l));
     const note = !inCh() && sc.day<=1 && !sc.from && idx===nextIndex(0) ? `${S.life ? `<div class="local"><b>📖 My Life Abroad · Month 1</b>This is the start of one long life. Your money, your meters, and the choices you make this month follow you into every chapter.</div>` : ''}${S.daily && S.landing===1 ? `<div class="local"><b>Today's Landing #${dailyNo(S.daily)}</b>Everyone playing today lands here and meets the same surprises. Your score is compared with theirs at the end.</div>` : ''}${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
-    app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${glossLink()}</div>`;
+    app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${!(S.q||0) ? `<p class="noundo">${FINAL_LINES[(S.seed||0) % FINAL_LINES.length]}</p>` : ''}${glossLink()}</div>`;
     wireBack();
     SFX.ambient(ambientFor(sc));
     if(sc.from && !(S.landing===1 && sc.day===1 && !inCh())) setTimeout(()=> isCall(sc) ? SFX.ring() : SFX.ping(), 150);
