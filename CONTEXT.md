@@ -72,15 +72,25 @@ Read this, then read index.html, before changing anything.
 - **What it is.** One continuing life, separate from Today's Landing. Money, meters, and every flag in `S.f` carry from chapter to chapter.
 - **Unlock.** The home card (lifeCardHTML) stays locked until JJC, which is 2 Today's Landings (LIFE_UNLOCK). One chapter opens per day.
 - **How a life starts.** Chapter 0 is a normal first month played inside the mode (lifeStart calls begin, then sets `S.life = {ch:0}`). Life games never post to the leaderboard and never enter nyhl-history.
-- **Chapters.** CHAPTERS lists all six stages. A chapter is playable when it has `scenes`. Built so far:
+- **Chapters.** CHAPTERS lists all six stages, and every one is written:
   1. Months 2 to 3 · Payslip and Rent (lifeCh1)
   2. Month 6 · First Winter and Paperwork (lifeCh2)
-  3. Year 1 · The Anniversary (to write)
-  4. Year 2 · Promotion, Pressure, and Land (to write)
-  5. Year 3+ · Papers, Family, or Japada (to write). Ends the life with a summary built from `log`.
-- **Chapter scenes.** Ten slots numbered by `day` 1 to 10, with 9 choices and one auto money event (autoEvent `life1`, `life2`, using lifePay). `label` is the time shown, `art` picks the picture. Versions use pickV keys starting with `L1` or `L2`. inCh() makes showable() show every scene in order.
+  3. Year 1 · The Anniversary (lifeCh3): ajo payout, the anniversary, visiting home or Mummy visiting, the lease, a brother who wants to japa, meeting someone.
+  4. Year 2 · Promotion, Pressure, and Land (lifeCh4): graduation or promotion, wedding pressure, land at home, three school fees, mortgage, burnout, being asked to be a guarantor.
+  5. Year 3+ · Papers, Family, or Japada (lifeCh5): papers by route, bringing parents, a job offer in Lagos, owning property, helping the next JJC, and the final question, where is home now (ending: stay, pada, both).
+- **The end of a life.** After chapter 5, renderLifeEnd shows the ending title, lifeReceipts() lines, and the score from every stage, then "Start a new life".
+- **Chapter scenes.** Ten slots, with 9 or 10 choices and one auto money event (autoEvent `life1` to `life5`, using lifePay). From Year 1, lifePay gives everyone at least a survival wage. `label` is the time shown, `art` picks the picture. inCh() makes showable() show every scene in order. A slot can hold two or three scenes with opposite `when` conditions.
 - **Month one comes back.** lifeCallback picks one flag from earlier play (sibling, guest, farm, loan, house, car) once per chapter and stores it in `S.cbk`. lifeComeback writes that scene.
-- **Flags set so far.** upkeep, ajo, assoc, licence, december, guest (notice, paying), farm (sold), loan (plan). Later chapters should pay these off. For example, ajo slot nine pays out around month 11.
+- **Flags.** upkeep, ajo, assoc, licence, december, guest, farm, loan, uber30, fanbelt, car (junked), visited, raise, partner, promo, grad, land, house2, papers, family, pada, owner, ending.
 - **Saving.** renderLifeEnd saves nyhl-life `{v, rk, place, ch, doneOn, started, S, log}` once per chapter. lifePlay rebuilds R, L, and S from it. nyhl-life is in MOVE_KEYS, and importing keeps the further-along life.
-- **Testing.** `python3 tests/life_mode.py` plays 12 lives through every written chapter and must print `ISSUES: none`. Add `shots` to save screenshots in tests/shots/.
-- **Still to do.** Write chapters 3 to 5 and the life summary. Add a stage question to the Tally form so players can send stories for a chapter.
+- **Testing.** `python3 tests/life_mode.py` plays 12 whole lives, arrivals to the ending, and must print `ISSUES: none`. Add `shots` to save screenshots in tests/shots/.
+
+## Real stories and the monthly update
+- Players send stories through Tally form q5480d. It asks when the story happened (first month to year 3+) and has a box for later stories.
+- STORIES.md logs every submission read, by ID, with where it lives in the game. Never put emails in the repo.
+- A scheduled task, "Now You Have Landed monthly stories", runs at 8:53am New York time on the 1st of each month until May 2027. It turns new stories into scenes, runs both test suites, pushes to main only if both pass, and sends Nafeezie a short note.
+- Nafeezie's own scenes carry credit:'Nafeezie', own:1. Scenes added after launch are gated with OWN_FROM, so a Today's Landing already in progress never changes mid-day.
+
+## Hands-off checklist (Nafeezie)
+- Namecheap: keep auto-renew on for nowyouhavelanded.com.
+- Supabase: if an email warns the project will pause, open the dashboard and press Resume.

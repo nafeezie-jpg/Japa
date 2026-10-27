@@ -33,7 +33,7 @@ async def run():
       await pg.select_option('#lfund', index=g % 5)
       if g == 0 and SHOTS: await pg.locator('#lifecard').screenshot(path='tests/shots/life-setup.png')
       await pg.click('#lifego')
-      for ch in range(0, 3):
+      for ch in range(0, 6):
         steps = 0; backed = False
         for _ in range(140):
           if await pg.locator('#lhome').count(): break
@@ -53,10 +53,10 @@ async def run():
         if g == 0 and SHOTS: await pg.wait_for_timeout(700); await pg.screenshot(path=f'tests/shots/life-end-ch{ch}.png', full_page=True)
         await pg.click('#lhome')
         card = await pg.locator('#lifecard').inner_text()
-        if ch < 2 and 'unlocks in' not in card: issues.append(f'life {g} ch{ch}: home card does not show the countdown: {card[:100]!r}')
-        if ch == 2 and 'being written' not in card: issues.append(f'life {g}: chapter 3 not shown as coming soon')
+        if ch < 5 and 'unlocks in' not in card: issues.append(f'life {g} ch{ch}: home card does not show the countdown: {card[:100]!r}')
+        if ch == 5 and 'complete' not in card: issues.append(f'life {g}: life not shown as complete')
         if g == 0 and SHOTS and ch == 0: await pg.locator('#lifecard').screenshot(path='tests/shots/life-waiting.png')
-        if ch < 2:   # pretend a day has passed
+        if ch < 5:   # pretend a day has passed
           await pg.evaluate('() => { const l = loadLife(); l.doneOn = "2000-01-01"; saveLife(l); }')
           await pg.reload(); await pg.click('#lifeplay')
       if posts: issues.append(f'life {g}: posted {len(posts)} times to the leaderboard')
@@ -65,7 +65,7 @@ async def run():
       ctx2 = await b.new_context(); pg2 = await ctx2.new_page(); await pg2.route('**/*', lambda r: r.continue_() if r.request.url.startswith('file:') else r.abort())
       await pg2.goto(PAGE); await pg2.evaluate('c => importProgress(c)', code)
       moved = await pg2.evaluate('loadLife()')
-      if not moved or moved['ch'] != 2: issues.append(f'life {g}: move code lost the life')
+      if not moved or moved['ch'] != 5: issues.append(f'life {g}: move code lost the life')
       await ctx2.close()
       if errs: issues.append(f'life {g} js errors: {errs}')
       await ctx.close()
