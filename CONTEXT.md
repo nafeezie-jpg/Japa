@@ -35,7 +35,7 @@ Read this, then read index.html, before changing anything.
 - **Japa experience.**
   - Each Today's Landing counts as one "landing lived" (abroadMonths() counts daily days).
   - The titles in ABROAD_BADGES run Just Landed, JJC (2), Still Converting to Naira (7), Knows the Bus Routes (13), Proper Abroad Person (26), Sends Advice Home (52), Weather Complainer (78), Japa Veteran (130).
-  - Practice games ("Play more") don't count.
+  - Practice games ("Practice any route", formerly "Play more") don't count.
 - **Result screen, top to bottom.**
   - Verdict card
   - "What it cost you" chips (costParts)
@@ -48,7 +48,7 @@ Read this, then read index.html, before changing anything.
   - Play again buttons
   - Collection
   - Road to making it
-- **Home screen.** Your details, then the Today's Landing hero (or the tomorrow card once played), progress tiles, "What is this game?" (openAbout, also /?about), "Play more", and "How it works" (openHow, also /?how).
+- **Home screen.** Your details, then the Today's Landing hero (or the tomorrow card once played), progress tiles, "What is this game?" (openAbout, also /?about), "Practice any route" (id moredet), and "How it works" (openHow, also /?how).
 - **Move my progress.** openMove copies a NYHL1 code between Safari and the home screen app, which keep separate storage on iPhone.
 - **Supabase.**
   - Project mydzixaknqldrcfakirn. The publishable key is in index.html.
