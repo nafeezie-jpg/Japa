@@ -22,8 +22,8 @@ Read this, then read index.html, before changing anything.
 - **Game length.** Each game has 15 questions at most (MAX_Q, isCore, planExtras).
 - **Day 30.** `finale()` picks one of 5 endings.
 - **Meters.**
-  - Healthy marks are MARKS = {peace:60, home:50, future:40}, and HOME_CAP = 85. Cash is healthy at 3 months' rent.
-  - `scoreOf` gives about 60 when all four meters are healthy and 100 when all are excellent.
+  - Healthy marks are MARKS = {peace:80, home:65, future:60}, and HOME_CAP = 85. Cash is healthy at SAFE_RENT, 5 months' rent. Raised on 27 Oct 2026 because scores bunched in the 70s.
+  - `scoreOf` gives 70 when all four meters are healthy and 100 when all are excellent. Below a healthy mark, points fall away on a curve (power 1.6). The gauge line sits at 70. Ghost Mode needs home under 35, or 5+ refusals with home under 45.
 - **Verdicts and badges.**
   - VERDICTS (10) give one verdict per game.
   - BADGES (7) can be earned several per game.

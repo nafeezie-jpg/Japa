@@ -192,7 +192,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .cardwrap img{width:100%;border-radius:14px;display:block;box-shadow:0 10px 30px rgba(0,0,0,.15)}
 @media (prefers-reduced-motion:reduce){.art *{animation:none!important}.stat.up b,.stat.down b{animation:none}}
 .bar{position:relative}
-.bar::after{content:"";position:absolute;left:60%;top:-2px;bottom:-2px;width:2px;background:color-mix(in srgb,var(--green-ink) 70%,transparent)}
+.bar::after{content:"";position:absolute;left:70%;top:-2px;bottom:-2px;width:2px;background:color-mix(in srgb,var(--green-ink) 70%,transparent)}
 .sheet{display:grid;gap:10px}
 .meter{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:6px 12px 12px 6px;padding:10px 12px;display:grid;gap:6px}
 .meter.high{border-left-color:var(--good)} .meter.mid{border-left-color:var(--gold)} .meter.low{border-left-color:var(--bad)}
@@ -2208,7 +2208,7 @@ function render(){
               <dt>Home</dt><dd>Family ratings. Money pushes it up. Voice notes do absolutely nothing.</dd>
               <dt>Future</dt><dd>What you are really building. Nobody at home can see it, which is why it grows.</dd>
             </dl>
-            <p>Each meter is out of 100, and each has its own healthy mark. Future starts at 20, so 40 is already good. Home is best between 50 and 85, because a family that adores you in month one usually means you are overgiving. There are no right answers. Every choice follows you to the end of the game.</p>
+            <p>Each meter is out of 100, and each has its own healthy mark. Future starts at 20, so 60 takes real building. Home is best between 65 and 85, because a family that adores you in month one usually means you are overgiving. There are no right answers. Every choice follows you to the end of the game.</p>
           </div>
         </details>
         <details class="how">
@@ -2369,9 +2369,10 @@ function playVN(el){
 
 
 /* ---------- What the scores mean ---------- */
-const HEALTHY = 60;
+const HEALTHY = 70;
 // low below the first number, healthy from the second; home also has a ceiling
-const MARKS = {peace:[35,60], home:[30,50], future:[25,40]};
+const MARKS = {peace:[45,80], home:[35,65], future:[30,60]};
+const SAFE_RENT = 5;   // months of rent that count as a healthy cash cushion
 const HOME_CAP = 85;
 const healthy = (k, v) => v >= MARKS[k][1] && !(k==='home' && v > HOME_CAP);
 function band(k, v){
@@ -2379,8 +2380,8 @@ function band(k, v){
     const rent = RENT();
     if(v < 0) return {cls:'low', label:'In debt', meaning: ['study','partial','visitor','care'].includes(P()) ? 'You owe more than you have. Fees, papers, and a hard route did a lot of this, even if you were careful.' : 'You owe more than you have. Generosity without a budget turned into debt.'};
     if(v < rent) return {cls:'low', label:'One bad week from trouble', meaning:"You have less than one month's rent saved."};
-    if(v < rent*3) return {cls:'mid', label:'Breathing room', meaning:"You have one to three months' rent saved. Not rich, but not panicking."};
-    return {cls:'high', label:'Proper safety net', meaning:"You have more than three months' rent saved. Abroad experts call this sleeping well."};
+    if(v < rent*SAFE_RENT) return {cls:'mid', label:'Breathing room', meaning:`You have one to ${SAFE_RENT} months' rent saved. Not rich, but not panicking.`};
+    return {cls:'high', label:'Proper safety net', meaning:`You have ${SAFE_RENT} months' rent or more saved. Abroad experts call this sleeping well.`};
   }
   const T = {
     peace:[['Running on fumes','You are exhausted. Too many yeses, too little rest.'],['Holding it together','You are coping, but the stress is building.'],['Zen master','You protected your sanity and rested when you needed to.']],
@@ -2396,7 +2397,7 @@ function lesson(){
   if(S.cash < 0) return ['study','partial','visitor','care'].includes(P())
     ? "Your lesson: some of this debt was never about your choices. Your route came with costs you could not control. Being careful still matters, because it decides how deep the hole gets and how fast you climb out."
     : "Your lesson: you gave more than you had. Generosity without a budget becomes debt, and debt follows you everywhere.";
-  if(S.home > HOME_CAP && (S.cash < rent*3 || S.peace < MARKS.peace[1])) return "Your lesson: home is very happy with you, and your savings or your peace paid for it. You cannot give from an empty cup.";
+  if(S.home > HOME_CAP && (S.cash < rent*SAFE_RENT || S.peace < MARKS.peace[1])) return "Your lesson: home is very happy with you, and your savings or your peace paid for it. You cannot give from an empty cup.";
   const m = [['peace',S.peace],['home',S.home],['future',S.future]].map(([k,v])=>[k, v - MARKS[k][1]]).sort((a,b)=>a[1]-b[1])[0];
   if(m[1] >= 0 && S.cash >= rent) return "Your lesson: you kept all four meters healthy at once. That is rare. Teach the rest of us.";
   return {
@@ -2503,7 +2504,7 @@ function verdict(){
    [f.sibling==='sent' && S.home>=65 && S.cash<mid, "The Family ATM", `Everybody at home is thriving. You are eating Indomie in ${T()}.`],
    [S.cash<low, "Running on Prayers", "You made it to day 30 on faith, leftover jollof, and a very patient bank."],
    [S.peace<35, "Hustle Without Peace", "The money is coming in. Your body has filed a formal complaint."],
-   [S.home<35 || ((S.st||{}).r >= 4 && ((S.st||{}).s||0) < 200 && S.home < 55), "Ghost Mode Activated", "Your account is healthy. The family WhatsApp group thinks you have died."],
+   [S.home < MARKS.home[0] || ((S.st||{}).r >= 5 && ((S.st||{}).s||0) < 100 && S.home < 45), "Ghost Mode Activated", "Your account is healthy. The family WhatsApp group thinks you have died."],
    [(SOLD() || P()==='care' || P()==='visitor') && S.future>=30, "Making It By Force", "There is no going back, so you are going forward. Slowly, stubbornly, and with your whole chest."]
   ];
   for(const [ok, t, l] of story){ const [lo, hi] = verdictBand(t); if(ok && sc >= lo && sc <= hi) return [t, l]; }
@@ -2660,14 +2661,14 @@ function journalHTML(){
   const tip = avg('home') > HOME_CAP ? "Across your games, home is often very happy with you. Watch what your savings and peace pay for it."
     : avgRent < 1 ? "Across your games, you usually finish with less than one month's rent saved. Try protecting a small amount first, then giving."
     : weakest[1] < 0 ? `Across your games, ${weakest[0]} is the meter you protect least. Try one game where you guard it on purpose.`
-    : avgRent < 3 ? "Across your games, Peace, Home, and Future stay healthy on average. Your savings rarely reach three months' rent, so that is your next goal."
+    : avgRent < SAFE_RENT ? `Across your games, Peace, Home, and Future stay healthy on average. Your savings rarely reach ${SAFE_RENT} months' rent, so that is your next goal.`
     : "Across your games, you keep all four meters healthy on average. That is rare.";
   const meter = (n,k) => `<div class="j-meter"><div class="j-top"><b>${n}</b><span class="j-avg">avg ${avg(k)}</span>${trend(k)}</div>${spark(last.map(g=>g[k]), MARKS[k][1], k==='home'?HOME_CAP:0)}</div>`;
   const date = t => new Date(t).toLocaleDateString('en-GB',{day:'numeric', month:'short'});
   return `${roadHTML()}<div class="j-tiles"><div><b>${Math.max(...h.map(scoreOf))}</b><span>best score</span></div><div><b>${h.length}</b><span>games</span></div><div><b>${avgRent}</b><span>months of rent saved, on average</span></div><div><b>${top[0]}</b><span>your most common verdict</span></div></div>
     <div class="lesson">${tip}</div>
     ${meter('Peace','peace')}${meter('Home','home')}${meter('Future','future')}
-    <div class="j-meter"><div class="j-top"><b>Cash</b><span class="j-avg">avg ${avgRent} months of rent</span>${h.length>=4?trend('rent'):''}</div>${spark(last.map(g=>g.rent), 3, 0, Math.max(6, ...last.map(g=>g.rent)))}</div>
+    <div class="j-meter"><div class="j-top"><b>Cash</b><span class="j-avg">avg ${avgRent} months of rent</span>${h.length>=4?trend('rent'):''}</div>${spark(last.map(g=>g.rent), SAFE_RENT, 0, Math.max(6, ...last.map(g=>g.rent)))}</div>
     <p class="small">The line on each chart is the healthy mark. Charts show your last ${last.length} game${last.length>1?'s':''}.</p>
     <div class="when">Every game</div>
     <div class="j-list">${h.slice().reverse().map(g=>`<div class="j-row"><div><b>${g.v}</b><span>${date(g.t)} · ${g.trip}${g.daily?' · Today\'s Landing':''}</span></div><div class="j-nums"><b>${scoreOf(g)}</b>/100<br>${g.cur}${g.cash.toLocaleString('en-GB')} · P${g.peace} H${g.home} F${g.future}</div></div>`).join('')}</div>
@@ -2788,7 +2789,7 @@ const BOARDS = [
 ];
 const NGN0 = usd => '₦' + (Math.round(usd*NGN_PER_USD/5000)*5000).toLocaleString('en-GB');
 // the boards restarted for the new scoring; earlier results stay stored but are never counted
-const BOARD_FROM = '2026-10-25T00:50:00Z';
+const BOARD_FROM = '2026-10-27T16:49:00Z';   // tougher scoring from here, so the board starts fresh
 const boardFrom = d => new Date(Math.max(d.getTime(), Date.parse(BOARD_FROM)));
 function weekStart(at){ const d = at ? new Date(at) : new Date(); d.setUTCHours(0,0,0,0); d.setUTCDate(d.getUTCDate() - (d.getUTCDay()+6)%7); return d; }
 const boardSort = b => (x,y) => b.val(y)-b.val(x) || (b.key==='fooled' ? x.score-y.score : y.score-x.score) || (Date.parse(x.created_at||0) - Date.parse(y.created_at||0));
@@ -2958,13 +2959,14 @@ async function renderWinners(app){
 function getName(){ try{ return (localStorage.getItem('nyhl-name')||'').slice(0,20); }catch(e){ return ''; } }
 function setName(v){ v = (v||'').replace(/[^\p{L}\p{M} '\-.]/gu,'').replace(/\s+/g,' ').trim().slice(0,20); try{ localStorage.setItem('nyhl-name', v); }catch(e){} return v; }
 // Healthy on every meter scores about 60. A perfect 100 needs excellence on all four:
-// Peace 92+, Future 80+, Home 75 to 85, and 8 months' rent saved.
-const EXCELLENT = {peace:92, future:80, home:75, rent:8};
+// Healthy on every meter scores 70. A perfect 100 needs excellence on all four:
+// Peace 97+, Future 90+, Home 80 to 85, and 10 months' rent saved. Below a healthy mark, points fall away fast.
+const EXCELLENT = {peace:97, future:90, home:80, rent:10};
 function scoreOf(g){
-  const ramp = (v, healthy, top) => v <= healthy ? 15*Math.max(0, v)/healthy : 15 + 10*Math.min(1, (v-healthy)/(top-healthy));
-  const cash = g.rent < 0 ? 0 : ramp(g.rent, 3, EXCELLENT.rent);
+  const ramp = (v, healthy, top) => v <= healthy ? 17.5*Math.pow(Math.max(0, v)/healthy, 1.6) : 17.5 + 7.5*Math.min(1, (v-healthy)/(top-healthy));
+  const cash = g.rent < 0 ? 0 : ramp(g.rent, SAFE_RENT, EXCELLENT.rent);
   const peace = ramp(g.peace, MARKS.peace[1], EXCELLENT.peace), future = ramp(g.future, MARKS.future[1], EXCELLENT.future);
-  const home = g.home > HOME_CAP ? Math.max(8, 25-(g.home-HOME_CAP)*0.8) : ramp(g.home, MARKS.home[1], EXCELLENT.home);
+  const home = g.home > HOME_CAP ? Math.max(5, 25-(g.home-HOME_CAP)*1.2) : ramp(g.home, MARKS.home[1], EXCELLENT.home);
   return Math.round(cash + peace + future + home);
 }
 const nowScore = () => scoreOf({rent:S.cash/RENT(), peace:S.peace, home:S.home, future:S.future});
@@ -3077,7 +3079,7 @@ function openHow(){
       <div><span>📊</span><p><b>Every choice moves four meters.</b></p></div>
     </div>
     <div class="four">
-      <span>💵<small>Cash</small><em>3 months' rent</em></span><span>🧘🏾<small>Peace</small><em>60+</em></span><span>🏠<small>Home</small><em>50 to 85</em></span><span>🚀<small>Future</small><em>40+</em></span>
+      <span>💵<small>Cash</small><em>5 months' rent</em></span><span>🧘🏾<small>Peace</small><em>80+</em></span><span>🏠<small>Home</small><em>65 to 85</em></span><span>🚀<small>Future</small><em>60+</em></span>
     </div>
     <p class="howsmall">The numbers are the healthy marks. Above 85, home may be loving you at your own expense.</p>
     <div class="howlist">
@@ -3171,13 +3173,13 @@ function renderEnd(app){
     ${tomorrowHTML({newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `New title! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
     <div class="score">
       <div class="sc-top"><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div>
-      <div class="gauge"><i style="width:${Math.max(2,Math.min(100,nowScore()))}%"></i><em style="left:60%"></em></div>
-      <div class="gauge-k"><span>0</span><span style="left:60%">60 healthy</span><span>100</span></div>
+      <div class="gauge"><i style="width:${Math.max(2,Math.min(100,nowScore()))}%"></i><em style="left:70%"></em></div>
+      <div class="gauge-k"><span>0</span><span style="left:70%">70 healthy</span><span>100</span></div>
     </div>
     <div class="mtiles">
       ${[['cash','💵','Cash',money(S.cash)],['peace','🧘🏾','Peace',S.peace],['home','🏠','Home',S.home],['future','🚀','Future',S.future]].map(([k,ic,n,v])=>{ const b=band(k, S[k]); return `
       <button type="button" class="mtile ${b.cls}" data-hint="${esc(b.meaning)}"><span class="mt-ic" aria-hidden="true">${ic}</span><span class="mt-n">${n}</span><b>${v}</b>
-        ${k==='cash' ? `<div class="mbar"><i style="width:${Math.max(3,Math.min(100, S.cash/RENT()/3*100))}%"></i><em style="left:99%"></em></div>` : `<div class="mbar"><i style="width:${S[k]}%"></i><em style="left:${MARKS[k][1]}%"></em>${k==='home'?`<em class="cap" style="left:${HOME_CAP}%"></em>`:''}</div>`}
+        ${k==='cash' ? `<div class="mbar"><i style="width:${Math.max(3,Math.min(100, S.cash/RENT()/SAFE_RENT*100))}%"></i><em style="left:99%"></em></div>` : `<div class="mbar"><i style="width:${S[k]}%"></i><em style="left:${MARKS[k][1]}%"></em>${k==='home'?`<em class="cap" style="left:${HOME_CAP}%"></em>`:''}</div>`}
         <span class="tag">${b.label}</span></button>`; }).join('')}
     </div>
     <div class="lesson">💡 ${cap(lesson().replace(/^Your lesson: /,''))}</div>
@@ -3213,7 +3215,7 @@ function renderEnd(app){
     track('japada'); SFX.land();
     const box = document.getElementById('padabox'), c = C(), rent = RENT();
     const lines = [`One year later, you land back in ${O()}. The habits from your first month followed you all the way home.`];
-    lines.push(S.cash >= rent*3 ? "The saving habit you started in month one paid off. You come home with something real to start with." : S.cash >= 0 ? "You come home with stories, small savings, and a suitcase full of gifts you could not really afford." : `You come home still paying off what you owed abroad, and the first person to ask "where is our own?" gets a very long silence.`);
+    lines.push(S.cash >= rent*SAFE_RENT ? "The saving habit you started in month one paid off. You come home with something real to start with." : S.cash >= 0 ? "You come home with stories, small savings, and a suitcase full of gifts you could not really afford." : `You come home still paying off what you owed abroad, and the first person to ask "where is our own?" gets a very long silence.`);
     lines.push(S.home >= 50 ? `${c.mum} cooks ${c.food} and tells everyone you are "on holiday".` : "Half the family is happy to see you. The other half wants to know what happened.");
     lines.push(S.future >= 40 ? "You bring back skills, contacts, and a clearer head. This time you know exactly what you want." : "You sleep through the night for the first time in a year. The plan can wait until you are rested.");
     lines.push("Coming home takes courage. Sometimes the plan changes, and that is allowed.");
@@ -3838,7 +3840,7 @@ function lifeReset(){
 function mtilesHTML(){
   return `<div class="mtiles">${[['cash','💵','Cash',money(S.cash)],['peace','🧘🏾','Peace',S.peace],['home','🏠','Home',S.home],['future','🚀','Future',S.future]].map(([k,ic,n,v])=>{ const b = band(k, S[k]); return `
     <button type="button" class="mtile ${b.cls}" data-hint="${esc(b.meaning)}"><span class="mt-ic" aria-hidden="true">${ic}</span><span class="mt-n">${n}</span><b>${v}</b>
-      ${k==='cash' ? `<div class="mbar"><i style="width:${Math.max(3,Math.min(100, S.cash/RENT()/3*100))}%"></i><em style="left:99%"></em></div>` : `<div class="mbar"><i style="width:${S[k]}%"></i><em style="left:${MARKS[k][1]}%"></em>${k==='home'?`<em class="cap" style="left:${HOME_CAP}%"></em>`:''}</div>`}
+      ${k==='cash' ? `<div class="mbar"><i style="width:${Math.max(3,Math.min(100, S.cash/RENT()/SAFE_RENT*100))}%"></i><em style="left:99%"></em></div>` : `<div class="mbar"><i style="width:${S[k]}%"></i><em style="left:${MARKS[k][1]}%"></em>${k==='home'?`<em class="cap" style="left:${HOME_CAP}%"></em>`:''}</div>`}
       <span class="tag">${b.label}</span></button>`; }).join('')}</div>`;
 }
 const lifeLine = sc => S.cash < 0 ? (sc >= 60 ? "Your peace and your people are holding. Your bank account is not, so the next chapter is where the climb starts." : "Money is in the red, and the weeks were heavy. You are still here, and the story keeps going.")
@@ -3882,7 +3884,7 @@ function renderLifeEnd(app){
     <div class="cost"><div class="when">📈 What this chapter did to you</div><div class="chips">${chips(d) || '<span class="chip">Nothing moved. Steady hands.</span>'}</div></div>
     <div class="score">
       <div class="sc-top"><span class="when">Life score</span><b>${score}<small>/100</small></b></div>
-      <div class="gauge"><i style="width:${Math.max(2,Math.min(100,score))}%"></i><em style="left:60%"></em></div>
+      <div class="gauge"><i style="width:${Math.max(2,Math.min(100,score))}%"></i><em style="left:70%"></em></div>
     </div>
     ${mtilesHTML()}
     ${summary}
