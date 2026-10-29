@@ -2365,6 +2365,11 @@ const HEALTHY = 70;
 const MARKS = {peace:[45,80], home:[35,65], future:[30,60]};
 const SAFE_RENT = 5;   // months of rent that count as a healthy cash cushion
 const HOME_CAP = 85;
+// Fairer rules from next week's board: a very happy home only costs points when cash or peace paid for it,
+// story titles follow what happened, and your level on the road never drops.
+const RULES2 = '2026-11-02T00:00:00Z';
+const newRules = t => (t || Date.now()) >= Date.parse(RULES2);
+const homeOverdone = (rentMonths, peace) => rentMonths < SAFE_RENT || peace < MARKS.peace[1];
 const healthy = (k, v) => v >= MARKS[k][1] && !(k==='home' && v > HOME_CAP);
 function band(k, v){
   if(k==='cash'){
@@ -2379,6 +2384,7 @@ function band(k, v){
     home:[['"You have changed"','Family relationships are strained. Expect long voice notes.'],['On speaking terms','Your family is okay with you, but they have opinions.'],['Well loved','Your family is happy with you, and you still kept something for yourself.']],
     future:[['Still loading','Little went into your career, savings, or plans. You survived, but you did not build.'],['Building slowly','You have started building something for yourself. Keep going.'],['On the up','Your choices are building a real future. Your later self says thank you.']]
   }[k];
+  if(k==='home' && v > HOME_CAP && newRules() && !homeOverdone(S.cash/RENT(), S.peace)) return {cls:'high', label:'Well loved', meaning:'Your family is very happy with you, and your savings and your peace are still standing. That is the dream.'};
   if(k==='home' && v > HOME_CAP) return {cls:'mid', label:'Family ATM risk', meaning:'Home is thrilled with you. Check what your savings and your peace paid for it.'};
   const i = v < MARKS[k][0] ? 0 : v < MARKS[k][1] ? 1 : 2;
   return {cls:['low','mid','high'][i], label:T[i][0], meaning:T[i][1]};
@@ -2487,6 +2493,7 @@ function verdictBand(title){
   const b = {'The Family ATM':[0,59], 'Stronger Than The Agent':[45,89], 'Scholar and Sponsor':[40,79], 'Fees Still Pending':[0,64], 'Owing the Cooperative':[0,100],
     'Running on Prayers':[0,49], 'Hustle Without Peace':[0,59], 'Ghost Mode Activated':[0,79], 'Making It By Force':[55,79], 'Serial Japa Champion':[70,100],
     'Abroad Strategist':[90,100], 'Making Moves':[80,89], 'Settling In':[70,79], 'Still Finding Your Feet':[60,69], 'Hanging In There':[0,59]}[title];
+  if(newRules() && ['The Family ATM','Running on Prayers','Hustle Without Peace','Ghost Mode Activated'].includes(title)) return [0,79];
   return b || [0,100];
 }
 function verdict(){
@@ -2832,7 +2839,7 @@ function boardHTML(){
   const rows = bestPerPlayer(boardRows, b).slice(0,10);
   const flag = {us:'🇺🇸', uk:'🇬🇧', ca:'🇨🇦', eu:'🇪🇺'};
   const list = rows.length ? rows.map((r,i)=>`<div class="lb-row${myPostAt && Date.parse(r.created_at)===myPostAt ? ' me' : ''}"><span class="lb-rank">${i+1}</span><div><b>${esc(r.name)}</b><small>${flag[r.route]||''} ${esc(r.town)} · ${esc(r.verdict)}</small></div><span class="lb-val">${b.show(r)}</span></div>`).join('')
-    : `${Date.now() - Date.parse(BOARD_FROM) < 7*864e5 && weekStart() <= new Date(BOARD_FROM) ? `<p><b>🆕 Fresh board, tougher scoring.</b> Healthy now starts at 70, so this week's board restarted when the new marks went live.</p>` : ''}<p>${b.key==='spotted' ? 'Nobody has spotted a trap yet this week. Play with your eyes open to be the first.' : 'Nobody is on this board yet this week. Finish a game to be the first.'}</p>`;
+    : `${newRules() && weekStart() <= new Date(RULES2) ? `<p><b>🆕 Fairer scoring this week.</b> A very happy home only costs points when your savings or your peace paid for it, and your title now follows what really happened in your game.</p>` : ''}${Date.now() - Date.parse(BOARD_FROM) < 7*864e5 && weekStart() <= new Date(BOARD_FROM) ? `<p><b>🆕 Fresh board, tougher scoring.</b> Healthy now starts at 70, so this week's board restarted when the new marks went live.</p>` : ''}<p>${b.key==='spotted' ? 'Nobody has spotted a trap yet this week. Play with your eyes open to be the first.' : 'Nobody is on this board yet this week. Finish a game to be the first.'}</p>`;
   const cr = boardCrown ? `<div class="lb-crown">👑 Last week's Best Landing: <b>${esc(boardCrown.name)}</b>, ${boardCrown.score}/100</div>` : '';
   return `${cr}<div class="lb-tabs">${BOARDS.map(x=>`<button class="lb-tab${x.key===boardTab?' on':''}" type="button" data-t="${x.key}"><b>${x.title}</b><span>${x.sub}</span></button>`).join('')}</div>
     <div class="lb-list">${list}</div>
@@ -2957,24 +2964,28 @@ function scoreOf(g){
   const ramp = (v, healthy, top) => v <= healthy ? 17.5*Math.pow(Math.max(0, v)/healthy, 1.6) : 17.5 + 7.5*Math.min(1, (v-healthy)/(top-healthy));
   const cash = g.rent < 0 ? 0 : ramp(g.rent, SAFE_RENT, EXCELLENT.rent);
   const peace = ramp(g.peace, MARKS.peace[1], EXCELLENT.peace), future = ramp(g.future, MARKS.future[1], EXCELLENT.future);
-  const home = g.home > HOME_CAP ? Math.max(5, 25-(g.home-HOME_CAP)*1.2) : ramp(g.home, MARKS.home[1], EXCELLENT.home);
+  const home = g.home > HOME_CAP && (!newRules(g.t) || homeOverdone(g.rent, g.peace)) ? Math.max(5, 25-(g.home-HOME_CAP)*1.2) : ramp(g.home, MARKS.home[1], EXCELLENT.home);
   return Math.round(cash + peace + future + home);
 }
-const nowScore = () => scoreOf({rent:S.cash/RENT(), peace:S.peace, home:S.home, future:S.future});
+const nowScore = () => scoreOf({t:Date.now(), rent:S.cash/RENT(), peace:S.peace, home:S.home, future:S.future});
 const LEVELS = [[0,'Just landed','Every story starts at arrivals.'],[40,'Finding your feet','You are learning the rules.'],[60,'Settling in','The ground is getting firmer.'],[75,'Thriving','You are building something real.'],[90,'Made it','Money, peace, home, and future, all at once.']];
 function roadInfo(){
   const h = loadHistory(); if(!h.length) return null;
   const recent = h.slice(-5).map(scoreOf), avg = Math.round(recent.reduce((a,b)=>a+b,0)/recent.length);
-  let i = LEVELS.length-1; while(i>0 && avg < LEVELS[i][0]) i--;
-  const needMore = i===LEVELS.length-1 && h.length < 5;
-  if(needMore) i--;
+  const levelAt = (a, n) => { let j = LEVELS.length-1; while(j>0 && a < LEVELS[j][0]) j--; if(j===LEVELS.length-1 && n < 5) j--; return j; };
+  let i = levelAt(avg, h.length);
+  const needMore = i===LEVELS.length-2 && avg >= LEVELS[LEVELS.length-1][0] && h.length < 5;
+  let held = false;
+  if(newRules()){   // the road never takes a level back: keep the best level any five-game stretch reached
+    for(let n=1; n<=h.length; n++){ const w = h.slice(Math.max(0,n-5), n).map(scoreOf), j = levelAt(Math.round(w.reduce((a,b)=>a+b,0)/w.length), n); if(j > i){ i = j; held = true; } }
+  }
   const next = LEVELS[i+1], best = Math.max(...h.map(scoreOf));
   const pct = next ? Math.max(4, Math.min(100, Math.round((avg-LEVELS[i][0])/(next[0]-LEVELS[i][0])*100))) : 100;
-  return {avg, best, level:LEVELS[i], next, pct, games:h.length, needMore};
+  return {avg, best, level:LEVELS[i], next, pct, games:h.length, needMore, held};
 }
 function roadHTML(){
   const r = roadInfo(); if(!r) return '';
-  const tip = !r.next ? 'You made it. Now help the next person through arrivals.' : r.needMore ? `Your scores are there. Finish ${5-r.games} more game${5-r.games>1?'s':''} to prove it.` : `Average ${r.next[0]} across your last five games to reach ${r.next[1]}.`;
+  const tip = !r.next ? 'You made it. Now help the next person through arrivals.' : r.held ? `This level is yours to keep. Your last five games average ${r.avg}, so try a hard route and see what you learn.` : r.needMore ? `Your scores are there. Finish ${5-r.games} more game${5-r.games>1?'s':''} to prove it.` : `Average ${r.next[0]} across your last five games to reach ${r.next[1]}.`;
   const li = LEVELS.indexOf(r.level);
   return `<div class="road"><div class="when">Your road to making it</div>
     <div class="road-top"><b>${r.level[1]}</b><span>avg ${r.avg} · best ${r.best}</span></div>
