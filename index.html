@@ -1095,7 +1095,7 @@ const US = () => [
  doubt(19, "You sit in your car outside Walmart after another rejection email.", "You write them on a Walmart receipt and put it in the glove box. You will read it many times."),
  farm(), promise(),
  {day:25, auto:'pay2'},
- {day:27, when: s => s.f.sibling==='sent' || s.f.sibling==='video', auto:'roof'},
+ {day:27, when: s => s.f.sibling==='sent', auto:'roof'},
  friend(), finale()
 ];
 
@@ -1167,7 +1167,7 @@ const UK = () => [
    {l:"Write down why you came", fx:{peace:6, future:8}, r:`Closer to home, ${STU() ? "a degree" : "a real career"}, a fresh start. You stick the note on your tiny wall, which is the only wall you have.`}]},
  farm(), promise(),
  {day:25, auto:'pay2'},
- {day:27, when: s => s.f.sibling==='sent' || s.f.sibling==='video', auto:'roof'},
+ {day:27, when: s => s.f.sibling==='sent', auto:'roof'},
  friend(), finale()
 ];
 
@@ -1226,7 +1226,7 @@ const CA = () => [
  doubt(20, "You sit in your basement watching snow pile up against the window.", P()==='visitor' ? "You write them on the back of your old boarding pass. Opportunity, safety, and a future for your children." : "You write them on the back of your PR card envelope. Opportunity, safety, and a future for your children."),
  farm(), promise(),
  {day:25, auto:'pay2'},
- {day:27, when: s => s.f.sibling==='sent' || s.f.sibling==='video', auto:'roof'},
+ {day:27, when: s => s.f.sibling==='sent', auto:'roof'},
  friend(), finale()
 ];
 
@@ -1338,7 +1338,7 @@ const EU = () => { const c = C(), lang = L.lang, shared = Math.round(RENT()*0.75
    {l:"Ask the Naija group", fx:{peace:2, home:2}, r:"Thirty people reply with thirty translations. Two are correct, and one is a prayer."},
    {l:"Put it in a drawer and pray", fx:{peace:-6, future:-4}, r:"The drawer keeps it safe for three weeks. Then a second letter arrives, angrier."}]},
  {day:25, auto:'pay2'},
- {day:27, when: s => s.f.sibling==='sent' || s.f.sibling==='video', auto:'roof'},
+ {day:27, when: s => s.f.sibling==='sent', auto:'roof'},
  friend(), finale()
 ].filter(Boolean); };
 
@@ -1954,7 +1954,7 @@ function autoEvent(kind){
               "The agent has stopped answering. His office is now a phone repair shop, and nobody there has heard of him.",
               `Your neighbour sees the Corolla parked outside ${c.sib}'s girlfriend's house every evening. The weekly returns are "coming".`][v];
       fx = {peace:-10, future:-5};
-    } else { text = `Your neighbour mentions, casually, that ${c.sib} just bought a new phone.`; fx = {peace:-4}; }
+    }
   }
   return {text, fx};
 }
