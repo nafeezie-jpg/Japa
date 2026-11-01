@@ -24,6 +24,12 @@ Read this, then read index.html, before changing anything.
 - **Meters.**
   - Healthy marks are MARKS = {peace:80, home:65, future:60}, and HOME_CAP = 85. Cash is healthy at SAFE_RENT, 5 months' rent. Raised on 27 Oct 2026 because scores bunched in the 70s.
   - `scoreOf` gives 70 when all four meters are healthy and 100 when all are excellent. Below a healthy mark, points fall away on a curve (power 1.6). The gauge line sits at 70. Ghost Mode needs home under 35, or 5+ refusals with home under 45.
+  - From the 2 Nov 2026 board (RULES2, newRules(t)): Home above HOME_CAP only costs points when cash is under SAFE_RENT or peace is under 80 (homeOverdone). The four hard-luck story titles (Family ATM, Running on Prayers, Hustle Without Peace, Ghost Mode) apply up to a score of 79. The progress road keeps the best level any five-game stretch reached. History games are scored by their own time g.t, so old games keep old rules.
+- **Visuals (31 Oct 2026).**
+  - The header shows each change floating over the meter label (`.dl`), bars slide from the old value (data-w), and a meter below its low mark turns red (`.stat.low`).
+  - Messages render as a phone chat (`.chat`): typing dots, then the bubble with a time and ticks. Mummy's voice notes sit inside the chat as a waveform bubble (`.vnb`, playVN).
+  - A scene with `post:[who, emoji, caption]` shows a status post card instead of a drawing.
+  - Day 30 shows "Your 30 days in pictures": S.moves holds [day, landing, icon, label] for each choice, from moveIcon(); recapHTML() draws it.
 - **Verdicts and badges.**
   - VERDICTS (10) give one verdict per game.
   - BADGES (7) can be earned several per game.
@@ -89,6 +95,7 @@ Read this, then read index.html, before changing anything.
 - Players send stories through Tally form q5480d. It asks when the story happened (first month to year 3+) and has a box for later stories.
 - STORIES.md logs every submission read, by ID, with where it lives in the game. Never put emails in the repo.
 - A scheduled task, "Now You Have Landed monthly stories", runs at 8:53am New York time on the 1st of each month until May 2027. It turns new stories into scenes, runs both test suites, pushes to main only if both pass, and sends Nafeezie a short note.
+- livingLarge() (day 23, core, late) shows only to players who sent money home: the Bernabéu status, the rice-money restaurant, the sibling's lounge, the cousin's Lexus, the uncle in Dubai. oldColleagues() (day 21, extra) covers people back home being promoted. Both start with the 2 Nov board.
 - Nafeezie's own scenes carry credit:'Nafeezie', own:1. Scenes added after launch are gated with OWN_FROM, so a Today's Landing already in progress never changes mid-day.
 
 ## Hands-off checklist (Nafeezie)

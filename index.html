@@ -185,6 +185,51 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 @keyframes road{to{stroke-dashoffset:-24}}
 .stat.up b{animation:statup .9s ease}
 .stat.down b{animation:statdown .7s ease}
+.stat{position:relative}
+.stat .dl{position:absolute;left:0;right:0;top:-2px;background:var(--green);font-family:var(--mono);font-size:12px;font-weight:800;font-style:normal;white-space:nowrap;pointer-events:none;animation:dlfloat 2s ease forwards}
+.stat .dl.up{color:var(--gold)} .stat .dl.down{color:#FFB3A6}
+@keyframes dlfloat{0%{opacity:0;transform:translateY(6px)}12%{opacity:1;transform:none}75%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-6px)}}
+.stat.low .bar i{background:#FF8C7A}
+.stat.low b{color:#FFC9BF}
+.stat.low.down .bar{animation:lowglow 1s ease 2}
+@keyframes lowglow{50%{box-shadow:0 0 0 3px rgba(255,140,122,.45)}}
+.chat{padding:0;overflow:hidden;gap:0}
+.chat .who{background:var(--green);color:var(--green-ink);padding:9px 12px}
+.chat .who small{color:color-mix(in srgb,var(--green-ink) 75%,transparent)}
+.chat .avatar{background:var(--gold);color:var(--green)}
+.chat-ic{margin-left:auto;font-size:16px;opacity:.85}
+.chat-body{display:grid;gap:6px;padding:12px;background:var(--bubble);background-image:radial-gradient(color-mix(in srgb,var(--ink) 7%,transparent) 1px,transparent 1.2px);background-size:14px 14px}
+.chat .bubble{background:var(--card);box-shadow:0 1px 1px rgba(0,0,0,.08);position:relative;justify-self:start}
+.chat .bubble.msg{padding-bottom:20px;min-width:120px}
+.chat .meta{position:absolute;right:10px;bottom:4px;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.chat .meta b{color:#4FA3E0;font-weight:700}
+.chat .vlab{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.typing{justify-self:start;display:flex;gap:4px;background:var(--card);border-radius:4px 14px 14px 14px;padding:10px 12px;animation:typeout .9s ease forwards}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:pulse .9s infinite}
+.typing i:nth-child(2){animation-delay:.15s} .typing i:nth-child(3){animation-delay:.3s}
+@keyframes typeout{0%,75%{opacity:1;max-height:40px}100%{opacity:0;max-height:0;padding:0;margin:-6px 0 0}}
+.chat:not(.done) .bubble{opacity:0;animation:msgin .3s ease .8s forwards}
+.chat:not(.done) .bubble.msg{animation-delay:1s}
+@keyframes msgin{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
+.vnb{display:flex;align-items:center;gap:8px;border:0;font:inherit;color:inherit;cursor:pointer;min-width:220px}
+.vnb .vp{width:30px;height:30px;border-radius:50%;background:var(--green);color:var(--green-ink);display:grid;place-items:center;font-size:12px;flex:none}
+.vnb .vw{display:flex;align-items:center;gap:2px;flex:1}
+.vnb .vw i{display:block;width:3px;border-radius:2px;background:var(--muted)}
+.vnb.playing .vw i{background:var(--gold);animation:wave .4s ease-in-out infinite}
+.vnb .vt{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.recap{display:grid;gap:8px}
+.rc-strip{display:flex;flex-wrap:wrap;gap:6px}
+.rc-m{flex:none;display:grid;justify-items:center;gap:2px;width:48px;padding:7px 0 5px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:inherit;font:inherit;cursor:pointer;animation:popin .35s ease backwards}
+.rc-m b{font-size:22px;line-height:1}
+.rc-m small{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.rc-m .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.rc-k{font-size:12px;color:var(--muted)}
+.post{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.post .who{padding:10px 12px}
+.post-pic{display:grid;place-items:center;font-size:54px;letter-spacing:6px;padding:22px 0;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 35%,var(--card)),color-mix(in srgb,var(--green2) 30%,var(--card)))}
+.post-cap{padding:10px 12px 2px;font-weight:600}
+.post-react{padding:2px 12px 10px;font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.stat .dl{animation:none;opacity:1}.typing{display:none}.chat .bubble,.rc-m{animation:none!important;opacity:1}}
 @keyframes statup{0%{transform:scale(1)}30%{transform:scale(1.25);color:var(--gold)}100%{transform:scale(1)}}
 @keyframes statdown{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
 .choice{transition:border-color .15s,transform .12s,background .15s}
@@ -900,6 +945,57 @@ const friend = () => { const c = C(); return [
    {l:"Ask him for taxi money", fx:{peace:6, home:-1}, r:"The line goes quiet. Then he remembers he is driving and has to go. The bus comes eventually."}]}
 ].map((o,i)=>i!==5?ASK(o):o)[pickV('E',7)]; };
 
+// Nafeezie's own observation: the money you sweat for turns up as somebody else's soft life.
+// Shows only to players who sent money home this game, from the 2 Nov board.
+const livingLarge = () => { const c = C(), sent = NGN0(((S.st||{}).s)||0);
+ const base = {day:23, core:1, late:1, credit:'Nafeezie', own:1, art:'phone', when: s => newRules() && ((s.st||{}).s||0) > 0};
+ return [
+ {...base, post:[c.cousin,'🏟️⚽🙌🏾','God did it 🙌🏾'], text:`${c.cousin} posts a WhatsApp status from the Santiago Bernabéu. Real Madrid jersey, very good seats, and the caption "God did it 🙌🏾". Last month, ${c.cousin} begged you for help with "something urgent at home". So far this month, you have sent ${sent} home.`,
+  choices:[
+   {l:`Reply "God did it indeed 👀"`, fx:{peace:-2, home:-3}, r:`The status disappears in ten minutes. Then a private message arrives: "It was a sponsored trip, ${c.please.toLowerCase()}. Don't tell anybody." Nobody has ever been sponsored to watch football.`},
+   {l:"Mute the status and keep moving", fx:{peace:4}, r:"You will not see the next one either. That is the point."},
+   {l:"No more urgent money without details", fx:{home:-4, peace:3, future:4}, set:{atm:'rules'}, r:`You post the new rule in the family group. ${c.aunty} calls it "abroad pride". Two cousins quietly like the message.`}]},
+ {...base, post:[c.aunty,'🦞🍤🥂','Soft life is my portion ✨'], text:`Last week, ${c.aunty} sent you a photo of an empty rice bag and asked for money to stock the house. Today her status shows a seafood platter the size of a car tyre at the most expensive restaurant in ${c.home}. The caption says "Soft life is my portion". You are eating bread and egg for the third night running.`,
+  choices:[
+   {l:`Comment "Enjoy, Aunty 😊"`, fx:{home:2, peace:-5}, r:"She replies with three heart emojis and a voice note asking when the next one is coming."},
+   {l:`Send the screenshot to ${c.mum}`, fx:{home:-5, peace:2}, r:`${c.mum} says, "${c.exclaim} Is that not the same rice money?" By evening, the whole family knows, and ${c.aunty} has gone very quiet in the group.`},
+   {l:"Next time, send food, not cash", fx:{home:-2, peace:2, future:3}, set:{atm:'goods'}, r:"You find a supermarket at home that delivers. The food reaches the house, and the money never sees a restaurant."}]},
+ {...base, post:[c.sib,'🎉🚗🫧','Grand opening this Saturday! DJ, small chops, free car wash 🔥'], text:`${c.sib} has asked you for "small something" almost every week since you landed. Today he sends a flyer for the grand opening of his new lounge and car wash, with a DJ and free small chops. You read it at a bus stop, where the bus is twenty minutes late and the wind is cutting through your jacket.`,
+  choices:[
+   {l:"Ask who funded the lounge", fx:{home:-4, peace:-2, future:2}, r:`"Partners," he says. It turns out you are one of the partners. Nobody told you.`},
+   {l:"Send congratulations and nothing else", fx:{home:1, peace:3}, r:"He sends a thumbs up. The next request arrives four days later, for the lounge generator."},
+   {l:"Ask for a share of the business", fx:{home:-2, future:5}, set:{atm:'equity'}, r:"He laughs, goes quiet, and then sends a photo of a handwritten agreement. It would not survive a lawyer, but it is a start."}]},
+ {...base, post:[c.cousin,'🚘🎀','Changed profile photo'], text:`${c.cousin} changes the WhatsApp profile picture to a shiny Lexus with a red bow on the bonnet. A month ago, ${c.cousin}'s message said "things are very hard here, anything you can send". You are reading it on your cracked phone, between shifts.`,
+  choices:[
+   {l:"Congratulate and ask for a ride", fx:{home:3, peace:2}, r:`You get a laughing emoji. The car will be "at the mechanic" the week you visit.`},
+   {l:"Ask how much it cost", fx:{home:-3, peace:-3}, r:`"It is Tokunbo," comes the reply, as if that settles it. You do the maths anyway. It is eight months of your rent.`},
+   {l:"Start your own car fund instead", fx:{peace:1, future:5}, set:{atm:'fund'}, r:`You open a savings pot and name it "My Own Lexus". It has ${M(A(40))} in it. Everybody starts somewhere.`}]},
+ {...base, post:['Uncle','🏜️🐪☕','Rest is important 🙏🏾'], text:`Your uncle, the one who asked everyone abroad to contribute for his "hospital bills", posts photos from Dubai. A desert safari, a gold-dusted cappuccino, and a caption that says "Rest is important".`,
+  choices:[
+   {l:"Like the photo and say nothing", fx:{home:1, peace:-3}, r:"Your thumb likes it before your brain can stop it. He sends a voice note of thanks from the hotel pool."},
+   {l:"Ask how the hospital went", fx:{home:-5, peace:2}, r:"He says the doctor prescribed rest, and Dubai is where rest lives. You cannot argue with medicine."},
+   {l:"Start a family money sheet", fx:{home:-3, future:4}, set:{atm:'sheet'}, r:"Who asked, how much, and for what. Nobody else will ever see it, and you will never forget again."}]}
+ ][pickV('LL',5)]; };
+
+// The people you left behind keep climbing while you start again. An extra, from the 2 Nov board.
+const oldColleagues = () => { const c = C(), base = {day:21, credit:'Nafeezie', own:1, when: s => newRules()};
+ return [
+ {...base, post:['LinkedIn','🎉💼','Congratulate Tunde on his new role as Head of Operations'], text:`LinkedIn sends you a notification: "Congratulate Tunde on his new role as Head of Operations." Tunde was your junior in ${O()}, and you trained him. ${STU() ? 'Today you spent an hour in a queue for the library printer.' : 'Today you spent eight hours learning a till system from a nineteen-year-old.'}`,
+  choices:[
+   {l:"Congratulate him properly", fx:{peace:-2, future:3}, r:`He replies within minutes: "Boss! You taught me everything." It stings and it helps at the same time.`},
+   {l:"Ask him for introductions abroad", fx:{peace:1, future:6}, r:"He knows two people in your field here. One of them answers your email."},
+   {l:"Turn off LinkedIn for a month", fx:{peace:5, future:-2}, r:"Your phone gets quieter, and so does your heart."}]},
+ {...base, post:['Old office group','🎊🚙🅿️','Congratulations to our new manager, Ada! 🎉'], text:`Your old office WhatsApp group posts photos from a promotion party. Ada, who sat beside you, is now the manager. She has an official car, a driver, and your old parking space.`,
+  choices:[
+   {l:"Send Ada a voice note", fx:{peace:-1, future:2}, r:"Ada calls back and spends twenty minutes asking how abroad is. You say it is going well. You are not completely lying."},
+   {l:"Leave the group quietly", fx:{peace:4, future:-1}, r:"WhatsApp tells everyone you left. Three people message to ask if you are okay."},
+   {l:"Write down why you came", fx:{peace:3, future:3}, r:"Safety, options, and a future you can plan. You stick the note on the fridge where you will see it every morning."}]},
+ {...base, post:['Your friend','🔑🏡','Who said you must travel to make it? 🙌🏾'], text:`Your friend who refused to japa posts the keys to a new house in ${O()}. The caption says "Who said you must travel to make it?" You are sharing a kitchen with five strangers.`,
+  choices:[
+   {l:"Congratulate them warmly", fx:{home:1, peace:2}, r:"Their success is not your failure. Some days you even believe it."},
+   {l:"Ask how they did it", fx:{future:4}, r:"Land banking, a cooperative, and ten years of patience. You save the voice note."},
+   {l:"Wonder if you made a mistake", fx:{peace:-6, future:-2}, r:"You lie awake doing maths. By morning the maths has not changed, and neither has your rent."}]}
+ ][pickV('OC',3)]; };
 const familyGroup = () => { const c = C(); return [
  {day:13, from:"Family WhatsApp group", sub:`${c.aunty} posted`, text:`${c.exclaim} See our person abroad! Proud of you o! [A photo of you from your first week, standing beside a bus stop like it is the Eiffel Tower.]`,
   choices:[
@@ -1828,7 +1924,7 @@ function scenes(){
   const alts = routeAlts();
   base.concat(alts).forEach(sc => { if(sc.day===1 && !sc.core){ const w = sc.when; sc.when = s => !arrived(s) && !lola(s) && (!w || w(s)); } });
   base.push(lolaScene(lola));
-  return base.concat(alts, pathScenes(), fundScenes(), guestStay(), [bidetScene(), convertScene(), urgent2k(), godWhen(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  return base.concat(alts, pathScenes(), fundScenes(), guestStay(), [bidetScene(), convertScene(), urgent2k(), godWhen(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), livingLarge(), oldColleagues(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -1971,18 +2067,23 @@ function chips(fx){
 }
 function header(day){
   const pct = inCh() ? Math.min(100, day*10) : Math.min(100, (day/30)*100);
-  const cls = k => !shown ? '' : S[k] > shown[k] ? ' up' : S[k] < shown[k] ? ' down' : '';
+  const prev = shown, low = k => k==='cash' ? S.cash < RENT() : S[k] < MARKS[k][0];
+  const cls = k => (!prev ? '' : S[k] > prev[k] ? ' up' : S[k] < prev[k] ? ' down' : '') + (low(k) ? ' low' : '');
   const c = {cash:cls('cash'), peace:cls('peace'), home:cls('home'), future:cls('future')};
   shown = {cash:S.cash, peace:S.peace, home:S.home, future:S.future};
-  const b = v => `<div class="bar"><i style="width:${v}%"></i></div>`;
+  // the change floats up from the number, and each bar slides from where it was to where it is now
+  const dl = k => { if(!prev || S[k]===prev[k]) return ''; const d = S[k]-prev[k], up = d>0;
+    return `<em class="dl ${up?'up':'down'}" aria-hidden="true">${k==='cash' ? (up?'+':'-')+M(Math.abs(d)) : (up?'+':'')+d}</em>`; };
+  const b = k => `<div class="bar"><i style="width:${prev ? prev[k] : S[k]}%" data-w="${S[k]}"></i></div>`;
+  setTimeout(() => document.querySelectorAll('.bar i[data-w]').forEach(i => { i.style.width = i.dataset.w + '%'; i.removeAttribute('data-w'); }), 40);
   return `<div class="pass">
     <div class="pass-top"><div class="brand">${getName() ? getName().toUpperCase()+' HAS LANDED' : 'LANDED'}</div><div class="day">${inCh() ? `CHAPTER ${S.life.ch} OF ${CHAPTERS.length-1}` : day===0 ? 'ARRIVAL DAY' : `DAY ${String(day).padStart(2,'0')} / 30`}</div></div>
     <div class="route">${S.trail.map(t=>t.code).join(' → ')} → ${R.country} · ${L.town===L.name?L.name:L.town+', '+L.name}</div>
     <div class="stats">
-      <div class="stat${c.cash}"><span>Cash</span><b>${money(S.cash)}</b></div>
-      <div class="stat${c.peace}"><span>Peace</span><b>${S.peace}</b>${b(S.peace)}</div>
-      <div class="stat${c.home}"><span>Home</span><b>${S.home}</b>${b(S.home)}</div>
-      <div class="stat${c.future}"><span>Future</span><b>${S.future}</b>${b(S.future)}</div>
+      <div class="stat${c.cash}"><span>Cash</span><b>${money(S.cash)}</b>${dl('cash')}</div>
+      <div class="stat${c.peace}"><span>Peace</span><b>${S.peace}</b>${b('peace')}${dl('peace')}</div>
+      <div class="stat${c.home}"><span>Home</span><b>${S.home}</b>${b('home')}${dl('home')}</div>
+      <div class="stat${c.future}"><span>Future</span><b>${S.future}</b>${b('future')}${dl('future')}</div>
     </div>
   </div>
   <div class="progress" aria-hidden="true"><i style="width:${pct}%"></i></div>`;
@@ -1998,7 +2099,7 @@ function isCore(sc){
 }
 const sceneKey = sc => sc.day + '|' + (sc.from||'') + '|' + String(sc.text||sc.auto).slice(0, 48);
 function planExtras(){   // choose this game's extras once, at the start
-  const all = scenes(), core = all.filter(sc => !sc.auto && isCore(sc) && (!sc.when || sc.when(S))).length;
+  const all = scenes(), core = all.filter(sc => !sc.auto && isCore(sc) && (!sc.when || sc.when(S) || (sc.late && newRules()))).length;
   const pool = all.filter(sc => !isCore(sc) && (sc.late || !sc.when || sc.when(S)));
   const seed = (S.daily ? S.daily : String(S.seed)) + '|x' + S.landing;
   const seenBefore = sc => !S.daily && RECENT.k.includes(sceneKey(sc)) ? 1 : 0;
@@ -2271,7 +2372,7 @@ function render(){
     app.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{
       const c = list[+btn.dataset.i]; SFX.tap(); setTimeout(()=>SFX.result(c.fx), 90);
       history.push(JSON.stringify({S, idx}));
-      apply(c.fx||{}); Object.assign(S.f, c.set||{}); tally(sc, c); S.q = (S.q||0) + 1; (S.seen = S.seen||[]).push(sceneKey(sc));
+      apply(c.fx||{}); Object.assign(S.f, c.set||{}); tally(sc, c); if(!inCh()) (S.moves = S.moves||[]).push([sc.day, S.landing, ...moveIcon(sc, c)]); S.q = (S.q||0) + 1; (S.seen = S.seen||[]).push(sceneKey(sc));
       last = {r:c.r, fx:c.fx||{}, picked:c.l}; phase='result'; render(); scrollTo(0,0);
     });
     return;
@@ -2343,7 +2444,11 @@ const ART = {
   star:`${[[40,24],[120,22],[30,66],[132,64],[80,12]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="3" class="f-gold a-pulse" style="animation-delay:${i*0.2}s"/>`).join('')}<g class="a-pop"><path d="M80 22 l7 15 l16 2 l-12 11 l3 16 l-14 -8 l-14 8 l3 -16 l-12 -11 l16 -2z" class="f-gold"/></g>`,
   globe:`<g class="a-spin" style="transform-origin:80px 45px"><circle cx="80" cy="45" r="26" class="f-green"/><path d="M62 34 q10 6 6 14 q-6 6 2 14 M92 26 q-6 10 4 16 q8 4 4 14" class="s-paper" stroke-width="3" fill="none"/></g>`
 };
-function art(sc){ const k = artKind(sc);
+function art(sc){
+  if(sc.post){ const [who, pic, cap] = sc.post, h = hashStr(cap);
+    return `<div class="post" aria-hidden="true"><div class="who"><div class="avatar">${who[0]}</div><div><b>${who}</b><small>${who==='LinkedIn' ? 'Notification · just now' : 'Status · just now'}</small></div></div><div class="post-pic">${pic}</div><div class="post-cap">${cap}</div><div class="post-react">❤️🔥😂 ${20+h%180} · 👀 Seen by you</div></div>`; }
+  const k = artKind(sc);
+  if(k==='voice' && sc.from) return '';
   if(k==='voice') return `<button class="art vn" type="button" onclick="playVN(this)" data-say="${esc(String(sc.text).replace(/<[^>]+>/g,''))}" aria-label="Play the voice note"><svg viewBox="0 0 160 90" aria-hidden="true">${ART.voice}</svg><span class="vn-hint">Tap to play</span></button>`;
   return `<div class="art" aria-hidden="true"><svg viewBox="0 0 160 90">${ART[k]}</svg></div>`; }
 const VN_LINES = ["Network don cut 😅 Read am below.", "Your data finished halfway. The message is written below.", "Na so the network be. Read the message below 😅", "The voice note will not load. Somebody in the family group is using all the data."];
@@ -2472,9 +2577,13 @@ function wireBack(){
 const creditTag = sc => sc.credit ? `<div class="credit-tag">${sc.own ? "From Nafeezie's own japa" : sc.told ? `A real story, told to ${sc.credit}` : `A real story, shared by ${sc.credit}`}</div>` : '';
 function intro(sc, compact){
   if(sc.from){
-    return `<div class="when">${sc.label || 'Day '+sc.day} · New message</div>${creditTag(sc)}
-      <div class="thread"><div class="who"><div class="avatar">${sc.from[0]}</div><div><b>${sc.from}</b><small>${sc.sub||''}</small></div></div>
-      <div class="bubble">${sc.text}</div></div>`;
+    const call = isCall(sc), vn = artKind(sc)==='voice', h = hashStr(String(sc.text));
+    const time = (/(\d{1,2}:\d{2}\s?[ap]m)/i.exec(sc.sub||'')||[])[1] || `${1+h%12}:${String(h%60).padStart(2,'0')}${h%2?'pm':'am'}`;
+    const status = compact ? (sc.sub||'') : call ? 'Calling you…' : /group/i.test(sc.from) ? (sc.sub||'') : 'typing…';
+    const voice = vn ? `<button class="bubble vnb" type="button" onclick="playVN(this)" aria-label="Play the voice note"><span class="vp" aria-hidden="true">▶</span><span class="vw" aria-hidden="true">${Array.from({length:26},(_,i)=>`<i style="height:${4+((h>>(i%20))+i*7)%15}px;animation-delay:${(i%6)*0.1}s"></i>`).join('')}</span><span class="vt">0:${String(14+h%45).padStart(2,'0')}</span></button>` : '';
+    return `<div class="when">${sc.label || 'Day '+sc.day} · ${call ? 'Incoming call' : vn ? 'New voice note' : 'New message'}</div>${creditTag(sc)}
+      <div class="thread chat${compact?' done':''}"><div class="who"><div class="avatar">${sc.from[0]}</div><div><b>${sc.from}</b><small>${compact ? (sc.sub||'') : status}</small></div><span class="chat-ic" aria-hidden="true">${call ? '📞' : '⋮'}</span></div>
+      <div class="chat-body">${compact ? '' : '<div class="typing" aria-hidden="true"><i></i><i></i><i></i></div>'}${voice}<div class="bubble msg">${vn ? '<span class="vlab">Transcript</span>' : ''}${sc.text}<span class="meta">${time} <b>✓✓</b></span></div></div></div>`;
   }
   return `<div class="when">${sc.label || 'Day '+sc.day}</div>${creditTag(sc)}${compact?'':`<div class="narr">${sc.text}</div>`}`;
 }
@@ -2778,6 +2887,22 @@ function tally(sc, c){
   if(c.g || set.sibling==='sent' || set.farm==='sent' || set.status==='scam') st.g++;
   if(c.sp || ['checked','video'].includes(set.sibling) || ['asked','counted'].includes(set.farm) || ['lawyer','community'].includes(set.status) || set.cos==='reported') st.p = (st.p||0) + 1;
 }
+// one picture per choice, for the day 30 recap
+function moveIcon(sc, c){
+  const fx = c.fx||{}, set = c.set||{}, checked = set.sibling==='checked' || set.farm==='counted';
+  if(c.g || set.sibling==='sent' || set.farm==='sent' || set.status==='scam') return ['🪤','Fell for a trap'];
+  if(c.sp || ['checked','video'].includes(set.sibling) || ['asked','counted'].includes(set.farm) || ['lawyer','community'].includes(set.status) || set.cos==='reported') return ['👀','Spotted a trap'];
+  if(sc.ask) return (fx.cash||0) < 0 && !checked ? ['💸','Sent money home'] : ['🙅🏾','Said no to home'];
+  const w = {cash:(fx.cash||0)/A(25), peace:fx.peace||0, home:fx.home||0, future:fx.future||0};
+  const k = Object.keys(w).sort((a,b)=>Math.abs(w[b])-Math.abs(w[a]))[0];
+  if(!w[k]) return ['🚶🏾','Kept it moving'];
+  return {cash:[['💵','Made some money'],['🛍️','Spent money']], peace:[['🧘🏾','Protected your peace'],['😮‍💨','Lost some peace']],
+    home:[['❤️','Made home happy'],['💔','Upset home']], future:[['🚀','Built your future'],['📉','Future took a hit']]}[k][w[k]>0?0:1];
+}
+function recapHTML(){
+  const m = (S.moves||[]).filter(x => x[1]===S.landing); if(m.length < 3) return '';
+  return `<div class="recap"><div class="when">🎞️ Your 30 days in pictures</div><div class="rc-strip">${m.map(([d,,i,t])=>`<button type="button" class="rc-m" data-hint="${esc('Day '+d+' · '+t)}"><b aria-hidden="true">${i}</b><small>D${Math.max(1,d)}</small><span class="sr">${esc('Day '+d+': '+t)}</span></button>`).join('')}</div><div class="rc-k">Tap a picture to see what you did that day.</div></div>`;
+}
 const BOARDS = [
   {key:'score', title:'Best landing', sub:'Highest Landing Score · wins the weekly crown', val:r=>r.score, show:r=>`${r.score}/100`},
   {key:'spotted', title:'Most streetwise', sub:'Spotted the most traps', val:r=>r.spotted||0, show:r=>`${r.spotted} spotted`},
@@ -3012,7 +3137,7 @@ function collectionHTML(current, isNew, earned){
     <p class="coll-note">Tap a 🔒 for a hint. Your collection is yours forever.</p>
   </div>`;
 }
-document.addEventListener('click', e => { const v = e.target.closest && e.target.closest('.vbadge'); if(v && v.dataset.hint) vnToast(v.dataset.hint); });
+document.addEventListener('click', e => { const v = e.target.closest && e.target.closest('.vbadge, .rc-m'); if(v && v.dataset.hint) vnToast(v.dataset.hint); });
 
 /* ---------- Come back tomorrow: one card with the countdown, streak, time abroad, and reminders ---------- */
 function tomorrowHTML(opts){
@@ -3172,6 +3297,7 @@ function renderEnd(app){
       ${rec.length?`<div class="receipts">${rec.slice(0,2).map(r=>`<div>${r}</div>`).join('')}</div>`:''}
     </div>
     <div class="cost"><div class="when">💸 What it cost you</div><div class="cost-chips">${costParts().map(([i,t]) => `<span>${i} ${t}</span>`).join('')}</div></div>
+    ${recapHTML()}
     ${tomorrowHTML({newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `New title! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
     <div class="score">
       <div class="sc-top"><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div>
