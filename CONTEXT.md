@@ -101,3 +101,10 @@ Read this, then read index.html, before changing anything.
 ## Hands-off checklist (Nafeezie)
 - Namecheap: keep auto-renew on for nowyouhavelanded.com.
 - Supabase: if an email warns the project will pause, open the dashboard and press Resume.
+
+## Next up (agreed 31 Oct 2026, Nafeezie returns about 15-16 Nov)
+When she opens a new chat with "Return ticket and teen demo":
+1. Check two weeks of play since the 2 Nov board (GoatCounter: finishes, return visits, story-form taps) against the weeks before.
+2. **The Return Ticket.** Add a special storyline to Now You Have Landed: twelve years abroad, a good salary, little saved, family expects support, and going home means starting over. It tests her "the life people see" idea with existing players. Track plays, finishes, and shares.
+3. **Teen demo.** A 10-minute standalone demo of a money game for ages 10-16 (pocket money, a first small hustle, family pressure, Nigerian prices and inflation), for her to show five parents or teachers. No accounts, no open text, no names on boards, no ads. It is the seed of First Paycheck (the Gen Z version), which shares the same engine. Don't call it Monopoly anything.
+4. December: decide. If parents or schools lean in, the teen game and First Paycheck become the next product. If not, Now You Have Landed stays the focus.
