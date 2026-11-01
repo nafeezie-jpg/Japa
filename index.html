@@ -1404,11 +1404,16 @@ const EU = () => { const c = C(), lang = L.lang, shared = Math.round(RENT()*0.75
    {l:"Find the one open petrol station", fx:{cash:-A(15), peace:2}, r:"You pay petrol station prices for rice. It tastes like victory and overcharge."},
    {l:"Plan ahead like a local", fx:{peace:2, future:4}, r:"You start shopping on Saturdays like everyone else. You are becoming European, one shopping list at a time."}]} : null,
  sibling(),
- {day:13, art:'house', text: EN() ? "A neighbour leaves a note on your door, in English so polite that it somehow sounds angry. It is about your bins." : `A neighbour leaves a note on your door in ${lang}. It has three exclamation marks and a drawing of a bin.`,
+ {day:13, art:'house', when: s => pickV('eu13',grow(s,1,'2026-11-02'))===0, text: EN() ? "A neighbour leaves a note on your door, in English so polite that it somehow sounds angry. It is about your bins." : `A neighbour leaves a note on your door in ${lang}. It has three exclamation marks and a drawing of a bin.`,
   choices:[
    {l:"Translate it and apologise", fx:{peace:2, future:2}, r:"It is about recycling. Brown glass, green glass, and white glass go in three different bins. You did not know glass had tribes."},
    {l:"Knock and ask in person", fx:{peace:4, home:1}, r:"She explains with her hands and a lot of patience. By the end she offers you cake. You are neighbours now."},
    {l:"Ignore it", fx:{peace:-4}, r:"A second note arrives. This one has a photo of your bin bag."}]},
+ {day:13, art:'house', when: s => (!s.daily || s.daily >= '2026-11-02') && pickV('eu13',grow(s,1,'2026-11-02'))===1, text:`${c.mum} calls on video with the whole family, and everybody greets you at once, the way family calls go. It is 9:40pm. Your neighbour knocks on the wall three times, slowly, like a judge. The building rules in ${T()} say quiet after 10pm, and 9:40 is close enough for her.`,
+  choices:[
+   {l:"Whisper to the whole family", fx:{peace:-2, home:2}, r:`You turn the volume down and whisper. ${c.mum} thinks you have been kidnapped and asks you to blink twice if you need help.`},
+   {l:"Apologise with chin chin", fx:{peace:3, future:2}, r:"You knock on her door the next morning with a small bag of chin chin. She asks for the recipe. Quiet hours now start at 10:30, for you only."},
+   {l:"Finish the call at full volume", fx:{peace:-4, home:3}, r:"Your uncle prays for you loudly for eleven minutes. The next morning there is a note on the noticeboard, and everybody in the building knows who it is for."}]},
  {day:14, from:c.mum, sub:`${c.home} · voice note`, text:`${cap(c.endear)}, so this Europe, is it the same as London? Why didn't you just go to the UK like your cousin?`,
   choices:[
    {l:"Explain that Europe is many countries", fx:{home:-1, peace:2}, r:"She listens patiently. Then she tells everybody you are in London."},
@@ -1423,11 +1428,16 @@ const EU = () => { const c = C(), lang = L.lang, shared = Math.round(RENT()*0.75
    {l:"Treat it with ginger at home", fx:{peace:-4, home:2}, r:"Ginger, lemon, and stubbornness. You recover in nine days instead of three."}]},
  doubt(20, EN() ? `You sit on a wet bench in ${T()} after another rejection email.` : `You sit in a ${lang} class where the teenagers learn faster than you.`, "You write them in the back of your phrasebook. Safety, a future, and a passport that opens more doors."),
  farm(), promise(),
- {day:22, art:'food', text:`The nearest African shop to your place is two trains away. The Nigerian community is small enough that everybody knows your business by Friday.`,
+ {day:22, art:'food', when: s => pickV('eu22',grow(s,1,'2026-11-02'))===0, text:`The nearest African shop to your place is two trains away. The Nigerian community is small enough that everybody knows your business by Friday.`,
   choices:[
    {l:"Make the trip every Saturday", fx:{cash:-A(30), peace:6, home:2}, r:"Palm oil, garri, and gossip. You come back with full bags and the full story of everybody's papers."},
    {l:"Join the community WhatsApp", fx:{peace:2, home:4, future:3}, set:{network:true}, r:"Two hundred Nigerians in one group. Someone has a room, someone has a job, and someone has opinions about your hair."},
    {l:"Cook with local ingredients", fx:{peace:-3, future:2}, r:"Egusi made with pumpkin seeds from the supermarket. It is related to egusi, distantly."}]},
+ {day:22, art:'car', when: s => (!s.daily || s.daily >= '2026-11-02') && pickV('eu22',grow(s,1,'2026-11-02'))===1, text:`On the tram in ${T()}, someone behind you says, "Abeg, how far? I dey come," into his phone. Your head turns so fast that your neck makes a sound.`,
+  choices:[
+   {l:"Turn around and say hello", fx:{peace:4, home:3, future:2}, set:{network:true}, r:`"${c.exclaim} Naija?" you say. He laughs, and you both miss your stop to keep talking. By evening you are in his church group, his football group, and the planning group for his cousin's wedding.`},
+   {l:"Ask where to buy palm oil", fx:{cash:-A(25), peace:5, home:2}, r:`He knows a man who knows a man with a shop behind the station. The palm oil costs ${M(A(25))} and tastes like Saturday in ${O()}.`},
+   {l:"Pretend you heard nothing", fx:{peace:-3, future:1}, r:"You stare at your phone like a proper European. He gets off two stops later, and you spend the evening wondering if he knew where to find good pepper."}]},
  {day:23, art:'phone', text: EN() ? "An official letter about your permit arrives, written in English so formal that it might as well be Latin." : `An official letter arrives in ${lang}. The translation app turns it into a court summons. Your hands start shaking.`,
   choices:[
    {l:"Take it to the migrant help office", fx:{peace:4, future:6}, r:"The adviser reads it in ten seconds. It is a reminder to renew something in four months. You laugh until you cry."},

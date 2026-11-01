@@ -16,3 +16,4 @@ Never put emails or other contact details in this file or in the game.
 
 ## Runs
 - 2026-10-27: no new submissions (all four above were already logged). Added two fresh first-month versions so daily players see new things from 2026-10-28: UK day 4 (saying "Good morning, ma" at the bus stop, pool uk4) and Canada day 4 (the tip screen at lunch, pool ca4).
+- 2026-11-01: no new submissions (the same four are still the only ones). Added two fresh Europe first-month versions, since every Europe scene had only one, live for Today's Landings from 2026-11-02: day 13 (Mummy's family video call hits quiet hours, pool eu13) and day 22 (hearing "Abeg, how far?" on the tram, pool eu22).
