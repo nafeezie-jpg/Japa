@@ -41,7 +41,7 @@ async def run():
       await pg.wait_for_timeout(900)
       box = await pg.locator('#lbbox').inner_text()
       if 'this week, of' not in box: issues.append(f'game {g} box: {box[:80]}')
-      if not await pg.locator('#cardimg:not([hidden])').count(): issues.append(f'game {g} no card')
+      if not await pg.evaluate("() => (document.getElementById('cardimg')||{}).src?.startsWith('data:image/png') || false"): issues.append(f'game {g} no card')
       wa = await pg.get_attribute('#s-wa','href')
       if '%23' not in wa: issues.append(f'game {g} no rank in share')
       if g==0:
