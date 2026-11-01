@@ -766,6 +766,8 @@ const ABROAD_BADGES = [[2,'First Month Abroad','JJC','🐣'],[7,'Three Months In
 const JUST_LANDED = [0,'Just landed','Just Landed','🛬'];
 const myRep = n => ABROAD_BADGES.filter(([k]) => k <= n).pop() || JUST_LANDED;
 const timeOf = k => { const w = k*2; return w < 52 ? (w < 8 ? w+' weeks' : Math.round(w/4.33)+' months') : Math.round(w/52)+' year'+(w>=104?'s':''); };
+const ordinal = n => n + (n%100>=11 && n%100<=13 ? 'th' : ['th','st','nd','rd'][n%10] || 'th');
+const myLandingNo = () => { const days = abroadMonths(), played = loadHistory().some(g=>g.daily && dayKey(g.t)===dayKey(Date.now())); return played ? days : days + 1; };
 const abroadMonths = () => new Set(loadHistory().filter(g=>g.daily).map(g=>dayKey(g.t))).size;
 const monthsLabel = n => { const w = n*2, y = Math.floor(w/52), rest = w - y*52, m = Math.floor((rest+0.5)/4.33), wk = Math.round(rest - m*4.33);
   if(!n) return 'Not yet started'; if(!y && !m) return `${w} weeks`;
@@ -2275,7 +2277,7 @@ function render(){
   if(phase==='intro'){
     const rk = pick.route;
     app.innerHTML = `<div class="intro fade">
-      <div class="stamp">Arrived · Day 01</div>
+      <div class="stamp">${abroadMonths() ? `Arrived · Landing ${String(myLandingNo()).padStart(2,"0")}` : "Arrived · Day 01"}</div>
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
       <p>Everybody wants to japa. Nobody tells you what happens after you land.</p>
       <div class="four"><span>💵<small>Cash</small></span><span>🧘🏾<small>Peace</small></span><span>🏠<small>Home</small></span><span>🚀<small>Future</small></span><span>⏱️<small>5 min</small></span></div>
@@ -2373,7 +2375,7 @@ function render(){
   if(phase==='scene'){
     const list = typeof sc.choices==='function' ? sc.choices(S) : sc.choices;
     const ord = list.map((c,i)=>i).sort((a,b)=> hashStr((S.seed||0)+'|'+sc.day+'|'+list[a].l) - hashStr((S.seed||0)+'|'+sc.day+'|'+list[b].l));
-    const note = !inCh() && sc.day<=1 && !sc.from && idx===nextIndex(0) ? `${S.life ? `<div class="local"><b>📖 My Life Abroad · Month 1</b>This is the start of one long life. Your money, your meters, and the choices you make this month follow you into every chapter.</div>` : ''}${S.daily && S.landing===1 ? `<div class="local"><b>Today's Landing #${dailyNo(S.daily)}</b>Everyone playing today lands here and meets the same surprises. Your score is compared with theirs at the end.</div>` : ''}${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
+    const note = !inCh() && sc.day<=1 && !sc.from && idx===nextIndex(0) ? `${S.life ? `<div class="local"><b>📖 My Life Abroad · Month 1</b>This is the start of one long life. Your money, your meters, and the choices you make this month follow you into every chapter.</div>` : ''}${S.daily && S.landing===1 ? `<div class="local"><b>Today's Landing #${dailyNo(S.daily)} · your ${ordinal(myLandingNo())} landing</b>Everyone playing today lands here and meets the same surprises. Your score is compared with theirs at the end.</div>` : ''}${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
     app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${!(S.q||0) ? `<p class="noundo">${FINAL_LINES[(S.seed||0) % FINAL_LINES.length]}</p>` : ''}${glossLink()}</div>`;
     wireBack();
     SFX.ambient(ambientFor(sc));
@@ -3306,6 +3308,7 @@ function renderEnd(app){
       <p>${line}</p>
       ${rec.length?`<div class="receipts">${rec.slice(0,2).map(r=>`<div>${r}</div>`).join('')}</div>`:''}
     </div>
+    ${collectionHTML(title, isNewVerdict, earned)}
     <div class="cost"><div class="when">💸 What it cost you</div><div class="cost-chips">${costParts().map(([i,t]) => `<span>${i} ${t}</span>`).join('')}</div></div>
     ${recapHTML()}
     ${tomorrowHTML({newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `New title! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
@@ -3341,7 +3344,6 @@ function renderEnd(app){
     </div>
     <div id="movebox" hidden class="routes"></div>
     <div id="padabox" hidden class="result padabox"></div>
-    ${collectionHTML(title, isNewVerdict, earned)}
     ${roadHTML()}
     <a class="storylink" href="https://tally.so/r/q5480d" target="_blank" rel="noopener">Have a japa story? Share it and it could become a scene in the game →</a>
     <div class="toast" id="toast" role="status"></div>
@@ -3365,7 +3367,7 @@ function renderEnd(app){
   let cardFile = null, cardBlob = null;
   const paintCard = () => drawCard(title, line, journey, rec).then(canvas => {
     const img = document.getElementById('cardimg'); if(!img) return;
-    img.src = canvas.toDataURL('image/png'); img.hidden = false;
+    img.src = canvas.toDataURL('image/png');
     canvas.toBlob(b => { cardBlob = b; try{ cardFile = new File([b], 'my-landed-verdict.png', {type:'image/png'}); }catch(e){} }, 'image/png');
   });
   paintCard();
