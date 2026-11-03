@@ -102,8 +102,18 @@ Read this, then read index.html, before changing anything.
 - Namecheap: keep auto-renew on for nowyouhavelanded.com.
 - Supabase: if an email warns the project will pause, open the dashboard and press Resume.
 
+## Your life carries on (3 Nov 2026)
+- A player's first Today's Landing is the shared airport arrival. From their second, Today's Landing continues their own life: contReady() is true when myLandingNo() >= 2 and they have a saved or seedable life.
+- The life is saved in localStorage nyhl-daily (loadDaily, saveDaily in renderEnd for every daily game). Players from before this change are seeded from their last daily history entry (seedDaily).
+- Each landing is two weeks: contMonth(n) = 1 + ceil((n-1)/2), contWeek(n) is 1 or 3. Landing 2 is month 2, landing 8 is month 5. This matches the abroad titles (7 landings = Three Months In).
+- contScenes(): a 'fortnight' payday auto (contPay, half a month's pay minus rent, food, transport), then 7 choices. Four are shared, from contGeneral() (16 written for this mode, plus oldColleagues, contribution, farm, promise, mishap, familyGroup, smallWin), and rotate by dailyNo so everyone meets the same ones on the same day. Three come from the My Life Abroad chapter for that stage (contCh: months 2-3 ch1, 4-6 ch2, 7-12 ch3, year 2 ch4, year 3+ ch5), minus autos, day-10 milestone calls, and the ending choice.
+- S.cSeen (saved) keeps a player from seeing a scene again until the rest of the pool has had its turn.
+- The score is the same 0-100 life score. CONT_LINES rewords ladder verdicts that mention the first month. "Japa again" is hidden in continuing games.
+- tests/continue_life.py plays nine days in a row on all four routes and must print "ISSUES: none".
+- To keep it fresh, add to contGeneral() over time. The monthly story task should put later-life stories there.
+
 ## Next up (agreed 31 Oct 2026, Nafeezie returns about 15-16 Nov)
-When she opens a new chat with "Return ticket and teen demo":
+Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-month storyline inside the continuing life. When she opens a new chat with "Return ticket and teen demo":
 1. Check two weeks of play since the 2 Nov board (GoatCounter: finishes, return visits, story-form taps) against the weeks before.
 2. **The Return Ticket.** Add a special storyline to Now You Have Landed: twelve years abroad, a good salary, little saved, family expects support, and going home means starting over. It tests her "the life people see" idea with existing players. Track plays, finishes, and shares.
 3. **Teen demo.** A 10-minute standalone demo of a money game for ages 10-16 (pocket money, a first small hustle, family pressure, Nigerian prices and inflation), for her to show five parents or teachers. No accounts, no open text, no names on boards, no ads. It is the seed of First Paycheck (the Gen Z version), which shares the same engine. Don't call it Monopoly anything.

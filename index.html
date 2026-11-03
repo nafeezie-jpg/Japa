@@ -224,6 +224,10 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .rc-m small{font-family:var(--mono);font-size:10px;color:var(--muted)}
 .rc-m .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .rc-k{font-size:12px;color:var(--muted)}
+.hero-sub{margin:4px 0 0;font-size:14px;color:var(--green-ink);opacity:.85}
+.pass-top{min-width:0}
+.pass .brand{min-width:0;flex:1 1 auto}
+.pass .day{white-space:nowrap;flex:none}
 .post{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .post .who{padding:10px 12px}
 .post-pic{display:grid;place-items:center;font-size:54px;letter-spacing:6px;padding:22px 0;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 35%,var(--card)),color-mix(in srgb,var(--green2) 30%,var(--card)))}
@@ -1930,6 +1934,7 @@ const guestStay = () => { const c = C(), p = PRO(), host = s => pickV('HOST',2)=
 
 function scenes(){
   if(inCh()) return CHAPTERS[S.life.ch].scenes();
+  if(S && S.cont) return contScenes();
   const base = [arrival(), barNight()].concat(R.key==='us' ? US() : R.key==='uk' ? UK() : R.key==='eu' ? EU() : CA());
   const arrived = s => s.landing===1 && [1,2].includes(pickV('air',5));   // an arrival story already covered day 1
   const lola = s => R.key==='us' && STU() && s.landing===1 && !arrived(s) && (!s.daily || s.daily >= OWN_FROM) && pickV('lola',2)===0;
@@ -1940,6 +1945,8 @@ function scenes(){
 }
 
 function autoEvent(kind){
+  if(kind==='fortnight'){ const {pay, out} = contPay(), net = pay - out;
+    return {fx:{cash:net}, text:`Two more weeks of life in ${T()}. ${pay ? `Your pay brings in ${M(pay)}.` : 'No pay comes in.'} Rent, food, transport, and data take ${M(out)}.` + (net >= 0 ? ' What is left is yours.' : ' The difference comes out of your savings.')}; }
   const f = S.f, k = R.key; let text = '', fx = {};
   if(kind==='pay1' && k==='eu'){
     if(f.job==='salaried'){ text = `No salary yet. In ${L.name}, payday is the end of the month, and the month is very long.`; fx = {cash:0, peace:-2}; }
@@ -2078,7 +2085,7 @@ function chips(fx){
   }).join('');
 }
 function header(day){
-  const pct = inCh() ? Math.min(100, day*10) : Math.min(100, (day/30)*100);
+  const pct = inCh() ? Math.min(100, day*10) : S.cont ? Math.min(100, day/14*100) : Math.min(100, (day/30)*100);
   const prev = shown, low = k => k==='cash' ? S.cash < RENT() : S[k] < MARKS[k][0];
   const cls = k => (!prev ? '' : S[k] > prev[k] ? ' up' : S[k] < prev[k] ? ' down' : '') + (low(k) ? ' low' : '');
   const c = {cash:cls('cash'), peace:cls('peace'), home:cls('home'), future:cls('future')};
@@ -2089,7 +2096,7 @@ function header(day){
   const b = k => `<div class="bar"><i style="width:${prev ? prev[k] : S[k]}%" data-w="${S[k]}"></i></div>`;
   setTimeout(() => document.querySelectorAll('.bar i[data-w]').forEach(i => { i.style.width = i.dataset.w + '%'; i.removeAttribute('data-w'); }), 40);
   return `<div class="pass">
-    <div class="pass-top"><div class="brand">${getName() ? getName().toUpperCase()+' HAS LANDED' : 'LANDED'}</div><div class="day">${inCh() ? `CHAPTER ${S.life.ch} OF ${CHAPTERS.length-1}` : day===0 ? 'ARRIVAL DAY' : `DAY ${String(day).padStart(2,'0')} / 30`}</div></div>
+    <div class="pass-top"><div class="brand">${getName() ? getName().toUpperCase()+' HAS LANDED' : 'LANDED'}</div><div class="day">${inCh() ? `CHAPTER ${S.life.ch} OF ${CHAPTERS.length-1}` : S.cont ? `MONTH ${S.cont.m} · WK ${S.cont.w + (day > 7 ? 1 : 0)}` : day===0 ? 'ARRIVAL DAY' : `DAY ${String(day).padStart(2,'0')} / 30`}</div></div>
     <div class="route">${S.trail.map(t=>t.code).join(' → ')} → ${R.country} · ${L.town===L.name?L.name:L.town+', '+L.name}</div>
     <div class="stats">
       <div class="stat${c.cash}"><span>Cash</span><b>${money(S.cash)}</b>${dl('cash')}</div>
@@ -2291,11 +2298,12 @@ function render(){
         : `<div class="me"><span>👤 <b>${esc(nm || 'Anonymous lander')}</b> · leaving from ${esc(from[1])}</span><button type="button" id="meedit">Change</button></div>`; })()}
       ${(() => { const ds = todayStr(), plan = dailyPlan(ds), pl = places(plan.rk).find(x=>x.name===plan.place), done = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).pop();
         const where = (pl.town===pl.name ? pl.name : pl.town + ', ' + pl.name) + (plan.rk==='eu' ? '' : ', ' + ROUTES[plan.rk].label);
-        if(done) return tomorrowHTML({top: `<div class="when" style="color:var(--gold)">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><div class="tm-done"><b>${scoreOf(done)}</b><small>/100 today</small><span>📍 ${where}</span></div>`,
+        if(done) return tomorrowHTML({top: `<div class="when" style="color:var(--gold)">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><div class="tm-done"><b>${scoreOf(done)}</b><small>/100 today</small><span>📍 ${esc(String(done.trip||where).split(' → ').pop())}</span></div>`,
           bottom: `<button class="primary" id="dailygo" type="button">🏆 See how everyone did today</button>`});
-        return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>📍 Everyone lands in ${where} today</b>
-        <div class="hero-chips">${streakInfo().n ? `<span>🔥 Keep your ${streakInfo().n}-day streak</span>` : ''}<span>👥 Same game for everyone</span><span>⏳ New one in <em id="cd">${untilMidnight()}</em></span></div>
-        <button class="primary" id="dailygo" type="button">✈️ Play Today's Landing</button>
+        const cont = contReady(), cn = myLandingNo();
+        return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div>${cont ? `<b>📍 Month ${contMonth(cn)} of your life in ${contWhere()}</b><p class="hero-sub">Your life carries on from your last landing. Your money and your meters come with you.</p>` : `<b>📍 Everyone lands in ${where} today</b>`}
+        <div class="hero-chips">${streakInfo().n ? `<span>🔥 Keep your ${streakInfo().n}-day streak</span>` : ''}<span>👥 ${cont ? 'Same situations for everyone today' : 'Same game for everyone'}</span><span>⏳ New one in <em id="cd">${untilMidnight()}</em></span></div>
+        <button class="primary" id="dailygo" type="button">${cont ? `📖 Continue my life · month ${contMonth(cn)}` : "✈️ Play Today's Landing"}</button>
         ${pushButtonHTML()}</div>`; })()}
       ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>${progressTilesHTML()}` : `<button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>`}
       ${lifeCardHTML()}
@@ -2340,6 +2348,7 @@ function render(){
       const pn2 = document.getElementById('pname'); if(pn2) setName(pn2.value);
       const ds = todayStr(), plan = dailyPlan(ds), st = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0];
       SFX.land(); pick.daily = true; pick.path = plan.path; pick.fund = plan.fund; pick.culture = STATE_CULTURE[st] || 'general'; pick.duo = 0;
+      if(contReady() && contStart()){ render(); scrollTo(0,0); return; }
       track('daily-' + dailyNo(ds)); begin(plan.rk, plan.place); render(); scrollTo(0,0);
     };
     const md = document.getElementById('moredet'); if(md) md.ontoggle = () => { pick.moreOpen = md.open; };
@@ -2390,9 +2399,10 @@ function render(){
     return;
   }
   const picked = last.picked ? `<div class="when">You chose · ${last.picked}</div>` : '';
-  const body = art(sc) + (last.auto ? `<div class="when">${sc.label || 'Day '+sc.day}</div>` : intro(sc,true)) + picked +
+  const welcome = S.cont && last.auto && sc.auto==='fortnight' ? `<div class="local"><b>Today's Landing #${dailyNo(S.daily)} · your ${ordinal(S.cont.n)} landing</b>Your life carries on in ${T()}, right where you left it. Your money and your meters came with you. Everyone playing today meets the same situations, wherever they are in their life.</div>` : '';
+  const body = art(sc) + welcome + (last.auto ? `<div class="when">${sc.label || 'Day '+sc.day}</div>` : intro(sc,true)) + picked +
     `<div class="result">${last.r}</div><div class="chips">${chips(last.fx)}</div>
-     <button class="primary" id="next">${nextIndex(idx+1)>=SCENES.length ? (S.life ? (inCh() ? '📖 Close this chapter' : '📖 See how your life begins') : 'See how your 30 days went') : 'Continue'}</button>`;
+     <button class="primary" id="next">${nextIndex(idx+1)>=SCENES.length ? (S.life ? (inCh() ? '📖 Close this chapter' : '📖 See how your life begins') : (S.cont ? 'See how your two weeks went' : 'See how your 30 days went')) : 'Continue'}</button>`;
   app.innerHTML = header(sc.day) + `<div class="scene fade">${body}</div>`;
   wireBack();
   document.getElementById('next').onclick = ()=>{
@@ -2610,6 +2620,14 @@ const VERDICT_LINES = {
   'Hanging In There':"It was a rough first month, and you are still here. Month two will be kinder.",
   'Still Finding Your Feet':"Thirty days in, and you are still standing. That counts for more than people at home will ever know."
 };
+// the same titles, said for a life that is months in rather than thirty days old
+const CONT_LINES = {
+  'Abroad Strategist':"Your money, your peace, and your future are all in order. People are starting to ask you for advice.",
+  'Making Moves':"Two strong weeks. You are building faster than most people at your stage.",
+  'Still Finding Your Feet':"Months in, and you are still finding your rhythm. That is allowed, and you are still standing.",
+  'Hanging In There':"It was a rough two weeks, and you are still here. The next two can be kinder.",
+  'Running on Prayers':"You made it through two more weeks on faith, leftover jollof, and a very patient bank."
+};
 function verdictBand(title){
   const b = {'The Family ATM':[0,59], 'Stronger Than The Agent':[45,89], 'Scholar and Sponsor':[40,79], 'Fees Still Pending':[0,64], 'Owing the Cooperative':[0,100],
     'Running on Prayers':[0,49], 'Hustle Without Peace':[0,59], 'Ghost Mode Activated':[0,79], 'Making It By Force':[55,79], 'Serial Japa Champion':[70,100],
@@ -2626,9 +2644,10 @@ function verdict(){
    [S.home < MARKS.home[0] || ((S.st||{}).r >= 5 && ((S.st||{}).s||0) < 100 && S.home < 45), "Ghost Mode Activated", "Your account is healthy. The family WhatsApp group thinks you have died."],
    [(SOLD() || P()==='care' || P()==='visitor') && S.future>=30, "Making It By Force", "There is no going back, so you are going forward. Slowly, stubbornly, and with your whole chest."]
   ];
-  for(const [ok, t, l] of story){ const [lo, hi] = verdictBand(t); if(ok && sc >= lo && sc <= hi) return [t, l]; }
+  const later = (t, l) => [t, S.cont && CONT_LINES[t] ? CONT_LINES[t] : l];
+  for(const [ok, t, l] of story){ const [lo, hi] = verdictBand(t); if(ok && sc >= lo && sc <= hi) return later(t, l); }
   const t = LADDER.find(([min]) => sc >= min)[1];
-  return [t, VERDICT_LINES[t]];
+  return later(t, VERDICT_LINES[t]);
 }
 function costParts(){
   const st = S.st || {r:0, s:0, g:0}, p0 = S.p0 || {peace:70}, out = [];
@@ -2913,7 +2932,7 @@ function moveIcon(sc, c){
 }
 function recapHTML(){
   const m = (S.moves||[]).filter(x => x[1]===S.landing); if(m.length < 3) return '';
-  return `<div class="recap"><div class="when">🎞️ Your 30 days in pictures</div><div class="rc-strip">${m.map(([d,,i,t])=>`<button type="button" class="rc-m" data-hint="${esc('Day '+d+' · '+t)}"><b aria-hidden="true">${i}</b><small>D${Math.max(1,d)}</small><span class="sr">${esc('Day '+d+': '+t)}</span></button>`).join('')}</div><div class="rc-k">Tap a picture to see what you did that day.</div></div>`;
+  return `<div class="recap"><div class="when">🎞️ ${S.cont ? 'Your two weeks' : 'Your 30 days'} in pictures</div><div class="rc-strip">${m.map(([d,,i,t])=>`<button type="button" class="rc-m" data-hint="${esc('Day '+d+' · '+t)}"><b aria-hidden="true">${i}</b><small>D${Math.max(1,d)}</small><span class="sr">${esc('Day '+d+': '+t)}</span></button>`).join('')}</div><div class="rc-k">Tap a picture to see what you did that day.</div></div>`;
 }
 const BOARDS = [
   {key:'score', title:'Best landing', sub:'Highest Landing Score · wins the weekly crown', val:r=>r.score, show:r=>`${r.score}/100`},
@@ -3255,7 +3274,7 @@ function openCollection(){
 }
 
 /* ---------- Move my progress to another browser or the home screen app ---------- */
-const MOVE_KEYS = ['nyhl-history','nyhl-verdicts','nyhl-posts','nyhl-recent','nyhl-name','nyhl-origin','nyhl-life'];
+const MOVE_KEYS = ['nyhl-history','nyhl-verdicts','nyhl-posts','nyhl-recent','nyhl-name','nyhl-origin','nyhl-life','nyhl-daily'];
 function progressCode(){
   const d = {}; MOVE_KEYS.forEach(k => { try{ const v = localStorage.getItem(k); if(v) d[k] = v; }catch(e){} });
   return 'NYHL1:' + btoa(unescape(encodeURIComponent(JSON.stringify(d))));
@@ -3294,12 +3313,13 @@ function renderEnd(app){
   const [title, line] = verdict(), rec = receipts();
   track('finish-'+title.toLowerCase().replace(/[^a-z]+/g,'-'));
   const isNewVerdict = saveVerdict(title); saveGame(title); const earned = earnBadges();
+  if(S.daily && !S.dlSaved){ S.dlSaved = true; saveDaily(); }
   setTimeout(()=>SFX.verdict(S.cash > 0 && (S.peace + S.home + S.future) / 3 >= 50), 250);
   const where = `${L.town}, ${R.country}`;
   const journey = S.trail.map(t=>t.town).concat([L.town]).join(' → ');
   const share = `${S.daily ? `Today's Landing #${dailyNo(S.daily)}. ` : ''}I played Now You Have Landed (${journey}) and I am "${title}". ${line} What it cost me: ${costText()}. Wetin be your own?`;
   app.innerHTML = `<div class="scene fade">
-    <div class="when">Day 30 · Your result${S.daily ? ` · Today's Landing #${dailyNo(S.daily)}` : ''}</div>
+    <div class="when">${S.cont ? `Month ${S.cont.m}, weeks ${S.cont.w} and ${S.cont.w+1}` : 'Day 30'} · Your result${S.daily ? ` · Today's Landing #${dailyNo(S.daily)}` : ''}</div>
     <div class="journey-line">${journey}</div>
     <div class="verdict">
       <div class="label">Your verdict · scores ${verdictBand(title)[0]} to ${verdictBand(title)[1]}</div>
@@ -3337,7 +3357,7 @@ function renderEnd(app){
       </div>
     </div>
     <div class="row">
-      <button class="ghost" id="move">✈️ Japa again to another country</button>
+      ${S.cont ? '' : `<button class="ghost" id="move">✈️ Japa again to another country</button>`}
       <button class="ghost" id="pada">🏠 ${S.f.pada ? 'Japada. You went back a year later' : 'Japada. Go back after a year?'}</button>
       <button class="ghost" id="again">🔄 Start a new life</button>
       <button class="ghost" type="button" onclick="openJournal()">📒 My games</button>
@@ -3404,7 +3424,7 @@ function renderEnd(app){
     const fallback = ()=>{ t.textContent = text; t.style.userSelect = 'all'; };
     try{ navigator.clipboard.writeText(text).then(()=>{ t.textContent = "Copied. Paste it anywhere, including LinkedIn."; }).catch(fallback); }catch(e){ fallback(); }
   };
-  document.getElementById('move').onclick = ()=>{
+  if(document.getElementById('move')) document.getElementById('move').onclick = ()=>{
     const box = document.getElementById('movebox'); box.hidden = false;
     box.innerHTML = `<div class="when">Where are you moving next?</div>` +
       Object.values(ROUTES).filter(r=>r.key!==R.key).map(r=>`<button class="route-btn" data-r="${r.key}"><b>${r.label}</b><span>${r.sub}</span></button>`).join('');
@@ -3977,6 +3997,156 @@ function lifeReset(){
   if(!confirm('Start a different life? Your current life abroad will be gone.')) return;
   try{ localStorage.removeItem(LIFE_KEY); }catch(e){} pick.lroute = null; track('life-reset'); render();
 }
+/* ---------- Your life carries on: from the second Today's Landing, each day is the next two weeks of your own life ---------- */
+const DL_KEY = 'nyhl-daily';
+function loadDaily(){ try{ return JSON.parse(localStorage.getItem(DL_KEY)||'null'); }catch(e){ return null; } }
+function saveDaily(){
+  const st = {}; ['cash','start','path','sold','fund','peace','home','future','f','origin','trail','culture','gender','cSeen'].forEach(k => st[k] = S[k]);
+  try{ localStorage.setItem(DL_KEY, JSON.stringify({v:1, rk:R.key, place:L.name, on:todayStr(), S:st})); }catch(e){}
+}
+// players who landed before this existed pick up from their last Today's Landing
+function seedDaily(){
+  const g = loadHistory().filter(x => x.daily && ROUTES[x.r]).pop(); if(!g) return null;
+  const town = String(g.trip||'').split(' → ').pop(), pl = places(g.r).find(p => p.town===town || p.name===town) || places(g.r).find(p => p.name===ROUTES[g.r].def) || places(g.r)[0];
+  const stc = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[])[0];
+  const path = pathOptions(g.r).some(o=>o[0]===g.path) ? g.path : 'work';
+  return {v:1, rk:g.r, place:pl.name, seeded:true, S:{cash:g.cash, start:g.cash, path, sold:false, fund:'savings', peace:g.peace, home:g.home, future:g.future, f:{},
+    origin:pick.origin, trail:[{code:ORIGINS[pick.origin]||'NGA', town:pick.origin, country:'Nigeria'}], culture:STATE_CULTURE[stc]||pick.culture||'general', gender:pick.gender||'any'}};
+}
+// each Today's Landing after the first is two weeks: landing 2 is month 2, weeks 1 and 2
+const contMonth = n => 1 + Math.ceil((n-1)/2);
+const contWeek = n => n % 2 === 0 ? 1 : 3;
+const contReady = () => myLandingNo() >= 2 && !!(loadDaily() || loadHistory().some(g => g.daily));
+function contWhere(){ const lf = loadDaily() || seedDaily(); if(!lf) return null; const pl = places(lf.rk).find(p=>p.name===lf.place) || {town:lf.place, name:lf.place};
+  return (pl.town===pl.name ? pl.name : pl.town + ', ' + pl.name) + (lf.rk==='eu' ? '' : ', ' + ROUTES[lf.rk].label); }
+function contStart(){
+  const lf = loadDaily() || seedDaily(); if(!lf) return false;
+  const pl = places(lf.rk).find(p=>p.name===lf.place) || places(lf.rk)[0]; if(!pl) return false;
+  const ds = todayStr(), n = myLandingNo();
+  R = ROUTES[lf.rk]; L = pl;
+  S = JSON.parse(JSON.stringify(lf.S));
+  Object.assign(S, {daily:ds, seed:hashStr(ds), v:{}, q:0, seen:[], st:{r:0, s:0, g:0, p:0}, duo:0, duoDay:ds, landing:1, life:null, xPick:null, cPick:null, moves:[],
+    cont:{n, m:contMonth(n), w:contWeek(n)}});
+  if(!S.trail || !S.trail.length) S.trail = [{code:ORIGINS[S.origin]||'NGA', town:S.origin||'Lagos', country:'Nigeria'}];
+  S.p0 = {peace:S.peace, home:S.home, future:S.future}; S.c0 = S.cash;
+  pick.daily = true; shown = null; history = []; last = null;
+  track('daily-cont-' + dailyNo(ds) + '-m' + S.cont.m);
+  idx = nextIndex(0); phase = 'scene';
+  return true;
+}
+const contCh = m => m <= 3 ? 1 : m <= 6 ? 2 : m <= 12 ? 3 : m <= 24 ? 4 : 5;
+function contScenes(){
+  const {m, w} = S.cont, no = dailyNo(S.daily);
+  const ok = sc => !sc.auto && sc.choices && !(Array.isArray(sc.choices) && sc.choices.some(c => c.set && 'ending' in c.set)) && sc.day !== 10;
+  const gen = contGeneral().filter(ok), chap = CHAPTERS[contCh(m)].scenes().filter(ok);
+  if(!S.cPick){   // chosen once: the shared four rotate by date, the stage three by date and stage
+    const seen = new Set(S.cSeen || []);   // a scene you have already lived waits until the rest of the pool has had its turn
+    const take = (arr, k, off) => { const out = []; for(const fresh of [true, false]) for(let i=0; i<arr.length && out.length<k; i++){ const sc = arr[(off+i) % arr.length], key = sceneKey(sc); if(out.includes(key) || (fresh && seen.has(key))) continue; if(!sc.when || sc.when(S)) out.push(key); } return out; };
+    const g = take(gen, 4, (no*4) % gen.length), c = take(chap, 3, (no*3) % Math.max(1, chap.length));
+    const mix = []; for(let i=0; i<7; i++){ const src = i % 2 ? c : g; const k = src.shift() || g.shift() || c.shift(); if(k) mix.push(k); }
+    S.cPick = mix; S.cSeen = (S.cSeen || []).concat(mix).slice(-150);
+  }
+  const byKey = new Map(gen.concat(chap).map(sc => [sceneKey(sc), sc]));
+  const lbl = d => `Month ${m} · week ${w + (d > 7 ? 1 : 0)}`;
+  const out = [{day:1, auto:'fortnight', label:lbl(1), core:1}];
+  S.cPick.forEach((k, i) => { const sc = byKey.get(k); if(sc){ const d = 2 + i*2; out.push(Object.assign({}, sc, {day:d, label:lbl(d), core:1})); } });
+  return out;
+}
+function contPay(){
+  const f = S.f, m = S.cont.m;
+  let pay = lifePay();
+  if(m >= 4) pay = Math.max(pay, A(STU() ? 900 : 1300));   // a few months in, everybody has found some steady work
+  if(m >= 7) pay = Math.max(pay, A(1500));
+  const rent = (f.stay==='cousin' || f.stay==='host' || f.stay==='lola') && m <= 3 ? A(300) : RENT();
+  const upkeep = f.upkeep==='set' ? A(150) : 0;
+  return {pay: Math.round(pay/2), out: Math.round((rent + A(380) + upkeep)/2)};
+}
+// the shared situations: anyone at any stage can meet them, and everyone meets the same four on the same day
+const contGeneral = () => { const c = C(), dent = {us:600, uk:300, ca:450, eu:250}[R.key];
+ return [
+ {art:'house', text:`A letter from your landlord in ${T()}. From next month your rent goes up by ${M(Math.max(30, Math.round(RENT()*0.08/10)*10))}. It says "market conditions". Your salary did not get the same letter.`,
+  choices:[
+   {l:"Pay it and say nothing", fx:{cash:-A(80), peace:-3}, r:"You adjust the budget again. Something small, like the Sunday treat, quietly leaves the plan."},
+   {l:"Negotiate politely, in writing", fx:{cash:-A(30), peace:2, future:3}, r:"You mention your clean record and offer a longer lease. The increase drops by half. Writing it down made you braver."},
+   {l:"Look for somewhere cheaper", fx:{cash:-A(120), peace:-4, future:5}, set:{moved:1}, r:"You find a place twenty minutes further out. The commute is longer, and the rent finally fits."}]},
+ ASK({from:c.cousin, sub:`Wedding committee · ${c.home}`, text:`${c.please}, our aso ebi is out! Your own is ${N(120)}, and the committee said the people abroad will add something for the souvenirs.`,
+  choices:[
+   {l:"Pay for the aso ebi and souvenirs", fx:{cash:-A(220), home:8}, r:"Your fabric arrives in a photo, and your name is on the souvenir list. You will wear the aso ebi to a wedding you watch on Instagram Live."},
+   {l:"Pay for the aso ebi only", fx:{cash:-A(120), home:3}, r:"The committee says thank you, then asks if you know anybody else abroad."},
+   {l:"Send a gift on the day instead", fx:{cash:-A(50), home:-3, peace:3}, r:"The couple loves the gift. The committee notes that your name is not on the list."}]}),
+ {art:'card', text:`It is sale season in ${T()}. Every app on your phone is shouting "70% off". Your cart now holds a winter coat, a TV, and three things you did not know you needed.`,
+  choices:[
+   {l:"Buy the whole cart", fx:{cash:-A(450), peace:4}, r:"The boxes arrive. So does the credit card statement."},
+   {l:"Buy only the coat", fx:{cash:-A(90), peace:2, future:1}, r:"One good coat. Your body thanks you every morning."},
+   {l:"Delete the apps for the weekend", fx:{peace:-1, future:3}, r:"The weekend is quiet and slightly boring. Your account is untouched."}]},
+ {art:'work', text: STU() ? "A classmate offers you weekend shifts at the warehouse where she works. Twelve hours a weekend, paid every Friday." : "Someone from the Naija community offers you weekend shifts at a warehouse. Twelve hours a weekend, paid every Friday.",
+  choices:[
+   {l:"Take every weekend", fx:{cash:A(350), peace:-8, future:1}, r:"The money is real, and so is the back pain. You sleep through every Sunday."},
+   {l:"Take one weekend a month", fx:{cash:A(120), peace:-2, future:2}, r:"Enough to breathe, and not enough to break you."},
+   {l:"Say no and protect your rest", fx:{peace:4, future:2}, r:"Your weekends stay yours. You use one of them to finally update your CV."}]},
+ {art:'card', text:"Your bank sends a cheerful message. You are \"pre-approved\" for a credit card with a limit bigger than your monthly pay.",
+  choices:[
+   {l:"Accept it and use it for bills", fx:{cash:A(300), peace:2, future:-6}, set:{credit:'used'}, r:"The bills are paid, and the card is already a third full. The interest starts next month."},
+   {l:"Use it small and clear it monthly", fx:{peace:-1, future:6}, set:{credit:'built'}, r:"You put one bill on it and clear it every month. Your credit score starts to like you."},
+   {l:"Decline it", fx:{peace:2}, r:"No new card, and no new worry."}]},
+ ASK({from:c.mum, sub:`${c.home} · 11:40pm`, text:`${cap(c.endear)}, it is me. Do not worry o. The doctor says it is only my blood pressure, but they want to run some tests. They are asking for ${N(200)} before they start.`,
+  choices:[
+   {l:"Pay the hospital directly", fx:{cash:-A(200), home:8, peace:2}, r:"You call the hospital, pay them yourself, and ask for the results by email. She is fine. You are tired and very relieved."},
+   {l:"Split it with your siblings", fx:{cash:-A(80), home:4, peace:-2}, r:"You start a group chat with your siblings. Two of them pay. One reads the message and goes quiet."},
+   {l:"Suggest the general hospital", fx:{cash:-A(30), home:-4, peace:-4}, r:"It is cheaper and slower. You call every day to check, and every call costs you a little sleep."}]}),
+ {art:'chat', text: STU() ? "Your course mates go out every Friday after the last lecture. You have said no four times, and they have stopped asking loudly." : "Your colleagues go for drinks every Friday after work. You have said no four times, and the invitations are getting quieter.",
+  choices:[
+   {l:"Go every Friday", fx:{cash:-A(160), peace:3, future:4}, r:"You learn who really runs the place, and somebody mentions an opening you would never have found online."},
+   {l:"Go once and order one drink", fx:{cash:-A(25), peace:2, future:3}, r:"You nurse one drink for two hours and leave with three new contacts."},
+   {l:"Keep saying no", fx:{peace:-2, future:-3}, r:"You save the money. Next month, the opportunity goes to someone who was always there."}]},
+ ASK({from:c.friend, sub:`Secondary school friend · ${c.home}`, text:`${c.please}, I am ready to japa now. Just send me an admission letter or a job offer from your side. You are there now, so you know people.`,
+  choices:[
+   {l:"Spend a weekend helping properly", fx:{peace:-3, home:6, future:2}, r:"You send links, deadlines, and a step-by-step list. He thanks you, then asks if you can just fill the forms for him."},
+   {l:"Send the official websites", fx:{home:1, peace:2}, r:`You send three links. He replies, "Ehen, but who do you know?"`},
+   {l:"Tell him the truth about month one", fx:{home:-2, peace:3, future:1}, r:`You tell him about the rent, the cold, and the double shifts. He goes quiet, then asks, "So you want to stop me?"`}]}),
+ {art:'phone', text:`Your phone slips out of your pocket at the bus stop. The screen now looks like a map of ${T()}, and everything you own runs on this phone.`,
+  choices:[
+   {l:"Get a new phone on a plan", fx:{cash:-A(60), peace:4, future:-3}, r:"A shiny phone and a 24-month contract. You will still be paying for it when it is old."},
+   {l:"Repair the screen", fx:{cash:-A(140), peace:2}, r:"It is almost as good as new. This time you buy the thick case."},
+   {l:"Live with the cracks", fx:{peace:-4}, r:"You learn exactly where to tap. Your WhatsApp contacts think you are ignoring them."}]},
+ {art:'group', text:`It is a long weekend, and everyone you know here is busy. Your flat is very quiet, and the family group is posting photos from a party in ${O()}.`,
+  choices:[
+   {l:"Call home for three hours", fx:{home:6, peace:3}, r:`${c.mum} puts you on speaker and passes the phone round the room. For three hours, you are at the party too.`},
+   {l:"Find a Naija event in town", fx:{cash:-A(40), peace:5, future:3}, r:"Jollof, loud music, and an uncle who knows your uncle. You leave with five new numbers and a full belly."},
+   {l:"Sleep the weekend away", fx:{peace:-5}, r:"You sleep a lot and rest very little. Monday arrives heavier than Friday left."}]},
+ {art:'school', text: STU() ? `Your department offers a Saturday certificate in data analysis. It costs ${M(A(300))}, and everyone says it is what employers want.` : `Your manager mentions a certificate that would put you in line for the next role. The course costs ${M(A(300))}, and the exam is in three months.`,
+  choices:[
+   {l:"Pay and start now", fx:{cash:-A(300), peace:-3, future:10}, r:"Your Saturdays disappear into slides and practice tests. Your CV is getting heavier in a good way."},
+   {l: STU() ? "Apply for the department bursary" : "Ask work to sponsor it", fx:{cash:-A(150), peace:-1, future:7}, r:"It takes two emails and a form. They agree to pay half. Asking turned out to be the best investment."},
+   {l:"Wait until next year", fx:{peace:3, future:-3}, r:"You keep your Saturdays. Someone else signs up instead."}]},
+ ASK({from:c.aunty, sub:`Family elder · ${c.home}`, text:`${c.greet}. Your cousin's son has got admission in your country. We have told him he will stay with you until he settles. He lands next week.`,
+  choices:[
+   {l:"Welcome him for one month", fx:{cash:-A(150), home:8, peace:-4}, r:"He eats like a growing boy, because he is one. He also cleans the kitchen without being asked."},
+   {l:"Help him find a room nearby", fx:{cash:-A(40), home:2, peace:2, future:1}, r:"You find him a shared room ten minutes away. He visits every Sunday for jollof."},
+   {l:"Say your place is too small", fx:{home:-6, peace:3}, r:"The family says you have changed. Your one-bedroom flat says you have not."}]}),
+ {art:'work', text: STU() ? "Your campus job offers extra hours over the break, at a better rate." : "Your manager asks if you want overtime for the next two weeks. Time and a half.",
+  choices:[
+   {l:"Take all of it", fx:{cash:A(400), peace:-7}, r:"Your account smiles. Your body files a formal complaint."},
+   {l:"Take half of it", fx:{cash:A(200), peace:-2}, r:"A healthy bump, and you still see daylight."},
+   {l:"Ask for a pay review instead", fx:{peace:-1, future:5}, set:{raise:true}, r:"Your manager is surprised, then impressed. Your review is booked, and it goes your way."}]},
+ {art:'plane', text:`Flights home for ${c.party} are already ${M(A(1400))} and climbing. The family group has started planning where you will sit.`,
+  choices:[
+   {l:"Book it now", fx:{cash:-A(1400), home:12, peace:3}, r:"You book it and send a screenshot. The family group explodes with joy, and your savings go very quiet."},
+   {l:"Go in February when it is cheaper", fx:{home:-3, peace:2, future:2}, r:`The flight is half the price. ${c.mum} says February is "a strange time to come home".`},
+   {l:"Send money for the party instead", fx:{cash:-A(300), home:6}, r:"The party happens without you, paid for by you. You watch the video and dance in your kitchen."}]},
+ {art:'sun', text: {us:`Your tooth has ached for a week. The dentist quotes ${M(A(dent))}, and your insurance covers "some of it".`, uk:`Your tooth has ached for a week. The NHS dentist list is closed, and a private dentist quotes ${M(A(dent))}.`, ca:`Your tooth has ached for a week. Dental is not covered, and the clinic quotes ${M(A(dent))}.`, eu:`Your tooth has ached for a week. The dentist quotes ${M(A(dent))}, and the earliest slot is in three weeks.`}[R.key],
+  choices:[
+   {l:"Pay and fix it now", fx:{cash:-A(dent), peace:6}, r:"Ten minutes in the chair, and you can chew on both sides again."},
+   {l:"Painkillers, and wait", fx:{cash:-A(15), peace:-6}, r:"The pain comes and goes. So does your focus."},
+   {l:"Fix it on your next trip home", fx:{peace:-3, future:1}, r:"You add it to the list of things to do at home. The list is getting long."}]},
+ {art:'chat', text:`A JJC from your hometown lands in ${T()} and gets your number from a friend of a friend. "Please, can I stay with you for one week while I find my feet?"`,
+  choices:[
+   {l:"Say yes, for one week", fx:{cash:-A(80), home:4, peace:-3}, r:"One week becomes two. You show the JJC the cheap shop, the bus routes, and how to say no to aunties. You have become the cousin."},
+   {l:"Help with a room, not your sofa", fx:{home:1, peace:2, future:2}, r:"You send listings, go with them to one viewing, and keep your sofa. Everybody wins."},
+   {l:"Pretend you did not see it", fx:{home:-3, peace:-2}, r:"You see their status a week later. They found a place. You feel bad for exactly one evening."}]},
+ oldColleagues(), contribution(), farm(), promise(), mishap(), familyGroup(), smallWin()
+ ].filter(Boolean).map(sc => Object.assign({day:5}, sc)); };
+
 function mtilesHTML(){
   return `<div class="mtiles">${[['cash','💵','Cash',money(S.cash)],['peace','🧘🏾','Peace',S.peace],['home','🏠','Home',S.home],['future','🚀','Future',S.future]].map(([k,ic,n,v])=>{ const b = band(k, S[k]); return `
     <button type="button" class="mtile ${b.cls}" data-hint="${esc(b.meaning)}"><span class="mt-ic" aria-hidden="true">${ic}</span><span class="mt-n">${n}</span><b>${v}</b>
