@@ -21,6 +21,8 @@ async def run():
       await pg.select_option('#origin', index=g % 37)
       if g%5==0:
         await pg.click('#dailygo')
+        await pg.click(f'[data-rk="{route}"]'); await pg.click('[data-deps="' + ['parents','siblings','kids','none'][g%4] + '"]')
+        await pg.click('[data-goal="' + ['papers','house','family','debt','career','savings'][g%6] + '"]'); await pg.click('#sugo')
       else:
        await pg.click('#moredet > summary')
        await pg.click(f'.quick-btn[data-q="{route}"]')
@@ -44,11 +46,11 @@ async def run():
       if not await pg.evaluate("() => (document.getElementById('cardimg')||{}).src?.startsWith('data:image/png') || false"): issues.append(f'game {g} no card')
       wa = await pg.get_attribute('#s-wa','href')
       if '%23' not in wa: issues.append(f'game {g} no rank in share')
-      if g==0:
+      if g==1:
         await pg.click('#pada'); await pg.click('#move'); await pg.locator('#movebox .route-btn').first.click(); await pg.click('#go2')
         await pg.wait_for_selector('.choice'); landing2 = await pg.evaluate('S.landing')
         if landing2!=2: issues.append('japa again failed')
-      if g==1:
+      if g==2:
         await pg.click('#again'); await pg.wait_for_selector('.quick-btn')
         await pg.click('.glossbtn' if await pg.locator('.glossbtn').count() else 'details.how >> nth=1')
         await pg.evaluate('openJournal()'); await pg.wait_for_selector('#journalover .j-row')

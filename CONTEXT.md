@@ -74,22 +74,8 @@ Read this, then read index.html, before changing anything.
 - `python3 tests/full_games.py` plays 24 random full games with the leaderboard mocked. It must print `ISSUES: none`.
 - Chromium and Playwright are needed. Check screens with Playwright screenshots at 390px wide.
 
-## My Life Abroad, the continuing story mode
-- **What it is.** One continuing life, separate from Today's Landing. Money, meters, and every flag in `S.f` carry from chapter to chapter.
-- **Unlock.** The home card (lifeCardHTML) stays locked until JJC, which is 2 Today's Landings (LIFE_UNLOCK). One chapter opens per day.
-- **How a life starts.** Chapter 0 is a normal first month played inside the mode (lifeStart calls begin, then sets `S.life = {ch:0}`). Life games never post to the leaderboard and never enter nyhl-history.
-- **Chapters.** CHAPTERS lists all six stages, and every one is written:
-  1. Months 2 to 3 · Payslip and Rent (lifeCh1)
-  2. Month 6 · First Winter and Paperwork (lifeCh2)
-  3. Year 1 · The Anniversary (lifeCh3): ajo payout, the anniversary, visiting home or Mummy visiting, the lease, a brother who wants to japa, meeting someone.
-  4. Year 2 · Promotion, Pressure, and Land (lifeCh4): graduation or promotion, wedding pressure, land at home, three school fees, mortgage, burnout, being asked to be a guarantor.
-  5. Year 3+ · Papers, Family, or Japada (lifeCh5): papers by route, bringing parents, a job offer in Lagos, owning property, helping the next JJC, and the final question, where is home now (ending: stay, pada, both).
-- **The end of a life.** After chapter 5, renderLifeEnd shows the ending title, lifeReceipts() lines, and the score from every stage, then "Start a new life".
-- **Chapter scenes.** Ten slots, with 9 or 10 choices and one auto money event (autoEvent `life1` to `life5`, using lifePay). From Year 1, lifePay gives everyone at least a survival wage. `label` is the time shown, `art` picks the picture. inCh() makes showable() show every scene in order. A slot can hold two or three scenes with opposite `when` conditions.
-- **Month one comes back.** lifeCallback picks one flag from earlier play (sibling, guest, farm, loan, house, car) once per chapter and stores it in `S.cbk`. lifeComeback writes that scene.
-- **Flags.** upkeep, ajo, assoc, licence, december, guest, farm, loan, uber30, fanbelt, car (junked), visited, raise, partner, promo, grad, land, house2, papers, family, pada, owner, ending.
-- **Saving.** renderLifeEnd saves nyhl-life `{v, rk, place, ch, doneOn, started, S, log}` once per chapter. lifePlay rebuilds R, L, and S from it. nyhl-life is in MOVE_KEYS, and importing keeps the further-along life.
-- **Testing.** `python3 tests/life_mode.py` plays 12 whole lives, arrivals to the ending, and must print `ISSUES: none`. Add `shots` to save screenshots in tests/shots/.
+## My Life Abroad chapters
+- CHAPTERS and lifeCh1 to lifeCh5 hold the stage scenes (Months 2-3, Month 6, Year 1, Year 2, Year 3+). Since 12 Nov they feed Your story (see below). The old separate mode (lifeCardHTML, lifePlay, renderLifeEnd) is no longer reachable from the home screen.
 
 ## Real stories and the monthly update
 - Players send stories through Tally form q5480d. It asks when the story happened (first month to year 3+) and has a box for later stories.
@@ -102,15 +88,21 @@ Read this, then read index.html, before changing anything.
 - Namecheap: keep auto-renew on for nowyouhavelanded.com.
 - Supabase: if an email warns the project will pause, open the dashboard and press Resume.
 
-## Your life carries on (3 Nov 2026)
-- A player's first Today's Landing is the shared airport arrival. From their second, Today's Landing continues their own life: contReady() is true when myLandingNo() >= 2 and they have a saved or seedable life.
-- The life is saved in localStorage nyhl-daily (loadDaily, saveDaily in renderEnd for every daily game). Players from before this change are seeded from their last daily history entry (seedDaily).
-- Each landing is two weeks: contMonth(n) = 1 + ceil((n-1)/2), contWeek(n) is 1 or 3. Landing 2 is month 2, landing 8 is month 5. This matches the abroad titles (7 landings = Three Months In).
-- contScenes(): a 'fortnight' payday auto (contPay, half a month's pay minus rent, food, transport), then 7 choices. Four are shared, from contGeneral() (16 written for this mode, plus oldColleagues, contribution, farm, promise, mishap, familyGroup, smallWin), and rotate by dailyNo so everyone meets the same ones on the same day. Three come from the My Life Abroad chapter for that stage (contCh: months 2-3 ch1, 4-6 ch2, 7-12 ch3, year 2 ch4, year 3+ ch5), minus autos, day-10 milestone calls, and the ending choice.
-- S.cSeen (saved) keeps a player from seeing a scene again until the rest of the pool has had its turn.
-- The score is the same 0-100 life score. CONT_LINES rewords ladder verdicts that mention the first month. "Japa again" is hidden in continuing games.
-- tests/continue_life.py plays nine days in a row on all four routes and must print "ISSUES: none".
-- To keep it fresh, add to contGeneral() over time. The monthly story task should put later-life stories there.
+## Your story (12 Nov 2026): Today's Landing is now one personal life
+- Nafeezie found the shared daily boring: it was not her story, and stages repeated. Now every player lives their own life, Month 1 to Year 5, one chapter a day. The leaderboard is unchanged, and every daily chapter still posts a score.
+- **Setup.** Tapping Today's Landing without a story opens phase `setup` (setupHTML, wireSetup): country, city, route, funding, gender, who counts on you (DEPS: parents, siblings, kids, none), and a goal (GOALS: papers, house, family, debt, career, savings). Existing players see it pre-filled and keep their money, meters, title, and streak.
+- **The life.** It is saved in localStorage nyhl-daily `{v:2, rk, place, n, done, log, started, S}`, where S.me = {goal, deps}. `n` is landings lived in this life. LIFE_LEN = 19, and STAGES[n] gives the label (Month 1 ... Year 5), the chapter (ch 1 to 5, from CHAPTERS), and months covered (mo).
+  - Landing 1 is a normal first month (begin, with S.me set).
+  - Landings 2 to 19 use contStart and contScenes: a payday auto covering `mo` months (contPay, including family upkeep from DEPS), then 4 choices. Those are 1 goal scene (goalScenes, by `at:[from,to]` range), a family scene on even landings (depScenes), 1 or 2 chapter scenes, and general scenes (contGeneral plus lateScenes for years 2 to 5).
+  - The last landing has 3 picks plus the "where is home now" ending choice from lifeCh5.
+- **No repeats.** S.cSeen holds every scene lived in this life. CONT_MEMO fixes a chapter's scenes once picked.
+- **Goals.** Choices can carry `gp`, which is added to S.f.gp. goalPct() adds passive progress (savings from cash, career from future) and big moments (owner, papers, loan paid, promo). goalResult: 80+ reached, 55+ almost, else not this time.
+- **Result screen.** storyEndHTML shows "Chapter n of 19 done", the goal bar, and the road. At landing 19 it shows the whole-life summary: the ending title, the goal result, lifeReceipts, and scores by stage. The next day offers a new life.
+- **Migration.** Older players get lifeN(lf), which maps the month they had reached (two weeks a landing) onto the new road. For example, 15 landings is Month 8, so they carry on at Month 10. On setup, gp starts at n × 2.5.
+- The separate My Life Abroad card is gone from the home screen. Its CHAPTERS and lifeCh1 to lifeCh5 now feed the story. Old nyhl-life saves are left untouched.
+- Japa again and Japada are hidden in story games and stay in practice games.
+- **Testing.** `python3 tests/story.py` lives four whole stories (two new, two migrated) and must print `ISSUES: none`. `tests/full_games.py` still must pass.
+- **Fresh content.** The monthly story task should add to lateScenes, goalScenes, depScenes, and contGeneral. Scenes are 4 per chapter, so the pool covers a full life without repeats (about 70 per life today).
 
 ## Next up (agreed 31 Oct 2026, Nafeezie returns about 15-16 Nov)
 Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-month storyline inside the continuing life. When she opens a new chat with "Return ticket and teen demo":
