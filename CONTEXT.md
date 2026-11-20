@@ -104,6 +104,19 @@ Read this, then read index.html, before changing anything.
 - **Testing.** `python3 tests/story.py` lives four whole stories (two new, two migrated) and must print `ISSUES: none`. `tests/full_games.py` still must pass.
 - **Fresh content.** The monthly story task should add to lateScenes, goalScenes, depScenes, and contGeneral. Scenes are 4 per chapter, so the pool covers a full life without repeats (about 70 per life today).
 
+## Rent Week (20 Nov 2026): the city-map game at /week/
+- Nafeezie found the story game boring and asked for something people come back to, in the spirit of GTA. Rent Week is a separate page, week/index.html, linked from a card on the home screen (rentWeekCard, under the name row).
+- **Loop.** Each real day is one game week: Monday to Friday, three slots a day (morning, afternoon, night). You tap a place on a city map. Each visit uses a slot and energy. Friday night pays the week's bill.
+- **Cities.** CITIES: houston, london, toronto, each with its own currency factor k (A(v) scales amounts), rent, landlord, lender, roads, and river. The city is picked once. The default comes from the story's country.
+- **Bills.** MISSIONS cycle every 6 weeks: rent, car note, visa renewal, rent, owambe season, Detty December. Each cycle is 6% dearer. living() adds food, bus, and phone. A shortfall pays what you have, rolls the gap over with a 10% fee (arrears), and adds a warning. Three warnings means eviction: you restart on a cousin's sofa with your history kept.
+- **Aunty Alert.** Stars rise when you leave WhatsApp requests on read or let them pile up, and fall when you send money, call home, or go to the owambe. At five stars a Family Raid costs money and peace.
+- **Growth.** Mechanic (week 2+): fix the car for good. Night class (week 3+): four classes lead to an office job. Market stall (week 5+, Mama trust 6): earns every Friday. Eight warehouse shifts get the forklift promotion.
+- **Shared luck.** luck(tag) is seeded by the date plus the moment of the week, so the same move gives the same outcome for everyone that day.
+- **Saved** in localStorage nyhl-week. One week per day; replay shows the done screen and a countdown. Share text works like Wordle.
+- **Balance.** A sensible player passes most weeks with modest savings; careless play fails. Check with a smart-player run before changing pay or bills.
+- **Tests.** `python3 tests/rent_week.py` plays seven days in each city and must print `ISSUES: none`. window.__rentweek is a read-only peek for tests.
+- **Not yet.** No leaderboard (it would need its own Supabase table). Ideas: a weekly leaderboard, more places, city-specific radio lines.
+
 ## Next up (agreed 31 Oct 2026, Nafeezie returns about 15-16 Nov)
 Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-month storyline inside the continuing life. When she opens a new chat with "Return ticket and teen demo":
 1. Check two weeks of play since the 2 Nov board (GoatCounter: finishes, return visits, story-form taps) against the weeks before.

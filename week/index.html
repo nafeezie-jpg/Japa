@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rent Week · Now You Have Landed</title>
+<meta name="description" content="One week abroad, every day. Make rent by Friday while the warehouse, the fan belt, the loan shark and your aunties all pull at you.">
+<meta property="og:title" content="Rent Week · Now You Have Landed">
+<meta property="og:description" content="Make rent by Friday. Ignore your aunties at your own risk.">
+<meta property="og:url" content="https://nowyouhavelanded.com/week/">
+<meta property="og:image" content="https://nowyouhavelanded.com/og.png">
+<meta name="theme-color" content="#16122B">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;500;700&family=Space+Mono:wght@700&display=swap">
+<style>
+/* Houston, London or Toronto after dark: sodium light over a city map. HUD on top, map in the middle, action sheet below. One look on purpose. */
+:root{
+  --night:#16122B; --deep:#0E0B1D; --block:#231D40; --road:#3A3160; --ring:#4A3F7A; --water:#1F4E5A;
+  --sun:#FF8A3D; --pink:#FF4F8B; --gold:#FFC93C; --naija:#2DBE6C;
+  --ink:#F6F1FF; --dim:#B4AACF; --bad:#FF6B6B;
+  --display:"Bungee","Impact",system-ui,sans-serif;
+  --body:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Space Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--night)}
+[hidden]{display:none!important}
+.wrap{max-width:560px;margin:0 auto;padding-block:12px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+a{color:var(--gold)}
+
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.back{font-size:13px;color:var(--dim);text-decoration:none}
+.logo{font-family:var(--display);font-size:22px;line-height:1;background:linear-gradient(90deg,var(--sun),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.when{font-family:var(--display);font-size:13px;color:var(--gold);white-space:nowrap}
+
+.hud{display:grid;gap:6px}
+.mission{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:13px;color:var(--dim)}
+.mission b{color:var(--ink);font-weight:700}
+.mission .due{font-family:var(--mono);color:var(--gold);white-space:nowrap}
+.lbl{display:grid;grid-template-columns:7.5em 1fr auto;gap:10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.stats{display:grid;grid-template-columns:7.5em 1fr auto;gap:10px;align-items:center}
+.cash{font-family:var(--mono);font-size:22px;color:var(--naija);font-variant-numeric:tabular-nums;transition:color .3s;min-width:5ch}
+.cash.down{color:var(--bad)}
+.energy{height:10px;border-radius:6px;background:var(--road);overflow:hidden}
+.energy i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--gold));transition:width .5s}
+.stars{font-size:16px;letter-spacing:2px;white-space:nowrap}
+.stars .on{color:var(--gold);text-shadow:0 0 8px rgba(255,201,60,.7)}
+.stars .off{color:var(--road)}
+.stars.bump{animation:bump .5s}
+@keyframes bump{40%{transform:scale(1.25)}}
+
+.radio{display:flex;gap:8px;align-items:center;background:var(--deep);border:1px solid var(--road);border-radius:10px;padding:7px 10px;overflow:hidden;min-width:0}
+.radio b{font-family:var(--display);font-size:11px;color:var(--pink);white-space:nowrap;font-weight:400}
+.radio .tk{flex:1;min-width:0;overflow:hidden;white-space:nowrap}
+.radio .tk span{display:inline-block;padding-left:100%;animation:tick 40s linear infinite;font-size:13px;color:var(--dim)}
+@keyframes tick{to{transform:translateX(-100%)}}
+
+.map{position:relative;aspect-ratio:9/10;max-width:100%;border-radius:16px;overflow:hidden;border:1px solid var(--road);background:var(--block)}
+.map canvas{position:absolute;inset:0;width:100%;height:100%}
+.sky{position:absolute;inset:0;pointer-events:none;transition:background 1.2s}
+.pin{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:2px;background:none;border:0;padding:4px;z-index:2}
+.pin .ic{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:24px;background:var(--night);border:2px solid var(--gold);box-shadow:0 0 0 4px rgba(255,201,60,.15),0 6px 14px rgba(0,0,0,.4);transition:transform .15s}
+.pin:hover .ic{transform:scale(1.08)}
+.pin .nm{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(14,11,29,.88);padding:2px 6px;border-radius:6px;white-space:nowrap}
+.pin.shut{opacity:.38}
+.pin.shut .ic{border-color:var(--dim)}
+.pin.new .ic{border-color:var(--naija);animation:glow 1.4s ease-in-out infinite}
+.pin.new .nm::after{content:" NEW";color:var(--naija)}
+@keyframes glow{50%{box-shadow:0 0 0 8px rgba(45,190,108,.25),0 6px 14px rgba(0,0,0,.4)}}
+.me{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--naija);border:3px solid var(--ink);transform:translate(-50%,-50%);transition:left .9s ease-in-out,top .9s ease-in-out;box-shadow:0 0 14px var(--naija);z-index:3;pointer-events:none}
+.me::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--naija);animation:ping 1.6s ease-out infinite}
+@keyframes ping{from{opacity:.8;transform:scale(.6)}to{opacity:0;transform:scale(1.6)}}
+.phone{position:absolute;right:10px;bottom:10px;z-index:4;border:0;border-radius:14px;background:var(--naija);color:#08210F;font-weight:700;padding:9px 12px;display:flex;gap:6px;align-items:center;box-shadow:0 6px 16px rgba(0,0,0,.4);animation:buzz 2.4s ease-in-out infinite}
+.phone .n{background:var(--pink);color:var(--ink);border-radius:10px;padding:0 7px;font-size:12px}
+@keyframes buzz{0%,86%,100%{transform:none}88%{transform:rotate(-6deg)}92%{transform:rotate(6deg)}96%{transform:rotate(-3deg)}}
+
+.sheet{background:var(--deep);border:1px solid var(--road);border-radius:16px;padding:14px;display:grid;gap:10px;min-width:0}
+.sheet h2{margin:0;font-family:var(--display);font-size:17px;font-weight:400;color:var(--gold);text-wrap:balance}
+.sheet p{margin:0}
+.who{font-size:12px;color:var(--dim)}
+.acts{display:grid;gap:8px}
+.act{display:flex;justify-content:space-between;gap:10px;align-items:center;text-align:left;border:1px solid var(--road);background:var(--block);border-radius:12px;padding:11px 12px;min-width:0}
+.act:hover{border-color:var(--gold)}
+.act small{font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right}
+.act[disabled]{opacity:.45;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:12px;padding:3px 8px;border-radius:8px;background:var(--block)}
+.chip.g{color:var(--naija)} .chip.b{color:var(--bad)}
+.go{border:0;border-radius:12px;padding:13px;background:linear-gradient(90deg,var(--sun),var(--pink));color:#1A0E14;font-weight:700;width:100%}
+.ghost{border:1px solid var(--road);background:none;border-radius:12px;padding:11px;width:100%}
+
+.overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(10,7,22,.95);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);padding:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow:auto;animation:fade .3s}
+.overlay .box{max-width:460px;width:100%;display:grid;gap:12px;text-align:center;padding-block:24px}
+.eyebrow{font-family:var(--display);font-size:13px;color:var(--dim);letter-spacing:.05em}
+.big{font-family:var(--display);font-size:clamp(32px,10vw,52px);line-height:1;letter-spacing:.02em;animation:slam .5s cubic-bezier(.2,1.6,.4,1);text-wrap:balance}
+.big.win{color:var(--gold);text-shadow:0 4px 0 #8A5A00,0 0 30px rgba(255,201,60,.5)}
+.big.lose{color:var(--bad);text-shadow:0 4px 0 #6A1020}
+.big.plain{color:var(--ink);text-shadow:0 4px 0 #3A3160}
+.sub{font-family:var(--display);font-size:15px}
+.recap{background:var(--deep);border:1px solid var(--road);border-radius:14px;padding:12px;display:grid;gap:6px;text-align:left;font-size:14px}
+.recap div{display:flex;justify-content:space-between;gap:10px}
+.recap span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.recap .hr{border-top:1px solid var(--road);margin-top:4px;padding-top:8px}
+.daycard{position:fixed;inset:0;z-index:25;display:grid;place-items:center;pointer-events:none;background:rgba(10,7,22,.55);animation:fade .2s}
+.daycard div{font-family:var(--display);font-size:clamp(44px,14vw,80px);color:var(--ink);text-shadow:0 5px 0 var(--pink);animation:slam .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes slam{from{transform:scale(2.4);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translateX(-50%);z-index:26;width:min(92vw,460px);background:var(--ink);color:var(--night);border-radius:12px;padding:10px 14px;font-size:14px;box-shadow:0 10px 24px rgba(0,0,0,.4);animation:fade .25s}
+.cities{display:grid;gap:10px}
+.city{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;text-align:left;border:1px solid var(--road);background:var(--block);border-radius:14px;padding:14px}
+.city:hover{border-color:var(--gold)}
+.city .fl{grid-row:span 2;font-size:30px}
+.city b{font-family:var(--display);font-weight:400;font-size:16px}
+.city small{color:var(--dim)}
+.prog{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.prog span{font-size:12px;padding:4px 9px;border-radius:999px;background:var(--block);color:var(--dim)}
+.prog span.on{color:var(--naija)}
+.note{font-size:12px;color:var(--dim);text-align:center}
+canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%;height:100%}
+@media (prefers-reduced-motion:reduce){.radio .tk span{animation:none;padding-left:0}.me{transition:none}.me::after,.phone,.pin.new .ic{animation:none}.big,.daycard div{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a class="back" href="/">← Now You Have Landed</a><div class="when" id="when"></div></div>
+  <div class="logo">RENT WEEK</div>
+  <header class="hud" aria-live="polite">
+    <div class="mission"><span id="mtitle"></span><span class="due" id="mdue"></span></div>
+    <div class="lbl"><span>Cash</span><span>Energy</span><span>Aunty Alert</span></div>
+    <div class="stats">
+      <div class="cash" id="cash"></div>
+      <div class="energy" role="img" id="enlbl"><i id="en"></i></div>
+      <div class="stars" id="stars"></div>
+    </div>
+  </header>
+  <div class="radio"><b id="fm">📻 JAPA FM</b><div class="tk"><span id="radio"></span></div></div>
+  <div class="map" id="map">
+    <canvas id="city" aria-hidden="true"></canvas>
+    <div class="sky" id="sky"></div>
+    <div id="pins"></div>
+    <div class="me" id="me"></div>
+    <button class="phone" id="phone" type="button" hidden>📱 WhatsApp <span class="n" id="pn">1</span></button>
+  </div>
+  <section class="sheet" id="sheet" aria-live="polite"></section>
+  <p class="note">Everyone playing today gets the same breakdowns, tips, and messages. One week a day.</p>
+</div>
+<div class="overlay" id="over" hidden><div class="box" id="obox"></div></div>
+<div class="toast" id="toast" hidden></div>
+<script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script>
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+const KEY = 'nyhl-week';
+const track = n => { try{ window.goatcounter && window.goatcounter.count && window.goatcounter.count({path:'week-'+n, title:'week-'+n, event:true}); }catch(e){} };
+const store = { get(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } }, set(v){ try{ localStorage.setItem(KEY, JSON.stringify(v)); }catch(e){} } };
+const myName = (() => { try{ return (localStorage.getItem('nyhl-name')||'').trim(); }catch(e){ return ''; } })();
+
+/* ---------- cities ---------- */
+const CITIES = {
+  houston:{name:'Houston', flag:'🇺🇸', cur:'$', k:1, rent:1200, start:520, area:'Bissonnet', landlord:'Landlord Kevin', lender:'Quick Cash Kings', mkt:"Mama Ngozi's African Market", hall:'Celebration Hall, Alief', water:'BUFFALO BAYOU', roads:['I-45','610'], airport:'IAH', fm:'98.7', blurb:'Warehouse shifts, a 2009 Corolla, and humidity that hugs too hard.', boss:'Brad', bossWord:'buddy', ware:'Amazing Logistics'},
+  london:{name:'London', flag:'🇬🇧', cur:'£', k:.8, rent:950, start:420, area:'Peckham', landlord:'Mr Patel', lender:'Cash4U Today', mkt:"Mama Ngozi's in Peckham", hall:'Thamesmead Events Hall', water:'RIVER THAMES', roads:['A2','S. CIRCULAR'], airport:'Heathrow', fm:'99.1', blurb:'Care shifts, night buses, and rain that never fully stops.', boss:'Gareth', bossWord:'mate', ware:'Swift Parcels'},
+  toronto:{name:'Toronto', flag:'🇨🇦', cur:'C$', k:1.25, rent:1500, start:650, area:'Brampton', landlord:'Gary', lender:'EZ Money Now', mkt:"Mama Ngozi's in Brampton", hall:'Mississauga Event Centre', water:'HUMBER RIVER', roads:['401','410'], airport:'Pearson', fm:'101.3', blurb:'Factory shifts, minus 20 in January, and everybody apologising.', boss:'Darren', bossWord:'bud', ware:'Maple Freight'}
+};
+let C;
+const A = v => Math.round(v * C.k / 5) * 5;
+const money = v => (v < 0 ? '-' : '') + C.cur + Math.abs(Math.round(v)).toLocaleString('en-US');
+
+/* ---------- the same luck for everyone today ---------- */
+const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+const hash = s => { let h = 2166136261; for(const ch of String(s)){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+const luck = tag => { let t = hash(today() + '|' + tag) + 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const roll = (tag, p) => luck(tag) < p;
+const between = (tag, a, b) => a + Math.floor(luck(tag) * (b - a + 1));
+const pickL = (tag, arr) => arr[Math.floor(luck(tag) * arr.length)];
+const shuffleL = (tag, arr) => arr.map((x, i) => [luck(tag + i), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+
+/* ---------- each week has a bill to beat ---------- */
+const MISSIONS = [
+  {id:'rent',  title:'RENT DAY', line:w => `${C.landlord} wants the rent by Friday night.`, amt:() => C.rent},
+  {id:'car',   title:'THE CAR NOTE', line:() => 'Your car payment and insurance are both due Friday.', amt:() => A(450)},
+  {id:'visa',  title:'VISA RENEWAL', line:() => 'Your lawyer needs the renewal fee by Friday, or the paperwork waits.', amt:() => A(800)},
+  {id:'rent',  title:'RENT DAY', line:() => `${C.landlord} is back. Rent, Friday night.`, amt:() => C.rent},
+  {id:'owambe',title:'OWAMBE SEASON', line:() => 'Two weddings and a 60th. Aso ebi and gifts are due Friday.', amt:() => A(350)},
+  {id:'detty', title:'DETTY DECEMBER', line:() => `The family has booked your seat at Christmas dinner. The ticket from ${C.airport} costs this much.`, amt:() => A(1100)}
+];
+const missionFor = w => { const m = MISSIONS[(w - 1) % MISSIONS.length], cycle = Math.floor((w - 1) / MISSIONS.length); return {...m, amount: Math.round(m.amt() * (1 + cycle * 0.06) / 5) * 5}; };
+
+/* ---------- words ---------- */
+const RADIO = () => [
+  `Japa FM ${C.fm}, the station that converts every price to naira so you do not have to.`,
+  `AD: Tired of your landlord? Become a landlord. Our seminar is only ${money(A(499))}.`,
+  'Weather: cold tonight. Colder than the reply your cousin sent.',
+  'Traffic: the ring road is a car park. Your manager does not care.',
+  "AD: Pastor Abroad's visa prayer line. Press 1 for blessing, press 2 for tithe.",
+  `News: man spotted in ${C.area} wearing a winter jacket indoors. Neighbours confirm he is new.`,
+  `AD: ${C.lender}. We believe in you. Our interest rate believes in you even more.`,
+  `Gist: somebody's uncle says ${C.name} is "small Lagos". ${C.name} has not responded.`,
+  'Request line: Aunty Bisi dedicates "Owo Ni Koko" to everybody who has not sent money.',
+  'AD: Learn to code in 6 weeks. Results not guaranteed. Debt guaranteed.',
+  'Sports: Super Eagles fans abroad report watching the match on a cousin\'s phone held up to a TV.'
+];
+const REQUESTS = () => [
+  {from:'Aunty Bisi', t:'Our generator has packed up. Send ₦60,000. God will replace it for you.', amt:A(40)},
+  {from:'Cousin Blessing', t:'Data finished. Just small. I will pay back when things settle.', amt:A(20)},
+  {from:'Mummy', t:"Your brother's school fees. The school is threatening him. Please.", amt:A(120)},
+  {from:'Uncle Femi', t:'I am in the hospital. Send money now, I will explain later. Do not call.', amt:A(80), scam:true},
+  {from:'Family group', t:"Contribution for Baba's 70th. Everybody abroad is paying. Names are being written.", amt:A(50)},
+  {from:'Tunde (secondary school)', t:'Guy, small capital for my business. You know say money dey your side.', amt:A(60)},
+  {from:'Pastor Sunday', t:'The church roof project. Your name is already on the honour board.', amt:A(45)},
+  {from:'Daddy', t:'Your mother says I should not ask. I am asking. The roof is leaking.', amt:A(90)},
+  {from:'Cousin Emeka', t:'I am coming to your country next month. Can you send me proof of funds? Just a screenshot.', amt:A(0), proof:true}
+];
+const STATUS = [
+  'Cousin Blessing posted a status from the Bernabéu. Caption: "God did it 🙌🏾".',
+  'Aunty Bisi\'s status: a seafood platter in Victoria Island. "Soft life is my portion."',
+  'Tunde changed his profile picture. A Lexus with a red bow.',
+  'Your old colleague is now Head of Operations. LinkedIn wants you to congratulate him.',
+  'Your friend who stayed home just bought land in Ibeju-Lekki. The caption: "Who said you must japa?"'
+];
+
+/* ---------- state ---------- */
+let P, W;
+function freshLife(city){ return {v:1, city, week:1, cash:Math.round(700 * CITIES[city].k / 5) * 5, owed:0, arrears:0, car:'old', boss:0, promo:false, school:0, office:false, mama:0, stall:false, warnings:0, last:'', done:'', streak:0, lives:1, hist:[], seen:{}}; }
+function freshWeek(){
+  const reqs = shuffleL('req' + P.week, REQUESTS()).filter(r => !(r.proof && P.week < 2));
+  W = {day:0, slot:0, energy:100, peace:60, stars:Math.min(2, Math.floor(P.warnings)), at:'home', inbox:[], queue:reqs, log:{shifts:0, rides:0, sent:0, ignored:0, earned:0}, bet:false, hustle:false, statusN:0, borrowed:0};
+}
+function save(){ store.set(P); }
+
+/* ---------- map ---------- */
+const PL = () => ({
+  home:{x:18,y:84,ic:'🏠',nm:'Your flat', title:`Your flat in ${C.area}`, who:'Shared wall with a man who plays the drums at midnight.'},
+  work: P.office ? {x:80,y:24,ic:'💼',nm:'Office', title:'Your new office job', who:'A desk, a lanyard, and a coffee machine that judges you.'}
+                 : {x:80,y:24,ic:'📦',nm:'Warehouse', title:C.ware, who:`Supervisor ${C.boss} calls everyone "${C.bossWord}". Nobody knows his surname.`},
+  ryde:{x:50,y:42,ic:'🚗',nm:'Ryde', title:'Drive for Ryde', who: P.car==='fixed' ? 'Your car, freshly fixed. It purrs. You are proud.' : 'Your old car and a phone mount held on with prayer.'},
+  mama:{x:24,y:33,ic:'🛒',nm:'Mama Ngozi', title:C.mkt, who:'Garri, gossip, and Nollywood on a TV from 2006.'},
+  loan:{x:82,y:64,ic:'💸',nm:'Loan shop', title:C.lender, who:'"Approved in 5 minutes. Regretted in 5 days."'},
+  hall:{x:50,y:79,ic:'🎉',nm:'Owambe', title:C.hall, who:'Thursday night. Aunty Funmi turns 60 again.'},
+  ...(P.week >= 2 && P.car !== 'fixed' ? {mech:{x:62,y:61,ic:'🔧',nm:'Mechanic', title:'Chidi Auto Repairs', who:'Chidi fixes cars and gives free life advice. Only one of those is good.', fresh:P.week===2}} : {}),
+  ...(P.week >= 3 && !P.office ? {school:{x:24,y:58,ic:'🎓',nm:'Night class', title:'Community College, evening course', who:`Four classes and you can apply for office jobs. You have done ${P.school} of 4.`, fresh:P.week===3}} : {}),
+  ...(P.week >= 5 && !P.stall ? {stall:{x:40,y:14,ic:'🏪',nm:'Market stall', title:'A stall at the weekend market', who:'Your own small business. Mama Ngozi will only recommend you if she trusts you.', fresh:P.week===5}} : {})
+});
+let places = {};
+function isOpen(k){
+  if(k==='hall') return W.day===3 && W.slot===2;
+  if(k==='loan') return W.slot!==2;
+  if(k==='mama') return W.slot!==2;
+  if(k==='school') return W.slot===2;
+  if(k==='work' && P.office) return W.slot!==2;
+  if(k==='mech') return W.slot!==2;
+  return true;
+}
+function drawCity(){
+  const cv = $('city'), r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.max(1, r.width * dpr); cv.height = Math.max(1, r.height * dpr);
+  const g = cv.getContext('2d'), w = cv.width, h = cv.height; g.setTransform(1,0,0,1,0,0);
+  const sx = w / 360, sy = h / 400; g.scale(sx, sy);
+  g.fillStyle = '#231D40'; g.fillRect(0,0,360,400);
+  g.fillStyle = '#2B2450';
+  [[18,18,40,50],[88,22,76,44],[200,18,74,48],[306,20,40,46],[16,96,44,52],[200,96,76,52],[306,98,42,50],[16,176,44,44],[306,176,42,40],[16,290,44,30],[88,296,76,26],[200,292,74,30],[18,344,42,44],[88,346,76,42],[200,344,74,44],[306,344,40,44],[96,100,60,40],[100,180,50,40],[212,180,50,36]].forEach(([x,y,a,b]) => { g.beginPath(); g.roundRect ? g.roundRect(x,y,a,b,4) : g.rect(x,y,a,b); g.fill(); });
+  g.strokeStyle = '#1F4E5A'; g.lineWidth = 22; g.lineCap = 'round'; g.beginPath(); g.moveTo(-10,250); g.bezierCurveTo(60,230,90,290,160,270); g.bezierCurveTo(230,250,290,215,370,240); g.stroke();
+  g.strokeStyle = '#3A3160'; g.lineWidth = 4; g.beginPath(); [80,160,330].forEach(y => { g.moveTo(0,y); g.lineTo(360,y); }); [70,290].forEach(x => { g.moveTo(x,0); g.lineTo(x,400); }); g.stroke();
+  g.strokeStyle = '#4A3F7A'; g.lineWidth = 9; g.beginPath(); g.arc(180,200,120,0,Math.PI*2); g.stroke(); g.beginPath(); g.moveTo(180,0); g.lineTo(180,400); g.stroke();
+  // little lit windows
+  for(let i=0;i<70;i++){ const x = (hash('w'+i) % 340) + 10, y = (hash('y'+i) % 380) + 10; g.fillStyle = i % 3 ? 'rgba(255,201,60,.18)' : 'rgba(255,138,61,.22)'; g.fillRect(x, y, 3, 3); }
+  const sign = (x,y,t) => { g.font = '700 9px Rubik, sans-serif'; const tw = g.measureText(t).width + 10; g.fillStyle = '#FFC93C'; g.beginPath(); g.roundRect ? g.roundRect(x - tw/2, y - 7, tw, 13, 3) : g.rect(x - tw/2, y - 7, tw, 13); g.fill(); g.fillStyle = '#16122B'; g.textAlign = 'center'; g.fillText(t, x, y + 3); };
+  sign(180, 70, C.roads[0]); sign(300, 192, C.roads[1]);
+  g.font = '9px Rubik, sans-serif'; g.fillStyle = '#5FA9B8'; g.textAlign = 'right'; g.fillText(C.water, 352, 228);
+}
+function pins(){
+  places = PL();
+  $('pins').innerHTML = Object.entries(places).map(([k, p]) => {
+    const shut = !isOpen(k);
+    return `<button class="pin${shut ? ' shut' : ''}${p.fresh ? ' new' : ''}" type="button" data-k="${k}" style="left:${p.x}%;top:${p.y}%" aria-label="${p.title}${shut ? ' (closed now)' : ''}"><span class="ic" aria-hidden="true">${p.ic}</span><span class="nm">${p.nm}</span></button>`;
+  }).join('');
+}
+
+/* ---------- HUD ---------- */
+const DAYS = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY'], SLOTS = ['MORNING','AFTERNOON','NIGHT'];
+const SKY = ['linear-gradient(180deg,rgba(255,170,90,.18),rgba(255,170,90,0) 60%)','linear-gradient(180deg,rgba(255,230,170,.08),transparent)','linear-gradient(180deg,rgba(5,3,20,.55),rgba(5,3,20,.35))'];
+const living = () => A(150) + Math.min(5, Math.floor((P.week - 1) / 3)) * A(15);   // food, bus, phone, slowly creeping up
+const due = () => missionFor(P.week).amount + P.arrears + P.owed + living();
+function hud(prev){
+  const m = missionFor(P.week);
+  $('when').textContent = `WEEK ${P.week} · ${DAYS[W.day].slice(0,3)} ${SLOTS[W.slot]}`;
+  $('mtitle').innerHTML = `<b>${m.title}</b>${P.arrears ? ' + arrears' : ''}${P.owed ? ' + loan' : ''}`;
+  $('mdue').textContent = 'Friday: ' + money(due());
+  const c = $('cash'); c.textContent = money(P.cash); c.classList.toggle('down', prev != null && P.cash < prev);
+  $('en').style.width = Math.max(0, W.energy) + '%'; $('enlbl').setAttribute('aria-label', 'Energy ' + Math.max(0, W.energy) + ' of 100');
+  const st = $('stars'); st.innerHTML = [0,1,2,3,4].map(i => `<span class="${i < W.stars ? 'on' : 'off'}">★</span>`).join(''); st.setAttribute('aria-label', 'Aunty Alert ' + W.stars + ' of 5');
+  $('sky').style.background = SKY[W.slot];
+  const p = places[W.at] || places.home; $('me').style.left = (p.x + 8) + '%'; $('me').style.top = (p.y - 6) + '%';
+  $('phone').hidden = !W.inbox.length; $('pn').textContent = W.inbox.length;
+}
+function bumpStars(){ const s = $('stars'); s.classList.remove('bump'); void s.offsetWidth; s.classList.add('bump'); }
+
+/* ---------- sheet ---------- */
+const sheet = html => { $('sheet').innerHTML = html; };
+function idle(){
+  const hint = W.energy < 30 ? 'You are running on empty. Your flat is calling you.' : W.slot === 2 ? 'Night. Some places are closed. The warehouse never sleeps.' : 'Tap a place on the map. Each visit uses part of your day.';
+  sheet(`<h2>${DAYS[W.day][0] + DAYS[W.day].slice(1).toLowerCase()} ${SLOTS[W.slot].toLowerCase()}. Where to?</h2><p>${hint}</p>${W.day===3 && W.slot===2 ? '<p class="who">🎉 The owambe is on tonight.</p>' : ''}`);
+}
+function visit(k){
+  if(!isOpen(k)){ toast(k==='hall' ? 'The owambe is Thursday night. Aunty Funmi needs time to tie her gele.' : k==='school' ? 'Classes are at night.' : 'Closed at this hour.'); return; }
+  W.at = k; hud(); const p = places[k], acts = actions(k);
+  sheet(`<h2>${p.ic} ${p.title}</h2><p class="who">${p.who}</p><div class="acts">${acts.map((a, i) => `<button class="act" type="button" data-i="${i}" ${a.dis ? 'disabled' : ''}><span>${a.l}</span><small>${a.tag || ''}</small></button>`).join('')}<button class="act" type="button" data-i="back"><span>Go somewhere else</span><small>free</small></button></div>`);
+  $('sheet').querySelectorAll('.act').forEach(b => b.onclick = () => { if(b.dataset.i === 'back'){ idle(); return; } const a = acts[+b.dataset.i]; if(!a.dis) a.run(); });
+}
+const T = () => W.day + '-' + W.slot;   // luck is shared per moment of the week, so the same move gets the same outcome for everyone today
+function actions(k){
+  const tired = W.energy < 20;
+  const shiftPay = () => P.office ? A(210) : (W.slot===2 ? A(170) : A(130)) + (P.promo ? A(40) : 0);
+  switch(k){
+    case 'home': return [
+      {l:'Sleep it off', tag:'+45 energy', run:() => done({energy:45, peace:6}, pickL('sleep'+T(), ['You sleep like someone who paid for the bed. Because you did.','The drummer next door takes a night off. A miracle.','You dream NEPA brought light for 24 hours. You wake up refreshed and confused.']))},
+      {l:'Video call home', tag:'+peace · ★ down', run:() => done({energy:20, peace:12, stars:-1}, 'Mummy shows you the new curtains, the dog, and a cousin you do not recognise. You feel held.')}
+    ];
+    case 'work': return [
+      {l: P.office ? 'Do a day at the office' : W.slot===2 ? 'Night shift' : 'Day shift', tag:`+${money(shiftPay())} · -${P.office ? 20 : W.slot===2 ? 40 : 35} energy`, dis:tired, run:() => {
+        W.log.shifts++; const pay = shiftPay(), en = P.office ? -20 : W.slot===2 ? -40 : -35;
+        if(!P.office){ P.boss++; if(!P.promo && P.boss >= 8){ P.promo = true; return done({cash:pay, energy:en}, `${C.boss} calls you over. "${C.bossWord[0].toUpperCase() + C.bossWord.slice(1)}, you are the only one who shows up. Forklift lead. ${money(A(40))} more a shift." You did not even know you wanted it.`, '🏅 Promoted to forklift lead'); } }
+        if(!P.office && roll('ot' + T(), .3)) return choice(`${C.boss} says "${C.bossWord}" twice, which means he wants something. Overtime?`, [
+          {l:'Yes, two more hours', run:() => done({cash:pay + A(60), energy:en - 20, peace:-4}, 'Two extra hours of boxes. Your back now has opinions.')},
+          {l:'No, I am done', run:() => done({cash:pay, energy:en}, `${C.boss} says "no worries, ${C.bossWord}" in the voice that means worries.`)}
+        ]);
+        done({cash:pay, energy:en}, P.office ? pickL('off' + T(), ['Three meetings that could have been emails. You get paid either way.','Someone microwaves fish. Everyone looks at you. It was not you this time.','You fix the printer. You are now "the tech person". Forever.']) : pickL('wh' + T(), ['Eight hours of boxes. You now know exactly what people order at 3am.','A forklift almost reverses into you. You survive. The pay is the same.','You find a Nigerian in the next aisle. You talk jollof for a whole break.']));
+      }}
+    ];
+    case 'ryde': return [
+      {l:'Drive a few hours', tag:`${money(A(45))} to ${money(A(170))} · -25 energy`, dis:tired, run:() => {
+        W.log.rides++; const r = luck('ryde' + T());
+        if(r < (P.car==='fixed' ? .04 : .16)) return choice(`Your car screams, then smells, then stops. The fan belt. The mechanic wants ${money(A(90))} today.`, [
+          {l:'Pay the mechanic', run:() => done({cash:-A(90), energy:-15, peace:-6}, 'Fixed. The mechanic gives you a "home discount" of zero.')},
+          {l:'YouTube it, fix it yourself', run:() => roll('diy' + T(), .5) ? done({cash:-A(15), energy:-30, peace:4}, 'Two hours, one video, grease to your elbows. It works. You feel like a genius.') : done({cash:-A(110), energy:-30, peace:-8}, `You fix the fan belt and break something else. Now it is ${money(A(110))}.`)}
+        ]);
+        if(r < .26) return done({cash:-A(75), energy:-25, peace:-5}, `Lights behind you. Rolling stop. ${money(A(75))} ticket. You say "yes officer" eleven times.`);
+        if(r < .38) return done({cash:between('tip' + T(), 90, 140) * C.k + A(60), energy:-25, peace:8}, `Your rider is a Nigerian aunty going to a vigil. She prays for you for twenty minutes and tips ${money(A(60))}.`);
+        done({cash:A(between('fare' + T(), 45, 150)) + (P.car==='fixed' ? A(20) : 0), energy:-25}, pickL('rt' + T(), ['A man talks about crypto the whole ride. Five stars anyway.','Airport run. Long ride, good fare, no small talk. Perfect.','Rain and surge pricing. The only time rain has ever helped you.']));
+      }}
+    ];
+    case 'mama': return [
+      {l:'Buy food for the week', tag:`-${money(A(35))} · +energy`, run:() => { P.mama++; done({cash:-A(35), energy:15, peace:6}, pickL('food' + T(), ['Garri, rice, and stockfish that announces itself to the whole bus.','Mama adds free ugu "because you are too thin". You are not too thin.'])); }},
+      {l:'Listen to the gossip', tag:'free', run:() => {
+        P.mama++;
+        if(!W.hustle){ W.hustle = true; return choice(`Mama leans in. "My nephew sells shea butter online. Put ${money(A(80))} in, you can get ${money(A(200))} back by Friday. Or not. It is business."`, [
+          {l:`Put in ${money(A(80))}`, run:() => { W.bet = true; done({cash:-A(80), peace:-2}, 'You hand it over. Mama says "you will see". You are not sure what you will see.'); }},
+          {l:'No thank you, Ma', run:() => done({peace:2}, 'Mama hisses, but kindly. She gives you a free puff-puff anyway.')}
+        ]); }
+        done({peace:4}, pickL('gos' + T(), ['"That one that came last year has bought a house." Nobody knows how. Everybody has a theory.',"\"Bisi's son married an oyinbo.\" The shop goes quiet for a moment of respect."]));
+      }}
+    ];
+    case 'loan': return [
+      {l: W.borrowed ? 'You already borrowed this week' : `Borrow ${money(A(300))} now`, tag: W.borrowed ? '' : `pay ${money(A(420))} Friday`, dis:!!W.borrowed, run:() => { W.borrowed = A(300); P.owed += A(420); done({cash:A(300), peace:-5}, `The man smiles too much. You sign six pages. ${money(A(300))} lands. ${money(A(420))} leaves on Friday.`); }}
+    ];
+    case 'hall': return [
+      {l:'Go, spray money, network', tag:`-${money(A(60))} · big peace · ★ down`, run:() => { const lead = roll('lead' + P.week, .5); done({cash:-A(60) + (lead ? A(150) : 0), energy:-15, peace:18, stars:-2}, lead ? `You dance, you spray, and the celebrant's husband needs someone for a weekend job. ${money(A(150))} on the spot.` : `Jollof, small chops, and the DJ plays your song. You spray ${money(A(60))} and regret nothing until morning.`); }},
+      {l:'Eat and leave early', tag:`-${money(A(20))}`, run:() => done({cash:-A(20), energy:-5, peace:10, stars:-1}, 'You take a plate for the road. Nobody sees you leave. That is a skill.')}
+    ];
+    case 'mech': return [
+      {l:'Fix the car properly, once and for all', tag:`-${money(A(300))}`, run:() => { P.car = 'fixed'; done({cash:-A(300), peace:8}, 'Chidi replaces everything that was "managing". Fewer breakdowns, better fares. He also tells you to marry.', '🚗 Car fixed: fewer breakdowns, better fares'); }}
+    ];
+    case 'school': return [
+      {l:'Go to class', tag:`-${money(A(60))} · -20 energy`, dis:tired, run:() => {
+        P.school++;
+        if(P.school >= 4){ P.office = true; return done({cash:-A(60), energy:-20, peace:6}, `Final class. You pass. A week later, an office calls you back. ${money(A(210))} a day, no boxes.`, '💼 New job: the office pays more and costs less energy'); }
+        done({cash:-A(60), energy:-20, peace:2}, pickL('cls' + P.school, ['Excel, at night, after work. You are the oldest person there and the only one taking notes.','The teacher asks where your accent is from. You say "home". She smiles.']), `🎓 Night class ${P.school} of 4`);
+      }}
+    ];
+    case 'stall': return [
+      {l:'Open your stall', tag: P.mama >= 6 ? `-${money(A(400))} · earns every week` : `Mama trust ${P.mama}/6`, dis:P.mama < 6, run:() => { P.stall = true; done({cash:-A(400), peace:10}, `Mama vouches for you. You sell spices, shea butter, and chin chin. From now on, the stall brings in ${money(A(120))} every Friday.`, '🏪 You own a small business'); }}
+    ];
+  }
+  return [];
+}
+function choice(text, opts){
+  sheet(`<p>${text}</p><div class="acts">${opts.map((o, i) => `<button class="act" type="button" data-i="${i}"><span>${o.l}</span></button>`).join('')}</div>`);
+  $('sheet').querySelectorAll('.act').forEach(b => b.onclick = () => opts[+b.dataset.i].run());
+}
+function apply(fx){
+  const before = P.cash;
+  if(fx.cash){ P.cash += Math.round(fx.cash); if(fx.cash > 0) W.log.earned += fx.cash; }
+  if(fx.energy) W.energy = Math.max(0, Math.min(100, W.energy + fx.energy));
+  if(fx.peace) W.peace = Math.max(0, Math.min(100, W.peace + fx.peace));
+  if(fx.stars){ W.stars = Math.max(0, Math.min(5, W.stars + fx.stars)); if(fx.stars > 0) bumpStars(); }
+  return before;
+}
+function chips(fx){
+  const c = [];
+  if(fx.cash) c.push([fx.cash > 0, (fx.cash > 0 ? '+' : '') + money(fx.cash)]);
+  if(fx.energy) c.push([fx.energy > 0, (fx.energy > 0 ? '+' : '') + fx.energy + ' energy']);
+  if(fx.peace) c.push([fx.peace > 0, (fx.peace > 0 ? '+' : '') + fx.peace + ' peace']);
+  if(fx.stars) c.push([fx.stars < 0, (fx.stars > 0 ? '+' : '') + fx.stars + ' ★']);
+  return `<div class="chips">${c.map(([g, t]) => `<span class="chip ${g ? 'g' : 'b'}">${t}</span>`).join('')}</div>`;
+}
+function done(fx, text, unlock){
+  const before = apply(fx); save(); hud(before);
+  const last = W.day === 4 && W.slot === 2;
+  sheet(`<p>${text}</p>${chips(fx)}${unlock ? `<p class="who" style="color:var(--naija)">${unlock}</p>` : ''}<button class="go" type="button" id="next">${last ? 'Friday night. Time to pay.' : 'Next'}</button>`);
+  $('next').onclick = advance;
+  if(unlock) toast(unlock);
+}
+
+/* ---------- time moves ---------- */
+let busy = false;
+function dayCard(t, cb){ busy = true; const d = document.createElement('div'); d.className = 'daycard'; d.innerHTML = `<div>${t}</div>`; document.body.appendChild(d); setTimeout(() => { d.remove(); busy = false; cb && cb(); }, 900); }
+function advance(){
+  if(busy || W.over) return;
+  const nx = $('next'); if(nx) nx.disabled = true;
+  if(W.day === 4 && W.slot === 2) return friday();
+  W.slot++; let newDay = false;
+  if(W.slot > 2){ W.slot = 0; W.day++; W.energy = Math.min(100, W.energy + 15); newDay = true; }
+  const t = 'q' + W.day + W.slot;
+  if(W.queue.length && roll(t, .55)) W.inbox.push(W.queue.shift());
+  if(W.inbox.length > 2){ W.stars = Math.min(5, W.stars + 1); bumpStars(); toast('Unread messages are piling up. Aunty Alert ★ +1'); }
+  else if(W.statusN < STATUS.length && roll('st' + W.day + W.slot, .2)) toast('👀 ' + STATUS[(hash(today()) + W.statusN++) % STATUS.length]);
+  if(W.bet && W.day === 4 && W.slot === 0){ W.bet = false; const win = roll('bet' + P.week, .5); const b = apply({cash: win ? A(200) : 0, peace: win ? 6 : -6}); hud(b); toast(win ? `🧴 The shea butter sold out. Mama hands you ${money(A(200))}.` : `🧴 The nephew has "travelled". Your ${money(A(80))} travelled with him.`); }
+  W.at = W.slot === 0 ? 'home' : W.at;
+  save();
+  const go = () => {
+    if(W.energy <= 0){ W.at = 'home'; pins(); hud(); apply({energy:40}); sheet(`<h2>You collapsed on the sofa</h2><p>Your body made the decision for you. You lose this part of the day sleeping.</p><button class="go" type="button" id="next">Wake up</button>`); $('next').onclick = advance; return; }
+    if(W.stars >= 5) return raid();
+    pins(); hud(); idle();
+  };
+  newDay ? dayCard(DAYS[W.day], go) : go();
+}
+function raid(){
+  W.stars = 2; const fx = {cash:-A(100), peace:-12};
+  sheet(`<h2>★★★★★ FAMILY RAID</h2><p>Mummy, two aunties, and Pastor Sunday join one video call. They want to know why you have "changed". It takes the whole afternoon, and you send ${money(A(100))} to end it.</p>${chips(fx)}<button class="go" type="button" id="next">Survive</button>`);
+  const b = apply(fx); pins(); hud(b); save();
+  $('next').onclick = advance;
+}
+function phone(){
+  const m = W.inbox[0]; if(!m) return;
+  if(m.proof){
+    sheet(`<h2>📱 ${m.from}</h2><p>${m.t}</p><div class="acts"><button class="act" type="button" data-a="no"><span>"Bro, that is how people go to jail"</span><small>★ up</small></button><button class="act" type="button" data-a="send"><span>Send the screenshot</span><small>risky</small></button></div>`);
+    $('sheet').querySelectorAll('.act').forEach(b => b.onclick = () => { W.inbox.shift();
+      if(b.dataset.a === 'send') done({peace:-10}, 'Two weeks later, your bank calls about "unusual activity". You spend a morning explaining. Never again.');
+      else { W.log.ignored++; done({stars:1, peace:4}, 'Emeka calls you wicked in three languages. You sleep well.'); }
+      backToMap(); });
+    return;
+  }
+  sheet(`<h2>📱 ${m.from}</h2><p>${m.t}</p><div class="acts">
+    <button class="act" type="button" data-a="send"><span>Send it</span><small>-${money(m.amt)} · ★ down</small></button>
+    <button class="act" type="button" data-a="half"><span>Send half and a long voice note</span><small>-${money(m.amt / 2)}</small></button>
+    <button class="act" type="button" data-a="no"><span>Leave them on read</span><small>★ up</small></button></div>`);
+  $('sheet').querySelectorAll('.act').forEach(b => b.onclick = () => {
+    W.inbox.shift(); const a = b.dataset.a;
+    if(a === 'send'){ W.log.sent += m.amt; done({cash:-m.amt, stars:-1, peace: m.scam ? -6 : 3}, m.scam ? `Later, Uncle Femi's real number calls. His WhatsApp was hacked. He is fine. Your ${money(m.amt)} is not.` : pickL('ty' + m.from, ['A voice note of pure prayer comes back. Two minutes long. You feel like a good child.','"God bless you." Then, ten minutes later: "Also, please…"'])); }
+    else if(a === 'half'){ W.log.sent += m.amt / 2; done({cash:-m.amt / 2, peace:-2}, 'You record four minutes about the cost of living abroad. They reply with one thumbs up.'); }
+    else { W.log.ignored++; done({stars:1, peace: m.scam ? 4 : -3}, m.scam ? 'Good instinct. That was a hacker in Uncle Femi\'s WhatsApp.' : 'Blue ticks. You can feel the family group talking about you.'); }
+    backToMap();
+  });
+}
+// reading a message does not use up time
+function backToMap(){ const n = $('next'); n.textContent = 'Back to the map'; n.onclick = () => { pins(); hud(); idle(); }; }
+
+/* ---------- Friday ---------- */
+function friday(){
+  const m = missionFor(P.week), extra = [];
+  if(P.stall){ apply({cash:A(120)}); extra.push(['Your stall this week', A(120)]); }
+  const owe = m.amount + P.arrears + living(), loan = P.owed, before = P.cash;
+  const pass = P.cash >= owe + loan;
+  let title, line, big, cls;
+  if(pass){
+    P.cash -= owe + loan; P.arrears = 0; P.owed = 0; P.warnings = Math.max(0, P.warnings - 0.5);
+    const left = P.cash;
+    title = left >= A(400) ? 'ABROAD STRATEGIST' : W.peace < 30 ? 'HUSTLE WITHOUT PEACE' : W.log.sent >= A(150) ? 'GENEROUS AND STILL STANDING' : m.id === 'rent' ? 'RENT PAID' : 'BILL PAID';
+    big = 'MISSION PASSED'; cls = 'win';
+    line = left >= A(400) ? 'Paid, with money left to breathe. People are starting to ask you for advice.' : 'Paid. It was tight, but it is done.';
+  } else {
+    // the loan shark collects first, everything else goes to the bill, and only the gap rolls over with a late fee
+    const gap = owe + loan - before; P.cash = 0; P.owed = 0;
+    P.arrears = Math.round((gap * 1.1) / 5) * 5; P.warnings++;
+    title = W.log.sent >= A(200) ? 'THE FAMILY ATM' : W.peace < 30 ? 'RUNNING ON PRAYERS' : 'NOT THIS WEEK';
+    big = 'MISSION FAILED'; cls = 'lose';
+    line = `You paid what you had and came up ${money(owe + loan - before)} short. The gap rolls into next week with a 10% late fee. Warning ${P.warnings} of 3.`;
+  }
+  const evicted = !pass && P.warnings >= 3;
+  const respect = Math.max(0, Math.round((pass ? 50 : 10) + Math.max(0, P.cash) / (20 * C.k) + W.peace / 3 - W.stars * 4));
+  const rec = {w:P.week, pass, left:Math.round(P.cash), stars:W.stars, sent:Math.round(W.log.sent), title, respect, d:today(), m:m.title};
+  P.hist.push(rec); P.hist = P.hist.slice(-60);
+  const y = new Date(Date.now() - 864e5), yk = y.getFullYear() + '-' + String(y.getMonth()+1).padStart(2,'0') + '-' + String(y.getDate()).padStart(2,'0');
+  P.streak = P.done === yk ? (P.streak || 0) + 1 : 1;
+  P.done = today(); W.over = true;
+  const unlockNext = {2:'🔧 Next week: Chidi the mechanic opens on your map.', 3:'🎓 Next week: night classes open. Four classes lead to an office job.', 5:'🏪 Next week: a market stall becomes possible, if Mama Ngozi trusts you.'}[P.week + 1] || '';
+  P.week++; P.wk = null;
+  if(evicted){ P.evicted = true; }
+  save(); track('end-w' + rec.w + (pass ? '-pass' : '-fail'));
+  showEnd(rec, {big, cls, line, owe, loan, before, extra, unlockNext, evicted, liv:living()});
+}
+function shareText(rec){
+  const stars = '★'.repeat(rec.stars) + '☆'.repeat(5 - rec.stars);
+  return `Rent Week · ${C.name} · Week ${rec.w} ${rec.pass ? '✅' : '❌'}\n${rec.m}: ${rec.pass ? 'paid' : 'missed'} · ${money(rec.left)} left\nAunty Alert ${stars}\nSent home ${money(rec.sent)} · Respect +${rec.respect}\nnowyouhavelanded.com/week`;
+}
+function showEnd(rec, o){
+  $('obox').innerHTML = `<div class="eyebrow">WEEK ${rec.w} · ${rec.m}</div>
+    <div class="big ${o.cls}">${o.big}</div>
+    <div class="sub">${rec.title}</div>
+    <p>${o.line}</p>
+    <div class="recap">
+      ${o.extra.map(([t, v]) => `<div><span>${t}</span><span>+${money(v)}</span></div>`).join('')}
+      <div><span>Cash on Friday night</span><span>${money(o.before)}</span></div>
+      <div><span>${rec.m}, living costs${o.owe > missionFor(rec.w).amount + o.liv ? ', arrears' : ''}</span><span>-${money(o.owe)}</span></div>
+      ${o.loan ? `<div><span>${C.lender}</span><span>-${money(o.loan)}</span></div>` : ''}
+      <div class="hr"><span>Left for next week</span><span>${money(rec.left)}</span></div>
+      <div><span>Sent home this week</span><span>${money(rec.sent)}</span></div>
+      <div><span>Aunty Alert</span><span>${'★'.repeat(rec.stars)}${'☆'.repeat(5 - rec.stars)}</span></div>
+      <div><span>Respect</span><span>+${rec.respect}</span></div>
+    </div>
+    ${o.unlockNext ? `<p class="who" style="color:var(--naija)">${o.unlockNext}</p>` : ''}
+    ${o.evicted ? `<p><b>Three warnings.</b> ${C.landlord} changes the locks. Tomorrow you start again on a cousin's sofa, with your lessons and nothing else.</p>` : ''}
+    <button class="go" type="button" id="share">Share my week</button>
+    <div class="note" id="sharemsg">Week ${P.week} unlocks tomorrow. 🔥 ${P.streak}-day streak.</div>
+    <a class="ghost" href="/" style="text-decoration:none;display:block;color:var(--ink)">Back to Now You Have Landed</a>`;
+  $('over').hidden = false;
+  if(rec.pass) confetti();
+  $('share').onclick = async () => {
+    const t = shareText(rec);
+    try{ if(navigator.share){ await navigator.share({text:t}); return; } }catch(e){ if(e && e.name === 'AbortError') return; }
+    try{ await navigator.clipboard.writeText(t); $('sharemsg').textContent = 'Copied. Paste it in your group chat.'; }catch(e){ $('sharemsg').textContent = t; }
+  };
+}
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv = document.createElement('canvas'); cv.className = 'confetti'; document.body.appendChild(cv);
+  const g = cv.getContext('2d'); cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ['#FFC93C','#FF4F8B','#2DBE6C','#FF8A3D','#F6F1FF'];
+  const bits = Array.from({length:140}, () => ({x:cv.width/2, y:cv.height*.35, vx:(Math.random()-.5)*14, vy:Math.random()*-14-4, r:Math.random()*6+3, c:cols[Math.floor(Math.random()*cols.length)], a:Math.random()*6}));
+  let f = 0; (function tick(){ g.clearRect(0,0,cv.width,cv.height); bits.forEach(b => { b.x += b.vx; b.y += b.vy; b.vy += .4; b.a += .2; g.fillStyle = b.c; g.save(); g.translate(b.x,b.y); g.rotate(b.a); g.fillRect(-b.r/2,-b.r/2,b.r,b.r*.6); g.restore(); }); if(++f < 120) requestAnimationFrame(tick); else cv.remove(); })();
+}
+
+let tt;
+function toast(t){ const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, 3800); }
+
+/* ---------- screens ---------- */
+function pickCity(){
+  const guess = (() => { try{ const d = JSON.parse(localStorage.getItem('nyhl-daily')||'null'); return d && ({us:'houston', uk:'london', ca:'toronto'})[d.rk]; }catch(e){ return null; } })();
+  $('obox').innerHTML = `<div class="eyebrow">NOW YOU HAVE LANDED</div><div class="big plain">RENT WEEK</div>
+    <p>Every day is one week of your life abroad. Make the bill by Friday night while work, the loan shark, and your aunties pull at you. Your money and your progress carry on, week after week.</p>
+    <div class="cities">${Object.entries(CITIES).sort((a, b) => (b[0] === guess) - (a[0] === guess)).map(([k, c]) => `<button class="city" type="button" data-c="${k}"><span class="fl" aria-hidden="true">${c.flag}</span><b>${c.name}</b><small>${c.blurb}</small></button>`).join('')}</div>`;
+  $('over').hidden = false;
+  $('obox').querySelectorAll('.city').forEach(b => b.onclick = () => { P = freshLife(b.dataset.c); save(); track('start-' + b.dataset.c); $('over').hidden = true; boot(); });
+}
+function doneToday(){
+  const rec = P.hist[P.hist.length - 1];
+  const ms = (() => { const n = new Date(), t = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1); return t - n; })();
+  const h = Math.floor(ms / 36e5), mm = Math.floor(ms % 36e5 / 6e4);
+  $('obox').innerHTML = `<div class="eyebrow">${C.flag} ${C.name.toUpperCase()} · YOU PLAYED TODAY</div>
+    <div class="big ${rec && rec.pass ? 'win' : 'lose'}">${rec ? (rec.pass ? 'PASSED' : 'FAILED') : 'DONE'}</div>
+    ${rec ? `<div class="sub">Week ${rec.w}: ${rec.title}</div>` : ''}
+    <p>Week ${P.week}, <b>${missionFor(P.week).title}</b> (${money(missionFor(P.week).amount + P.arrears)}), unlocks in <b>${h}h ${mm}m</b>.</p>
+    <div class="recap"><div><span>Cash carried over</span><span>${money(P.cash)}</span></div><div><span>Weeks lived</span><span>${P.hist.length}</span></div><div><span>Passed</span><span>${P.hist.filter(r => r.pass).length}</span></div><div><span>Streak</span><span>🔥 ${P.streak || 1}</span></div></div>
+    <div class="prog">${[['🏅 Forklift lead', P.promo], ['🚗 Car fixed', P.car==='fixed'], ['💼 Office job', P.office], ['🏪 Own stall', P.stall]].map(([t, on]) => `<span class="${on ? 'on' : ''}">${on ? '' : '🔒 '}${t}</span>`).join('')}</div>
+    ${rec ? '<button class="go" type="button" id="share">Share my week</button><div class="note" id="sharemsg"></div>' : ''}
+    <a class="ghost" href="/" style="text-decoration:none;display:block;color:var(--ink)">Back to Now You Have Landed</a>`;
+  $('over').hidden = false;
+  const s = $('share'); if(s) s.onclick = async () => { const t = shareText(rec); try{ if(navigator.share){ await navigator.share({text:t}); return; } }catch(e){ if(e && e.name === 'AbortError') return; } try{ await navigator.clipboard.writeText(t); $('sharemsg').textContent = 'Copied. Paste it in your group chat.'; }catch(e){ $('sharemsg').textContent = t; } };
+}
+function weekIntro(){
+  const m = missionFor(P.week);
+  $('obox').innerHTML = `<div class="eyebrow">${C.flag} ${C.name.toUpperCase()} · WEEK ${P.week}${P.streak > 1 ? ` · 🔥 ${P.streak}` : ''}</div>
+    <div class="big plain">${m.title}</div>
+    <p>${m.line()}</p>
+    <div class="recap">
+      <div><span>Due Friday night</span><span>${money(m.amount)}</span></div>
+      <div><span>Food, bus, and phone</span><span>${money(living())}</span></div>
+      ${P.arrears ? `<div><span>Arrears from last week</span><span>${money(P.arrears)}</span></div>` : ''}
+      <div><span>You have</span><span>${money(P.cash)}</span></div>
+      ${P.warnings ? `<div><span>Warnings</span><span>${Math.ceil(P.warnings)} of 3</span></div>` : ''}
+    </div>
+    ${P.week === 1 ? `<p class="who">Tap places on the map to work, drive, shop, or rest. Answer WhatsApp, or don't. Every message you ignore raises the Aunty Alert. Five stars and the whole family calls at once.</p>` : ''}
+    <button class="go" type="button" id="begin">Start Monday</button>`;
+  $('over').hidden = false;
+  $('begin').onclick = () => { $('over').hidden = true; track('play-w' + P.week); dayCard('MONDAY', () => { pins(); hud(); idle(); }); };
+}
+function boot(){
+  C = CITIES[P.city];
+  if(P.evicted){ const keep = {lives:(P.lives||1) + 1, hist:P.hist, streak:P.streak, done:P.done, city:P.city}; P = Object.assign(freshLife(P.city), keep); P.cash = A(200); save(); toast('New start on a cousin\'s sofa. Your lessons came with you.'); }
+  $('fm').textContent = `📻 JAPA FM ${C.fm}`;
+  $('radio').textContent = shuffleL('radio', RADIO()).join('   ·   ');
+  drawCity();
+  if(P.done === today()){ freshWeek(); pins(); hud(); idle(); doneToday(); return; }
+  if(P.wk && P.wk.date === today()){ W = P.wk.W; }   // pick up a week you started earlier today
+  else { freshWeek(); }
+  P.wk = {date:today(), W}; save();
+  pins(); hud(); idle();
+  if(W.day === 0 && W.slot === 0 && !W.started){ W.started = true; save(); weekIntro(); }
+}
+$('pins').addEventListener('click', e => { if(busy) return; const b = e.target.closest('.pin'); if(b) visit(b.dataset.k); });
+$('phone').onclick = phone;
+addEventListener('resize', () => C && drawCity());
+window.__rentweek = () => ({W, P});   // read-only peek for the automated tests
+P = store.get();
+if(!P || !CITIES[P.city]) pickCity(); else boot();
+})();
+</script>
+</body>
+</html>

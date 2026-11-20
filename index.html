@@ -224,6 +224,11 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .rc-m small{font-family:var(--mono);font-size:10px;color:var(--muted)}
 .rc-m .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .rc-k{font-size:12px;color:var(--muted)}
+.rwcard{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px;border-radius:16px;text-decoration:none;color:#F6F1FF;background:linear-gradient(135deg,#16122B,#2A1E4A);border:2px solid transparent;background-clip:padding-box;position:relative;box-shadow:0 0 0 2px #FF8A3D,0 8px 22px rgba(255,79,139,.25)}
+.rwcard b{display:block;font-size:16px;color:#FFC93C}
+.rwcard small{display:block;font-size:13px;color:#D8D0EE;line-height:1.35;margin-top:2px}
+.rw-ic{font-size:30px}
+.rw-go{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(90deg,#FF8A3D,#FF4F8B);color:#1A0E14;font-weight:700}
 .hero-sub{margin:4px 0 0;font-size:14px;color:var(--green-ink);opacity:.85}
 .pass-top{min-width:0}
 .pass .brand{min-width:0;flex:1 1 auto}
@@ -2316,6 +2321,7 @@ function render(){
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
           ${set ? `<button class="ghost" type="button" id="medone">Save</button>` : ''}</div>`
         : `<div class="me"><span>👤 <b>${esc(nm || 'Anonymous lander')}</b> · leaving from ${esc(from[1])}</span><button type="button" id="meedit">Change</button></div>`; })()}
+      ${rentWeekCard()}
       ${(() => { const ds = todayStr(), plan = dailyPlan(ds), pl = places(plan.rk).find(x=>x.name===plan.place), done = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).pop();
         const where = (pl.town===pl.name ? pl.name : pl.town + ', ' + pl.name) + (plan.rk==='eu' ? '' : ', ' + ROUTES[plan.rk].label);
         if(done) return tomorrowHTML({top: `<div class="when" style="color:var(--gold)">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><div class="tm-done"><b>${scoreOf(done)}</b><small>/100 today</small><span>📍 ${esc(String(done.trip||where).split(' → ').pop())}</span></div>`,
@@ -3280,6 +3286,14 @@ function openHow(){
   </div>`);
 }
 
+/* ---------- Rent Week: the city-map game at /week/ ---------- */
+function rentWeekCard(){
+  let w = null; try{ w = JSON.parse(localStorage.getItem('nyhl-week')||'null'); }catch(e){}
+  const played = w && w.done === todayStr(), last = w && w.hist && w.hist[w.hist.length-1];
+  const head = !w ? 'NEW · Rent Week' : played ? `Rent Week · week ${last.w} ${last.pass ? 'passed ✅' : 'failed ❌'}` : `Rent Week · week ${w.week} is ready`;
+  const sub = !w ? 'A city map, a bill due Friday, a loan shark, and your aunties watching ★★★★★. One week a day.' : played ? 'Next week unlocks tomorrow. Your money and your progress carry on.' : 'Your bill is due Friday night. Work, drive, hustle, and keep the Aunty Alert down.';
+  return `<a class="rwcard" href="/week/" onclick="track('home-rentweek')"><span class="rw-ic" aria-hidden="true">🌆</span><span><b>${head}</b><small>${sub}</small></span><span class="rw-go" aria-hidden="true">${played ? '✓' : '▶'}</span></a>`;
+}
 /* ---------- Your progress, at a glance ---------- */
 function progressTilesHTML(){
   const h = loadHistory(); if(!h.length) return '';
