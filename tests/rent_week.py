@@ -10,6 +10,7 @@ async def play_week(pg, tag, shoot=False):
   for _ in range(200):
     if await pg.locator('#over:not([hidden]) #share').count(): return taps
     if await pg.locator('#drive #dauto').count(): await pg.click('#dauto'); await pg.wait_for_timeout(100); continue
+    if await pg.locator('#mg #mgauto').count(): await pg.click('#mgauto'); await pg.wait_for_timeout(100); continue
     if await pg.locator('#over:not([hidden]) #begin').count(): await pg.click('#begin'); await pg.wait_for_timeout(1000); continue
     body = await pg.locator('body').inner_text()
     for bad in ('undefined','NaN','[object','${'):
