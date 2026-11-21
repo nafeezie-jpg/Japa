@@ -80,8 +80,18 @@ a{color:var(--gold)}
 .pin.new .ic{border-color:var(--naija);animation:glow 1.4s ease-in-out infinite}
 .pin.new .nm::after{content:" NEW";color:var(--naija)}
 @keyframes glow{50%{box-shadow:0 0 0 8px rgba(45,190,108,.25),0 6px 14px rgba(0,0,0,.4)}}
-.me{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--naija);border:3px solid var(--ink);transform:translate(-50%,-50%);transition:left .9s ease-in-out,top .9s ease-in-out;box-shadow:0 0 14px var(--naija);z-index:3;pointer-events:none}
-.me::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--naija);animation:ping 1.6s ease-out infinite}
+.me{position:absolute;width:40px;height:40px;border-radius:50%;background:var(--naija);border:3px solid var(--ink);transform:translate(-50%,-50%);transition:left .9s ease-in-out,top .9s ease-in-out;box-shadow:0 0 14px var(--naija);z-index:3;pointer-events:none;display:grid;place-items:center;font-size:24px;line-height:1}
+.me::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:2px solid var(--naija);animation:ping 1.6s ease-out infinite}
+.me .mb{position:absolute;right:-8px;bottom:-6px;font-size:15px}
+.you{position:relative;justify-self:start;display:flex;align-items:flex-end;gap:2px;padding:6px 12px 6px 8px;border-radius:999px;background:var(--block);border:1px solid var(--road)}
+.you .yf{font-size:34px;line-height:1}
+.you .yb{font-size:20px;line-height:1;margin-left:-6px}
+.you small{align-self:center;margin-left:8px;color:var(--dim);font-size:12px}
+.mood{font-size:40px;line-height:1;animation:slam .45s cubic-bezier(.2,1.6,.4,1)}
+.whoami{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.whoami button{display:grid;justify-items:center;gap:6px;border:1px solid var(--road);background:var(--block);border-radius:14px;padding:14px 6px;font-size:13px}
+.whoami button span{font-size:44px;line-height:1}
+.whoami button:hover{border-color:var(--gold)}
 @keyframes ping{from{opacity:.8;transform:scale(.6)}to{opacity:0;transform:scale(1.6)}}
 .phone{position:absolute;right:10px;bottom:10px;z-index:4;border:0;border-radius:14px;background:var(--naija);color:#08210F;font-weight:700;padding:9px 12px;display:flex;gap:6px;align-items:center;box-shadow:0 6px 16px rgba(0,0,0,.4);animation:buzz 2.4s ease-in-out infinite}
 .phone .n{background:var(--pink);color:var(--ink);border-radius:10px;padding:0 7px;font-size:12px}
@@ -143,7 +153,7 @@ canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><a class="back" href="/">← Now You Have Landed</a><div class="when" id="when"></div><button class="snd" id="help" type="button" aria-label="How to play">❓</button><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
+  <div class="top"><a class="back" href="/">← Landed</a><div class="when" id="when"></div><button class="snd" id="help" type="button" aria-label="How to play">❓</button><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
   <div class="logo">WAHALA WEEK</div>
   <header class="hud" aria-live="polite">
     <div class="mission"><span id="mtitle"></span><span class="due" id="mdue"></span></div>
@@ -299,6 +309,22 @@ const STATUS = () => NG() ? STATUS_HOME : STATUS_ABROAD;
 
 /* ---------- state ---------- */
 let P, W;
+/* you, as a person: pick once, then you are shown doing everything */
+const ME = {
+  w:{base:'👩🏾', walk:'🚶🏾‍♀️', work:'👩🏾‍💼', school:'👩🏾‍🎓', mech:'👩🏾‍🔧', dance:'💃🏾', happy:'🙆🏾‍♀️', stress:'🤦🏾‍♀️', meh:'🤷🏾‍♀️', label:'Woman'},
+  h:{base:'🧕🏾', walk:'🚶🏾‍♀️', work:'🧕🏾', school:'🧕🏾', mech:'🧕🏾', dance:'💃🏾', happy:'🙆🏾‍♀️', stress:'🤦🏾‍♀️', meh:'🤷🏾‍♀️', label:'Woman in hijab'},
+  m:{base:'👨🏾', walk:'🚶🏾‍♂️', work:'👨🏾‍💼', school:'👨🏾‍🎓', mech:'👨🏾‍🔧', dance:'🕺🏾', happy:'🙆🏾‍♂️', stress:'🤦🏾‍♂️', meh:'🤷🏾‍♂️', label:'Man'}
+};
+const me = () => ME[(P && P.me) || 'w'];
+// what you look like at each place: [person, little badge]
+function pose(k){
+  const m = me();
+  return ({home:['🛌🏾',''], work:[m.work, P.office ? '🏦' : '💼'], ryde:[m.base,'🚗'], mama:[m.base,'🍲'], loan:[m.base,'📲'], hall:[m.dance,'🎉'],
+    fuel:[m.base,'⛽'], mech:[m.mech,'🔧'], school:[m.school,'📚'], stall:[m.base,'🏧'], pray:[m.base,'🙏🏾'], view:[m.base,'⚽'], phone:[m.base,'📱'], sick:['🤒','']})[k] || [m.base,''];
+}
+const youHTML = (k, caption) => { const [a, b] = pose(k); return `<div class="you" aria-hidden="true"><span class="yf">${a}</span>${b ? `<span class="yb">${b}</span>` : ''}${caption ? `<small>${caption}</small>` : ''}</div>`; };
+function moodFx(fx){ const m = me(), good = (fx.cash || 0) > 0 || (fx.peace || 0) >= 6, bad = (fx.peace || 0) <= -4 || (fx.stars || 0) > 0 || ((fx.cash || 0) < 0 && !(fx.peace > 0));
+  return good && !bad ? m.happy : bad ? m.stress : m.meh; }
 function freshLife(city){ return {v:1, city, week:1, cash:Math.round((CITIES[city].ng ? 850 : 700) * CITIES[city].k / (CITIES[city].ng ? 500 : 5)) * (CITIES[city].ng ? 500 : 5), owed:0, arrears:0, car:'old', boss:0, promo:false, school:0, office:false, mama:0, stall:false, warnings:0, last:'', done:'', streak:0, lives:1, hist:[], seen:{}}; }
 function freshWeek(){
   const reqs = shuffleL('req' + P.week, REQUESTS()).filter(r => !((r.proof || r.guest) && P.week < 2));
@@ -314,7 +340,7 @@ const PL = () => NG() ? ({
   ryde:{x:50,y:38,ic:'🚗',nm:'Ryde', title:'Drive for Ryde', who: P.car==='fixed' ? 'Your car, freshly fixed. Even the AC works.' : 'Your Corolla, nicknamed "End of Discussion". The AC works when it wants.'},
   mama:{x:18,y:36,ic:'🍲',nm:'Buka', title:C.mkt, who: P.ajo ? `Hot food, gist, and the ajo book. Your turn to collect is week ${P.ajo.turn}.` : 'Hot food, cold drinks, the freshest gist, and an ajo book under the counter.'},
   pray:{x:52,y:14,ic:'🙏🏾',nm:'Church/mosque', title:'Church or mosque', who:'Midweek service on Wednesday night. Jumat and Friday prayers on Friday afternoon.'},
-  bet:{x:82,y:36,ic:'⚽',nm:'Bet shop', title:'Odds Kings betting shop and viewing centre', who:'Fans, fumes, and a man who has been "one game away" since 2019.'},
+  view:{x:82,y:36,ic:'📺',nm:'Viewing centre', title:'Viewing centre', who:'Premier League and Super Eagles on one big screen, one generator, and fifty men with opinions.'},
   loan:{x:82,y:58,ic:'📲',nm:'Loan app', title:C.lender, who:'Instant approval. They also get access to all your contacts.'},
   hall:{x:50,y:80,ic:'🎉',nm:'Owambe', title:C.hall, who:'Thursday night. Aunty Funmi turns 60 again.'},
   fuel:{x:82,y:80,ic:'⛽',nm:'Filling station', title:'Filling station', who:'There is fuel today. There is also a queue to the next town.'},
@@ -341,6 +367,7 @@ function isOpen(k){
   if(k==='school') return W.slot===2;
   if(k==='work' && (P.office || NG())) return W.slot!==2;
   if(k==='fuel') return W.slot!==2;
+  if(k==='view') return W.slot===2;
   if(k==='pray') return (W.day===2 && W.slot===2) || (W.day===4 && W.slot===1);
   if(k==='mech') return W.slot!==2;
   return true;
@@ -387,7 +414,11 @@ function hud(prev){
   $('en').style.width = Math.max(0, W.energy) + '%'; $('enlbl').setAttribute('aria-label', 'Energy ' + Math.max(0, W.energy) + ' of 100');
   const st = $('stars'); st.innerHTML = [0,1,2,3,4].map(i => `<span class="${i < W.stars ? 'on' : 'off'}">★</span>`).join(''); st.setAttribute('aria-label', 'Family pressure ' + W.stars + ' of 5');
   $('sky').style.background = SKY[W.slot];
-  const p = places[W.at] || places.home; $('me').style.left = (p.x + 8) + '%'; $('me').style.top = (p.y - 6) + '%';
+  const p = places[W.at] || places.home, mk = $('me'), [pa, pb] = pose(W.sickNow ? 'sick' : W.at);
+  const moved = mk.dataset.at && mk.dataset.at !== W.at; mk.dataset.at = W.at;
+  if(moved){ mk.innerHTML = me().walk; clearTimeout(mk._t); mk._t = setTimeout(() => { mk.innerHTML = pa + (pb ? `<span class="mb">${pb}</span>` : ''); }, 900); }
+  else mk.innerHTML = pa + (pb ? `<span class="mb">${pb}</span>` : '');
+  mk.style.left = (p.x + 8) + '%'; mk.style.top = (p.y - 6) + '%';
   $('phone').hidden = !W.inbox.length; $('pn').textContent = W.inbox.length;
 }
 function bumpStars(){ const s = $('stars'); s.classList.remove('bump'); void s.offsetWidth; s.classList.add('bump'); }
@@ -395,13 +426,17 @@ function bumpStars(){ const s = $('stars'); s.classList.remove('bump'); void s.o
 /* ---------- sheet ---------- */
 const sheet = html => { $('sheet').innerHTML = html; };
 function idle(){
+  const _i = idleText();
+  sheet(`${youHTML(W.at === 'home' ? 'home' : W.at, (myName || 'You') + (W.energy < 30 ? ', tired' : ''))}` + _i);
+}
+function idleText(){
   const hint = W.energy < 30 ? 'You are running on empty. Your flat is calling you.' : W.slot === 2 ? (NG() ? 'Night. Offices are closed, but Ryde still runs.' : 'Night. Some places are closed. The warehouse never sleeps.') : 'Tap a place on the map. Each visit uses part of your day.';
-  sheet(`<h2>${DAYS[W.day][0] + DAYS[W.day].slice(1).toLowerCase()} ${SLOTS[W.slot].toLowerCase()}. Where to?</h2><p>${hint}</p>${W.day===3 && W.slot===2 ? '<p class="who">🎉 The owambe is on tonight.</p>' : ''}`);
+  return `<h2>${DAYS[W.day][0] + DAYS[W.day].slice(1).toLowerCase()} ${SLOTS[W.slot].toLowerCase()}. Where to?</h2><p>${hint}</p>${W.day===3 && W.slot===2 ? '<p class="who">🎉 The owambe is on tonight.</p>' : ''}${NG() && W.slot===2 ? '<p class="who">📺 The viewing centre is open.</p>' : ''}`;
 }
 function visit(k){
   if(!isOpen(k)){ toast(k==='pray' ? 'Midweek service is Wednesday night. Friday prayers are Friday afternoon.' : k==='hall' ? 'The owambe is Thursday night. Aunty Funmi needs time to tie her gele.' : k==='school' ? 'Classes are at night.' : 'Closed at this hour.'); return; }
   W.at = k; hud(); const p = places[k], acts = actions(k);
-  sheet(`<h2>${p.ic} ${p.title}</h2><p class="who">${p.who}</p><div class="acts">${acts.map((a, i) => `<button class="act" type="button" data-i="${i}" ${a.dis ? 'disabled' : ''}><span>${a.l}</span><small>${a.tag || ''}</small></button>`).join('')}<button class="act" type="button" data-i="back"><span>Go somewhere else</span><small>free</small></button></div>`);
+  sheet(`${youHTML(k, (myName || 'You') + ' at ' + p.nm.toLowerCase())}<h2>${p.ic} ${p.title}</h2><p class="who">${p.who}</p><div class="acts">${acts.map((a, i) => `<button class="act" type="button" data-i="${i}" ${a.dis ? 'disabled' : ''}><span>${a.l}</span><small>${a.tag || ''}</small></button>`).join('')}<button class="act" type="button" data-i="back"><span>Go somewhere else</span><small>free</small></button></div>`);
   $('sheet').querySelectorAll('.act').forEach(b => b.onclick = () => { if(b.dataset.i === 'back'){ idle(); return; } const a = acts[+b.dataset.i]; if(!a.dis) a.run(); });
 }
 const T = () => W.day + '-' + W.slot;   // luck is shared per moment of the week, so the same move gets the same outcome for everyone today
@@ -453,9 +488,9 @@ function actions(k){
       {l:'Pray and give offering', tag:`-${money(A(15))} · +peace · ★ down`, run:() => done({cash:-A(15), peace:12, stars:-1}, pickL('pray' + T(), ['The sermon is long, but you leave lighter than you came.','After the service, an elder asks after your parents by name. You feel seen.','You pray for rent, for your family, and for NEPA. Two out of three would be fine.']))},
       {l:'Network after the service', tag:'maybe a lead', run:() => roll('net' + P.week + W.day, .45) ? done({cash:A(100), peace:6}, `A man from the men's fellowship needs someone for a small job this week. ${money(A(100))}, cash, no wahala.`) : done({cash:-A(20), peace:-2, stars:-1}, `You are now on the building committee. That means a levy of ${money(A(20))}, starting today.`)}
     ];
-    case 'bet': return [
-      {l:'Stake a small bet', tag:`-${money(A(20))} · 1 in 4 wins big`, run:() => { W.log.bets = (W.log.bets || 0) + 1; roll('bet' + T(), .25) ? done({cash:A(60), peace:8}, `The last match comes in at the 94th minute. You win ${money(A(80))} and shout so loud the whole shop claps.`) : done({cash:-A(20), peace:-4}, pickL('lose' + T(), ['One game cut your ticket. One game. It is always one game.','You were winning until the referee remembered he had a whistle.'])); }},
-      {l:'Watch the match at the viewing centre', tag:`-${money(A(5))} · +peace`, run:() => done({cash:-A(5), energy:-5, peace:9}, pickL('view' + T(), ['Fifty people, one generator, one TV, and pure joy when the goal comes.','The light goes off at half time. The crowd boos NEPA louder than the referee.']))}
+    case 'view': return [
+      {l:'Watch the match', tag:`-${money(A(5))} · +peace`, run:() => { const won = roll('match' + P.week + W.day, .5); done({cash:-A(5), energy:-5, peace: won ? 12 : 5}, won ? pickL('vw' + T(), ['Your team scores in the 90th minute. Fifty grown men jump at once, and the bench breaks. Nobody cares.','Super Eagles win. Strangers hug you. Someone buys everyone suya.']) : pickL('vl' + T(), ['Your team loses, but the arguments afterwards are better than the match.','NEPA takes light at half time. The whole centre boos NEPA louder than the referee.'])); }},
+      {l:'Argue about football till late', tag:'free · -energy', run:() => done({energy:-15, peace:8}, 'Two hours on whether Messi or Ronaldo is greater. Nobody changes their mind. Everyone goes home happy.')}
     ];
     case 'fuel': return [
       {l:'Buy fuel for the generator', tag:`-${money(A(25))} · light for 2 nights`, run:() => { W.fuel = (W.fuel || 0) + 2; const q = roll('queue' + T(), .4); done({cash:-A(25), energy: q ? -15 : -5, peace: q ? -3 : 2}, q ? 'You queue for two hours behind a danfo and three okadas. You get the fuel. You also get a headache.' : 'No queue today. The attendant is so surprised that he smiles.'); }}
@@ -566,6 +601,7 @@ function drive(cb){
     g.fillStyle = '#2DBE6C'; g.beginPath(); g.roundRect ? g.roundRect(-17, -30, 34, 60, 9) : g.rect(-17, -30, 34, 60); g.fill();
     g.fillStyle = '#0E0B1D'; g.fillRect(-12, -18, 24, 12); g.fillRect(-12, 10, 24, 9);
     g.fillStyle = '#FFC93C'; g.fillRect(-14, -31, 7, 4); g.fillRect(7, -31, 7, 4);
+    g.font = '18px system-ui'; g.textAlign = 'center'; g.fillText(me().base, 0, -2);
     g.restore();
     if(flash > 0){ g.fillStyle = `rgba(255,107,107,${flash * .35})`; g.fillRect(0, 0, W0, H0); flash = Math.max(0, flash - dt * 2.5); }
     // dashboard
@@ -609,14 +645,14 @@ function chips(fx){
 function done(fx, text, unlock){
   const before = apply(fx); save(); hud(before);
   const last = W.day === 4 && W.slot === 2;
-  sheet(`<p>${text}</p>${chips(fx)}${unlock ? `<p class="who" style="color:var(--naija)">${unlock}</p>` : ''}<button class="go" type="button" id="next">${last ? 'Friday night. Time to pay.' : 'Next'}</button>`);
+  sheet(`<div class="mood" aria-hidden="true">${moodFx(fx)}</div><p>${text}</p>${chips(fx)}${unlock ? `<p class="who" style="color:var(--naija)">${unlock}</p>` : ''}<button class="go" type="button" id="next">${last ? 'Friday night. Time to pay.' : 'Next'}</button>`);
   $('next').onclick = advance;
   if(unlock) toast(unlock);
 }
 
 /* ---------- time moves ---------- */
 let busy = false;
-function dayCard(t, cb){ busy = true; SND.day(); const d = document.createElement('div'); d.className = 'daycard'; d.innerHTML = `<div>${t}</div>`; document.body.appendChild(d); setTimeout(() => { d.remove(); busy = false; cb && cb(); }, 900); }
+function dayCard(t, cb){ busy = true; SND.day(); const d = document.createElement('div'); d.className = 'daycard'; d.innerHTML = `<div>${P && P.me ? me().walk + ' ' : ''}${t}</div>`; document.body.appendChild(d); setTimeout(() => { d.remove(); busy = false; cb && cb(); }, 900); }
 function advance(){
   if(busy || W.over) return;
   const nx = $('next'); if(nx) nx.disabled = true;
@@ -644,7 +680,7 @@ function advance(){
   newDay ? dayCard(DAYS[W.day], go) : go();
 }
 function malaria(){
-  choice('You wake up and your body is hot. Your joints are complaining. It is malaria, the Nigerian national guest.', [
+  W.at = 'home'; hud(); choice(`${youHTML('sick')}` + 'You wake up and your body is hot. Your joints are complaining. It is malaria, the Nigerian national guest.', [
     {l:`Go to the chemist (${money(A(15))})`, run:() => done({cash:-A(15), energy:-15, peace:-3}, 'The chemist gives you three kinds of drugs and one lecture. You manage to function today.')},
     {l:`Go to the hospital (${money(A(60))})`, run:() => done({cash:-A(60), energy:10, peace:4}, 'A drip, a test, and real medicine. By evening you feel human again.')},
     {l:'Drink agbo and "manage it"', run:() => done({cash:-A(3), energy:-35, peace:-6}, 'The agbo is bitter enough to scare the malaria and you. You lose the whole morning.')}
@@ -658,8 +694,9 @@ function raid(){
 }
 function phone(){
   const m = W.inbox[0]; if(!m) return;
+  const youPh = youHTML('phone', 'reading WhatsApp');
   if(m.guest){
-    sheet(`<h2>📱 ${m.from}</h2><p>${m.t}</p><div class="acts"><button class="act" type="button" data-a="yes"><span>Welcome him, "for small time"</span><small>-${money(A(70))} · ★ down</small></button><button class="act" type="button" data-a="no"><span>Say your room is too small</span><small>★ up</small></button></div>`);
+    sheet(`${youPh}<h2>📱 ${m.from}</h2><p>${m.t}</p><div class="acts"><button class="act" type="button" data-a="yes"><span>Welcome him, "for small time"</span><small>-${money(A(70))} · ★ down</small></button><button class="act" type="button" data-a="no"><span>Say your room is too small</span><small>★ up</small></button></div>`);
     $('sheet').querySelectorAll('.act').forEach(b => b.onclick = () => { W.inbox.shift();
       if(b.dataset.a === 'yes') done({cash:-A(70), stars:-1, peace:-5}, 'Emeka arrives with one bag and a big appetite. "Small time" has no end date. He does wash the plates.');
       else { W.log.ignored++; done({stars:1, peace:3}, 'The family group hears that you have "changed". Your one room says you have not.'); }
@@ -667,14 +704,14 @@ function phone(){
     return;
   }
   if(m.proof){
-    sheet(`<h2>📱 ${m.from}</h2><p>${m.t}</p><div class="acts"><button class="act" type="button" data-a="no"><span>"Bro, that is how people go to jail"</span><small>★ up</small></button><button class="act" type="button" data-a="send"><span>Send the screenshot</span><small>risky</small></button></div>`);
+    sheet(`${youPh}<h2>📱 ${m.from}</h2><p>${m.t}</p><div class="acts"><button class="act" type="button" data-a="no"><span>"Bro, that is how people go to jail"</span><small>★ up</small></button><button class="act" type="button" data-a="send"><span>Send the screenshot</span><small>risky</small></button></div>`);
     $('sheet').querySelectorAll('.act').forEach(b => b.onclick = () => { W.inbox.shift();
       if(b.dataset.a === 'send') done({peace:-10}, 'Two weeks later, your bank calls about "unusual activity". You spend a morning explaining. Never again.');
       else { W.log.ignored++; done({stars:1, peace:4}, 'Emeka calls you wicked in three languages. You sleep well.'); }
       backToMap(); });
     return;
   }
-  sheet(`<h2>📱 ${m.from}</h2><p>${m.t}</p><div class="acts">
+  sheet(`${youPh}<h2>📱 ${m.from}</h2><p>${m.t}</p><div class="acts">
     <button class="act" type="button" data-a="send"><span>Send it</span><small>-${money(m.amt)} · ★ down</small></button>
     <button class="act" type="button" data-a="half"><span>Send half and a long voice note</span><small>-${money(m.amt / 2)}</small></button>
     <button class="act" type="button" data-a="no"><span>Leave them on read</span><small>★ up</small></button></div>`);
@@ -731,6 +768,7 @@ function shareText(rec){
 }
 function showEnd(rec, o){
   $('obox').innerHTML = `<div class="eyebrow">WEEK ${rec.w} · ${rec.m}</div>
+    <div style="font-size:56px;line-height:1" aria-hidden="true">${rec.pass ? me().dance : me().stress}</div>
     <div class="big ${o.cls}">${o.big}</div>
     <div class="sub">${rec.title}</div>
     <p>${o.line}</p>
@@ -832,7 +870,7 @@ $('help').onclick = () => {
   const box = document.createElement('div'); box.className = 'overlay'; box.innerHTML = `<div class="box" style="text-align:left"><div class="eyebrow" style="text-align:center">HOW TO PLAY</div><div class="big plain" style="text-align:center;font-size:clamp(28px,8vw,40px)">WAHALA WEEK</div>
     <div class="recap" style="gap:10px">
       <p>📅 <b>Each day is one week of your life.</b> Monday to Friday, three parts a day: morning, afternoon, and night.</p>
-      <p>🗺️ <b>Tap a place on the map</b> to work, drive, eat, pray, bet, borrow, or rest. Each visit uses part of the day and some energy. Rest at home when you are tired.</p>
+      <p>🗺️ <b>Tap a place on the map</b> to work, drive, eat, pray, watch football, borrow, or rest. Each visit uses part of the day and some energy. Rest at home when you are tired.</p>
       <p>💸 <b>Pay the bill by Friday night.</b> It changes every week, and food, transport, and data come out too. ${NG() ? 'In Nigeria the rent is yearly, so save for it. The countdown shows how close it is.' : 'Rent comes round every few weeks.'}</p>
       <p>📱 <b>WhatsApp keeps buzzing.</b> Send money, send half and a voice note, or leave them on read. Ignoring people raises the ⭐ family pressure. Five stars and the whole family calls at once.</p>
       <p>🚗 <b>Ryde is a real drive.</b> Swipe or tap left and right to dodge and collect fares. Three knocks and the fan belt goes.</p>
@@ -854,7 +892,14 @@ function pickCity(){
     <p>Every day is one week of real life, abroad or at home in Nigeria. Work, hustle, pray, go to owambe, dodge your aunties, and still pay the week's bill by Friday night. Your money and your progress carry on, week after week.</p>
     ${[['🌍 Abroad', ([k, c]) => !c.ng], ['🇳🇬 Home in Nigeria', ([k, c]) => c.ng]].map(([h, f]) => `<div class="eyebrow" style="text-align:left;margin-top:6px">${h}</div><div class="cities">${Object.entries(CITIES).filter(f).sort((a, b) => (b[0] === guess) - (a[0] === guess)).map(([k, c]) => `<button class="city" type="button" data-c="${k}"><span class="fl" aria-hidden="true">${c.flag}</span><b>${c.name}</b><small>${c.blurb}</small></button>`).join('')}</div>`).join('')}`;
   $('over').hidden = false;
-  $('obox').querySelectorAll('.city').forEach(b => b.onclick = () => { P = freshLife(b.dataset.c); save(); track('start-' + b.dataset.c); $('over').hidden = true; boot(); });
+  $('obox').querySelectorAll('.city').forEach(b => b.onclick = () => { P = freshLife(b.dataset.c); save(); track('start-' + b.dataset.c); pickMe(); });
+}
+function pickMe(){
+  $('obox').innerHTML = `<div class="eyebrow">ONE MORE THING</div><div class="big plain" style="font-size:clamp(28px,8vw,40px)">WHO ARE YOU?</div>
+    <p>You will see yourself on the map, at work, at the buka, at the owambe, and behind the wheel.</p>
+    <div class="whoami">${Object.entries(ME).map(([k, m]) => `<button type="button" data-me="${k}"><span aria-hidden="true">${m.base}</span>${m.label}</button>`).join('')}</div>`;
+  $('over').hidden = false;
+  $('obox').querySelectorAll('[data-me]').forEach(b => b.onclick = () => { P.me = b.dataset.me; save(); track('me-' + P.me); $('over').hidden = true; boot(); });
 }
 function doneToday(){
   const rec = P.hist[P.hist.length - 1];
@@ -892,7 +937,8 @@ function weekIntro(){
 }
 function boot(){
   C = CITIES[P.city];
-  if(P.evicted){ const keep = {lives:(P.lives||1) + 1, hist:P.hist, streak:P.streak, done:P.done, city:P.city}; P = Object.assign(freshLife(P.city), keep); P.cash = A(200); save(); toast('New start on a cousin\'s sofa. Your lessons came with you.'); }
+  if(!P.me) return pickMe();
+  if(P.evicted){ const keep = {lives:(P.lives||1) + 1, hist:P.hist, streak:P.streak, done:P.done, city:P.city, me:P.me}; P = Object.assign(freshLife(P.city), keep); P.cash = A(200); save(); toast('New start on a cousin\'s sofa. Your lessons came with you.'); }
   $('fm').textContent = `📻 ${NG() ? 'NAIJA' : 'JAPA'} FM ${C.fm}`;
   $('radio').textContent = shuffleL('radio', RADIO()).join('   ·   ');
   drawCity();
