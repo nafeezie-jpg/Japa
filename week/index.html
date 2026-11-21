@@ -113,6 +113,7 @@ a{color:var(--gold)}
 .recap{background:var(--deep);border:1px solid var(--road);border-radius:14px;padding:12px;display:grid;gap:6px;text-align:left;font-size:14px}
 .recap div{display:flex;justify-content:space-between;gap:10px}
 .recap span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.recap p{margin:0}
 .recap .hr{border-top:1px solid var(--road);margin-top:4px;padding-top:8px}
 .daycard{position:fixed;inset:0;z-index:25;display:grid;place-items:center;pointer-events:none;background:rgba(10,7,22,.55);animation:fade .2s}
 .daycard div{font-family:var(--display);font-size:clamp(44px,14vw,80px);color:var(--ink);text-shadow:0 5px 0 var(--pink);animation:slam .5s cubic-bezier(.2,1.6,.4,1)}
@@ -129,13 +130,20 @@ a{color:var(--gold)}
 .prog span{font-size:12px;padding:4px 9px;border-radius:999px;background:var(--block);color:var(--dim)}
 .prog span.on{color:var(--naija)}
 .note{font-size:12px;color:var(--dim);text-align:center}
+.drive{position:fixed;inset:0;z-index:22;background:rgba(10,7,22,.96);display:grid;place-items:center;padding:12px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));animation:fade .25s}
+.dbox{display:grid;gap:10px;justify-items:center;max-width:420px;width:100%;position:relative}
+.dhead{display:flex;justify-content:space-between;gap:10px;width:100%;font-size:13px;color:var(--dim)}
+.dhead b{font-family:var(--display);font-weight:400;color:var(--gold);font-size:15px}
+#dcv{border-radius:14px;border:1px solid var(--road);touch-action:none;max-width:100%}
+.dhelp{position:absolute;inset:40px 10px auto;display:grid;gap:10px;background:rgba(14,11,29,.94);border:1px solid var(--road);border-radius:14px;padding:16px;text-align:center}
+.dhelp p{margin:0}
 canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%;height:100%}
 @media (prefers-reduced-motion:reduce){.radio .tk span{animation:none;padding-left:0}.me{transition:none}.me::after,.phone,.pin.new .ic{animation:none}.big,.daycard div{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><a class="back" href="/">← Now You Have Landed</a><div class="when" id="when"></div><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
+  <div class="top"><a class="back" href="/">← Now You Have Landed</a><div class="when" id="when"></div><button class="snd" id="help" type="button" aria-label="How to play">❓</button><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
   <div class="logo">WAHALA WEEK</div>
   <header class="hud" aria-live="polite">
     <div class="mission"><span id="mtitle"></span><span class="due" id="mdue"></span></div>
@@ -420,16 +428,7 @@ function actions(k){
       }}
     ];
     case 'ryde': return [
-      {l:'Drive a few hours', tag:`${money(A(45))} to ${money(A(170))} · -25 energy`, dis:tired, run:() => {
-        W.log.rides++; const r = luck('ryde' + T());
-        if(r < (P.car==='fixed' ? .04 : .16)) return choice(`Your car screams, then smells, then stops. The fan belt. The mechanic wants ${money(A(90))} today.`, [
-          {l:'Pay the mechanic', run:() => done({cash:-A(90), energy:-15, peace:-6}, 'Fixed. The mechanic gives you a "home discount" of zero.')},
-          {l:'YouTube it, fix it yourself', run:() => roll('diy' + T(), .5) ? done({cash:-A(15), energy:-30, peace:4}, 'Two hours, one video, grease to your elbows. It works. You feel like a genius.') : done({cash:-A(110), energy:-30, peace:-8}, `You fix the fan belt and break something else. Now it is ${money(A(110))}.`)}
-        ]);
-        if(r < .26) return ng ? done({cash:-A(30), energy:-25, peace:-5}, `A checkpoint. "Anything for the boys?" You hand over ${money(A(30))} and a very tired smile.`) : done({cash:-A(75), energy:-25, peace:-5}, `Lights behind you. Rolling stop. ${money(A(75))} ticket. You say "yes officer" eleven times.`);
-        if(r < .38) return done({cash:Math.round(between('tip' + T(), 90, 140) * C.k / STEP()) * STEP() + A(60), energy:-25, peace:8}, ng ? `Your passenger is a big man's personal assistant. He talks for an hour and tips ${money(A(60))} "for the road".` : `Your rider is a Nigerian aunty going to a vigil. She prays for you for twenty minutes and tips ${money(A(60))}.`);
-        done({cash:A(between('fare' + T(), 45, 150)) + (P.car==='fixed' ? A(20) : 0), energy:-25}, pickL('rt' + T(), ng ? ['A woman negotiates the fare down, then tips you back up. Only in Nigeria.','Airport run. The domestic terminal. Good fare, no wahala.','Rain floods half the road. Surge pricing finally works for you.'] : ['A man talks about crypto the whole ride. Five stars anyway.','Airport run. Long ride, good fare, no small talk. Perfect.','Rain and surge pricing. The only time rain has ever helped you.']));
-      }}
+      {l:'Drive a few hours', tag:'you drive · fares, dodges, tips', dis:tired, run:() => { W.log.rides++; drive(res => rydeResult(res)); }}
     ];
     case 'mama': return [
       {l:'Buy food for the week', tag:`-${money(A(35))} · +energy`, run:() => { P.mama++; done({cash:-A(35), energy:15, peace:6}, pickL('food' + T(), ng ? ['Rice, beans, and a small tin of tomato paste that costs as much as the rice.','She adds extra meat "because you are a regular". Your heart sings.'] : ['Garri, rice, and stockfish that announces itself to the whole bus.','Mama adds free ugu "because you are too thin". You are not too thin.'])); }},
@@ -487,6 +486,105 @@ function ngWork(pay, en){
     {l:'No, I am going home', run:() => done({cash:pay, energy:en}, `${C.boss} says "no problem" in the voice that means problem.`)}
   ]);
   done({cash:pay, energy:en}, P.office ? pickL('bank' + T(), ['The AC works all day. You almost cry.','A customer shouts because the network is down. It is always the network.','Your colleague brings small chops for her birthday. The whole floor is happy.']) : pickL('ngw' + T(), ['Three meetings, one power cut, and a manager who says "we move".','The office generator goes off at noon. Everybody fans themselves with files.','You spend the morning in traffic and the afternoon explaining why you were late.']));
+}
+/* ---------- the Ryde run: 20 seconds of real driving ---------- */
+function rydeResult(res){
+  const ng = NG();
+  if(res.hits >= 3) return choice(ng ? `One pothole too many. The car screams, then smells, then stops. The fan belt. The mechanic wants ${money(A(90))} today.` : `One pothole too many. Your car screams, then smells, then stops. The fan belt. The mechanic wants ${money(A(90))} today.`, [
+    {l:'Pay the mechanic', run:() => done({cash:A(res.coins * 6) - A(90), energy:-30, peace:-6}, `You keep the ${money(A(res.coins * 6))} in fares you made, and the mechanic takes most of it. "Home discount": zero.`)},
+    {l:'YouTube it, fix it yourself', run:() => roll('diy' + T(), .5) ? done({cash:A(res.coins * 6) - A(15), energy:-40, peace:4}, 'Two hours, one video, grease to your elbows. It works. You feel like a genius.') : done({cash:A(res.coins * 6) - A(110), energy:-40, peace:-8}, `You fix the fan belt and break something else. Now it is ${money(A(110))}.`)}
+  ]);
+  let cash = A(25) + A(res.coins * 6) + (P.car === 'fixed' ? A(20) : 0), peace = 0, bits = [];
+  bits.push(`${res.coins} fare${res.coins === 1 ? '' : 's'} picked up`);
+  if(res.hits) { peace -= res.hits * 2; bits.push(`${res.hits} knock${res.hits === 1 ? '' : 's'}`); }
+  if(res.cop){ const fine = ng ? A(30) : A(75); cash -= fine; peace -= 5; bits.push(ng ? `"something for the boys" at the checkpoint (${money(fine)})` : `a ${money(fine)} ticket`); }
+  const clean = !res.hits && !res.cop && res.coins >= 7;
+  if(clean){ cash += A(60); peace += 8; }
+  done({cash, energy:-30, peace}, (clean ? (ng ? `A clean run. Your last passenger, a big man's PA, tips you ${money(A(60))} "for the road".` : `A clean run. Your last rider tips ${money(A(60))} and leaves five stars.`) : pickL('rt' + T(), ng ? ['Go-slow, potholes, and one okada with a death wish. You survived Lagos traffic.','A woman negotiates the fare down, then tips you back up. Only in Nigeria.'] : ['Traffic, potholes, and one driver who has never used an indicator. You survived.','Rain and surge pricing. The only time rain has ever helped you.'])) + ` (${bits.join(', ')}.)`);
+}
+function drive(cb){
+  const ng = NG(), seed = 'drive' + P.week + '-' + T();
+  const ov = document.createElement('div'); ov.className = 'drive'; ov.id = 'drive';
+  ov.innerHTML = `<div class="dbox"><div class="dhead"><b>🚗 RYDE RUN</b><span id="dinfo">Same road for everyone today</span></div>
+    <canvas id="dcv" aria-label="Driving game: swipe or tap left and right to change lanes"></canvas>
+    <div class="dhelp" id="dhelp"><p><b>Swipe or tap left and right</b> to change lanes. Pick up 💵 fares. Dodge ${ng ? 'potholes, okadas, danfos, goats, and the checkpoint' : 'potholes, traffic, and the police car'}. Three knocks and the fan belt goes.</p>
+    <button class="go" type="button" id="dstart">Start driving</button><button class="ghost" type="button" id="dauto">Let the GPS drive (no tip)</button></div></div>`;
+  document.body.appendChild(ov);
+  const cv = $('dcv'), g = cv.getContext('2d'), dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W0 = Math.min(400, innerWidth - 32), H0 = Math.min(Math.round(W0 * 1.35), innerHeight - 190);
+  cv.style.width = W0 + 'px'; cv.style.height = H0 + 'px'; cv.width = W0 * dpr; cv.height = H0 * dpr; g.scale(dpr, dpr);
+  const lanes = 3, laneW = (W0 - 40) / lanes, laneX = i => 20 + laneW * i + laneW / 2;
+  const KINDS = ng ? [['🕳️',0],['🛵',1],['🚌',1],['🐐',0],['🕳️',0]] : [['🕳️',0],['🚙',1],['🚕',1],['🕳️',0]];
+  // the course is planned from today's date, so everyone gets the same road
+  const items = []; let y = -120;
+  for(let i = 0; i < 60; i++){
+    y -= 120 + Math.floor(luck(seed + 'gap' + i) * 70);
+    const lane = Math.floor(luck(seed + 'lane' + i) * 3), r = luck(seed + 'kind' + i);
+    if(r < .45) items.push({y, lane, coin:true});
+    else { const k = KINDS[Math.floor(luck(seed + 'k' + i) * KINDS.length)]; items.push({y, lane, ic:k[0], moving:k[1]}); }
+    if(i === 28) { y -= 140; items.push({y, lane:Math.floor(luck(seed + 'gap') * 3), cop:true}); }
+  }
+  let car = 1, carX = laneX(1), t0 = 0, last = 0, dist = 0, run = false, over = false, coins = 0, hits = 0, cop = false, flash = 0, raf = 0;
+  const DUR = 20;
+  function move(d){ if(!run) return; const n = Math.max(0, Math.min(2, car + d)); if(n !== car){ car = n; SND.tap(); } }
+  const key = e => { if(e.key === 'ArrowLeft'){ move(-1); e.preventDefault(); } if(e.key === 'ArrowRight'){ move(1); e.preventDefault(); } };
+  let sx = null;
+  cv.addEventListener('pointerdown', e => { sx = e.clientX; });
+  cv.addEventListener('pointerup', e => { if(sx === null) return; const dx = e.clientX - sx; if(Math.abs(dx) > 25) move(dx > 0 ? 1 : -1); else { const r = cv.getBoundingClientRect(); move(e.clientX - r.left < r.width / 2 ? -1 : 1); } sx = null; });
+  addEventListener('keydown', key);
+  function draw(now){
+    const el = run ? (now - t0) / 1000 : 0, left = Math.max(0, DUR - el), dt = last ? Math.min(.05, (now - last) / 1000) : 0; last = now;
+    const speed = 240 + el * 11; if(run) dist += speed * dt;
+    carX += (laneX(car) - carX) * Math.min(1, dt * 14);
+    // road
+    g.fillStyle = ng ? '#3B3324' : '#2B2450'; g.fillRect(0, 0, W0, H0);
+    g.fillStyle = '#3A3A44'; g.fillRect(16, 0, W0 - 32, H0);
+    g.fillStyle = ng ? '#C9A227' : '#FFC93C'; g.fillRect(14, 0, 3, H0); g.fillRect(W0 - 17, 0, 3, H0);
+    g.fillStyle = 'rgba(255,255,255,.55)'; for(let l = 1; l < lanes; l++){ const x = 20 + laneW * l - 2; for(let yy = (dist % 60) - 60; yy < H0; yy += 60) g.fillRect(x, yy, 4, 30); }
+    // things on the road
+    const carY = H0 - 70;
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    for(const it of items){
+      if(it.gone) continue;
+      const sy = it.y + dist + (it.moving ? -dist * 0.25 : 0);
+      if(sy < -60 || sy > H0 + 60) continue;
+      if(it.cop){
+        const gap = it.lane; g.font = '30px system-ui';
+        for(let l = 0; l < 3; l++) if(l !== gap) g.fillText(ng ? '🚧' : '🚓', laneX(l), sy);
+        if(run && !it.done && Math.abs(sy - carY) < 30){ it.done = true; if(car !== gap){ cop = true; flash = 1; SND.pressure(); toast(ng ? '👮🏾 Checkpoint. "Anything for the boys?"' : '🚓 Pulled over. Ticket.'); } }
+        continue;
+      }
+      if(it.coin){ g.font = '28px system-ui'; g.fillText('💵', laneX(it.lane), sy); }
+      else { g.font = it.ic === '🕳️' ? '30px system-ui' : '34px system-ui'; g.fillText(it.ic, laneX(it.lane), sy); }
+      if(run && it.lane === car && Math.abs(carX - laneX(car)) < laneW * .35 && Math.abs(sy - carY) < (it.coin ? 32 : 24)){
+        it.gone = true;
+        if(it.coin){ coins++; SND.cashIn(); } else { hits++; flash = 1; SND.pressure(); if(navigator.vibrate) try{ navigator.vibrate(60); }catch(e){} }
+      }
+    }
+    // your car
+    g.save(); g.translate(carX, carY); if(flash > 0) g.rotate(Math.sin(now / 30) * 0.15 * flash);
+    g.fillStyle = '#2DBE6C'; g.beginPath(); g.roundRect ? g.roundRect(-17, -30, 34, 60, 9) : g.rect(-17, -30, 34, 60); g.fill();
+    g.fillStyle = '#0E0B1D'; g.fillRect(-12, -18, 24, 12); g.fillRect(-12, 10, 24, 9);
+    g.fillStyle = '#FFC93C'; g.fillRect(-14, -31, 7, 4); g.fillRect(7, -31, 7, 4);
+    g.restore();
+    if(flash > 0){ g.fillStyle = `rgba(255,107,107,${flash * .35})`; g.fillRect(0, 0, W0, H0); flash = Math.max(0, flash - dt * 2.5); }
+    // dashboard
+    g.fillStyle = 'rgba(14,11,29,.8)'; g.fillRect(0, 0, W0, 34);
+    g.font = '700 14px Rubik, system-ui'; g.fillStyle = '#F6F1FF'; g.textAlign = 'left'; g.fillText(`⏱ ${left.toFixed(1)}s`, 10, 17);
+    g.textAlign = 'center'; g.fillText(`💵 ${coins}`, W0 / 2, 17);
+    g.textAlign = 'right'; g.fillText('🔧'.repeat(Math.max(0, 3 - hits)) + '💥'.repeat(Math.min(3, hits)), W0 - 10, 17);
+    if(run && (left <= 0 || hits >= 3)) return finish();
+    raf = requestAnimationFrame(draw);
+  }
+  function finish(){ run = false; over = true; cancelAnimationFrame(raf); removeEventListener('keydown', key);
+    const msg = hits >= 3 ? '💥 Breakdown' : (!hits && !cop && coins >= 7) ? '⭐ Clean run' : '🏁 Done';
+    $('dinfo').textContent = msg; setTimeout(() => { ov.remove(); cb({coins, hits, cop}); }, 900); }
+  $('dstart').onclick = () => { $('dhelp').hidden = true; SND.init(); let n = 3; $('dinfo').textContent = 'Get ready… 3';
+    const tick = setInterval(() => { n--; if(n > 0){ $('dinfo').textContent = 'Get ready… ' + n; SND.tap(); } else { clearInterval(tick); $('dinfo').textContent = 'Drive!'; run = true; t0 = performance.now(); last = 0; } }, 600); };
+  $('dauto').onclick = () => { cancelAnimationFrame(raf); removeEventListener('keydown', key); ov.remove();
+    cb({coins: 6 + Math.floor(luck(seed + 'auto') * 4), hits: luck(seed + 'ahit') < .25 ? 1 : 0, cop: luck(seed + 'acop') < .2}); };
+  window.__drive = () => ({items, car, dist, carY: H0 - 70, run, coins, hits});   // read-only peek for the automated tests
+  raf = requestAnimationFrame(draw);
 }
 function choice(text, opts){
   sheet(`<p>${text}</p><div class="acts">${opts.map((o, i) => `<button class="act" type="button" data-i="${i}"><span>${o.l}</span></button>`).join('')}</div>`);
@@ -730,6 +828,20 @@ const SND = (() => {
 })();
 document.addEventListener('pointerdown', () => SND.init(), {once:false, passive:true});
 $('snd').textContent = SND.on ? '🔊' : '🔇';
+$('help').onclick = () => {
+  const box = document.createElement('div'); box.className = 'overlay'; box.innerHTML = `<div class="box" style="text-align:left"><div class="eyebrow" style="text-align:center">HOW TO PLAY</div><div class="big plain" style="text-align:center;font-size:clamp(28px,8vw,40px)">WAHALA WEEK</div>
+    <div class="recap" style="gap:10px">
+      <p>📅 <b>Each day is one week of your life.</b> Monday to Friday, three parts a day: morning, afternoon, and night.</p>
+      <p>🗺️ <b>Tap a place on the map</b> to work, drive, eat, pray, bet, borrow, or rest. Each visit uses part of the day and some energy. Rest at home when you are tired.</p>
+      <p>💸 <b>Pay the bill by Friday night.</b> It changes every week, and food, transport, and data come out too. ${NG() ? 'In Nigeria the rent is yearly, so save for it. The countdown shows how close it is.' : 'Rent comes round every few weeks.'}</p>
+      <p>📱 <b>WhatsApp keeps buzzing.</b> Send money, send half and a voice note, or leave them on read. Ignoring people raises the ⭐ family pressure. Five stars and the whole family calls at once.</p>
+      <p>🚗 <b>Ryde is a real drive.</b> Swipe or tap left and right to dodge and collect fares. Three knocks and the fan belt goes.</p>
+      <p>📈 <b>Your life carries on.</b> Your money and progress move to next week. New places open as you go: the mechanic, evening classes, and your own business.</p>
+      <p>❌ <b>Miss a bill</b> and the gap rolls into next week with a late fee. Three misses and you start again on a cousin's sofa.</p>
+      <p>👥 <b>Everyone playing today</b> gets the same breakdowns, tips, messages, and road. Share your week and compare.</p>
+    </div><button class="go" type="button">Got it</button></div>`;
+  document.body.appendChild(box); box.querySelector('.go').onclick = () => box.remove();
+};
 $('snd').onclick = () => { const on = SND.toggle(); $('snd').textContent = on ? '🔊' : '🔇'; $('snd').setAttribute('aria-label', on ? 'Sound on' : 'Sound off'); };
 
 let tt;

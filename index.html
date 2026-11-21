@@ -3246,16 +3246,20 @@ function openAbout(){
   track('about');
   const o = overlay('aboutover', 'About the game', `<div class="sheet-panel aboutp"><div class="aboutcard">
     <div class="ab-top"><span>✈️ Now You Have Landed</span><button class="xbtn" aria-label="Close">✕</button></div>
-    <h2>Your first 30 days abroad, as a game.</h2>
+    <h2>Life abroad and life at home, as a game.</h2>
     <p class="ab-tag">Everybody wants to japa. Nobody tells you what happens after you land.</p>
     <div class="ab-grid">
       <div><span>🐣</span><b>Just landed?</b><small>Learn the rules before they cost you.</small></div>
       <div><span>😂</span><b>Been abroad for years?</b><small>Laugh at the JJC you used to be.</small></div>
       <div><span>🧳</span><b>Planning to japa?</b><small>Know what to expect before you board.</small></div>
-      <div><span>👀</span><b>Staying home?</b><small>See what life abroad really looks like.</small></div>
+      <div><span>🇳🇬</span><b>Staying home?</b><small>Play Wahala Week in Lagos, Abuja, Kano, and more.</small></div>
     </div>
-    <div class="ab-strip"><span>🇺🇸 🇬🇧 🇨🇦 🇪🇺</span><span>⏱️ 5 min</span><span>📅 Daily</span><span>📖 Story mode</span><span>🆓 Free</span></div>
-    <p class="ab-real">Built from real japa stories. Your family's calls, your money, your peace.</p>
+    <div class="howlist">
+      <div><span>📖</span><p><b>Your story.</b> Your own life abroad, from the day you land to year five. One chapter a day.</p></div>
+      <div><span>🌆</span><p><b>Wahala Week.</b> One week of everyday hustle a day, on a city map, abroad or at home in Nigeria. Make the bill by Friday night.</p></div>
+    </div>
+    <div class="ab-strip"><span>🇺🇸 🇬🇧 🇨🇦 🇪🇺 🇳🇬</span><span>⏱️ 5 min</span><span>📅 Daily</span><span>📖 Story mode</span><span>🆓 Free</span></div>
+    <p class="ab-real">Built from real stories. Your family's calls, your money, your peace.</p>
     <div class="ab-foot"><b>nowyouhavelanded.com</b><span>Created by Nafeezie</span></div>
   </div>
   <div class="row ab-btns"><button class="primary" type="button" data-close>✈️ Play</button></div></div>`);
@@ -3280,6 +3284,17 @@ function openHow(){
     <div class="ladder">${[JUST_LANDED].concat(ABROAD_BADGES).map(([k,,r,ic]) => `<div class="${r===me[2]?'me':k<=n?'done':''}"><span>${ic}</span><b>${r}</b><small>${k ? k+' landings' : 'Your first one'}</small></div>`).join('')}</div>
     <div class="howlist">
       <div><span>🏆</span><p><b>Weekly leaderboard.</b> The best Today's Landing score of the week wins the 👑 crown.</p></div>
+    </div>
+    <div class="sheet-head" style="margin-top:14px"><b>🌆 Wahala Week</b></div>
+    <div class="howlist">
+      <div><span>🗺️</span><p><b>One week of life a day, on a city map.</b> Pick Houston, London, Toronto, or a Nigerian city. Tap places to work, drive, eat, pray, bet, borrow, or rest. Each visit uses part of the day and some energy.</p></div>
+      <div><span>💸</span><p><b>Pay the week's bill by Friday night.</b> Abroad it is rent and other bills. At home it is light, school fees, owambe, hospital, data, December, and the yearly rent every 12 weeks.</p></div>
+      <div><span>⭐</span><p><b>Watch the family pressure.</b> Ignore WhatsApp and the stars climb. Five stars and the whole family calls at once.</p></div>
+      <div><span>🚗</span><p><b>Ryde is a real drive.</b> Twenty seconds of dodging traffic and collecting fares. Everyone gets the same road that day.</p></div>
+      <div><span>📈</span><p><b>Your life grows.</b> Your money carries over. Fix your car, take evening classes for a better job, and open your own stall or POS stand.</p></div>
+    </div>
+    <a class="primary" href="/week/" style="display:block;text-align:center;text-decoration:none;margin-top:8px">🌆 Play Wahala Week</a>
+    <div class="howlist">
       <div><span>🏅</span><p><b>Collect 10 verdicts and 7 badges.</b> Your verdict says how your month went. Badges reward what you did.</p></div>
       <div><span>🎮</span><p><b>Practice any route, anytime.</b> Pick your own country to practise or relive your JJC days. Those games do not count toward your title.</p></div>
     </div>
