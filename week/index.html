@@ -44,6 +44,10 @@ a{color:var(--gold)}
 .hud{display:grid;gap:6px}
 .mission{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:13px;color:var(--dim)}
 .mission b{color:var(--ink);font-weight:700}
+.rentline{font-size:12px;color:var(--dim)}
+.rentline b{color:var(--gold);font-family:var(--mono)}
+.rentline i{display:block;height:5px;border-radius:3px;background:var(--road);margin-top:4px;overflow:hidden}
+.rentline i span{display:block;height:100%;background:var(--naija)}
 .mission .due{font-family:var(--mono);color:var(--gold);white-space:nowrap}
 .lbl{display:grid;grid-template-columns:7.5em 1fr auto;gap:10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
 .stats{display:grid;grid-template-columns:7.5em 1fr auto;gap:10px;align-items:center}
@@ -134,6 +138,7 @@ canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%
   <div class="logo">WAHALA WEEK</div>
   <header class="hud" aria-live="polite">
     <div class="mission"><span id="mtitle"></span><span class="due" id="mdue"></span></div>
+    <div class="rentline" id="rentline" hidden></div>
     <div class="lbl"><span>Cash</span><span>Energy</span><span>Aunty Alert</span></div>
     <div class="stats">
       <div class="cash" id="cash"></div>
@@ -170,7 +175,7 @@ const CITIES = {
   london:{name:'London', flag:'🇬🇧', cur:'£', k:.8, rent:950, start:420, area:'Peckham', landlord:'Mr Patel', lender:'Cash4U Today', mkt:"Mama Ngozi's in Peckham", hall:'Thamesmead Events Hall', water:'RIVER THAMES', roads:['A2','S. CIRCULAR'], airport:'Heathrow', fm:'99.1', blurb:'Care shifts, night buses, and rain that never fully stops.', boss:'Gareth', bossWord:'mate', ware:'Swift Parcels'},
   toronto:{name:'Toronto', flag:'🇨🇦', cur:'C$', k:1.25, rent:1500, start:650, area:'Brampton', landlord:'Gary', lender:'EZ Money Now', mkt:"Mama Ngozi's in Brampton", hall:'Mississauga Event Centre', water:'HUMBER RIVER', roads:['401','410'], airport:'Pearson', fm:'101.3', blurb:'Factory shifts, minus 20 in January, and everybody apologising.', boss:'Darren', bossWord:'bud', ware:'Maple Freight'},
   // home: the same pressure, Nigerian edition
-  lagos:{ng:1, name:'Lagos', flag:'🇳🇬', cur:'₦', k:100, area:'Yaba', landlord:'Alhaji Landlord', mkt:"Iya Basira's buka", hall:'Eko Event Centre, Ikeja', water:'LAGOS LAGOON', roads:['3RD MAINLAND','IKORODU RD'], fm:'97.3', blurb:'Go-slow on Third Mainland, NEPA on strike, and a landlord who wants two years upfront.', boss:'Oga Tunde', bossWord:'my dear', ware:'Prime Trust Bank, Marina'},
+  lagos:{ng:1, name:'Lagos', flag:'🇳🇬', cur:'₦', k:100, area:'Yaba', landlord:'Alhaji Landlord', mkt:"Iya Basira's buka", hall:'Eko Event Centre, Ikeja', water:'LAGOS LAGOON', roads:['3RD MAINLAND','IKORODU RD'], fm:'97.3', blurb:'Go-slow on Third Mainland, NEPA on strike, and a landlord who wants a full year upfront.', boss:'Oga Tunde', bossWord:'my dear', ware:'Prime Trust Bank, Marina'},
   abuja:{ng:1, name:'Abuja', flag:'🇳🇬', cur:'₦', k:100, area:'Kubwa', landlord:'Chief Okafor', mkt:"Mama Nkechi's canteen", hall:'Shehu Event Hall, Wuse', water:'JABI LAKE', roads:['AIRPORT RD','EXPRESSWAY'], fm:'99.9', blurb:'Kubwa traffic, ministry gist, and rent priced like Lagos.', boss:'Oga Director', bossWord:'my dear', ware:'A ministry office in the Secretariat'},
   ph:{ng:1, name:'Port Harcourt', flag:'🇳🇬', cur:'₦', k:90, area:'Rumuokoro', landlord:'Pa Ibinabo', mkt:"Mama Tonye's pepper soup joint", hall:'Garden City Event Hall', water:'BONNY RIVER', roads:['ABA RD','IKWERRE RD'], fm:'98.5', blurb:'Oil company dreams, soot on your windowsill, and pepper soup that fixes everything.', boss:'Oga Boma', bossWord:'my person', ware:'Deltastar Oil Services'},
   ibadan:{ng:1, name:'Ibadan', flag:'🇳🇬', cur:'₦', k:70, area:'Bodija', landlord:'Baba Landlord', mkt:"Iya Ibeji's amala spot", hall:'Ring Road Event Centre', water:'OGUNPA RIVER', roads:['RING RD','IWO RD'], fm:'101.1', blurb:'Brown roofs, cheap amala, and everyone asking when you will move to Lagos.', boss:'Oga Kunle', bossWord:'my dear', ware:'Oyo Agro Processing'},
@@ -178,7 +183,7 @@ const CITIES = {
   enugu:{ng:1, name:'Enugu', flag:'🇳🇬', cur:'₦', k:70, area:'Independence Layout', landlord:'Chief Eze', mkt:"Mama Nkechi's abacha joint", hall:'Coal City Event Hall', water:'EKULU RIVER', roads:['OGUI RD','ZIK AVE'], fm:'96.1', blurb:'Coal City calm, green hills, and an uncle who knows everybody at the council.', boss:'Oga Chinedu', bossWord:'my brother', ware:'Coal City Distributors'},
   ilorin:{ng:1, name:'Ilorin', flag:'🇳🇬', cur:'₦', k:60, area:'Tanke', landlord:'Alhaji Ajao', mkt:"Iya Kudi's amala and gbegiri", hall:'Kwara Event Centre', water:'ASA RIVER', roads:['UNITY RD','TAIWO RD'], fm:'99.3', blurb:'State of Harmony, quiet streets, and a family that sees everything you do.', boss:'Oga Lukman', bossWord:'my dear', ware:'Kwara Agro Mills'}
 };
-for(const c of Object.values(CITIES)) if(c.ng){ c.rent = Math.round(1200 * c.k / 500) * 500; c.lender = 'SoftCredit loan app'; c.airport = 'the village'; }
+for(const c of Object.values(CITIES)) if(c.ng){ c.rent = Math.round(3700 * c.k / 500) * 500; c.lender = 'SoftCredit loan app'; c.airport = 'the village'; }
 const NG = () => !!(C && C.ng);
 let C;
 const STEP = () => C.ng ? 500 : 5;
@@ -204,15 +209,19 @@ const MISSIONS_ABROAD = [
   {id:'detty', title:'DETTY DECEMBER', line:() => `The family has booked your seat at Christmas dinner. The ticket from ${C.airport} costs this much.`, amt:() => A(1100)}
 ];
 const MISSIONS_HOME = [
-  {id:'rent',  title:'HOUSE RENT', line:() => `${C.landlord} wants this part of the rent balance by Friday night.`, amt:() => C.rent},
-  {id:'fees',  title:'SCHOOL FEES', line:() => "Your younger sister's school fees are due Friday. The bursar has already called Mummy.", amt:() => A(450)},
+  // in Nigeria rent is yearly, so the weekly bills are everything else, and the rent comes due every 12 weeks
   {id:'light', title:'LIGHT AND FUEL', line:() => 'Prepaid meter, generator fuel, and the estate levy, all by Friday.', amt:() => A(500)},
-  {id:'rent',  title:'HOUSE RENT', line:() => `${C.landlord} is back. "Balance, my dear." Friday night.`, amt:() => C.rent},
+  {id:'fees',  title:'SCHOOL FEES', line:() => "Your younger sister's school fees are due Friday. The bursar has already called Mummy.", amt:() => A(450)},
   {id:'owambe',title:'OWAMBE SEASON', line:() => 'Two weddings and a 60th. Aso ebi and gifts are due Friday.', amt:() => A(350)},
+  {id:'hosp',  title:'HOSPITAL BILL', line:() => "Daddy's blood pressure. The hospital wants a deposit before they do anything.", amt:() => A(400)},
+  {id:'phone', title:'PHONE AND DATA', line:() => 'Your phone screen cracked, and your data plan ends Friday. Life stops without both.', amt:() => A(250)},
   {id:'detty', title:'DETTY DECEMBER', line:() => 'Christmas in the village. Bus fare, gifts, and a bag of rice for everybody.', amt:() => A(900)}
 ];
+const RENT_EVERY = 12;
+const RENEWAL = {id:'renewal', title:'RENT RENEWAL', line:() => `${C.landlord} wants the whole year's rent by Friday night. "Two years would be better, but I will manage one."`, amt:() => A(3700)};
+const nextRenewal = w => Math.ceil(w / RENT_EVERY) * RENT_EVERY;
 const MISSIONS = () => NG() ? MISSIONS_HOME : MISSIONS_ABROAD;
-const missionFor = w => { const L = MISSIONS(), m = L[(w - 1) % L.length], cycle = Math.floor((w - 1) / L.length); return {...m, amount: Math.round(m.amt() * (1 + cycle * 0.06) / STEP()) * STEP()}; };
+const missionFor = w => { const L = MISSIONS(), renew = NG() && w % RENT_EVERY === 0, m = renew ? RENEWAL : L[(w - 1) % L.length], cycle = renew ? w / RENT_EVERY - 1 : Math.floor((w - 1) / L.length); return {...m, amount: Math.round(m.amt() * (1 + cycle * 0.06) / STEP()) * STEP()}; };
 
 /* ---------- words ---------- */
 const RADIO = () => NG() ? [
@@ -363,6 +372,8 @@ function hud(prev){
   $('when').textContent = `WEEK ${P.week} · ${DAYS[W.day].slice(0,3)} ${SLOTS[W.slot]}`;
   $('mtitle').innerHTML = `<b>${m.title}</b>${P.arrears ? ' + arrears' : ''}${P.owed ? ' + loan' : ''}`;
   $('mdue').textContent = 'Friday: ' + money(due());
+  const rl = $('rentline'); rl.hidden = !NG() || m.id === 'renewal';
+  if(NG() && m.id !== 'renewal'){ const nr = nextRenewal(P.week), amt = missionFor(nr).amount, wk = nr - P.week; rl.innerHTML = `🏠 Yearly rent in <b>${wk} week${wk === 1 ? '' : 's'}</b> (week ${nr}): <b>${money(amt)}</b>. You have ${Math.max(0, Math.min(100, Math.round(P.cash / amt * 100)))}% saved.<i><span style="width:${Math.max(0, Math.min(100, P.cash / amt * 100))}%"></span></i>`; }
   const c = $('cash'); c.textContent = money(P.cash); c.classList.toggle('down', prev != null && P.cash < prev);
   $('en').style.width = Math.max(0, W.energy) + '%'; $('enlbl').setAttribute('aria-label', 'Energy ' + Math.max(0, W.energy) + ' of 100');
   const st = $('stars'); st.innerHTML = [0,1,2,3,4].map(i => `<span class="${i < W.stars ? 'on' : 'off'}">★</span>`).join(''); st.setAttribute('aria-label', 'Aunty Alert ' + W.stars + ' of 5');
@@ -591,7 +602,7 @@ function friday(){
   if(pass){
     P.cash -= owe + loan; P.arrears = 0; P.owed = 0; P.warnings = Math.max(0, P.warnings - 0.5);
     const left = P.cash;
-    title = left >= A(400) ? 'ABROAD STRATEGIST' : W.peace < 30 ? 'HUSTLE WITHOUT PEACE' : W.log.sent >= A(150) ? 'GENEROUS AND STILL STANDING' : m.id === 'rent' ? 'RENT PAID' : 'BILL PAID';
+    title = m.id === 'renewal' ? 'ONE MORE YEAR OF ROOF' : left >= A(400) ? (NG() ? 'SAPA CANNOT CATCH ME' : 'ABROAD STRATEGIST') : W.peace < 30 ? 'HUSTLE WITHOUT PEACE' : W.log.sent >= A(150) ? 'GENEROUS AND STILL STANDING' : m.id === 'rent' ? 'RENT PAID' : 'BILL PAID';
     big = 'MISSION PASSED'; cls = 'win';
     line = left >= A(400) ? 'Paid, with money left to breathe. People are starting to ask you for advice.' : 'Paid. It was tight, but it is done.';
   } else {
@@ -692,6 +703,7 @@ function weekIntro(){
       <div><span>Due Friday night</span><span>${money(m.amount)}</span></div>
       <div><span>Food, bus, and phone</span><span>${money(living())}</span></div>
       ${P.ajo ? `<div><span>Ajo contribution</span><span>${money(ajoDue())}</span></div>` : ''}
+      ${NG() && m.id !== 'renewal' ? `<div><span>🏠 Yearly rent, week ${nextRenewal(P.week)}</span><span>${money(missionFor(nextRenewal(P.week)).amount)}</span></div>` : ''}
       ${P.arrears ? `<div><span>Arrears from last week</span><span>${money(P.arrears)}</span></div>` : ''}
       <div><span>You have</span><span>${money(P.cash)}</span></div>
       ${P.warnings ? `<div><span>Warnings</span><span>${Math.ceil(P.warnings)} of 3</span></div>` : ''}
