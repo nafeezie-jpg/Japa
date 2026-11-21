@@ -115,6 +115,7 @@ Read this, then read index.html, before changing anything.
 - **Saved** in localStorage nyhl-week. One week per day; replay shows the done screen and a countdown. Share text works like Wordle.
 - **Balance.** A sensible player passes most weeks with modest savings; careless play fails. Check with a smart-player run before changing pay or bills.
 - **Tests.** `python3 tests/rent_week.py` plays seven days in each city and must print `ISSUES: none`. window.__rentweek is a read-only peek for tests.
+- **Nigeria (20 Nov 2026).** Seven home cities with ng:1: lagos, abuja, ph, ibadan, kano, enugu, ilorin. Prices are in naira; k is about 100 for Lagos and Abuja and 60 for Kano and Ilorin, rounded to ₦500 (STEP). NG() switches in MISSIONS_HOME (house rent, school fees, light and fuel, owambe, Christmas in the village), Naija FM radio, home requests (Cousin Emeka wants to stay "for small time"), friends-abroad statuses, and home places (9 to 5 closed at night, buka, loan app, filling station, mechanic village, ICAN class, POS stand). ngWork() covers late salaries and staying late. NEPA takes light on most nights; fuel from the filling station covers two nights, and without it you lose peace and energy. Balance: Nigerian pay A(120), bank job A(200), living A(200). A sensible player just makes rent in week 1.
 - **Not yet.** No leaderboard (it would need its own Supabase table). Ideas: a weekly leaderboard, more places, city-specific radio lines.
 
 ## Next up (agreed 31 Oct 2026, Nafeezie returns about 15-16 Nov)

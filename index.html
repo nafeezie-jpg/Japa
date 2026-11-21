@@ -3291,7 +3291,7 @@ function rentWeekCard(){
   let w = null; try{ w = JSON.parse(localStorage.getItem('nyhl-week')||'null'); }catch(e){}
   const played = w && w.done === todayStr(), last = w && w.hist && w.hist[w.hist.length-1];
   const head = !w ? 'NEW · Rent Week' : played ? `Rent Week · week ${last.w} ${last.pass ? 'passed ✅' : 'failed ❌'}` : `Rent Week · week ${w.week} is ready`;
-  const sub = !w ? 'A city map, a bill due Friday, a loan shark, and your aunties watching ★★★★★. One week a day.' : played ? 'Next week unlocks tomorrow. Your money and your progress carry on.' : 'Your bill is due Friday night. Work, drive, hustle, and keep the Aunty Alert down.';
+  const sub = !w ? 'Abroad or at home in Nigeria. A city map, a bill due Friday, and your aunties watching ★★★★★. One week a day.' : played ? 'Next week unlocks tomorrow. Your money and your progress carry on.' : 'Your bill is due Friday night. Work, drive, hustle, and keep the Aunty Alert down.';
   return `<a class="rwcard" href="/week/" onclick="track('home-rentweek')"><span class="rw-ic" aria-hidden="true">🌆</span><span><b>${head}</b><small>${sub}</small></span><span class="rw-go" aria-hidden="true">${played ? '✓' : '▶'}</span></a>`;
 }
 /* ---------- Your progress, at a glance ---------- */

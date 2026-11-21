@@ -27,7 +27,7 @@ async def play_week(pg, tag, shoot=False):
 async def run():
   async with async_playwright() as p:
     b = await p.chromium.launch()
-    for ci, city in enumerate(['houston','london','toronto']):
+    for ci, city in enumerate(['houston','london','toronto','lagos','abuja','ph','ibadan','kano','enugu','ilorin']):
       ctx = await b.new_context(viewport={'width':390,'height':844}); pg = await ctx.new_page()
       errs = []; pg.on('pageerror', lambda e, errs=errs: errs.append(str(e)))
       await pg.route('**/gc.zgo.at/**', lambda r: r.abort()); await pg.route('**/fonts.g*/**', lambda r: r.abort())
@@ -35,7 +35,7 @@ async def run():
       await pg.clock.install(time=day0); await pg.goto(PAGE)
       await pg.click(f'.city[data-c="{city}"]'); await pg.wait_for_timeout(300)
       if SHOTS and ci == 0: await pg.screenshot(path='tests/shots/week-intro.png')
-      for d in range(7):
+      for d in range(7 if ci < 4 else 3):
         if d: await pg.clock.set_fixed_time(day0 + datetime.timedelta(days=d)); await pg.goto(PAGE); await pg.wait_for_timeout(300)
         before = await pg.evaluate('JSON.parse(localStorage.getItem("nyhl-week"))')
         if before['week'] != d + 1 and not before.get('lives', 1) > 1: issues.append(f'{city} day {d}: expected week {d+1}, got {before["week"]}')

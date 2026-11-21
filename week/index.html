@@ -168,10 +168,21 @@ const myName = (() => { try{ return (localStorage.getItem('nyhl-name')||'').trim
 const CITIES = {
   houston:{name:'Houston', flag:'🇺🇸', cur:'$', k:1, rent:1200, start:520, area:'Bissonnet', landlord:'Landlord Kevin', lender:'Quick Cash Kings', mkt:"Mama Ngozi's African Market", hall:'Celebration Hall, Alief', water:'BUFFALO BAYOU', roads:['I-45','610'], airport:'IAH', fm:'98.7', blurb:'Warehouse shifts, a 2009 Corolla, and humidity that hugs too hard.', boss:'Brad', bossWord:'buddy', ware:'Amazing Logistics'},
   london:{name:'London', flag:'🇬🇧', cur:'£', k:.8, rent:950, start:420, area:'Peckham', landlord:'Mr Patel', lender:'Cash4U Today', mkt:"Mama Ngozi's in Peckham", hall:'Thamesmead Events Hall', water:'RIVER THAMES', roads:['A2','S. CIRCULAR'], airport:'Heathrow', fm:'99.1', blurb:'Care shifts, night buses, and rain that never fully stops.', boss:'Gareth', bossWord:'mate', ware:'Swift Parcels'},
-  toronto:{name:'Toronto', flag:'🇨🇦', cur:'C$', k:1.25, rent:1500, start:650, area:'Brampton', landlord:'Gary', lender:'EZ Money Now', mkt:"Mama Ngozi's in Brampton", hall:'Mississauga Event Centre', water:'HUMBER RIVER', roads:['401','410'], airport:'Pearson', fm:'101.3', blurb:'Factory shifts, minus 20 in January, and everybody apologising.', boss:'Darren', bossWord:'bud', ware:'Maple Freight'}
+  toronto:{name:'Toronto', flag:'🇨🇦', cur:'C$', k:1.25, rent:1500, start:650, area:'Brampton', landlord:'Gary', lender:'EZ Money Now', mkt:"Mama Ngozi's in Brampton", hall:'Mississauga Event Centre', water:'HUMBER RIVER', roads:['401','410'], airport:'Pearson', fm:'101.3', blurb:'Factory shifts, minus 20 in January, and everybody apologising.', boss:'Darren', bossWord:'bud', ware:'Maple Freight'},
+  // home: the same pressure, Nigerian edition
+  lagos:{ng:1, name:'Lagos', flag:'🇳🇬', cur:'₦', k:100, area:'Yaba', landlord:'Alhaji Landlord', mkt:"Iya Basira's buka", hall:'Eko Event Centre, Ikeja', water:'LAGOS LAGOON', roads:['3RD MAINLAND','IKORODU RD'], fm:'97.3', blurb:'Go-slow on Third Mainland, NEPA on strike, and a landlord who wants two years upfront.', boss:'Oga Tunde', bossWord:'my dear', ware:'Prime Trust Bank, Marina'},
+  abuja:{ng:1, name:'Abuja', flag:'🇳🇬', cur:'₦', k:100, area:'Kubwa', landlord:'Chief Okafor', mkt:"Mama Nkechi's canteen", hall:'Shehu Event Hall, Wuse', water:'JABI LAKE', roads:['AIRPORT RD','EXPRESSWAY'], fm:'99.9', blurb:'Kubwa traffic, ministry gist, and rent priced like Lagos.', boss:'Oga Director', bossWord:'my dear', ware:'A ministry office in the Secretariat'},
+  ph:{ng:1, name:'Port Harcourt', flag:'🇳🇬', cur:'₦', k:90, area:'Rumuokoro', landlord:'Pa Ibinabo', mkt:"Mama Tonye's pepper soup joint", hall:'Garden City Event Hall', water:'BONNY RIVER', roads:['ABA RD','IKWERRE RD'], fm:'98.5', blurb:'Oil company dreams, soot on your windowsill, and pepper soup that fixes everything.', boss:'Oga Boma', bossWord:'my person', ware:'Deltastar Oil Services'},
+  ibadan:{ng:1, name:'Ibadan', flag:'🇳🇬', cur:'₦', k:70, area:'Bodija', landlord:'Baba Landlord', mkt:"Iya Ibeji's amala spot", hall:'Ring Road Event Centre', water:'OGUNPA RIVER', roads:['RING RD','IWO RD'], fm:'101.1', blurb:'Brown roofs, cheap amala, and everyone asking when you will move to Lagos.', boss:'Oga Kunle', bossWord:'my dear', ware:'Oyo Agro Processing'},
+  kano:{ng:1, name:'Kano', flag:'🇳🇬', cur:'₦', k:60, area:'Sabon Gari', landlord:'Alhaji Musa', mkt:"Mai Shayi's tea spot", hall:'Durbar Event Hall', water:'JAKARA RIVER', roads:['ZOO RD','BUK RD'], fm:'95.5', blurb:'Harmattan, kilishi, and a market older than your great-grandfather.', boss:'Oga Sani', bossWord:'my friend', ware:'Kano Textile Mills'},
+  enugu:{ng:1, name:'Enugu', flag:'🇳🇬', cur:'₦', k:70, area:'Independence Layout', landlord:'Chief Eze', mkt:"Mama Nkechi's abacha joint", hall:'Coal City Event Hall', water:'EKULU RIVER', roads:['OGUI RD','ZIK AVE'], fm:'96.1', blurb:'Coal City calm, green hills, and an uncle who knows everybody at the council.', boss:'Oga Chinedu', bossWord:'my brother', ware:'Coal City Distributors'},
+  ilorin:{ng:1, name:'Ilorin', flag:'🇳🇬', cur:'₦', k:60, area:'Tanke', landlord:'Alhaji Ajao', mkt:"Iya Kudi's amala and gbegiri", hall:'Kwara Event Centre', water:'ASA RIVER', roads:['UNITY RD','TAIWO RD'], fm:'99.3', blurb:'State of Harmony, quiet streets, and a family that sees everything you do.', boss:'Oga Lukman', bossWord:'my dear', ware:'Kwara Agro Mills'}
 };
+for(const c of Object.values(CITIES)) if(c.ng){ c.rent = Math.round(1200 * c.k / 500) * 500; c.lender = 'SoftCredit loan app'; c.airport = 'the village'; }
+const NG = () => !!(C && C.ng);
 let C;
-const A = v => Math.round(v * C.k / 5) * 5;
+const STEP = () => C.ng ? 500 : 5;
+const A = v => Math.round(v * C.k / STEP()) * STEP();
 const money = v => (v < 0 ? '-' : '') + C.cur + Math.abs(Math.round(v)).toLocaleString('en-US');
 
 /* ---------- the same luck for everyone today ---------- */
@@ -184,7 +195,7 @@ const pickL = (tag, arr) => arr[Math.floor(luck(tag) * arr.length)];
 const shuffleL = (tag, arr) => arr.map((x, i) => [luck(tag + i), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
 
 /* ---------- each week has a bill to beat ---------- */
-const MISSIONS = [
+const MISSIONS_ABROAD = [
   {id:'rent',  title:'RENT DAY', line:w => `${C.landlord} wants the rent by Friday night.`, amt:() => C.rent},
   {id:'car',   title:'THE CAR NOTE', line:() => 'Your car payment and insurance are both due Friday.', amt:() => A(450)},
   {id:'visa',  title:'VISA RENEWAL', line:() => 'Your lawyer needs the renewal fee by Friday, or the paperwork waits.', amt:() => A(800)},
@@ -192,10 +203,30 @@ const MISSIONS = [
   {id:'owambe',title:'OWAMBE SEASON', line:() => 'Two weddings and a 60th. Aso ebi and gifts are due Friday.', amt:() => A(350)},
   {id:'detty', title:'DETTY DECEMBER', line:() => `The family has booked your seat at Christmas dinner. The ticket from ${C.airport} costs this much.`, amt:() => A(1100)}
 ];
-const missionFor = w => { const m = MISSIONS[(w - 1) % MISSIONS.length], cycle = Math.floor((w - 1) / MISSIONS.length); return {...m, amount: Math.round(m.amt() * (1 + cycle * 0.06) / 5) * 5}; };
+const MISSIONS_HOME = [
+  {id:'rent',  title:'HOUSE RENT', line:() => `${C.landlord} wants this part of the rent balance by Friday night.`, amt:() => C.rent},
+  {id:'fees',  title:'SCHOOL FEES', line:() => "Your younger sister's school fees are due Friday. The bursar has already called Mummy.", amt:() => A(450)},
+  {id:'light', title:'LIGHT AND FUEL', line:() => 'Prepaid meter, generator fuel, and the estate levy, all by Friday.', amt:() => A(500)},
+  {id:'rent',  title:'HOUSE RENT', line:() => `${C.landlord} is back. "Balance, my dear." Friday night.`, amt:() => C.rent},
+  {id:'owambe',title:'OWAMBE SEASON', line:() => 'Two weddings and a 60th. Aso ebi and gifts are due Friday.', amt:() => A(350)},
+  {id:'detty', title:'DETTY DECEMBER', line:() => 'Christmas in the village. Bus fare, gifts, and a bag of rice for everybody.', amt:() => A(900)}
+];
+const MISSIONS = () => NG() ? MISSIONS_HOME : MISSIONS_ABROAD;
+const missionFor = w => { const L = MISSIONS(), m = L[(w - 1) % L.length], cycle = Math.floor((w - 1) / L.length); return {...m, amount: Math.round(m.amt() * (1 + cycle * 0.06) / STEP()) * STEP()}; };
 
 /* ---------- words ---------- */
-const RADIO = () => [
+const RADIO = () => NG() ? [
+  `Naija FM ${C.fm}. If you hear a generator, it is not you. It is everybody.`,
+  'AD: Japa seminar this Saturday. Learn how to leave. The fee is non-refundable, like your landlord.',
+  `Traffic: ${C.roads[0]} is standing still. Your oga has already noticed you are late.`,
+  'NEPA update: light came for forty minutes. Please manage it.',
+  'Fuel price: we do not want to talk about it.',
+  `AD: ${C.lender}. Instant loans. If you forget to pay, we will text your contacts. With love.`,
+  'Gist: your classmate in Canada posted snow again. Snow is not a personality.',
+  'Request line: Aunty Bisi dedicates "Owo Ni Koko" to everybody who is working.',
+  'Sports: Super Eagles fans report three viewing centres and one generator.',
+  `News: man in ${C.area} buys a generator bigger than his flat. Neighbours are grateful.`
+] : [
   `Japa FM ${C.fm}, the station that converts every price to naira so you do not have to.`,
   `AD: Tired of your landlord? Become a landlord. Our seminar is only ${money(A(499))}.`,
   'Weather: cold tonight. Colder than the reply your cousin sent.',
@@ -208,7 +239,17 @@ const RADIO = () => [
   'AD: Learn to code in 6 weeks. Results not guaranteed. Debt guaranteed.',
   'Sports: Super Eagles fans abroad report watching the match on a cousin\'s phone held up to a TV.'
 ];
-const REQUESTS = () => [
+const REQUESTS = () => NG() ? [
+  {from:'Aunty Bisi', t:'Our generator has packed up. You are working now, you can manage it.', amt:A(40)},
+  {from:'Cousin Blessing', t:'Data finished. Just small. I will pay back when things settle.', amt:A(20)},
+  {from:'Mummy', t:"Your brother's school fees. The school is threatening him. Please.", amt:A(120)},
+  {from:'Uncle Femi', t:'I am in the hospital. Send money now, I will explain later. Do not call.', amt:A(80), scam:true},
+  {from:'Family group', t:"Contribution for Baba's 70th. Everybody working is paying. Names are being written.", amt:A(50)},
+  {from:'Tunde (secondary school)', t:'Guy, small capital for my business. You are the one with the office job.', amt:A(60)},
+  {from:'Pastor Sunday', t:'The church roof project. Your name is already on the honour board.', amt:A(45)},
+  {from:'Daddy', t:'Your mother says I should not ask. I am asking. The roof is leaking.', amt:A(90)},
+  {from:'Cousin Emeka', t:`I am coming to ${C.name} to look for work. I will just stay with you for small time.`, amt:A(0), guest:true}
+] : [
   {from:'Aunty Bisi', t:'Our generator has packed up. Send ₦60,000. God will replace it for you.', amt:A(40)},
   {from:'Cousin Blessing', t:'Data finished. Just small. I will pay back when things settle.', amt:A(20)},
   {from:'Mummy', t:"Your brother's school fees. The school is threatening him. Please.", amt:A(120)},
@@ -219,25 +260,45 @@ const REQUESTS = () => [
   {from:'Daddy', t:'Your mother says I should not ask. I am asking. The roof is leaking.', amt:A(90)},
   {from:'Cousin Emeka', t:'I am coming to your country next month. Can you send me proof of funds? Just a screenshot.', amt:A(0), proof:true}
 ];
-const STATUS = [
+const STATUS_HOME = [
+  'Your friend in Canada posted "First snow ❄️" for the ninth time.',
+  'Your classmate in London: "Just bought my first car 🙏🏾". It is a 2011 Corolla.',
+  'Cousin Blessing posted a status from the Bernabéu. Nobody knows where the money came from.',
+  'Tunde changed his profile picture. A Lexus with a red bow.',
+  'Your old colleague japa-ed. Today: an airport selfie captioned "Grateful".'
+];
+const STATUS_ABROAD = [
   'Cousin Blessing posted a status from the Bernabéu. Caption: "God did it 🙌🏾".',
   'Aunty Bisi\'s status: a seafood platter in Victoria Island. "Soft life is my portion."',
   'Tunde changed his profile picture. A Lexus with a red bow.',
   'Your old colleague is now Head of Operations. LinkedIn wants you to congratulate him.',
   'Your friend who stayed home just bought land in Ibeju-Lekki. The caption: "Who said you must japa?"'
 ];
+const STATUS = () => NG() ? STATUS_HOME : STATUS_ABROAD;
 
 /* ---------- state ---------- */
 let P, W;
-function freshLife(city){ return {v:1, city, week:1, cash:Math.round(700 * CITIES[city].k / 5) * 5, owed:0, arrears:0, car:'old', boss:0, promo:false, school:0, office:false, mama:0, stall:false, warnings:0, last:'', done:'', streak:0, lives:1, hist:[], seen:{}}; }
+function freshLife(city){ return {v:1, city, week:1, cash:Math.round(700 * CITIES[city].k / (CITIES[city].ng ? 500 : 5)) * (CITIES[city].ng ? 500 : 5), owed:0, arrears:0, car:'old', boss:0, promo:false, school:0, office:false, mama:0, stall:false, warnings:0, last:'', done:'', streak:0, lives:1, hist:[], seen:{}}; }
 function freshWeek(){
-  const reqs = shuffleL('req' + P.week, REQUESTS()).filter(r => !(r.proof && P.week < 2));
+  const reqs = shuffleL('req' + P.week, REQUESTS()).filter(r => !((r.proof || r.guest) && P.week < 2));
   W = {day:0, slot:0, energy:100, peace:60, stars:Math.min(2, Math.floor(P.warnings)), at:'home', inbox:[], queue:reqs, log:{shifts:0, rides:0, sent:0, ignored:0, earned:0}, bet:false, hustle:false, statusN:0, borrowed:0};
 }
 function save(){ store.set(P); }
 
 /* ---------- map ---------- */
-const PL = () => ({
+const PL = () => NG() ? ({
+  home:{x:18,y:84,ic:'🏠',nm:'Your room', title:`Your self-contain in ${C.area}`, who:'Shared compound, one tap, and a neighbour whose generator is louder than a church.'},
+  work: P.office ? {x:80,y:24,ic:'🏦',nm:'New job', title:'Your new job at a bank', who:'Air conditioning that works, suits, and a real pension.'}
+                 : {x:80,y:24,ic:'💼',nm:'9 to 5', title:C.ware, who:`${C.boss} calls everyone "${C.bossWord}". Salary comes "by the grace of God".`},
+  ryde:{x:50,y:42,ic:'🚗',nm:'Ryde', title:'Drive for Ryde', who: P.car==='fixed' ? 'Your car, freshly fixed. Even the AC works.' : 'Your Corolla, nicknamed "End of Discussion". The AC works when it wants.'},
+  mama:{x:24,y:33,ic:'🍲',nm:'Buka', title:C.mkt, who:'Hot food, cold drinks, and the freshest gist in the area.'},
+  loan:{x:82,y:64,ic:'📲',nm:'Loan app', title:C.lender, who:'Instant approval. They also get access to all your contacts.'},
+  hall:{x:50,y:79,ic:'🎉',nm:'Owambe', title:C.hall, who:'Thursday night. Aunty Funmi turns 60 again.'},
+  fuel:{x:84,y:86,ic:'⛽',nm:'Filling station', title:'Filling station', who:'There is fuel today. There is also a queue to the next town.'},
+  ...(P.week >= 2 && P.car !== 'fixed' ? {mech:{x:62,y:61,ic:'🔧',nm:'Mechanic', title:'Mechanic village', who:'Fourteen mechanics, one car, and everybody has an opinion.', fresh:P.week===2}} : {}),
+  ...(P.week >= 3 && !P.office ? {school:{x:24,y:58,ic:'🎓',nm:'ICAN class', title:'Professional exam class', who:`Four evening classes and the banks will look at your CV. You have done ${P.school} of 4.`, fresh:P.week===3}} : {}),
+  ...(P.week >= 5 && !P.stall ? {stall:{x:40,y:14,ic:'🏧',nm:'POS stand', title:'A POS stand by the junction', who:'Everybody needs cash. The buka owner will vouch for you if she trusts you.', fresh:P.week===5}} : {})
+}) : ({
   home:{x:18,y:84,ic:'🏠',nm:'Your flat', title:`Your flat in ${C.area}`, who:'Shared wall with a man who plays the drums at midnight.'},
   work: P.office ? {x:80,y:24,ic:'💼',nm:'Office', title:'Your new office job', who:'A desk, a lanyard, and a coffee machine that judges you.'}
                  : {x:80,y:24,ic:'📦',nm:'Warehouse', title:C.ware, who:`Supervisor ${C.boss} calls everyone "${C.bossWord}". Nobody knows his surname.`},
@@ -255,7 +316,8 @@ function isOpen(k){
   if(k==='loan') return W.slot!==2;
   if(k==='mama') return W.slot!==2;
   if(k==='school') return W.slot===2;
-  if(k==='work' && P.office) return W.slot!==2;
+  if(k==='work' && (P.office || NG())) return W.slot!==2;
+  if(k==='fuel') return W.slot!==2;
   if(k==='mech') return W.slot!==2;
   return true;
 }
@@ -274,7 +336,7 @@ function drawCity(){
   for(let i=0;i<70;i++){ const x = (hash('w'+i) % 340) + 10, y = (hash('y'+i) % 380) + 10; g.fillStyle = i % 3 ? 'rgba(255,201,60,.18)' : 'rgba(255,138,61,.22)'; g.fillRect(x, y, 3, 3); }
   const sign = (x,y,t) => { g.font = '700 9px Rubik, sans-serif'; const tw = g.measureText(t).width + 10; g.fillStyle = '#FFC93C'; g.beginPath(); g.roundRect ? g.roundRect(x - tw/2, y - 7, tw, 13, 3) : g.rect(x - tw/2, y - 7, tw, 13); g.fill(); g.fillStyle = '#16122B'; g.textAlign = 'center'; g.fillText(t, x, y + 3); };
   sign(180, 70, C.roads[0]); sign(300, 192, C.roads[1]);
-  g.font = '9px Rubik, sans-serif'; g.fillStyle = '#5FA9B8'; g.textAlign = 'right'; g.fillText(C.water, 352, 228);
+  g.font = '9px Rubik, sans-serif'; g.fillStyle = '#5FA9B8'; g.textAlign = 'left'; g.fillText(C.water, 8, 236);
 }
 function pins(){
   places = PL();
@@ -287,7 +349,7 @@ function pins(){
 /* ---------- HUD ---------- */
 const DAYS = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY'], SLOTS = ['MORNING','AFTERNOON','NIGHT'];
 const SKY = ['linear-gradient(180deg,rgba(255,170,90,.18),rgba(255,170,90,0) 60%)','linear-gradient(180deg,rgba(255,230,170,.08),transparent)','linear-gradient(180deg,rgba(5,3,20,.55),rgba(5,3,20,.35))'];
-const living = () => A(150) + Math.min(5, Math.floor((P.week - 1) / 3)) * A(15);   // food, bus, phone, slowly creeping up
+const living = () => A(NG() ? 200 : 150) + Math.min(5, Math.floor((P.week - 1) / 3)) * A(15);   // food, bus, phone, slowly creeping up
 const due = () => missionFor(P.week).amount + P.arrears + P.owed + living();
 function hud(prev){
   const m = missionFor(P.week);
@@ -306,7 +368,7 @@ function bumpStars(){ const s = $('stars'); s.classList.remove('bump'); void s.o
 /* ---------- sheet ---------- */
 const sheet = html => { $('sheet').innerHTML = html; };
 function idle(){
-  const hint = W.energy < 30 ? 'You are running on empty. Your flat is calling you.' : W.slot === 2 ? 'Night. Some places are closed. The warehouse never sleeps.' : 'Tap a place on the map. Each visit uses part of your day.';
+  const hint = W.energy < 30 ? 'You are running on empty. Your flat is calling you.' : W.slot === 2 ? (NG() ? 'Night. Offices are closed, but Ryde still runs.' : 'Night. Some places are closed. The warehouse never sleeps.') : 'Tap a place on the map. Each visit uses part of your day.';
   sheet(`<h2>${DAYS[W.day][0] + DAYS[W.day].slice(1).toLowerCase()} ${SLOTS[W.slot].toLowerCase()}. Where to?</h2><p>${hint}</p>${W.day===3 && W.slot===2 ? '<p class="who">🎉 The owambe is on tonight.</p>' : ''}`);
 }
 function visit(k){
@@ -318,15 +380,18 @@ function visit(k){
 const T = () => W.day + '-' + W.slot;   // luck is shared per moment of the week, so the same move gets the same outcome for everyone today
 function actions(k){
   const tired = W.energy < 20;
-  const shiftPay = () => P.office ? A(210) : (W.slot===2 ? A(170) : A(130)) + (P.promo ? A(40) : 0);
+  const shiftPay = () => NG() ? (P.office ? A(200) : A(120) + (P.promo ? A(35) : 0)) : P.office ? A(210) : (W.slot===2 ? A(170) : A(130)) + (P.promo ? A(40) : 0);
+  const ng = NG();
   switch(k){
     case 'home': return [
       {l:'Sleep it off', tag:'+45 energy', run:() => done({energy:45, peace:6}, pickL('sleep'+T(), ['You sleep like someone who paid for the bed. Because you did.','The drummer next door takes a night off. A miracle.','You dream NEPA brought light for 24 hours. You wake up refreshed and confused.']))},
-      {l:'Video call home', tag:'+peace · ★ down', run:() => done({energy:20, peace:12, stars:-1}, 'Mummy shows you the new curtains, the dog, and a cousin you do not recognise. You feel held.')}
+      ng ? {l:'Visit your parents', tag:'+peace · ★ down', run:() => done({energy:15, peace:12, stars:-1, cash:-A(15)}, 'Mummy cooks, Daddy reads the newspaper aloud, and nobody asks you for money for one whole hour. You leave with a cooler of stew.')}
+         : {l:'Video call home', tag:'+peace · ★ down', run:() => done({energy:20, peace:12, stars:-1}, 'Mummy shows you the new curtains, the dog, and a cousin you do not recognise. You feel held.')}
     ];
     case 'work': return [
-      {l: P.office ? 'Do a day at the office' : W.slot===2 ? 'Night shift' : 'Day shift', tag:`+${money(shiftPay())} · -${P.office ? 20 : W.slot===2 ? 40 : 35} energy`, dis:tired, run:() => {
-        W.log.shifts++; const pay = shiftPay(), en = P.office ? -20 : W.slot===2 ? -40 : -35;
+      {l: ng ? (P.office ? 'A day at the bank' : 'Go to work') : P.office ? 'Do a day at the office' : W.slot===2 ? 'Night shift' : 'Day shift', tag:`+${money(shiftPay())} · -${P.office ? 20 : ng ? 30 : W.slot===2 ? 40 : 35} energy`, dis:tired, run:() => {
+        W.log.shifts++; const pay = shiftPay(), en = P.office ? -20 : ng ? -30 : W.slot===2 ? -40 : -35;
+        if(ng) return ngWork(pay, en);
         if(!P.office){ P.boss++; if(!P.promo && P.boss >= 8){ P.promo = true; return done({cash:pay, energy:en}, `${C.boss} calls you over. "${C.bossWord[0].toUpperCase() + C.bossWord.slice(1)}, you are the only one who shows up. Forklift lead. ${money(A(40))} more a shift." You did not even know you wanted it.`, '🏅 Promoted to forklift lead'); } }
         if(!P.office && roll('ot' + T(), .3)) return choice(`${C.boss} says "${C.bossWord}" twice, which means he wants something. Overtime?`, [
           {l:'Yes, two more hours', run:() => done({cash:pay + A(60), energy:en - 20, peace:-4}, 'Two extra hours of boxes. Your back now has opinions.')},
@@ -342,44 +407,57 @@ function actions(k){
           {l:'Pay the mechanic', run:() => done({cash:-A(90), energy:-15, peace:-6}, 'Fixed. The mechanic gives you a "home discount" of zero.')},
           {l:'YouTube it, fix it yourself', run:() => roll('diy' + T(), .5) ? done({cash:-A(15), energy:-30, peace:4}, 'Two hours, one video, grease to your elbows. It works. You feel like a genius.') : done({cash:-A(110), energy:-30, peace:-8}, `You fix the fan belt and break something else. Now it is ${money(A(110))}.`)}
         ]);
-        if(r < .26) return done({cash:-A(75), energy:-25, peace:-5}, `Lights behind you. Rolling stop. ${money(A(75))} ticket. You say "yes officer" eleven times.`);
-        if(r < .38) return done({cash:between('tip' + T(), 90, 140) * C.k + A(60), energy:-25, peace:8}, `Your rider is a Nigerian aunty going to a vigil. She prays for you for twenty minutes and tips ${money(A(60))}.`);
-        done({cash:A(between('fare' + T(), 45, 150)) + (P.car==='fixed' ? A(20) : 0), energy:-25}, pickL('rt' + T(), ['A man talks about crypto the whole ride. Five stars anyway.','Airport run. Long ride, good fare, no small talk. Perfect.','Rain and surge pricing. The only time rain has ever helped you.']));
+        if(r < .26) return ng ? done({cash:-A(30), energy:-25, peace:-5}, `A checkpoint. "Anything for the boys?" You hand over ${money(A(30))} and a very tired smile.`) : done({cash:-A(75), energy:-25, peace:-5}, `Lights behind you. Rolling stop. ${money(A(75))} ticket. You say "yes officer" eleven times.`);
+        if(r < .38) return done({cash:Math.round(between('tip' + T(), 90, 140) * C.k / STEP()) * STEP() + A(60), energy:-25, peace:8}, ng ? `Your passenger is a big man's personal assistant. He talks for an hour and tips ${money(A(60))} "for the road".` : `Your rider is a Nigerian aunty going to a vigil. She prays for you for twenty minutes and tips ${money(A(60))}.`);
+        done({cash:A(between('fare' + T(), 45, 150)) + (P.car==='fixed' ? A(20) : 0), energy:-25}, pickL('rt' + T(), ng ? ['A woman negotiates the fare down, then tips you back up. Only in Nigeria.','Airport run. The domestic terminal. Good fare, no wahala.','Rain floods half the road. Surge pricing finally works for you.'] : ['A man talks about crypto the whole ride. Five stars anyway.','Airport run. Long ride, good fare, no small talk. Perfect.','Rain and surge pricing. The only time rain has ever helped you.']));
       }}
     ];
     case 'mama': return [
-      {l:'Buy food for the week', tag:`-${money(A(35))} · +energy`, run:() => { P.mama++; done({cash:-A(35), energy:15, peace:6}, pickL('food' + T(), ['Garri, rice, and stockfish that announces itself to the whole bus.','Mama adds free ugu "because you are too thin". You are not too thin.'])); }},
+      {l:'Buy food for the week', tag:`-${money(A(35))} · +energy`, run:() => { P.mama++; done({cash:-A(35), energy:15, peace:6}, pickL('food' + T(), ng ? ['Rice, beans, and a small tin of tomato paste that costs as much as the rice.','She adds extra meat "because you are a regular". Your heart sings.'] : ['Garri, rice, and stockfish that announces itself to the whole bus.','Mama adds free ugu "because you are too thin". You are not too thin.'])); }},
       {l:'Listen to the gossip', tag:'free', run:() => {
         P.mama++;
-        if(!W.hustle){ W.hustle = true; return choice(`Mama leans in. "My nephew sells shea butter online. Put ${money(A(80))} in, you can get ${money(A(200))} back by Friday. Or not. It is business."`, [
+        if(!W.hustle){ W.hustle = true; return choice(ng ? `She leans in. "My son sells phone accessories at the computer market. Put ${money(A(80))} in, you can get ${money(A(200))} back by Friday. Or not. It is business."` : `Mama leans in. "My nephew sells shea butter online. Put ${money(A(80))} in, you can get ${money(A(200))} back by Friday. Or not. It is business."`, [
           {l:`Put in ${money(A(80))}`, run:() => { W.bet = true; done({cash:-A(80), peace:-2}, 'You hand it over. Mama says "you will see". You are not sure what you will see.'); }},
           {l:'No thank you, Ma', run:() => done({peace:2}, 'Mama hisses, but kindly. She gives you a free puff-puff anyway.')}
         ]); }
-        done({peace:4}, pickL('gos' + T(), ['"That one that came last year has bought a house." Nobody knows how. Everybody has a theory.',"\"Bisi's son married an oyinbo.\" The shop goes quiet for a moment of respect."]));
+        done({peace:4}, pickL('gos' + T(), ng ? ['"That boy who japa-ed last year is already complaining about the cold." The whole buka laughs for five minutes.','"Prices went up again." Nobody asks which prices. All of them.'] : ['"That one that came last year has bought a house." Nobody knows how. Everybody has a theory.',"\"Bisi's son married an oyinbo.\" The shop goes quiet for a moment of respect."]));
       }}
     ];
     case 'loan': return [
-      {l: W.borrowed ? 'You already borrowed this week' : `Borrow ${money(A(300))} now`, tag: W.borrowed ? '' : `pay ${money(A(420))} Friday`, dis:!!W.borrowed, run:() => { W.borrowed = A(300); P.owed += A(420); done({cash:A(300), peace:-5}, `The man smiles too much. You sign six pages. ${money(A(300))} lands. ${money(A(420))} leaves on Friday.`); }}
+      {l: W.borrowed ? 'You already borrowed this week' : `Borrow ${money(A(300))} now`, tag: W.borrowed ? '' : `pay ${money(A(420))} Friday`, dis:!!W.borrowed, run:() => { W.borrowed = A(300); P.owed += A(420); done({cash:A(300), peace:-5}, ng ? `The app approves you in four minutes. It also wants your contacts, your photos, and your soul. ${money(A(300))} lands. ${money(A(420))} leaves on Friday.` : `The man smiles too much. You sign six pages. ${money(A(300))} lands. ${money(A(420))} leaves on Friday.`); }}
     ];
     case 'hall': return [
       {l:'Go, spray money, network', tag:`-${money(A(60))} · big peace · ★ down`, run:() => { const lead = roll('lead' + P.week, .5); done({cash:-A(60) + (lead ? A(150) : 0), energy:-15, peace:18, stars:-2}, lead ? `You dance, you spray, and the celebrant's husband needs someone for a weekend job. ${money(A(150))} on the spot.` : `Jollof, small chops, and the DJ plays your song. You spray ${money(A(60))} and regret nothing until morning.`); }},
       {l:'Eat and leave early', tag:`-${money(A(20))}`, run:() => done({cash:-A(20), energy:-5, peace:10, stars:-1}, 'You take a plate for the road. Nobody sees you leave. That is a skill.')}
     ];
+    case 'fuel': return [
+      {l:'Buy fuel for the generator', tag:`-${money(A(25))} · light for 2 nights`, run:() => { W.fuel = (W.fuel || 0) + 2; const q = roll('queue' + T(), .4); done({cash:-A(25), energy: q ? -15 : -5, peace: q ? -3 : 2}, q ? 'You queue for two hours behind a danfo and three okadas. You get the fuel. You also get a headache.' : 'No queue today. The attendant is so surprised that he smiles.'); }}
+    ];
     case 'mech': return [
-      {l:'Fix the car properly, once and for all', tag:`-${money(A(300))}`, run:() => { P.car = 'fixed'; done({cash:-A(300), peace:8}, 'Chidi replaces everything that was "managing". Fewer breakdowns, better fares. He also tells you to marry.', '🚗 Car fixed: fewer breakdowns, better fares'); }}
+      {l:'Fix the car properly, once and for all', tag:`-${money(A(300))}`, run:() => { P.car = 'fixed'; done({cash:-A(300), peace:8}, ng ? 'The mechanic replaces everything that was "managing". He also sells you a spare tyre you did not ask for.' : 'Chidi replaces everything that was "managing". Fewer breakdowns, better fares. He also tells you to marry.', '🚗 Car fixed: fewer breakdowns, better fares'); }}
     ];
     case 'school': return [
       {l:'Go to class', tag:`-${money(A(60))} · -20 energy`, dis:tired, run:() => {
         P.school++;
-        if(P.school >= 4){ P.office = true; return done({cash:-A(60), energy:-20, peace:6}, `Final class. You pass. A week later, an office calls you back. ${money(A(210))} a day, no boxes.`, '💼 New job: the office pays more and costs less energy'); }
-        done({cash:-A(60), energy:-20, peace:2}, pickL('cls' + P.school, ['Excel, at night, after work. You are the oldest person there and the only one taking notes.','The teacher asks where your accent is from. You say "home". She smiles.']), `🎓 Night class ${P.school} of 4`);
+        if(P.school >= 4){ P.office = true; return ng ? done({cash:-A(60), energy:-20, peace:6}, `You pass the exam. A bank calls you for an interview and hires you. ${money(A(200))} a day and air conditioning.`, '🏦 New job at a bank: more pay, less stress') : done({cash:-A(60), energy:-20, peace:6}, `Final class. You pass. A week later, an office calls you back. ${money(A(210))} a day, no boxes.`, '💼 New job: the office pays more and costs less energy'); }
+        done({cash:-A(60), energy:-20, peace:2}, pickL('cls' + P.school, ng ? ['Accounting at night after work. The lecturer arrives an hour late and teaches for three.','NEPA takes light in the middle of class. Everyone finishes the lecture by phone torch.'] : ['Excel, at night, after work. You are the oldest person there and the only one taking notes.','The teacher asks where your accent is from. You say "home". She smiles.']), `🎓 Night class ${P.school} of 4`);
       }}
     ];
     case 'stall': return [
-      {l:'Open your stall', tag: P.mama >= 6 ? `-${money(A(400))} · earns every week` : `Mama trust ${P.mama}/6`, dis:P.mama < 6, run:() => { P.stall = true; done({cash:-A(400), peace:10}, `Mama vouches for you. You sell spices, shea butter, and chin chin. From now on, the stall brings in ${money(A(120))} every Friday.`, '🏪 You own a small business'); }}
+      {l:'Open your stall', tag: P.mama >= 6 ? `-${money(A(400))} · earns every week` : `Mama trust ${P.mama}/6`, dis:P.mama < 6, run:() => { P.stall = true; done({cash:-A(400), peace:10}, ng ? `The buka owner vouches for you. Your POS stand by the junction is busy from day one. It brings in ${money(A(120))} every Friday.` : `Mama vouches for you. You sell spices, shea butter, and chin chin. From now on, the stall brings in ${money(A(120))} every Friday.`, ng ? '🏧 You own a POS business' : '🏪 You own a small business'); }}
     ];
   }
   return [];
+}
+// a working day in Nigeria: late salaries, a boss who says "we move", and go-slow both ways
+function ngWork(pay, en){
+  if(!P.office){ P.boss++; if(!P.promo && P.boss >= 8){ P.promo = true; return done({cash:pay, energy:en}, `${C.boss} calls you in. "${C.bossWord[0].toUpperCase() + C.bossWord.slice(1)}, you are the only one who comes early. Team lead." ${money(A(40))} more a day. You did not even know you wanted it.`, '🏅 Promoted to team lead'); } }
+  if(!P.office && roll('late' + T(), .15)) return done({cash:Math.round(pay / 2 / STEP()) * STEP(), energy:en, peace:-6}, `${C.boss} announces that salaries will be "a little late" this month. You get half today and a speech about loyalty.`);
+  if(!P.office && roll('ot' + T(), .3)) return choice(`${C.boss} says the report must go out today. Stay late?`, [
+    {l:'Yes, stay till 9pm', run:() => done({cash:pay + A(60), energy:en - 20, peace:-4}, 'You leave at 9pm into go-slow. You get home at 11 and eat standing up.')},
+    {l:'No, I am going home', run:() => done({cash:pay, energy:en}, `${C.boss} says "no problem" in the voice that means problem.`)}
+  ]);
+  done({cash:pay, energy:en}, P.office ? pickL('bank' + T(), ['The AC works all day. You almost cry.','A customer shouts because the network is down. It is always the network.','Your colleague brings small chops for her birthday. The whole floor is happy.']) : pickL('ngw' + T(), ['Three meetings, one power cut, and a manager who says "we move".','The office generator goes off at noon. Everybody fans themselves with files.','You spend the morning in traffic and the afternoon explaining why you were late.']));
 }
 function choice(text, opts){
   sheet(`<p>${text}</p><div class="acts">${opts.map((o, i) => `<button class="act" type="button" data-i="${i}"><span>${o.l}</span></button>`).join('')}</div>`);
@@ -421,8 +499,12 @@ function advance(){
   const t = 'q' + W.day + W.slot;
   if(W.queue.length && roll(t, .55)) W.inbox.push(W.queue.shift());
   if(W.inbox.length > 2){ W.stars = Math.min(5, W.stars + 1); bumpStars(); toast('Unread messages are piling up. Aunty Alert ★ +1'); }
-  else if(W.statusN < STATUS.length && roll('st' + W.day + W.slot, .2)) toast('👀 ' + STATUS[(hash(today()) + W.statusN++) % STATUS.length]);
+  else if(W.statusN < STATUS().length && roll('st' + W.day + W.slot, .2)) { const L = STATUS(); toast('👀 ' + L[(hash(today()) + W.statusN++) % L.length]); }
   if(W.bet && W.day === 4 && W.slot === 0){ W.bet = false; const win = roll('bet' + P.week, .5); const b = apply({cash: win ? A(200) : 0, peace: win ? 6 : -6}); hud(b); toast(win ? `🧴 The shea butter sold out. Mama hands you ${money(A(200))}.` : `🧴 The nephew has "travelled". Your ${money(A(80))} travelled with him.`); }
+  if(NG() && W.slot === 2 && roll('nepa' + W.day, .6)){
+    if(W.fuel > 0){ W.fuel--; toast('💡 NEPA took light. Your generator saves the night.'); }
+    else { const b = apply({peace:-6, energy:-8}); hud(b); toast('🌑 NEPA took light and you have no fuel. Heat, mosquitoes, and no sleep.'); }
+  }
   W.at = W.slot === 0 ? 'home' : W.at;
   save();
   const go = () => {
@@ -440,6 +522,14 @@ function raid(){
 }
 function phone(){
   const m = W.inbox[0]; if(!m) return;
+  if(m.guest){
+    sheet(`<h2>📱 ${m.from}</h2><p>${m.t}</p><div class="acts"><button class="act" type="button" data-a="yes"><span>Welcome him, "for small time"</span><small>-${money(A(70))} · ★ down</small></button><button class="act" type="button" data-a="no"><span>Say your room is too small</span><small>★ up</small></button></div>`);
+    $('sheet').querySelectorAll('.act').forEach(b => b.onclick = () => { W.inbox.shift();
+      if(b.dataset.a === 'yes') done({cash:-A(70), stars:-1, peace:-5}, 'Emeka arrives with one bag and a big appetite. "Small time" has no end date. He does wash the plates.');
+      else { W.log.ignored++; done({stars:1, peace:3}, 'The family group hears that you have "changed". Your one room says you have not.'); }
+      backToMap(); });
+    return;
+  }
   if(m.proof){
     sheet(`<h2>📱 ${m.from}</h2><p>${m.t}</p><div class="acts"><button class="act" type="button" data-a="no"><span>"Bro, that is how people go to jail"</span><small>★ up</small></button><button class="act" type="button" data-a="send"><span>Send the screenshot</span><small>risky</small></button></div>`);
     $('sheet').querySelectorAll('.act').forEach(b => b.onclick = () => { W.inbox.shift();
@@ -545,8 +635,8 @@ function toast(t){ const el = $('toast'); el.textContent = t; el.hidden = false;
 function pickCity(){
   const guess = (() => { try{ const d = JSON.parse(localStorage.getItem('nyhl-daily')||'null'); return d && ({us:'houston', uk:'london', ca:'toronto'})[d.rk]; }catch(e){ return null; } })();
   $('obox').innerHTML = `<div class="eyebrow">NOW YOU HAVE LANDED</div><div class="big plain">RENT WEEK</div>
-    <p>Every day is one week of your life abroad. Make the bill by Friday night while work, the loan shark, and your aunties pull at you. Your money and your progress carry on, week after week.</p>
-    <div class="cities">${Object.entries(CITIES).sort((a, b) => (b[0] === guess) - (a[0] === guess)).map(([k, c]) => `<button class="city" type="button" data-c="${k}"><span class="fl" aria-hidden="true">${c.flag}</span><b>${c.name}</b><small>${c.blurb}</small></button>`).join('')}</div>`;
+    <p>Every day is one week of your life, abroad or at home. Make the bill by Friday night while work, the loan shark, and your aunties pull at you. Your money and your progress carry on, week after week.</p>
+    ${[['🌍 Abroad', ([k, c]) => !c.ng], ['🇳🇬 Home in Nigeria', ([k, c]) => c.ng]].map(([h, f]) => `<div class="eyebrow" style="text-align:left;margin-top:6px">${h}</div><div class="cities">${Object.entries(CITIES).filter(f).sort((a, b) => (b[0] === guess) - (a[0] === guess)).map(([k, c]) => `<button class="city" type="button" data-c="${k}"><span class="fl" aria-hidden="true">${c.flag}</span><b>${c.name}</b><small>${c.blurb}</small></button>`).join('')}</div>`).join('')}`;
   $('over').hidden = false;
   $('obox').querySelectorAll('.city').forEach(b => b.onclick = () => { P = freshLife(b.dataset.c); save(); track('start-' + b.dataset.c); $('over').hidden = true; boot(); });
 }
@@ -585,7 +675,7 @@ function weekIntro(){
 function boot(){
   C = CITIES[P.city];
   if(P.evicted){ const keep = {lives:(P.lives||1) + 1, hist:P.hist, streak:P.streak, done:P.done, city:P.city}; P = Object.assign(freshLife(P.city), keep); P.cash = A(200); save(); toast('New start on a cousin\'s sofa. Your lessons came with you.'); }
-  $('fm').textContent = `📻 JAPA FM ${C.fm}`;
+  $('fm').textContent = `📻 ${NG() ? 'NAIJA' : 'JAPA'} FM ${C.fm}`;
   $('radio').textContent = shuffleL('radio', RADIO()).join('   ·   ');
   drawCity();
   if(P.done === today()){ freshWeek(); pins(); hud(); idle(); doneToday(); return; }
