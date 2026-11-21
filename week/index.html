@@ -39,7 +39,8 @@ a{color:var(--gold)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .back{font-size:13px;color:var(--dim);text-decoration:none}
 .logo{font-family:var(--display);font-size:22px;line-height:1;background:linear-gradient(90deg,var(--sun),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
-.when{font-family:var(--display);font-size:13px;color:var(--gold);white-space:nowrap}
+.when{font-family:var(--display);font-size:13px;color:var(--gold);white-space:nowrap;margin-left:auto}
+.snd{border:1px solid var(--road);background:var(--deep);border-radius:10px;width:36px;height:32px;font-size:16px;flex:none}
 
 .hud{display:grid;gap:6px}
 .mission{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:13px;color:var(--dim)}
@@ -134,12 +135,12 @@ canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><a class="back" href="/">← Now You Have Landed</a><div class="when" id="when"></div></div>
+  <div class="top"><a class="back" href="/">← Now You Have Landed</a><div class="when" id="when"></div><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
   <div class="logo">WAHALA WEEK</div>
   <header class="hud" aria-live="polite">
     <div class="mission"><span id="mtitle"></span><span class="due" id="mdue"></span></div>
     <div class="rentline" id="rentline" hidden></div>
-    <div class="lbl"><span>Cash</span><span>Energy</span><span>Aunty Alert</span></div>
+    <div class="lbl"><span>Cash</span><span>Energy</span><span>Family pressure</span></div>
     <div class="stats">
       <div class="cash" id="cash"></div>
       <div class="energy" role="img" id="enlbl"><i id="en"></i></div>
@@ -376,7 +377,7 @@ function hud(prev){
   if(NG() && m.id !== 'renewal'){ const nr = nextRenewal(P.week), amt = missionFor(nr).amount, wk = nr - P.week; rl.innerHTML = `🏠 Yearly rent in <b>${wk} week${wk === 1 ? '' : 's'}</b> (week ${nr}): <b>${money(amt)}</b>. You have ${Math.max(0, Math.min(100, Math.round(P.cash / amt * 100)))}% saved.<i><span style="width:${Math.max(0, Math.min(100, P.cash / amt * 100))}%"></span></i>`; }
   const c = $('cash'); c.textContent = money(P.cash); c.classList.toggle('down', prev != null && P.cash < prev);
   $('en').style.width = Math.max(0, W.energy) + '%'; $('enlbl').setAttribute('aria-label', 'Energy ' + Math.max(0, W.energy) + ' of 100');
-  const st = $('stars'); st.innerHTML = [0,1,2,3,4].map(i => `<span class="${i < W.stars ? 'on' : 'off'}">★</span>`).join(''); st.setAttribute('aria-label', 'Aunty Alert ' + W.stars + ' of 5');
+  const st = $('stars'); st.innerHTML = [0,1,2,3,4].map(i => `<span class="${i < W.stars ? 'on' : 'off'}">★</span>`).join(''); st.setAttribute('aria-label', 'Family pressure ' + W.stars + ' of 5');
   $('sky').style.background = SKY[W.slot];
   const p = places[W.at] || places.home; $('me').style.left = (p.x + 8) + '%'; $('me').style.top = (p.y - 6) + '%';
   $('phone').hidden = !W.inbox.length; $('pn').textContent = W.inbox.length;
@@ -493,10 +494,10 @@ function choice(text, opts){
 }
 function apply(fx){
   const before = P.cash;
-  if(fx.cash){ P.cash += Math.round(fx.cash); if(fx.cash > 0) W.log.earned += fx.cash; }
+  if(fx.cash){ P.cash += Math.round(fx.cash); if(fx.cash > 0){ W.log.earned += fx.cash; SND.cashIn(); } else SND.cashOut(); }
   if(fx.energy) W.energy = Math.max(0, Math.min(100, W.energy + fx.energy));
   if(fx.peace) W.peace = Math.max(0, Math.min(100, W.peace + fx.peace));
-  if(fx.stars){ W.stars = Math.max(0, Math.min(5, W.stars + fx.stars)); if(fx.stars > 0) bumpStars(); }
+  if(fx.stars){ W.stars = Math.max(0, Math.min(5, W.stars + fx.stars)); if(fx.stars > 0){ bumpStars(); SND.pressure(); } }
   return before;
 }
 function chips(fx){
@@ -517,7 +518,7 @@ function done(fx, text, unlock){
 
 /* ---------- time moves ---------- */
 let busy = false;
-function dayCard(t, cb){ busy = true; const d = document.createElement('div'); d.className = 'daycard'; d.innerHTML = `<div>${t}</div>`; document.body.appendChild(d); setTimeout(() => { d.remove(); busy = false; cb && cb(); }, 900); }
+function dayCard(t, cb){ busy = true; SND.day(); const d = document.createElement('div'); d.className = 'daycard'; d.innerHTML = `<div>${t}</div>`; document.body.appendChild(d); setTimeout(() => { d.remove(); busy = false; cb && cb(); }, 900); }
 function advance(){
   if(busy || W.over) return;
   const nx = $('next'); if(nx) nx.disabled = true;
@@ -525,13 +526,13 @@ function advance(){
   W.slot++; let newDay = false;
   if(W.slot > 2){ W.slot = 0; W.day++; W.energy = Math.min(100, W.energy + 15); newDay = true; }
   const t = 'q' + W.day + W.slot;
-  if(W.queue.length && roll(t, .55)) W.inbox.push(W.queue.shift());
-  if(W.inbox.length > 2){ W.stars = Math.min(5, W.stars + 1); bumpStars(); toast('Unread messages are piling up. Aunty Alert ★ +1'); }
+  if(W.queue.length && roll(t, .55)){ W.inbox.push(W.queue.shift()); setTimeout(() => SND.ping(), 400); }
+  if(W.inbox.length > 2){ W.stars = Math.min(5, W.stars + 1); bumpStars(); SND.pressure(); toast('Unread messages are piling up. Family pressure ★ +1'); }
   else if(W.statusN < STATUS().length && roll('st' + W.day + W.slot, .2)) { const L = STATUS(); toast('👀 ' + L[(hash(today()) + W.statusN++) % L.length]); }
   if(W.bet && W.day === 4 && W.slot === 0){ W.bet = false; const win = roll('bet' + P.week, .5); const b = apply({cash: win ? A(200) : 0, peace: win ? 6 : -6}); hud(b); toast(win ? `🧴 The shea butter sold out. Mama hands you ${money(A(200))}.` : `🧴 The nephew has "travelled". Your ${money(A(80))} travelled with him.`); }
   if(NG() && W.slot === 2 && roll('nepa' + W.day, .6)){
-    if(W.fuel > 0){ W.fuel--; toast('💡 NEPA took light. Your generator saves the night.'); }
-    else { const b = apply({peace:-6, energy:-8}); hud(b); toast('🌑 NEPA took light and you have no fuel. Heat, mosquitoes, and no sleep.'); }
+    if(W.fuel > 0){ W.fuel--; SND.gen(); toast('💡 NEPA took light. Your generator saves the night.'); }
+    else { SND.nepa(); const b = apply({peace:-6, energy:-8}); hud(b); toast('🌑 NEPA took light and you have no fuel. Heat, mosquitoes, and no sleep.'); }
   }
   if(NG() && newDay && !W.sick && P.week > 1 && roll('malaria' + P.week + '-' + W.day, .1)) W.sickNow = true;
   W.at = W.slot === 0 ? 'home' : W.at;
@@ -552,7 +553,7 @@ function malaria(){
   ]);
 }
 function raid(){
-  W.stars = 2; const fx = {cash:-A(100), peace:-12};
+  SND.ring(); W.stars = 2; const fx = {cash:-A(100), peace:-12};
   sheet(`<h2>★★★★★ FAMILY RAID</h2><p>Mummy, two aunties, and Pastor Sunday join one video call. They want to know why you have "changed". It takes the whole afternoon, and you send ${money(A(100))} to end it.</p>${chips(fx)}<button class="go" type="button" id="next">Survive</button>`);
   const b = apply(fx); pins(); hud(b); save();
   $('next').onclick = advance;
@@ -628,7 +629,7 @@ function friday(){
 }
 function shareText(rec){
   const stars = '★'.repeat(rec.stars) + '☆'.repeat(5 - rec.stars);
-  return `Wahala Week · ${C.name} · Week ${rec.w} ${rec.pass ? '✅' : '❌'}\n${rec.m}: ${rec.pass ? 'paid' : 'missed'} · ${money(rec.left)} left\nAunty Alert ${stars}\nSent home ${money(rec.sent)} · Respect +${rec.respect}\nnowyouhavelanded.com/week`;
+  return `Wahala Week · ${C.name} · Week ${rec.w} ${rec.pass ? '✅' : '❌'}\n${rec.m}: ${rec.pass ? 'paid' : 'missed'} · ${money(rec.left)} left\nFamily pressure ${stars}\nSent home ${money(rec.sent)} · Respect +${rec.respect}\nnowyouhavelanded.com/week`;
 }
 function showEnd(rec, o){
   $('obox').innerHTML = `<div class="eyebrow">WEEK ${rec.w} · ${rec.m}</div>
@@ -642,7 +643,7 @@ function showEnd(rec, o){
       ${o.loan ? `<div><span>${C.lender}</span><span>-${money(o.loan)}</span></div>` : ''}
       <div class="hr"><span>Left for next week</span><span>${money(rec.left)}</span></div>
       <div><span>Sent home this week</span><span>${money(rec.sent)}</span></div>
-      <div><span>Aunty Alert</span><span>${'★'.repeat(rec.stars)}${'☆'.repeat(5 - rec.stars)}</span></div>
+      <div><span>Family pressure</span><span>${'★'.repeat(rec.stars)}${'☆'.repeat(5 - rec.stars)}</span></div>
       <div><span>Respect</span><span>+${rec.respect}</span></div>
     </div>
     ${o.unlockNext ? `<p class="who" style="color:var(--naija)">${o.unlockNext}</p>` : ''}
@@ -651,7 +652,7 @@ function showEnd(rec, o){
     <div class="note" id="sharemsg">Week ${P.week} unlocks tomorrow. 🔥 ${P.streak}-day streak.</div>
     <a class="ghost" href="/" style="text-decoration:none;display:block;color:var(--ink)">Back to Now You Have Landed</a>`;
   $('over').hidden = false;
-  if(rec.pass) confetti();
+  if(rec.pass){ confetti(); SND.win(); } else SND.lose();
   $('share').onclick = async () => {
     const t = shareText(rec);
     try{ if(navigator.share){ await navigator.share({text:t}); return; } }catch(e){ if(e && e.name === 'AbortError') return; }
@@ -666,6 +667,70 @@ function confetti(){
   const bits = Array.from({length:140}, () => ({x:cv.width/2, y:cv.height*.35, vx:(Math.random()-.5)*14, vy:Math.random()*-14-4, r:Math.random()*6+3, c:cols[Math.floor(Math.random()*cols.length)], a:Math.random()*6}));
   let f = 0; (function tick(){ g.clearRect(0,0,cv.width,cv.height); bits.forEach(b => { b.x += b.vx; b.y += b.vy; b.vy += .4; b.a += .2; g.fillStyle = b.c; g.save(); g.translate(b.x,b.y); g.rotate(b.a); g.fillRect(-b.r/2,-b.r/2,b.r,b.r*.6); g.restore(); }); if(++f < 120) requestAnimationFrame(tick); else cv.remove(); })();
 }
+
+/* ---------- sound ---------- */
+const SND = (() => {
+  let ctx = null, master = null, music = null, on = true, beat = null, step = 0, next = 0;
+  try{ on = localStorage.getItem('nyhl-week-sound') !== 'off'; }catch(e){}
+  const ok = () => on && ctx && ctx.state === 'running';
+  function init(){
+    if(ctx){ if(ctx.state === 'suspended') ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+    ctx = new AC(); master = ctx.createGain(); master.gain.value = on ? 0.9 : 0; master.connect(ctx.destination);
+    music = ctx.createGain(); music.gain.value = 0.22; music.connect(master);
+    startMusic();
+  }
+  function tone(f, t0, dur, type = 'sine', vol = 0.25, dest = master, f2){
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f, t0);
+    if(f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(dest); o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function noise(t0, dur, vol = 0.2, freq = 6000, dest = master, q = 0.8){
+    const n = Math.floor(ctx.sampleRate * dur), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+    for(let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = b; f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = q;
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); s.connect(f); f.connect(g); g.connect(dest); s.start(t0);
+  }
+  // a light Afrobeat-style groove: kick, shaker, a talking-drum-ish tom, a bass line, and a guitar stab
+  const BASS = [55, 0, 0, 55, 0, 65.4, 0, 73.4, 55, 0, 0, 55, 0, 49, 0, 49];
+  const STAB = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0];
+  function startMusic(){
+    if(beat) return; next = ctx.currentTime + 0.1;
+    beat = setInterval(() => {
+      const spb = 60 / 104 / 4;
+      while(next < ctx.currentTime + 0.25){
+        const i = step % 16, night = W && W.slot === 2, t = next;
+        if(i % 4 === 0) tone(110, t, 0.18, 'sine', 0.5, music, 45);
+        if(i === 6 || i === 14) tone(220, t, 0.12, 'sine', 0.18, music, 160);
+        noise(t, 0.04, i % 2 ? 0.05 : 0.09, 8000, music, 1.2);
+        if(BASS[i]) tone(BASS[i] * (night ? 1 : 1), t, 0.22, 'triangle', 0.28, music);
+        if(STAB[i] && !night){ [330, 415, 494].forEach(f => tone(f, t, 0.09, 'square', 0.025, music)); }
+        if(night && i === 0 && step % 32 === 0) tone(196, t, 1.2, 'sine', 0.05, music);
+        next += spb; step++;
+      }
+    }, 60);
+  }
+  const api = {
+    init, get on(){ return on; },
+    toggle(){ on = !on; try{ localStorage.setItem('nyhl-week-sound', on ? 'on' : 'off'); }catch(e){} if(!ctx && on) init(); if(master) master.gain.setTargetAtTime(on ? 0.9 : 0, ctx.currentTime, 0.05); return on; },
+    tap(){ if(!ok()) return; tone(880, ctx.currentTime, 0.05, 'triangle', 0.12); },
+    cashIn(){ if(!ok()) return; const t = ctx.currentTime; tone(1318, t, 0.12, 'triangle', 0.2); tone(1760, t + 0.08, 0.25, 'triangle', 0.2); noise(t + 0.05, 0.15, 0.05, 9000); },
+    cashOut(){ if(!ok()) return; const t = ctx.currentTime; tone(523, t, 0.12, 'triangle', 0.16); tone(392, t + 0.09, 0.2, 'triangle', 0.16); },
+    ping(){ if(!ok()) return; const t = ctx.currentTime; tone(1568, t, 0.09, 'sine', 0.2); tone(2093, t + 0.11, 0.14, 'sine', 0.2); },
+    pressure(){ if(!ok()) return; const t = ctx.currentTime; tone(220, t, 0.3, 'sawtooth', 0.08, master, 160); tone(233, t + 0.18, 0.3, 'sawtooth', 0.08, master, 170); },
+    day(){ if(!ok()) return; const t = ctx.currentTime; noise(t, 0.5, 0.12, 1500, master, 0.5); tone(392, t + 0.1, 0.18, 'triangle', 0.1); tone(523, t + 0.25, 0.3, 'triangle', 0.1); },
+    nepa(){ if(!ok()) return; tone(180, ctx.currentTime, 0.9, 'sawtooth', 0.12, master, 30); },
+    gen(){ if(!ok()) return; const t = ctx.currentTime; for(let i = 0; i < 8; i++) noise(t + i * 0.07, 0.06, 0.12, 180, master, 2); },
+    ring(){ if(!ok()) return; const t = ctx.currentTime; for(let i = 0; i < 3; i++){ tone(988, t + i * 0.35, 0.12, 'square', 0.06); tone(1319, t + i * 0.35 + 0.13, 0.12, 'square', 0.06); } },
+    win(){ if(!ok()) return; const t = ctx.currentTime; [523, 659, 784, 1047].forEach((f, i) => tone(f, t + i * 0.12, 0.35, 'triangle', 0.2)); [1047, 1319, 1568].forEach(f => tone(f, t + 0.55, 0.8, 'triangle', 0.12)); },
+    lose(){ if(!ok()) return; const t = ctx.currentTime; [392, 370, 349, 294].forEach((f, i) => tone(f, t + i * 0.28, i === 3 ? 0.8 : 0.3, 'sawtooth', 0.09)); }
+  };
+  return api;
+})();
+document.addEventListener('pointerdown', () => SND.init(), {once:false, passive:true});
+$('snd').textContent = SND.on ? '🔊' : '🔇';
+$('snd').onclick = () => { const on = SND.toggle(); $('snd').textContent = on ? '🔊' : '🔇'; $('snd').setAttribute('aria-label', on ? 'Sound on' : 'Sound off'); };
 
 let tt;
 function toast(t){ const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, 3800); }
@@ -708,7 +773,7 @@ function weekIntro(){
       <div><span>You have</span><span>${money(P.cash)}</span></div>
       ${P.warnings ? `<div><span>Warnings</span><span>${Math.ceil(P.warnings)} of 3</span></div>` : ''}
     </div>
-    ${P.week === 1 ? `<p class="who">Tap places on the map to work, drive, shop, or rest. Answer WhatsApp, or don't. Every message you ignore raises the Aunty Alert. Five stars and the whole family calls at once.</p>` : ''}
+    ${P.week === 1 ? `<p class="who">Tap places on the map to work, drive, shop, or rest. Answer WhatsApp, or don't. Every message you ignore raises the family pressure. Five stars and the whole family calls at once.</p>` : ''}
     <button class="go" type="button" id="begin">Start Monday</button>`;
   $('over').hidden = false;
   $('begin').onclick = () => { $('over').hidden = true; track('play-w' + P.week); dayCard('MONDAY', () => { pins(); hud(); idle(); }); };
@@ -726,7 +791,7 @@ function boot(){
   pins(); hud(); idle();
   if(W.day === 0 && W.slot === 0 && !W.started){ W.started = true; save(); weekIntro(); }
 }
-$('pins').addEventListener('click', e => { if(busy) return; const b = e.target.closest('.pin'); if(b) visit(b.dataset.k); });
+$('pins').addEventListener('click', e => { if(busy) return; const b = e.target.closest('.pin'); if(b){ SND.init(); SND.tap(); visit(b.dataset.k); } });
 $('phone').onclick = phone;
 addEventListener('resize', () => C && drawCity());
 window.__rentweek = () => ({W, P});   // read-only peek for the automated tests
