@@ -131,3 +131,9 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 2. **The Return Ticket.** Add a special storyline to Now You Have Landed: twelve years abroad, a good salary, little saved, family expects support, and going home means starting over. It tests her "the life people see" idea with existing players. Track plays, finishes, and shares.
 3. **Teen demo.** A 10-minute standalone demo of a money game for ages 10-16 (pocket money, a first small hustle, family pressure, Nigerian prices and inflation), for her to show five parents or teachers. No accounts, no open text, no names on boards, no ads. It is the seed of First Paycheck (the Gen Z version), which shares the same engine. Don't call it Monopoly anything.
 4. December: decide. If parents or schools lean in, the teen game and First Paycheck become the next product. If not, Now You Have Landed stays the focus.
+
+### Wahala Week: its own front door and a gentle start (22 Nov)
+- /week is now its own game. Title "Wahala Week", no back link in the top bar, only a small "Also from us: Now You Have Landed" link at the end of a week and in How to play. A wahalaweek domain can point here later.
+- First-time players see a welcome screen (#wgo) before city and character (Step 1 of 2, Step 2 of 2). Tests must click #wgo before .city.
+- Week 1 shows only home, work, buka/market and Ryde. UNLOCK in week/index.html opens the rest: week 2 hall, pray, fuel, loan (mechanic too); week 3 viewing centre, Ayo, pitch (school too); stall from week 5. New places glow and are listed in the week intro under "New on your map this week". NEPA nights start in week 2.
+- Next: test with 5 to 10 real people (Nafeezie's mum and mother-in-law included) for a week before adding more.

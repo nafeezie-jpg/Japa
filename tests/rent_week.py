@@ -35,7 +35,7 @@ async def run():
       await pg.route('**/gc.zgo.at/**', lambda r: r.abort()); await pg.route('**/fonts.g*/**', lambda r: r.abort())
       day0 = datetime.datetime(2026, 11, 20, 10, 0)
       await pg.clock.install(time=day0); await pg.goto(PAGE)
-      await pg.click(f'.city[data-c="{city}"]'); await pg.click('[data-me="' + 'whm'[ci % 3] + '"]'); await pg.wait_for_timeout(300)
+      await pg.click('#wgo'); await pg.click(f'.city[data-c="{city}"]'); await pg.click('[data-me="' + 'whm'[ci % 3] + '"]'); await pg.wait_for_timeout(300)
       if SHOTS and ci == 0: await pg.screenshot(path='tests/shots/week-intro.png')
       for d in range(7 if ci < 4 else 3):
         if d: await pg.clock.set_fixed_time(day0 + datetime.timedelta(days=d)); await pg.goto(PAGE); await pg.wait_for_timeout(300)

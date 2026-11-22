@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Wahala Week · Now You Have Landed</title>
-<meta name="description" content="One week abroad, every day. Make rent by Saturday while the warehouse, the fan belt, the loan shark and your aunties all pull at you.">
-<meta property="og:title" content="Wahala Week · Now You Have Landed">
+<title>Wahala Week</title>
+<meta name="description" content="Survive one week of real life a day, in Lagos, Abuja, Kano, Houston, London, and more. Work, cook, hustle, pray, play Ayo, and pay the bill by Saturday night.">
+<meta property="og:title" content="Wahala Week">
 <meta property="og:description" content="Survive one week of real life, every day. Abroad or at home in Nigeria.">
 <meta property="og:url" content="https://nowyouhavelanded.com/week/">
 <meta property="og:image" content="https://nowyouhavelanded.com/og.png">
@@ -140,6 +140,14 @@ a{color:var(--gold)}
 .prog span{font-size:12px;padding:4px 9px;border-radius:999px;background:var(--block);color:var(--dim)}
 .prog span.on{color:var(--naija)}
 .note{font-size:12px;color:var(--dim);text-align:center}
+.newmap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;background:var(--deep);border:1px solid var(--naija);border-radius:14px;padding:10px}
+.newmap b{width:100%;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--naija)}
+.newmap span{font-size:13px;padding:4px 9px;border-radius:999px;background:var(--block)}
+.welcome{display:grid;gap:8px;text-align:left}
+.welcome div{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;background:var(--deep);border:1px solid var(--road);border-radius:12px;padding:10px 12px}
+.welcome div span{font-size:24px;line-height:1}
+.welcome p{margin:0}
+.small-link{font-size:13px;color:var(--dim)}
 .drive{position:fixed;inset:0;z-index:22;background:rgba(10,7,22,.96);display:grid;place-items:center;padding:12px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));animation:fade .25s}
 .dbox{display:grid;gap:10px;justify-items:center;max-width:420px;width:100%;position:relative}
 .dhead{display:flex;justify-content:space-between;gap:10px;width:100%;font-size:13px;color:var(--dim)}
@@ -186,7 +194,7 @@ canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><a class="back" href="/">← Landed</a><div class="when" id="when"></div><button class="snd" id="help" type="button" aria-label="How to play">❓</button><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
+  <div class="top"><div class="when" id="when"></div><button class="snd" id="help" type="button" aria-label="How to play">❓</button><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
   <div class="logo">WAHALA WEEK</div>
   <header class="hud" aria-live="polite">
     <div class="mission"><span id="mtitle"></span><span class="due" id="mdue"></span></div>
@@ -431,8 +439,12 @@ function drawCity(){
   sign(120, 82, C.roads[0]); sign(240, 158, C.roads[1]);
   g.font = '9px Rubik, sans-serif'; g.fillStyle = '#5FA9B8'; g.textAlign = 'left'; g.fillText(C.water, 8, 236);
 }
+// a newcomer starts with four places; the rest of the city opens week by week
+const UNLOCK = {home:1, work:1, mama:1, ryde:1, hall:2, pray:2, fuel:2, loan:2, view:3, relax:3, pitch:3};
+const unlockWeek = k => UNLOCK[k] || 1;
+const newThisWeek = () => Object.entries(PL()).filter(([k, v]) => v && P.week > 1 && (unlockWeek(k) === P.week || v.fresh)).map(([, v]) => v);
 function pins(){
-  places = Object.fromEntries(Object.entries(PL()).filter(([, v]) => v));
+  places = Object.fromEntries(Object.entries(PL()).filter(([k, v]) => v && unlockWeek(k) <= P.week).map(([k, v]) => [k, unlockWeek(k) === P.week && P.week > 1 ? {...v, fresh:true} : v]));
   $('pins').innerHTML = Object.entries(places).map(([k, p]) => {
     const shut = !isOpen(k);
     return `<button class="pin${shut ? ' shut' : ''}${p.fresh ? ' new' : ''}" type="button" data-k="${k}" style="left:${p.x}%;top:${p.y}%" aria-label="${p.title}${shut ? ' (closed now)' : ''}"><span class="ic" aria-hidden="true">${p.ic}</span><span class="nm">${p.nm}</span></button>`;
@@ -872,7 +884,7 @@ function advance(){
   if(W.inbox.length > 2){ W.stars = Math.min(5, W.stars + 1); bumpStars(); SND.pressure(); toast('Unread messages are piling up. Family pressure ★ +1'); }
   else if(W.statusN < STATUS().length && roll('st' + W.day + W.slot, .2)) { const L = STATUS(); toast('👀 ' + L[(hash(today()) + W.statusN++) % L.length]); }
   if(W.bet && W.day === 4 && W.slot === 0){ W.bet = false; const win = roll('bet' + P.week, .5); const b = apply({cash: win ? A(200) : 0, peace: win ? 6 : -6}); hud(b); toast(win ? `🧴 The shea butter sold out. Mama hands you ${money(A(200))}.` : `🧴 The nephew has "travelled". Your ${money(A(80))} travelled with him.`); }
-  if(NG() && W.slot === 2 && roll('nepa' + W.day, .6)){
+  if(NG() && P.week > 1 && W.slot === 2 && roll('nepa' + W.day, .6)){
     if(W.fuel > 0){ W.fuel--; SND.gen(); toast('💡 NEPA took light. Your generator saves the night.'); }
     else { SND.nepa(); const b = apply({peace:-6, energy:-8}); hud(b); toast('🌑 NEPA took light and you have no fuel. Heat, mosquitoes, and no sleep.'); }
   }
@@ -994,7 +1006,7 @@ function showEnd(rec, o){
     ${o.evicted ? `<p><b>Three warnings.</b> ${C.landlord} changes the locks. Tomorrow you start again on a cousin's sofa, with your lessons and nothing else.</p>` : ''}
     <button class="go" type="button" id="share">Share my week</button>
     <div class="note" id="sharemsg">Week ${P.week} unlocks tomorrow. 🔥 ${P.streak}-day streak.</div>
-    <a class="ghost" href="/" style="text-decoration:none;display:block;color:var(--ink)">Back to Now You Have Landed</a>`;
+    <a class="small-link" href="/">Also from us: Now You Have Landed, a story game about life abroad</a>`;
   $('over').hidden = false;
   if(rec.pass){ confetti(); SND.win(); } else SND.lose();
   $('share').onclick = async () => {
@@ -1086,6 +1098,7 @@ $('help').onclick = () => {
       <p>❌ <b>Miss a bill</b> and the gap rolls into next week with a late fee. Three misses and you start again on a cousin's sofa.</p>
       <p>👥 <b>Everyone playing today</b> gets the same breakdowns, tips, messages, and road. Share your week and compare.</p>
     </div><button class="go" type="button">Got it</button></div>`;
+  box.querySelector('.box').insertAdjacentHTML('beforeend', '<a class="small-link" href="/" style="text-align:center">Also from us: Now You Have Landed, a story game about life abroad</a>');
   document.body.appendChild(box); box.querySelector('.go').onclick = () => box.remove();
 };
 $('snd').onclick = () => { const on = SND.toggle(); $('snd').textContent = on ? '🔊' : '🔇'; $('snd').setAttribute('aria-label', on ? 'Sound on' : 'Sound off'); };
@@ -1094,16 +1107,30 @@ let tt;
 function toast(t){ const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, 3800); }
 
 /* ---------- screens ---------- */
+function welcome(){
+  $('obox').innerHTML = `<div class="eyebrow">A NEW WEEK, EVERY DAY</div><div class="big plain">WAHALA WEEK</div>
+    <p style="font-size:17px"><b>Survive one week of real life a day.</b> Pay the bill by Saturday night, and do not let your family pressure reach five stars.</p>
+    <div class="welcome">
+      <div><span>🗺️</span><p><b>Tap places on your city map.</b> Work, drive, cook at the buka, pray, go to owambe, play Ayo, watch the match.</p></div>
+      <div><span>📱</span><p><b>WhatsApp keeps buzzing.</b> Mummy, bae, the caretaker, and Cousin Emeka all need something. You decide who gets what.</p></div>
+      <div><span>📈</span><p><b>Your life carries on.</b> Your money, your job, and your car follow you to next week, and more of the city opens up.</p></div>
+      <div><span>👥</span><p><b>Everyone gets the same week today.</b> Same breakdowns, same orders, same road. Share your result and compare.</p></div>
+    </div>
+    <button class="go" type="button" id="wgo">Choose my city</button>
+    <p class="note">About 10 minutes a day. Sound on is best. 🔊</p>`;
+  $('over').hidden = false; track('welcome');
+  $('wgo').onclick = () => { SND.init(); pickCity(); };
+}
 function pickCity(){
   const guess = (() => { try{ const d = JSON.parse(localStorage.getItem('nyhl-daily')||'null'); return d && ({us:'houston', uk:'london', ca:'toronto'})[d.rk]; }catch(e){ return null; } })();
-  $('obox').innerHTML = `<div class="eyebrow">NOW YOU HAVE LANDED</div><div class="big plain">WAHALA WEEK</div>
-    <p>Every day is one week of real life, abroad or at home in Nigeria. Work, hustle, pray, go to owambe, dodge your aunties, and still pay the week's bill by Saturday night. Your money and your progress carry on, week after week.</p>
+  $('obox').innerHTML = `<div class="eyebrow">STEP 1 OF 2</div><div class="big plain" style="font-size:clamp(28px,8vw,40px)">WHERE DO YOU LIVE?</div>
+    <p>Pick your city. You can live abroad or at home in Nigeria.</p>
     ${[['🌍 Abroad', ([k, c]) => !c.ng], ['🇳🇬 Home in Nigeria', ([k, c]) => c.ng]].map(([h, f]) => `<div class="eyebrow" style="text-align:left;margin-top:6px">${h}</div><div class="cities">${Object.entries(CITIES).filter(f).sort((a, b) => (b[0] === guess) - (a[0] === guess)).map(([k, c]) => `<button class="city" type="button" data-c="${k}"><span class="fl" aria-hidden="true">${c.flag}</span><b>${c.name}</b><small>${c.blurb}</small></button>`).join('')}</div>`).join('')}`;
   $('over').hidden = false;
   $('obox').querySelectorAll('.city').forEach(b => b.onclick = () => { P = freshLife(b.dataset.c); save(); track('start-' + b.dataset.c); pickMe(); });
 }
 function pickMe(){
-  $('obox').innerHTML = `<div class="eyebrow">ONE MORE THING</div><div class="big plain" style="font-size:clamp(28px,8vw,40px)">WHO ARE YOU?</div>
+  $('obox').innerHTML = `<div class="eyebrow">STEP 2 OF 2</div><div class="big plain" style="font-size:clamp(28px,8vw,40px)">WHO ARE YOU?</div>
     <p>You will see yourself on the map, at work, at the buka, at the owambe, and behind the wheel.</p>
     <div class="whoami">${Object.entries(ME).map(([k, m]) => `<button type="button" data-me="${k}"><span aria-hidden="true">${m.base}</span>${m.label}</button>`).join('')}</div>`;
   $('over').hidden = false;
@@ -1120,7 +1147,7 @@ function doneToday(){
     <div class="recap"><div><span>Cash carried over</span><span>${money(P.cash)}</span></div><div><span>Weeks lived</span><span>${P.hist.length}</span></div><div><span>Passed</span><span>${P.hist.filter(r => r.pass).length}</span></div><div><span>Streak</span><span>🔥 ${P.streak || 1}</span></div></div>
     <div class="prog">${[['🏅 Forklift lead', P.promo], ['🚗 Car fixed', P.car==='fixed'], ['💼 Office job', P.office], ['🏪 Own stall', P.stall]].map(([t, on]) => `<span class="${on ? 'on' : ''}">${on ? '' : '🔒 '}${t}</span>`).join('')}</div>
     ${rec ? '<button class="go" type="button" id="share">Share my week</button><div class="note" id="sharemsg"></div>' : ''}
-    <a class="ghost" href="/" style="text-decoration:none;display:block;color:var(--ink)">Back to Now You Have Landed</a>`;
+    <a class="small-link" href="/">Also from us: Now You Have Landed, a story game about life abroad</a>`;
   $('over').hidden = false;
   const s = $('share'); if(s) s.onclick = async () => { const t = shareText(rec); try{ if(navigator.share){ await navigator.share({text:t}); return; } }catch(e){ if(e && e.name === 'AbortError') return; } try{ await navigator.clipboard.writeText(t); $('sharemsg').textContent = 'Copied. Paste it in your group chat.'; }catch(e){ $('sharemsg').textContent = t; } };
 }
@@ -1138,7 +1165,8 @@ function weekIntro(){
       <div><span>You have</span><span>${money(P.cash)}</span></div>
       ${P.warnings ? `<div><span>Warnings</span><span>${Math.ceil(P.warnings)} of 3</span></div>` : ''}
     </div>
-    ${P.week === 1 ? `<p class="who">Tap places on the map to work, drive, shop, or rest. Answer WhatsApp, or don't. Every message you ignore raises the family pressure. Five stars and the whole family calls at once.</p>` : ''}
+    ${newThisWeek().length ? `<div class="newmap"><b>New on your map this week</b>${newThisWeek().map(v => `<span>${v.ic} ${v.nm}</span>`).join('')}</div>` : ''}
+    ${P.week === 1 ? `<p class="who">Four places to start: your home, work, the ${NG() ? 'buka' : 'market'}, and Ryde. More of the city opens every week.</p><p class="who">Tap places on the map to work, drive, shop, or rest. Answer WhatsApp, or don't. Every message you ignore raises the family pressure. Five stars and the whole family calls at once.</p>` : ''}
     <button class="go" type="button" id="begin">Start Monday</button>`;
   $('over').hidden = false;
   $('begin').onclick = () => { $('over').hidden = true; track('play-w' + P.week); dayCard('MONDAY', () => { pins(); hud(); idle(); }); };
@@ -1162,7 +1190,7 @@ $('phone').onclick = phone;
 addEventListener('resize', () => C && drawCity());
 window.__rentweek = () => ({W, P});   // read-only peek for the automated tests
 P = store.get();
-if(!P || !CITIES[P.city]) pickCity(); else boot();
+if(!P || !CITIES[P.city]) welcome(); else boot();
 })();
 </script>
 </body>
