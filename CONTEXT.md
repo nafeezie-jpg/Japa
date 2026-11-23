@@ -137,3 +137,9 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - First-time players see a welcome screen (#wgo) before city and character (Step 1 of 2, Step 2 of 2). Tests must click #wgo before .city.
 - Week 1 shows only home, work, buka/market and Ryde. UNLOCK in week/index.html opens the rest: week 2 hall, pray, fuel, loan (mechanic too); week 3 viewing centre, Ayo, pitch (school too); stall from week 5. New places glow and are listed in the week intro under "New on your map this week". NEPA nights start in week 2.
 - Next: test with 5 to 10 real people (Nafeezie's mum and mother-in-law included) for a week before adding more.
+
+### Sound and a guided first week (22 Nov)
+- Both games ask iPhones for `navigator.audioSession.type = 'playback'` and play a tiny silent clip on the first tap, so sound plays even with the ring switch on silent. Sound also wakes on pointerdown, touchend, and click.
+- Wahala Week top bar is one target: cash / Saturday total, a bar, and "Earn X more by Saturday night". The yearly rent line and intro row show from week 3.
+- Nigerian cities start with 350 × k (was 850), so week 1 needs real earning.
+- Week 1 coaching: coachPin() makes work (or the buka when energy is low) glow, and coachText() replaces the idle hint. After tapping a place, showSheet() scrolls the choices into view; idle() scrolls back to the map.

@@ -2185,6 +2185,9 @@ const SFX = (() => {
     try {
       if(ctx && ctx.state === 'closed') ctx = null;
       if(!ctx){ const AC = window.AudioContext || window.webkitAudioContext; if(!AC) return null; ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.55; master.connect(ctx.destination); }
+      // iPhones mute web sound when the ring switch is on silent. Asking for "playback" lets the game play like music does.
+      try{ if(navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; }catch(e){}
+      if(!ensure.sil){ ensure.sil = 1; try{ const a = new Audio('data:audio/wav;base64,UklGRrQBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YZABAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA'); a.setAttribute('playsinline', ''); a.play().catch(()=>{}); }catch(e){} }
       // iPhones can leave audio 'suspended' or 'interrupted' after a notification or a locked screen
       if(ctx.state !== 'running') ctx.resume().catch(()=>{});
       return ctx;
@@ -2245,8 +2248,8 @@ const SFX = (() => {
   };
   try{ document.addEventListener('visibilitychange', () => { if(document.hidden) ambStop(0.2); }); }catch(e){}
   // wake the audio on every tap and whenever the page comes back into view
-  const wake = () => { if(on && ctx && ctx.state !== 'running') ctx.resume().catch(()=>{}); };
-  try{ ['touchend','click'].forEach(ev => document.addEventListener(ev, wake, {passive:true})); document.addEventListener('visibilitychange', () => { if(!document.hidden) wake(); }); }catch(e){}
+  const wake = () => { if(on) ensure(); };
+  try{ ['pointerdown','touchend','click'].forEach(ev => document.addEventListener(ev, wake, {passive:true})); document.addEventListener('visibilitychange', () => { if(!document.hidden) wake(); }); }catch(e){}
   return {
     get on(){ return on; },
     toggle(){ on = !on; try { localStorage.setItem('nyhl-sound', on ? 'on' : 'off'); } catch(e) {} if(on) this.tap(); else ambStop(0.2); return on; },
