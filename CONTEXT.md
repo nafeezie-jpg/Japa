@@ -143,3 +143,8 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - Wahala Week top bar is one target: cash / Saturday total, a bar, and "Earn X more by Saturday night". The yearly rent line and intro row show from week 3.
 - Nigerian cities start with 350 × k (was 850), so week 1 needs real earning.
 - Week 1 coaching: coachPin() makes work (or the buka when energy is low) glow, and coachText() replaces the idle hint. After tapping a place, showSheet() scrolls the choices into view; idle() scrolls back to the map.
+
+### Wahala Week on the home screen (23 Nov)
+- week/manifest.json (scope /week/, start /week/?source=homescreen) and its own icons (week/icon-192.png, icon-512.png, apple-touch-icon.png). Installs as "Wahala Week", separate from Landed.
+- A "Put Wahala Week on your phone" card shows on the end-of-week and played-today screens and in How to play. Android gets a real install button; iPhone gets Share, then Add to Home Screen.
+- iPhone home screen apps keep their own storage, so progress moves with a code (WW1. + base64 of the nyhl-week save). Copy it in How to play or on the iPhone tip card; paste it from the welcome screen link or How to play.

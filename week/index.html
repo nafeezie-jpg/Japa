@@ -10,8 +10,13 @@
 <meta property="og:url" content="https://nowyouhavelanded.com/week/">
 <meta property="og:image" content="https://nowyouhavelanded.com/og.png">
 <meta name="theme-color" content="#16122B">
-<link rel="icon" href="/icon-192.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" href="/week/icon-192.png">
+<link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
+<link rel="manifest" href="/week/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Wahala Week">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;500;700&family=Space+Mono:wght@700&display=swap">
 <style>
@@ -149,6 +154,10 @@ a{color:var(--gold)}
 .prog span{font-size:12px;padding:4px 9px;border-radius:999px;background:var(--block);color:var(--dim)}
 .prog span.on{color:var(--naija)}
 .note{font-size:12px;color:var(--dim);text-align:center}
+.hometip{border:1px solid var(--ring);border-radius:14px;padding:12px 14px;display:grid;gap:8px;text-align:left;background:rgba(255,201,60,.06)}
+.hometip b.t{color:var(--gold);font-size:13px;letter-spacing:.06em}
+.hometip p{margin:0;font-size:14px}
+.hometip textarea{width:100%;min-height:64px;border-radius:10px;border:1px solid var(--road);background:var(--deep);color:var(--ink);font:12px var(--mono);padding:8px}
 .newmap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;background:var(--deep);border:1px solid var(--naija);border-radius:14px;padding:10px}
 .newmap b{width:100%;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--naija)}
 .newmap span{font-size:13px;padding:4px 9px;border-radius:999px;background:var(--block)}
@@ -238,6 +247,46 @@ const $ = id => document.getElementById(id);
 const KEY = 'nyhl-week';
 const track = n => { try{ window.goatcounter && window.goatcounter.count && window.goatcounter.count({path:'week-'+n, title:'week-'+n, event:true}); }catch(e){} };
 const store = { get(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } }, set(v){ try{ localStorage.setItem(KEY, JSON.stringify(v)); }catch(e){} } };
+/* ---------- add to home screen, and carry progress between Safari and the home screen app ---------- */
+let installEvt = null;
+try{ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; }); }catch(e){}
+const isStandalone = () => { try{ return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; }catch(e){ return false; } };
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+const saveCode = () => { try{ return 'WW1.' + btoa(unescape(encodeURIComponent(localStorage.getItem(KEY) || ''))); }catch(e){ return ''; } };
+function loadCode(t){
+  try{
+    const raw = decodeURIComponent(escape(atob(String(t).trim().replace(/^WW1\./, ''))));
+    const v = JSON.parse(raw); if(!v || !v.city) return false;
+    localStorage.setItem(KEY, raw); return true;
+  }catch(e){ return false; }
+}
+function homeTipHTML(withCode = true){
+  if(isStandalone()) return '';
+  const ios = isIOS();
+  return `<div class="hometip" id="hometip"><b class="t">📲 PUT WAHALA WEEK ON YOUR PHONE</b>
+    <p>${ios ? 'In Safari, tap <b>Share</b>, then <b>Add to Home Screen</b>. It opens like an app, one tap away every day.' : installEvt ? 'Add it to your home screen and it opens like an app, one tap away every day.' : 'Open your browser menu and choose <b>Add to Home screen</b>. It opens like an app, one tap away every day.'}</p>
+    ${!ios && installEvt ? '<button class="go" type="button" id="installbtn">Add to home screen</button>' : ''}
+    ${withCode && ios && P && P.hist && P.hist.length ? '<p class="note" style="text-align:left">On iPhone the home screen app starts fresh. Copy your code first, then paste it there to keep your weeks.</p><button class="ghost" type="button" id="copycode">Copy my code</button>' : ''}
+  </div>`;
+}
+function wireHomeTip(){
+  const b = $('installbtn');
+  if(b) b.onclick = () => { if(!installEvt) return; installEvt.prompt(); track('install'); installEvt.userChoice.then(() => { const t = $('hometip'); if(t) t.remove(); }).catch(()=>{}); installEvt = null; };
+  const c = $('copycode');
+  if(c) c.onclick = async () => { const code = saveCode(); track('copy-code');
+    try{ await navigator.clipboard.writeText(code); c.textContent = 'Copied. Now add to home screen ✓'; }
+    catch(e){ c.insertAdjacentHTML('afterend', `<textarea readonly>${code}</textarea>`); const ta = c.nextElementSibling; ta.focus(); ta.select(); c.textContent = 'Copy the code below'; } };
+}
+function pasteCodeBox(){
+  const box = document.createElement('div'); box.className = 'overlay';
+  box.innerHTML = `<div class="box"><div class="eyebrow">ALREADY PLAYING?</div><div class="big plain" style="font-size:clamp(26px,7vw,36px)">BRING YOUR WEEKS</div>
+    <p>Open Wahala Week where you played before, tap ❓, then <b>Copy my code</b>. Paste it here.</p>
+    <div class="hometip"><textarea id="codein" placeholder="WW1.…"></textarea></div>
+    <button class="go" type="button" id="codego">Load my weeks</button><button class="ghost" type="button" id="codeno">Cancel</button><p class="note" id="codemsg"></p></div>`;
+  document.body.appendChild(box);
+  $('codeno').onclick = () => box.remove();
+  $('codego').onclick = () => { if(loadCode($('codein').value)){ track('load-code'); location.reload(); } else $('codemsg').textContent = 'That code did not work. Copy it again and paste the whole thing.'; };
+}
 const myName = (() => { try{ return (localStorage.getItem('nyhl-name')||'').trim(); }catch(e){ return ''; } })();
 
 /* ---------- cities ---------- */
@@ -1046,8 +1095,10 @@ function showEnd(rec, o){
     ${o.evicted ? `<p><b>Three warnings.</b> ${C.landlord} changes the locks. Tomorrow you start again on a cousin's sofa, with your lessons and nothing else.</p>` : ''}
     <button class="go" type="button" id="share">Share my week</button>
     <div class="note" id="sharemsg">Week ${P.week} unlocks tomorrow. 🔥 ${P.streak}-day streak.</div>
+    ${homeTipHTML()}
     <a class="small-link" href="/">Also from us: Now You Have Landed, a story game about life abroad</a>`;
   $('over').hidden = false;
+  wireHomeTip();
   if(rec.pass){ confetti(); SND.win(); } else SND.lose();
   $('share').onclick = async () => {
     const t = shareText(rec);
@@ -1142,8 +1193,13 @@ $('help').onclick = () => {
       <p>❌ <b>Miss a bill</b> and the gap rolls into next week with a late fee. Three misses and you start again on a cousin's sofa.</p>
       <p>👥 <b>Everyone playing today</b> gets the same breakdowns, tips, messages, and road. Share your week and compare.</p>
     </div><button class="go" type="button">Got it</button></div>`;
+  box.querySelector('.go').insertAdjacentHTML('beforebegin', `${homeTipHTML(false)}<div class="hometip"><b class="t">🔁 MOVE MY WEEKS</b><p>Playing on a new phone, or from the home screen? Copy your code here and paste it there.</p><button class="ghost" type="button" id="copycode2">Copy my code</button><button class="ghost" type="button" id="pastecode">Paste a code</button></div>`);
   box.querySelector('.box').insertAdjacentHTML('beforeend', '<a class="small-link" href="/" style="text-align:center">Also from us: Now You Have Landed, a story game about life abroad</a>');
   document.body.appendChild(box); box.querySelector('.go').onclick = () => box.remove();
+  wireHomeTip();
+  const cc = box.querySelector('#copycode2');
+  cc.onclick = async () => { const code = saveCode(); track('copy-code'); try{ await navigator.clipboard.writeText(code); cc.textContent = 'Copied ✓'; }catch(e){ cc.insertAdjacentHTML('afterend', `<textarea readonly>${code}</textarea>`); const ta = cc.nextElementSibling; ta.focus(); ta.select(); cc.textContent = 'Copy the code below'; } };
+  box.querySelector('#pastecode').onclick = () => { box.remove(); pasteCodeBox(); };
 };
 $('snd').onclick = () => { const on = SND.toggle(); $('snd').textContent = on ? '🔊' : '🔇'; $('snd').setAttribute('aria-label', on ? 'Sound on' : 'Sound off'); };
 
@@ -1161,9 +1217,11 @@ function welcome(){
       <div><span>✅</span><p><b>Pay the bill, keep the change.</b> Next week your life carries on.</p></div>
     </div>
     <button class="go" type="button" id="wgo">Choose my city</button>
-    <p class="note">About 10 minutes a day. Sound on is best. 🔊</p>`;
+    <p class="note">About 10 minutes a day. Sound on is best. 🔊</p>
+    <button class="small-link" type="button" id="wcode" style="background:none;border:0;text-decoration:underline">Already playing somewhere else? Bring your weeks</button>`;
   $('over').hidden = false; track('welcome');
   $('wgo').onclick = () => { SND.init(); pickCity(); };
+  $('wcode').onclick = () => pasteCodeBox();
 }
 function pickCity(){
   const guess = (() => { try{ const d = JSON.parse(localStorage.getItem('nyhl-daily')||'null'); return d && ({us:'houston', uk:'london', ca:'toronto'})[d.rk]; }catch(e){ return null; } })();
@@ -1191,8 +1249,10 @@ function doneToday(){
     <div class="recap"><div><span>Cash carried over</span><span>${money(P.cash)}</span></div><div><span>Weeks lived</span><span>${P.hist.length}</span></div><div><span>Passed</span><span>${P.hist.filter(r => r.pass).length}</span></div><div><span>Streak</span><span>🔥 ${P.streak || 1}</span></div></div>
     <div class="prog">${[['🏅 Forklift lead', P.promo], ['🚗 Car fixed', P.car==='fixed'], ['💼 Office job', P.office], ['🏪 Own stall', P.stall]].map(([t, on]) => `<span class="${on ? 'on' : ''}">${on ? '' : '🔒 '}${t}</span>`).join('')}</div>
     ${rec ? '<button class="go" type="button" id="share">Share my week</button><div class="note" id="sharemsg"></div>' : ''}
+    ${homeTipHTML()}
     <a class="small-link" href="/">Also from us: Now You Have Landed, a story game about life abroad</a>`;
   $('over').hidden = false;
+  wireHomeTip();
   const s = $('share'); if(s) s.onclick = async () => { const t = shareText(rec); try{ if(navigator.share){ await navigator.share({text:t}); return; } }catch(e){ if(e && e.name === 'AbortError') return; } try{ await navigator.clipboard.writeText(t); $('sharemsg').textContent = 'Copied. Paste it in your group chat.'; }catch(e){ $('sharemsg').textContent = t; } };
 }
 function weekIntro(){

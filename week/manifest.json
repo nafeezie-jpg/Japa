@@ -1,0 +1,15 @@
+{
+  "name": "Wahala Week",
+  "short_name": "Wahala Week",
+  "description": "Survive one week of real life a day. Pay the bill by Saturday night.",
+  "id": "/week/",
+  "start_url": "/week/?source=homescreen",
+  "scope": "/week/",
+  "display": "standalone",
+  "background_color": "#16122B",
+  "theme_color": "#16122B",
+  "icons": [
+    {"src": "/week/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/week/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
