@@ -19,7 +19,7 @@
 <meta name="twitter:image" content="https://nowyouhavelanded.com/og.png">
 <link rel="canonical" href="https://nowyouhavelanded.com/">
 <link rel="manifest" href="/manifest.json">
-<meta name="build" content="20261126045802">
+<meta name="build" content="20261126054108">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -141,6 +141,15 @@ details.fold[open]{display:grid;gap:8px}
 .choice:hover{border-color:var(--green)}
 .choice:active{transform:scale(.99)}
 .choice .k{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:700;flex:none}
+.endscore{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+.endscore b{font-size:40px;line-height:1;font-family:var(--serif, inherit)}
+.endscore b small{font-size:16px;color:var(--muted)}
+.endchips{display:flex;flex-wrap:wrap;gap:8px}
+.endchips span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:600}
+.endlinks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.endlinks button,.endlinks a{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 6px;font-weight:600;font-size:14px;color:var(--ink);text-align:center;text-decoration:none}
+.endnext{text-align:center;margin:0;color:var(--muted)}
+details.endmore > summary{font-weight:600}
 .result{background:var(--card);border-left:3px solid var(--gold);border-radius:4px 12px 12px 4px;padding:12px 14px;font-size:16px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font-family:var(--mono);font-size:12px;padding:3px 8px;border-radius:999px;border:1px solid currentColor}
@@ -2392,8 +2401,6 @@ function render(){
     app.innerHTML = `<div class="intro fade">
       <div class="stamp">${abroadMonths() ? `Arrived · Landing ${String(myLandingNo()).padStart(2,"0")}` : "Arrived · Day 01"}</div>
       <h1>Now You<br>Have Landed<em>The plane landed. Real life began.</em></h1>
-      <p>Everybody wants to japa. Nobody tells you what happens after you land.</p>
-      <div class="four"><span>💵<small>Cash</small></span><span>🧘🏾<small>Peace</small></span><span>🏠<small>Home</small></span><span>🚀<small>Future</small></span><span>⏱️<small>5 min</small></span></div>
       ${(() => { const nm = getName(), set = (() => { try{ return !!localStorage.getItem('nyhl-origin') || !!nm; }catch(e){ return !!nm; } })(), open = !set || pick.editMe;
         const from = (ORIGIN_LIST.find(o=>o[1]===pick.origin)||[pick.origin,pick.origin]);
         return open ? `<div class="me open"><div class="when">Your details · used in every game</div>
@@ -2402,7 +2409,6 @@ function render(){
       <select id="origin" class="select">${ORIGIN_LIST.map(([st,city])=>`<option value="${city}"${city===pick.origin?' selected':''}>${st===city?st:st+' · '+city}</option>`).join('')}</select>
           ${set ? `<button class="ghost" type="button" id="medone">Save</button>` : ''}</div>`
         : `<div class="me"><span>👤 <b>${esc(nm || 'Anonymous lander')}</b> · leaving from ${esc(from[1])}</span><button type="button" id="meedit">Change</button></div>`; })()}
-      ${rentWeekCard()}
       ${(() => { const ds = todayStr(), plan = dailyPlan(ds), pl = places(plan.rk).find(x=>x.name===plan.place), done = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).pop();
         const where = (pl.town===pl.name ? pl.name : pl.town + ', ' + pl.name) + (plan.rk==='eu' ? '' : ', ' + ROUTES[plan.rk].label);
         if(done) return tomorrowHTML({top: `<div class="when" style="color:var(--gold)">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><div class="tm-done"><b>${scoreOf(done)}</b><small>/100 today</small><span>📍 ${esc(String(done.trip||where).split(' → ').pop())}</span></div>`,
@@ -2411,16 +2417,16 @@ function render(){
         const chips = `<div class="hero-chips">${streakInfo().n ? `<span>🔥 Keep your ${streakInfo().n}-day streak</span>` : ''}<span>⏳ New chapter in <em id="cd">${untilMidnight()}</em></span></div>`;
         if(ready) return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>📖 ${STAGES[n].l} of your life in ${esc(storyWhere(lf))}</b>
           ${goalBarHTML(lifeGoalPct(lf), lf.S.me)}${storyRoad(n-1)}${chips}
-          <button class="primary" id="dailygo" type="button">📖 Continue my story · ${STAGES[n].l}</button>
-        ${pushButtonHTML()}</div>`;
+          <button class="primary" id="dailygo" type="button">📖 Continue my story · ${STAGES[n].l}</button></div>`;
         const old = !!lf && !lf.done;
         return `<div class="hero"><div class="when">Today's Landing #${dailyNo(ds)} · ${dayLabel(ds)}</div><b>${lf && lf.done ? '🎉 Your last story is complete. Start a new life?' : old ? '📖 Your life abroad is now your own story' : '📖 Play your own life abroad'}</b>
-          <p class="hero-sub">${old ? 'Your money, meters, and progress come with you. Tell us your real route, who counts on you, and your goal.' : 'Your country, your route, your family, your goal. From the day you land to year five, one chapter a day.'}</p>
           ${chips}
-          <button class="primary" id="dailygo" type="button">${old ? '✍🏾 Make it my story' : '🛬 Start my story'}</button>
-        ${pushButtonHTML()}</div>`; })()}
-      ${loadHistory().length ? `<div class="when" style="margin-top:6px">Your progress</div>${progressTilesHTML()}` : `<button class="ghost journalbtn" type="button" onclick="openBoard()">🏆 This week's leaderboard</button>`}
-      <div class="infobtns"><button class="ghost journalbtn" type="button" onclick="openAbout()">ℹ️ What is this game?</button><button class="ghost journalbtn" type="button" onclick="openHow()">📖 How it works</button></div>
+          <button class="primary" id="dailygo" type="button">${old ? '✍🏾 Make it my story' : '🛬 Start my story'}</button></div>`; })()}
+      <div class="endlinks"><button type="button" onclick="openBoard()">🏆 Leaderboard</button><button type="button" onclick="openHow()">📖 How to play</button><a href="/week/" onclick="track('home-ww')">🌆 Wahala Week</a></div>
+      <details class="how homemore" id="homemore"${pick.qroute || pick.moreOpen ? ' open' : ''}><summary>➕ More</summary><div class="how-body">
+      ${pushButtonHTML()}
+      ${loadHistory().length ? progressTilesHTML() : ''}
+      <button class="ghost journalbtn" type="button" onclick="openAbout()">ℹ️ What is this game?</button>
       <details class="how more" id="moredet"${pick.qroute || pick.moreOpen ? ' open' : ''}>
         <summary>🎮 Practice any route · pick your own country</summary>
         <div class="how-body">
@@ -2441,6 +2447,7 @@ function render(){
         </details>
         </div>
       </details>
+      </div></details>
       <div class="foot credit">Created by <b>Nafeezie</b> · © ${new Date().getFullYear()}</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
     </div>`;
@@ -2464,6 +2471,7 @@ function render(){
       pick.setup = null; phase = 'setup'; render(); scrollTo(0,0);
     };
     const md = document.getElementById('moredet'); if(md) md.ontoggle = () => { pick.moreOpen = md.open; };
+    const hm = document.getElementById('homemore'); if(hm) hm.ontoggle = () => { pick.moreOpen = hm.open || (md && md.open); };
     app.querySelectorAll('.quick-btn').forEach(b=>b.onclick=()=>{
       SFX.tap(); pick.qroute = (pick.qroute===b.dataset.q ? null : b.dataset.q); render();
       const qp = document.getElementById('qpanel'); if(qp) qp.scrollIntoView({behavior:'smooth', block:'nearest'});
@@ -3373,7 +3381,7 @@ function tomorrowHTML(opts){
     ${opts.top || ''}
     <div class="tm-head">${playedToday ? '✅ Done for today. Come back tomorrow!' : '✈️ A new landing every day'}</div>
     <div class="tm-tiles">
-      <div><span class="tm-ic">⏳</span><b id="cd">${untilMidnight()}</b><small>next landing</small></div>
+      <div><span class="tm-ic">⏳</span><b${opts.noCd ? '' : ' id="cd"'}>${untilMidnight()}</b><small>next landing</small></div>
       <div><span class="tm-ic">🔥</span><b>${streak}</b><small>day streak</small></div>
       <div><span class="tm-ic">🛬</span><b>${days}</b><small>landing${days===1?'':'s'} lived</small></div>
     </div>
@@ -3538,13 +3546,20 @@ function renderEnd(app){
       <div class="v-ic" aria-hidden="true">${vIcon(title)}</div>
       <h2>${title}</h2>
       <p>${line}</p>
-      ${rec.length?`<div class="receipts">${rec.slice(0,2).map(r=>`<div>${r}</div>`).join('')}</div>`:''}
     </div>
+    <div class="endscore"><b>${nowScore()}<small>/100</small></b><div class="gauge"><i style="width:${Math.max(2,Math.min(100,nowScore()))}%"></i><em style="left:70%"></em></div></div>
+    <div class="endchips"><span>💵 ${money(S.cash)}</span><span>🧘🏾 ${S.peace}</span><span>🏠 ${S.home}</span><span>🚀 ${S.future}</span></div>
     ${storyEndHTML()}
+    <button class="primary" id="sharecard">Share my result</button>
+    <div class="endlinks"><button type="button" onclick="openBoard()">🏆 Leaderboard</button><button type="button" onclick="openCollection()">🏅 Collection</button><a href="/week/" onclick="track('end-ww')">🌆 Wahala Week</a></div>
+    <p class="endnext" id="rankline"></p>
+    <p class="endnext">${S.daily ? `✅ Done for today. Next one in <b id="cd">${untilMidnight()}</b>.` : '🎮 Practice game. Today\'s Landing is still waiting on the home page.'}</p>
+    <details class="how endmore"><summary>More: what it cost you, your 30 days, share options</summary><div class="how-body">
+      ${rec.length?`<div class="receipts">${rec.slice(0,2).map(r=>`<div>${r}</div>`).join('')}</div>`:''}
     ${collectionHTML(title, isNewVerdict, earned)}
     <div class="cost"><div class="when">💸 What it cost you</div><div class="cost-chips">${costParts().map(([i,t]) => `<span>${i} ${t}</span>`).join('')}</div></div>
     ${recapHTML()}
-    ${tomorrowHTML({newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `New title! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
+    ${tomorrowHTML({noCd:1, newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `New title! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
     <div class="score">
       <div class="sc-top"><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div>
       <div class="gauge"><i style="width:${Math.max(2,Math.min(100,nowScore()))}%"></i><em style="left:70%"></em></div>
@@ -3559,8 +3574,7 @@ function renderEnd(app){
     <div class="lesson">💡 ${cap(lesson().replace(/^Your lesson: /,''))}</div>
     ${postBoxHTML()}
     <div class="cardwrap"><img id="cardimg" alt="Your result card" hidden></div>
-    <button class="primary" id="sharecard">Share my result card</button>
-    <div class="share">
+        <div class="share">
       <div class="when">Or share as text</div>
       <div class="share-row">
         <a class="sbtn wa" id="s-wa" target="_blank" rel="noopener">WhatsApp</a>
@@ -3579,6 +3593,7 @@ function renderEnd(app){
     <div id="padabox" hidden class="result padabox"></div>
     ${roadHTML()}
     <a class="storylink" href="https://tally.so/r/q5480d" target="_blank" rel="noopener">Have a japa story? Share it and it could become a scene in the game →</a>
+    </div></details>
     <div class="toast" id="toast" role="status"></div>
     <div class="foot credit">Created by <b>Nafeezie</b> · © ${new Date().getFullYear()}</div>
       <div class="foot small">A fictional game. Costs and situations are illustrative, not immigration or financial advice.</div>
@@ -3627,7 +3642,7 @@ function renderEnd(app){
     document.getElementById('s-x').href = 'https://twitter.com/intent/tweet?text=' + enc(shareNow()) + '&url=' + enc(SITE);
   };
   setLinks();
-  autoPost(title, () => { setLinks(); paintCard(); });
+  autoPost(title, () => { setLinks(); paintCard(); const rl = document.getElementById('rankline'); if(rl && S.rank) rl.textContent = `🏆 You are #${S.rank} on this week's leaderboard.`; });
   document.getElementById('s-li').href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + enc(SITE);
   ['s-wa','s-x','s-li'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click',()=>track('share-'+id.slice(2))); });
   const sl=document.querySelector('.storylink'); if(sl) sl.addEventListener('click',()=>track('story-form'));

@@ -201,3 +201,9 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - Shorter stories (25 Nov, her go-ahead): about 135 scene texts rewritten to one or two short sentences, keeping the facts the choices depend on. Average scene text went from about 29 words to 21, with none over 36. Results were left as they were (about 16 words).
 - Chapter games: every continuing-story chapter (contScenes) now includes one tap game (the shop or the bus, alternating), because returning players never saw the first-month games.
 - Auto-update: both games carry <meta name="build">. On load and when the app comes back into view, they fetch the page fresh and, if the build differs, move to ?v=<build> (at most twice a session). A local pre-commit hook (.git/hooks/pre-commit) stamps the build; recreate it in a new container (it sets the meta to the UTC time and re-adds both files).
+
+### Landed on one page (26 Nov)
+- Her ask: Landed had too many cards nobody reads; make it single-page like Wahala Week.
+- Home: title, your details (only until set), the Today's Landing hero with one big button, a row of three (Leaderboard, How to play, Wahala Week), and a folded "➕ More" (#homemore) holding notifications, progress tiles, About, practice routes (#moredet), and the extras. The Wahala Week card and the four-meter strip are gone.
+- Result: verdict, score bar, four meter chips, the story progress card (story mode), "Share my result", a row of three (Leaderboard, Collection, Wahala Week), a rank line (#rankline, filled when the post returns), a done-for-today line with the countdown, and a folded "More" (.endmore) holding receipts, collection, cost, 30 days, tomorrow panel, tiles, lesson, leaderboard box (#lbbox), card image, text share, japa again, japada, new life, road, story link.
+- Tests open #homemore and #moredet with JS, open .endmore before clicking #pada, #move, or #again, and read #lbbox with text_content.
