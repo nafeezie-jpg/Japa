@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126062551">
+<meta name="build" content="20261126063618">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -990,7 +990,11 @@ const SNAGS_KIDS = [['ðŸ©¹','Your son fell at school. Clinic and drugs.',25],['ð
 function nextSnag(){
   if((W.snags || 0) >= 2) return null;
   const L = (NG() ? SNAGS_HOME : SNAGS_ABROAD).concat(hasKids() ? SNAGS_KIDS : []);
-  const pick = t => pickL('snag' + P.week + t, L);
+  // no repeats: skip the ones you have had recently, even across a fresh start
+  const pick = t => { let seen = []; try{ seen = JSON.parse(localStorage.getItem('nyhl-week-snags') || '[]'); }catch(e){}
+    const fresh = L.filter(x => !seen.includes(x[1])), pool = fresh.length ? fresh : L, sn = pool[Math.floor(luck('snag' + P.week + t + P.hist.length) * pool.length)];
+    seen = seen.filter(x => x !== sn[1]).concat([sn[1]]).slice(-Math.max(1, L.length - 3)); try{ localStorage.setItem('nyhl-week-snags', JSON.stringify(seen)); }catch(e){}
+    return sn; };
   if(!W.snagUp && P.cash >= due()){ W.snagUp = true; return [...pick('up'), 'Just when things were looking up.', 2.5]; }
   if(!W.snagDown && W.day >= 2 && (W.stars >= 3 || P.cash < due() * 0.35)){ W.snagDown = true; return [...pick('down'), 'As if this week was not hard enough.', 1.2]; }
   if(!W.snags && W.day === 4 && W.slot === NIGHT){ W.snagDown = true; return [...pick('late'), 'Friday night, and then this.', 2]; }
