@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126064730">
+<meta name="build" content="20261126065015">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -55,6 +55,7 @@ a{color:var(--gold)}
 .target i{display:block;height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,var(--gold),#ff8a3d);transition:width .5s}
 .target i.ok{background:var(--naija)}
 .tnote{font-size:13px;color:var(--dim)}
+.goalline{background:rgba(255,201,60,.1);border:1px solid var(--gold);border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.5;text-align:left}
 .days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:2px 0}
 .days span{display:grid;justify-items:center;gap:1px;padding:5px 0;border-radius:9px;background:var(--block);color:var(--dim);font:700 11px var(--body);letter-spacing:.05em}
 .days span.past{opacity:.4}
@@ -740,8 +741,8 @@ function hud(prev){
   $('mdue').textContent = money(have) + ' / ' + money(need);
   $('tbar').style.width = pct + '%'; $('tbar').classList.toggle('ok', have >= need);
   $('tnote').innerHTML = have >= need ? '✅ Sunday is covered.' : `<b>${money(need - have)}</b> to go by Sunday night.`;
-  const rl = $('rentline'); rl.hidden = !NG() || m.id === 'renewal' || P.week < 3;
-  if(NG() && m.id !== 'renewal' && P.week >= 3){ const nr = nextRenewal(P.week), amt = missionFor(nr).amount, wk = nr - P.week; rl.innerHTML = `🏠 Yearly rent in <b>${wk} week${wk === 1 ? '' : 's'}</b> (week ${nr}): <b>${money(amt)}</b>. You have ${Math.max(0, Math.min(100, Math.round(P.cash / amt * 100)))}% saved.<i><span style="width:${Math.max(0, Math.min(100, P.cash / amt * 100))}%"></span></i>`; }
+  const rl = $('rentline'); rl.hidden = !NG() || m.id === 'renewal';
+  if(NG() && m.id !== 'renewal'){ const nr = nextRenewal(P.week), amt = missionFor(nr).amount, wk = nr - P.week; rl.innerHTML = `🏠 Yearly rent in <b>${wk} week${wk === 1 ? '' : 's'}</b> (week ${nr}): <b>${money(amt)}</b>. You have ${Math.max(0, Math.min(100, Math.round(P.cash / amt * 100)))}% saved.<i><span style="width:${Math.max(0, Math.min(100, P.cash / amt * 100))}%"></span></i>`; }
   const c = $('cash'); c.textContent = money(P.cash); c.classList.toggle('down', prev != null && P.cash < prev);
   $('en').style.width = Math.max(0, W.energy) + '%'; $('enlbl').classList.toggle('low', W.energy < 25); $('enlbl').setAttribute('aria-label', 'Energy ' + Math.max(0, W.energy) + ' of 100');
   const st = $('stars'); st.innerHTML = [0,1,2,3,4].map(i => `<span class="${i < W.stars ? 'on' : 'off'}">★</span>`).join(''); st.setAttribute('aria-label', 'Family pressure ' + W.stars + ' of 5');
@@ -1741,10 +1742,11 @@ function weekIntro(){
   $('obox').innerHTML = `<div class="eyebrow">${C.flag} ${C.name.toUpperCase()} · WEEK ${P.week}${P.streak > 1 ? ` · 🔥 ${P.streak}` : ''}</div>
     <div class="big plain">${m.title}</div>
     <p>${m.line()}</p>
+    <div class="goalline">🎯 <b>This week:</b> pay <b>${money(m.amount + living() + P.arrears + P.owed)}</b> by Sunday night.${NG() && m.id !== 'renewal' ? (() => { const nr = nextRenewal(P.week), amt = missionFor(nr).amount; return `<br>🏠 <b>Rent fund:</b> ${Math.max(0, Math.min(100, Math.round(P.cash / amt * 100)))}% of ${money(amt)} saved, due in week ${nr}.`; })() : ''}</div>
     <div class="recap">
       <div><span>Due Sunday night</span><span>${money(m.amount)}</span></div>
       <div><span>${livingLabel()}</span><span>${money(living())}</span></div>
-      ${NG() && m.id !== 'renewal' && P.week >= 3 ? `<div><span>🏠 Yearly rent, week ${nextRenewal(P.week)}</span><span>${money(missionFor(nextRenewal(P.week)).amount)}</span></div>` : ''}
+      ${NG() && m.id !== 'renewal' ? `<div><span>🏠 Yearly rent, week ${nextRenewal(P.week)}</span><span>${money(missionFor(nextRenewal(P.week)).amount)}</span></div>` : ''}
       ${P.arrears ? `<div><span>Arrears from last week</span><span>${money(P.arrears)}</span></div>` : ''}
       <div><span>You have</span><span>${money(P.cash)}</span></div>
       ${P.warnings ? `<div><span>Warnings</span><span>${Math.ceil(P.warnings)} of 3</span></div>` : ''}
