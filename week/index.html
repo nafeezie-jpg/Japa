@@ -579,7 +579,8 @@ const PL = () => NG() ? ({
   fuel:{x:82,y:68,ic:'⛽',nm:'Filling station', title:'Filling station', who:'There is fuel today. There is also a queue to the next town.'},
   home:{x:18,y:87,ic:'🏠',nm:'Your room', title:`Your self-contain in ${C.area}`, who:'Shared compound, one tap, and a neighbour whose generator is louder than a church.'},
   hall:{x:50,y:87,ic:'🎉',nm:'Owambe', title:C.hall, who:'Saturday afternoon. Aunty Funmi turns 60 again, and the caterer needs extra hands.'},
-  gigs:{x:50,y:30,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'Your phone is full of small jobs. Pick one. New ones come every morning, afternoon, and night.'}
+  ryde:{x:82,y:87,ic:'🚗',nm:'Ryde', title:'Drive for Ryde', who: P.car==='fixed' ? 'Your car, freshly fixed.' : 'Your old car and a phone mount held on with prayer.'},
+  gigs:{x:50,y:30,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'New jobs every morning, afternoon, and night.'}
 }) : ({
   stall: P.week >= 5 && !P.stall ? {x:18,y:11,ic:'🏪',nm:'Market stall', title:'A stall at the weekend market', who:'Your own small business. Mama Ngozi will only recommend you if she trusts you.', fresh:P.week===5} : undefined,
   work: P.office ? {x:82,y:11,ic:'💼',nm:'Office', title:'Your new office job', who:'A desk, a lanyard, and a coffee machine that judges you.'}
@@ -592,7 +593,8 @@ const PL = () => NG() ? ({
   pitch:{x:18,y:68,ic:'⚽',nm:'5-aside', title:'Saturday 5-aside at the rec centre', who:'Naija boys versus everybody else. The Ghanaians say it is their pitch.'},
   home:{x:18,y:87,ic:'🏠',nm:'Your flat', title:`Your flat in ${C.area}`, who:'Shared wall with a man who plays the drums at midnight. Your PlayStation is under the TV.'},
   hall:{x:50,y:87,ic:'🎉',nm:'Owambe', title:C.hall, who:'Saturday afternoon. Aunty Funmi turns 60 again, and the caterer needs extra hands.'},
-  gigs:{x:50,y:30,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'Your group chats are full of small jobs. Pick one. New ones come every morning, afternoon, and night.'}
+  ryde:{x:82,y:87,ic:'🚗',nm:'Ryde', title:'Drive for Ryde', who: P.car==='fixed' ? 'Your car, freshly fixed.' : 'Your old car and a phone mount held on with prayer.'},
+  gigs:{x:50,y:30,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'New jobs every morning, afternoon, and night.'}
 });
 let places = {};
 const SAT = 5;
@@ -629,7 +631,7 @@ function drawCity(){
   g.font = '9px Rubik, sans-serif'; g.fillStyle = '#5FA9B8'; g.textAlign = 'left'; g.fillText(C.water, 8, 236);
 }
 // a newcomer starts with four places; the rest of the city opens week by week
-const UNLOCK = {home:1, work:1, mama:1, gigs:1, hall:2, pray:2, fuel:2, loan:2, view:3, relax:3, pitch:3};
+const UNLOCK = {home:1, work:1, mama:1, gigs:1, ryde:1, hall:2, pray:2, fuel:2, loan:2, view:3, relax:3, pitch:3};
 const unlockWeek = k => UNLOCK[k] || 1;
 const newThisWeek = () => Object.entries(PL()).filter(([k, v]) => v && P.week > 1 && (unlockWeek(k) === P.week || v.fresh)).map(([, v]) => v);
 function pins(){
@@ -640,23 +642,8 @@ function pins(){
   }).join('');
 }
 
-// week one walks you through it: earn at work first, eat when you are tired, answer the family
-function coachPin(){
-  if(P.week > 1 || !W || W.over) return '';
-  if(W.energy < 35 && W.slot < 2) return 'mama';
-  if(!workedToday() && isOpen('work')) return 'work';
-  return '';
-}
-function coachText(){
-  if(P.week > 1 || !W) return '';
-  if(W.inbox.length && !W.answered) return '📱 Your family is texting. Tap the green WhatsApp button on the map before the stars climb.';
-  if(W.energy < 35 && W.slot < 2) return `🍲 Low energy. Tap the glowing ${NG() ? 'buka' : 'market'} to eat, or go home to sleep.`;
-  if(!workedToday() && isOpen('work')) return '💼 Start here. Tap the glowing work pin to earn money for Saturday.';
-  if(!workedToday() && !isOpen('work')) return '🛠️ Work is closed now. Tap Hustles and pick a job for today.';
-  if(workedToday() && P.cash < due()) return '🌙 You have worked today. Eat, rest, answer your family, and work again tomorrow.';
-  if(P.cash < due()) return '💸 One job a day: your work, a hustle, or a kitchen shift. Turn on Ryde on the way for extra fares.';
-  return '✅ You have enough for Saturday. Rest, enjoy the city, and keep some extra if you can.';
-}
+// no coaching: players choose for themselves
+const coachPin = () => '', coachText = () => '';
 
 /* ---------- HUD ---------- */
 const DAYS = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'], SLOTS = ['MORNING','AFTERNOON','NIGHT'];
@@ -671,7 +658,7 @@ function hud(prev){
   const need = due(), have = Math.max(0, P.cash), pct = Math.min(100, Math.round(have / need * 100));
   $('mdue').textContent = money(have) + ' / ' + money(need);
   $('tbar').style.width = pct + '%'; $('tbar').classList.toggle('ok', have >= need);
-  $('tnote').innerHTML = have >= need ? '✅ Saturday is covered. Anything extra is yours to keep.' : `Earn <b>${money(need - have)}</b> more by Saturday night.`;
+  $('tnote').innerHTML = have >= need ? '✅ Saturday is covered.' : `<b>${money(need - have)}</b> to go by Saturday night.`;
   const rl = $('rentline'); rl.hidden = !NG() || m.id === 'renewal' || P.week < 3;
   if(NG() && m.id !== 'renewal' && P.week >= 3){ const nr = nextRenewal(P.week), amt = missionFor(nr).amount, wk = nr - P.week; rl.innerHTML = `🏠 Yearly rent in <b>${wk} week${wk === 1 ? '' : 's'}</b> (week ${nr}): <b>${money(amt)}</b>. You have ${Math.max(0, Math.min(100, Math.round(P.cash / amt * 100)))}% saved.<i><span style="width:${Math.max(0, Math.min(100, P.cash / amt * 100))}%"></span></i>`; }
   const c = $('cash'); c.textContent = money(P.cash); c.classList.toggle('down', prev != null && P.cash < prev);
@@ -699,8 +686,7 @@ function idle(){
 }
 function idleText(){
   const hint = W.energy < 30 ? 'You are running on empty. Your flat is calling you.' : W.slot === 2 ? (NG() ? 'Night. Offices are closed, but some hustles run at night.' : 'Night. Some places are closed. The warehouse never sleeps.') : 'Tap a place on the map. Each visit uses part of your day.';
-  const coach = coachText();
-  return `<h2>${DAYS[W.day][0] + DAYS[W.day].slice(1).toLowerCase()} ${SLOTS[W.slot].toLowerCase()}. Where to?</h2>${coach ? `<p class="coachline">${coach}</p>` : `<p>${hint}</p>`}${W.day===SAT && W.slot===0 ? '<p class="who">⚽ Saturday morning: 5-aside is on.</p>' : ''}${W.day===SAT && W.slot===1 ? '<p class="who">🎉 The owambe is on this afternoon.</p>' : ''}${W.day===SAT && NG() ? '<p class="who">🏢 Offices are closed today.</p>' : ''}${NG() && W.slot===2 ? '<p class="who">📺 The viewing centre is open.</p>' : ''}`;
+  return `<h2>${DAYS[W.day][0] + DAYS[W.day].slice(1).toLowerCase()} ${SLOTS[W.slot].toLowerCase()}</h2>${W.energy < 30 ? '<p class="who">😮‍💨 Low energy</p>' : ''}${W.day===SAT && W.slot===0 ? '<p class="who">⚽ Saturday morning: 5-aside is on.</p>' : ''}${W.day===SAT && W.slot===1 ? '<p class="who">🎉 The owambe is on this afternoon.</p>' : ''}${W.day===SAT && NG() ? '<p class="who">🏢 Offices are closed today.</p>' : ''}${NG() && W.slot===2 ? '<p class="who">📺 The viewing centre is open.</p>' : ''}`;
 }
 function visit(k){
   if(!isOpen(k)){ toast(k==='pray' ? 'Midweek service is Wednesday night. Friday prayers are Friday afternoon.' : k==='hall' ? 'The owambe is Saturday afternoon. Aunty Funmi needs time to tie her gele.' : k==='pitch' ? '5-aside is Saturday morning.' : k==='relax' ? 'Baba Sule only sets up the board after work.' : k==='work' ? 'Offices are closed on Saturday.' : k==='school' ? 'Classes are at night.' : 'Closed at this hour.'); return; }
@@ -716,10 +702,10 @@ const BUSY_TAG = 'you already worked today';
 function startJob(job){
   W.jobDay = W.day; W.offerHome = true;
   if(W.energy < 30) return job();
-  choice(`${youHTML('ryde', 'on the way')}You are heading out. Turn on Ryde and pick up passengers on the way?`, [
-    {l:'🚗 Turn on Ryde on the way', run:() => { W.log.rides++; drive(res => { const r = rydeCommute(res, false), b = apply(r.fx); save(); hud(b);
-      sheet(`<div class="mood" aria-hidden="true">${moodFx(r.fx)}</div><p>${r.text}</p>${chips(r.fx)}<button class="go" type="button" id="next">Get to work</button>`); $('next').onclick = job; showSheet(); }); }},
-    {l:'Just go straight there', run:job}
+  choice(`${youHTML('ryde', 'on the way')}Ryde on the way?`, [
+    {l:'🚗 Turn on Ryde', run:() => { W.log.rides++; drive(res => { const r = rydeCommute(res, false), b = apply(r.fx); save(); hud(b);
+      sheet(`<div class="mood" aria-hidden="true">${moodFx(r.fx)}</div><p>${r.text}</p>${chips(r.fx)}<button class="go" type="button" id="next">Continue</button>`); $('next').onclick = job; showSheet(); }); }},
+    {l:'Go straight', run:job}
   ]);
 }
 function rydeCommute(res, home){
@@ -756,6 +742,9 @@ function actions(k){
         ]);
         return done({cash:pay, energy:en}, P.office ? pickL('off' + T(), ['Three meetings that could have been emails. You get paid either way.','Someone microwaves fish. Everyone looks at you. It was not you this time.','You fix the printer. You are now "the tech person". Forever.']) : pickL('wh' + T(), ['Eight hours of boxes. You now know exactly what people order at 3am.','A forklift almost reverses into you. You survive. The pay is the same.','You find a Nigerian in the next aisle. You talk jollof for a whole break.']));
       })}
+    ];
+    case 'ryde': return [
+      {l:'Drive all day', tag: workedToday() ? BUSY_TAG : `a full day · fares and tips · -45 energy`, dis:tired || workedToday(), run:() => { W.jobDay = W.day; W.log.rides++; drive(res => rydeResult(res)); }}
     ];
     case 'gigs': return gigsNow().map(g => ({l:`${g[1]} ${g[2]}`, tag: workedToday() ? BUSY_TAG : `about +${money(A(g[4] * 1.7))} · ${gigEnergy(g)} energy`, dis:workedToday() || W.energy < Math.min(20, -gigEnergy(g)), run:() => startJob(() => doGig(g))}));
     case 'ryde': return [
@@ -894,16 +883,16 @@ function ngWork(pay, en){
 function rydeResult(res){
   const ng = NG();
   if(res.hits >= 3) return choice(ng ? `One pothole too many. The car screams, then smells, then stops. The fan belt. The mechanic wants ${money(A(90))} today.` : `One pothole too many. Your car screams, then smells, then stops. The fan belt. The mechanic wants ${money(A(90))} today.`, [
-    {l:'Pay the mechanic', run:() => done({cash:A(res.coins * 6) - A(90), energy:-30, peace:-6}, `You keep the ${money(A(res.coins * 6))} in fares you made, and the mechanic takes most of it. "Home discount": zero.`)},
-    {l:'YouTube it, fix it yourself', run:() => roll('diy' + T(), .5) ? done({cash:A(res.coins * 6) - A(15), energy:-40, peace:4}, 'Two hours, one video, grease to your elbows. It works. You feel like a genius.') : done({cash:A(res.coins * 6) - A(110), energy:-40, peace:-8}, `You fix the fan belt and break something else. Now it is ${money(A(110))}.`)}
+    {l:'Pay the mechanic', run:() => done({cash:A(res.coins * 18) - A(90), energy:-45, peace:-6}, `You keep the ${money(A(res.coins * 18))} in fares you made, and the mechanic takes most of it. "Home discount": zero.`)},
+    {l:'YouTube it, fix it yourself', run:() => roll('diy' + T(), .5) ? done({cash:A(res.coins * 18) - A(15), energy:-50, peace:4}, 'Two hours, one video, grease to your elbows. It works. You feel like a genius.') : done({cash:A(res.coins * 18) - A(110), energy:-50, peace:-8}, `You fix the fan belt and break something else. Now it is ${money(A(110))}.`)}
   ]);
-  let cash = A(25) + A(res.coins * 6) + (P.car === 'fixed' ? A(20) : 0), peace = 0, bits = [];
+  let cash = A(80) + A(res.coins * 18) + (P.car === 'fixed' ? A(30) : 0), peace = 0, bits = [];
   bits.push(`${res.coins} fare${res.coins === 1 ? '' : 's'} picked up`);
   if(res.hits) { peace -= res.hits * 2; bits.push(`${res.hits} knock${res.hits === 1 ? '' : 's'}`); }
   if(res.cop){ const fine = ng ? A(30) : A(75); cash -= fine; peace -= 5; bits.push(ng ? `"something for the boys" at the checkpoint (${money(fine)})` : `a ${money(fine)} ticket`); }
   const clean = !res.hits && !res.cop && res.coins >= 7;
   if(clean){ cash += A(60); peace += 8; }
-  done({cash, energy:-30, peace}, (clean ? (ng ? `A clean run. Your last passenger, a big man's PA, tips you ${money(A(60))} "for the road".` : `A clean run. Your last rider tips ${money(A(60))} and leaves five stars.`) : pickL('rt' + T(), ng ? ['Go-slow, potholes, and one okada with a death wish. You survived Lagos traffic.','A woman negotiates the fare down, then tips you back up. Only in Nigeria.'] : ['Traffic, potholes, and one driver who has never used an indicator. You survived.','Rain and surge pricing. The only time rain has ever helped you.'])) + ` (${bits.join(', ')}.)`);
+  done({cash, energy:-45, peace}, (clean ? (ng ? `A clean run. Your last passenger, a big man's PA, tips you ${money(A(60))} "for the road".` : `A clean run. Your last rider tips ${money(A(60))} and leaves five stars.`) : pickL('rt' + T(), ng ? ['Go-slow, potholes, and one okada with a death wish. You survived Lagos traffic.','A woman negotiates the fare down, then tips you back up. Only in Nigeria.'] : ['Traffic, potholes, and one driver who has never used an indicator. You survived.','Rain and surge pricing. The only time rain has ever helped you.'])) + ` (${bits.join(', ')}.)`);
 }
 function drive(cb){
   const ng = NG(), seed = 'drive' + P.week + '-' + T();
@@ -1168,7 +1157,7 @@ function done(fx, text, unlock){
   const before = apply(fx); save(); hud(before);
   const last = W.day === SAT && W.slot === 2;
   const homeRyde = W.offerHome && W.energy >= 15; W.offerHome = false;
-  sheet(`<div class="mood" aria-hidden="true">${moodFx(fx)}</div><p>${text}</p>${chips(fx)}${unlock ? `<p class="who" style="color:var(--naija)">${unlock}</p>` : ''}<button class="go" type="button" id="next">${last ? 'Saturday night. Time to pay.' : 'Next'}</button>${homeRyde ? '<button class="ghost" type="button" id="rydehome">🚗 Turn on Ryde on the way home</button>' : ''}`);
+  sheet(`<div class="mood" aria-hidden="true">${moodFx(fx)}</div><p>${text}</p>${chips(fx)}${unlock ? `<p class="who" style="color:var(--naija)">${unlock}</p>` : ''}<button class="go" type="button" id="next">${last ? 'Saturday night. Time to pay.' : 'Next'}</button>${homeRyde ? '<button class="ghost" type="button" id="rydehome">🚗 Ryde on the way home</button>' : ''}`);
   $('next').onclick = advance;
   if(homeRyde) $('rydehome').onclick = () => { W.log.rides++; drive(res => { const r = rydeCommute(res, true), b = apply(r.fx); W.at = 'home'; save(); hud(b);
     sheet(`<div class="mood" aria-hidden="true">${moodFx(r.fx)}</div><p>${r.text}</p>${chips(r.fx)}<button class="go" type="button" id="next">${last ? 'Saturday night. Time to pay.' : 'Next'}</button>`); $('next').onclick = advance; showSheet(); }); };
@@ -1406,7 +1395,7 @@ $('help').onclick = () => {
   const box = document.createElement('div'); box.className = 'overlay'; box.innerHTML = `<div class="box" style="text-align:left"><div class="eyebrow" style="text-align:center">HOW TO PLAY</div><div class="big plain" style="text-align:center;font-size:clamp(28px,8vw,40px)">WAHALA WEEK</div>
     <div class="recap" style="gap:10px">
       <p>📅 <b>Each day is one week of your life.</b> Monday to Saturday, three parts a day: morning, afternoon, and night. Saturday is for 5-aside, the owambe, and the viewing centre.</p>
-      <p>🗺️ <b>Tap a place on the map</b> to work, take on a hustle, drive, cook, pray, play Ayo, watch football, borrow, or rest. You can do <b>one job a day</b>: your work, one hustle, or a kitchen shift. The 🛠️ Hustles pin has a fresh set of small jobs every morning, afternoon, and night. Each visit uses part of the day and some energy. Rest at home when you are tired.</p>
+      <p>🗺️ <b>Tap a place on the map</b> to work, take on a hustle, drive, cook, pray, play Ayo, watch football, borrow, or rest. You can do <b>one job a day</b>: your work, Ryde, one hustle, or a kitchen shift. The 🛠️ Hustles pin has a fresh set of small jobs every morning, afternoon, and night. Each visit uses part of the day and some energy. Rest at home when you are tired.</p>
       <p>💸 <b>Pay the bill by Saturday night.</b> It changes every week, and food, transport, and data come out too. ${NG() ? 'In Nigeria the rent is yearly, so save for it. The countdown shows how close it is.' : 'Rent comes round every few weeks.'}</p>
       <p>📱 <b>WhatsApp keeps buzzing.</b> Send money, send half and a voice note, or leave them on read. Ignoring people raises the ⭐ family pressure. Five stars and the whole family calls at once.</p>
       <p>🎮 <b>Little games inside the week.</b> 🚗 Ryde: switch it on as you go to work or head home, then swipe to dodge traffic and collect fares. 🍲 Kitchen: tap the ingredients for each order before the customer walks out. 🎲 Ayo with Baba Sule, plus ludo and draft. ⚽ Saturday 5-aside and FIFA on the PS: take penalties and dive for saves. Every game has a skip button if you just want to relax.</p>
@@ -1445,9 +1434,9 @@ function welcome(){
     <p style="font-size:17px">One week of everyday hustle, every day.</p>
     <div class="welcome steps">
       <div><span>🧾</span><p><b>A bill is due Saturday night.</b></p></div>
-      <div><span>💼</span><p><b>Pick one job a day.</b> Your work or one of over twenty hustles, with Ryde on the way for extra fares.</p></div>
-      <div><span>📱</span><p><b>Answer your family on WhatsApp.</b> Ignore them and the stars climb.</p></div>
-      <div><span>✅</span><p><b>Pay the bill, keep the change.</b> Next week your life carries on.</p></div>
+      <div><span>💼</span><p><b>One job a day.</b> Your work, Ryde, or twenty-plus hustles.</p></div>
+      <div><span>📱</span><p><b>Family is on WhatsApp.</b></p></div>
+      <div><span>✅</span><p><b>Your life carries on</b> week after week.</p></div>
     </div>
     <button class="go" type="button" id="wgo">Choose my city</button>
     <p class="note">About 10 minutes a day. Sound on is best. 🔊</p>
@@ -1484,7 +1473,7 @@ function pickCity(){
 function pickMe(){
   let who = P.me || '', life = P.fam || 'single';
   $('obox').innerHTML = `<div class="eyebrow">STEP 2 OF 2</div><div class="big plain" style="font-size:clamp(28px,8vw,40px)">WHO ARE YOU?</div>
-    <p>You will see yourself on the map, at work, at the buka, at the owambe, and behind the wheel.</p>
+    
     <div class="whoami">${Object.entries(ME).map(([k, m]) => `<button type="button" data-me="${k}"${k === who ? ' class="on"' : ''}><span aria-hidden="true">${m.base}</span>${m.label}</button>`).join('')}</div>
     <div class="eyebrow" style="text-align:left;margin-top:6px">YOUR HOME LIFE</div>
     <div class="whoami fam">${Object.entries(FAM).map(([k, [ic, l]]) => `<button type="button" data-fam="${k}"${k === life ? ' class="on"' : ''}><span aria-hidden="true">${ic}</span>${l}</button>`).join('')}</div>
@@ -1529,7 +1518,7 @@ function weekIntro(){
       ${P.warnings ? `<div><span>Warnings</span><span>${Math.ceil(P.warnings)} of 3</span></div>` : ''}
     </div>
     ${newThisWeek().length ? `<div class="newmap"><b>New on your map this week</b>${newThisWeek().map(v => `<span>${v.ic} ${v.nm}</span>`).join('')}</div>` : ''}
-    ${P.week === 1 ? `<p class="coachline">💼 Earn the money by Saturday night. Start by tapping the glowing work pin. We will guide you through week one.</p>` : ''}
+
     <button class="go" type="button" id="begin">Start Monday</button>`;
   $('over').hidden = false;
   $('begin').onclick = () => { $('over').hidden = true; track('play-w' + P.week); dayCard('MONDAY', () => { pins(); hud(); idle(); }); };
