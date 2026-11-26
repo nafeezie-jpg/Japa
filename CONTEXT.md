@@ -175,3 +175,10 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - No visiting parents. Home has sleep, Call Mummy (NG) or video call (abroad), and an evening with your spouse or children.
 - A Monday to Saturday strip sits under the bill bar with the part of the day (🌅 ☀️ 🌙). Each new day opens with a big day card ("MONDAY / MORNING").
 - Careful bot: Lagos single about ₦48k saved a week, Kano about ₦28k, Texas about $300.
+
+### Seven days, morning and night, men's and women's jobs (25 Nov)
+- The week is Monday to Sunday with two parts a day (SLOTS MORNING, NIGHT; NIGHT = 1). The bill is due Sunday night (lastSlot()). A new day restores 45 energy, so the night's sleep is implied.
+- Weekend: offices closed Saturday and Sunday (NG and office jobs); owambe Saturday morning; 5-aside Saturday and Sunday mornings; church or mosque Wednesday night, Friday morning, and Sunday morning.
+- Gender: GIG_SEX marks hustles as women's (braiding, make-up, small chops, bread, corn, babysitting, jollof, laundry, cleaning) or men's (dispatch, phone repair, site, moving, DJ, barbing, inverter, security, hype man, kitchen porter, flat-pack). Men don't get the buka kitchen shift or caterer cooking; they set up canopies at the owambe instead. Women don't see 5-aside, the viewing centre, or FIFA at home.
+- The drive's skip is now a small "Skip" link under "Start driving".
+- Pay now: NG work A(165), abroad A(135) day / A(160) night, office A(280)/A(250); hustles 0.75x base; commute Ryde A(2) a fare; surprises 40% a part of the day at 1.3x listed cost. Careful bot: Lagos about ₦47k saved a week, Kano about ₦27k, Texas about $240.
