@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126054108">
+<meta name="build" content="20261126054948">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -113,6 +113,10 @@ a{color:var(--gold)}
 .pin.new .ic{border-color:var(--naija);animation:glow 1.4s ease-in-out infinite}
 .pin.new .nm::after{content:" NEW";color:var(--naija)}
 @keyframes glow{50%{box-shadow:0 0 0 8px rgba(45,190,108,.25),0 6px 14px rgba(0,0,0,.4)}}
+.trail{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0}
+.trail line{stroke:var(--gold);stroke-width:.8;stroke-dasharray:2 2;vector-effect:non-scaling-stroke;stroke-width:3}
+.trail.on{animation:trail 1.6s ease forwards}
+@keyframes trail{0%{opacity:0}15%{opacity:1}80%{opacity:1}100%{opacity:0}}
 .me{position:absolute;width:40px;height:40px;border-radius:50%;background:var(--naija);border:3px solid var(--ink);transform:translate(-50%,-50%);transition:left .9s ease-in-out,top .9s ease-in-out;box-shadow:0 0 14px var(--naija);z-index:3;pointer-events:none;display:grid;place-items:center;font-size:24px;line-height:1}
 .me::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:2px solid var(--naija);animation:ping 1.6s ease-out infinite}
 .me .mb{position:absolute;right:-8px;bottom:-6px;font-size:15px}
@@ -266,6 +270,7 @@ canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%
   <div class="map" id="map">
     <canvas id="city" aria-hidden="true"></canvas>
     <div class="sky" id="sky"></div>
+    <svg class="trail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line id="trail" x1="0" y1="0" x2="0" y2="0"/></svg>
     <div id="pins"></div>
     <div class="me" id="me"></div>
     <button class="phone" id="phone" type="button" hidden>📱 WhatsApp <span class="n" id="pn">1</span></button>
@@ -582,7 +587,7 @@ function famRequests(){
 function pose(k){
   const m = me();
   return ({home:['🛌🏾',''], work:[m.work, P.office ? '🏦' : '💼'], ryde:[m.base,'🚗'], mama:[m.base,'🍲'], loan:[m.base,'📲'], hall:[m.dance,'🎉'],
-    fuel:[m.base,'⛽'], mech:[m.mech,'🔧'], school:[m.school,'📚'], stall:[m.base,'🏧'], gigs:[m.work,'🛠️'], pray:[m.base,'🙏🏾'], view:[m.base,'⚽'], phone:[m.base,'📱'], sick:['🤒','']})[k] || [m.base,''];
+    fuel:[m.base,'⛽'], mech:[m.mech,'🔧'], school:[m.school,'📚'], stall:[m.base,'🏧'], gigs:[m.work,'🛠️'], pray:[m.base,'🙏🏾'], view:[m.base,'⚽'], phone:[m.base,'📱'], walk:[m.walk,''], sick:['🤒','']})[k] || [m.base,''];
 }
 const youHTML = (k, caption) => { const [a, b] = pose(k); return `<div class="you" aria-hidden="true"><span class="yf">${a}</span>${b ? `<span class="yb">${b}</span>` : ''}${caption ? `<small>${caption}</small>` : ''}</div>`; };
 function moodFx(fx){ const m = me(), good = (fx.cash || 0) > 0 || (fx.peace || 0) >= 6, bad = (fx.peace || 0) <= -4 || (fx.stars || 0) > 0 || ((fx.cash || 0) < 0 && !(fx.peace > 0));
@@ -723,15 +728,46 @@ const showSheet = () => setTimeout(() => { const el = $('sheet'), r = el.getBoun
 const showMap = () => { const m = $('map'); if(m && m.getBoundingClientRect().top < 0) scrollTo({top:0, behavior:'smooth'}); };
 function idle(){
   showMap();
-  const _i = idleText();
-  sheet(`${youHTML(W.at === 'home' ? 'home' : W.at, (myName || 'You') + (W.energy < 30 ? ', tired' : ''))}` + _i);
+  sheet(`${youHTML(W.at === 'home' ? 'home' : W.at, (myName || 'You') + (W.energy < 30 ? ', tired' : ''))}` + idleText());
+  $('sheet').querySelectorAll('[data-go]').forEach(b => b.onclick = () => { SND.tap(); visit(b.dataset.go); });
+}
+// a short plan: where you could head now, and why
+function planOptions(){
+  const o = [], open = k => places[k] && isOpen(k), night = W.slot === NIGHT;
+  const pay = NG() ? (P.office ? A(280) : A(165) + (P.promo ? A(40) : 0)) : P.office ? A(250) : (night ? A(160) : A(135)) + (P.promo ? A(50) : 0);
+  if(!workedToday() && open('work')) o.push(['work', P.office ? '🏦' : '💼', night ? 'Night shift' : 'Go to work', `about +${money(pay)}`]);
+  if(!workedToday() && open('ryde') && !night) o.push(['ryde', '🚗', 'Drive Ryde all day', 'fares and tips']);
+  if(!gigToday() && open('gigs')) o.push(['gigs', '🛠️', night ? 'Evening hustle' : 'Pick a hustle', 'extra money on the side']);
+  if(open('hall')) o.push(['hall', '🎉', 'Go to the owambe', 'family pressure down']);
+  if(open('pray')) o.push(['pray', muslim() ? '🕌' : '🙏🏾', muslim() ? 'Go to the mosque' : 'Go to service', 'peace']);
+  if(open('pitch')) o.push(['pitch', '⚽', 'Play 5-aside', 'peace']);
+  if(W.energy < 60 && open('mama')) o.push(['mama', '🍲', NG() ? 'Eat at the buka' : 'Get food at the Naija shop', 'energy back']);
+  if(night && open('relax')) o.push(['relax', '🎲', 'Relax at the Ayo spot', 'peace']);
+  if(night && open('view')) o.push(['view', '📺', 'Watch the match', 'peace']);
+  if(open('school')) o.push(['school', '🎓', 'Go to class', 'a better job later']);
+  o.push(['home', '🏠', night ? 'Go home and rest' : 'Stay in and rest', '+energy']);
+  return o.slice(0, 5);
 }
 function idleText(){
-  const hint = W.energy < 30 ? 'You are running on empty. Your flat is calling you.' : W.slot === 2 ? (NG() ? 'Night. Offices are closed, but some hustles run at night.' : 'Night. Some places are closed. The warehouse never sleeps.') : 'Tap a place on the map. Each visit uses part of your day.';
-  return `<h2>${DAYS[W.day][0] + DAYS[W.day].slice(1).toLowerCase()} ${SLOTS[W.slot].toLowerCase()}</h2>${W.energy < 25 ? '<p class="warn">⚠️ Exhausted. Working now risks your health and your pay.</p>' : ''}${W.day===SAT && W.slot===0 ? '<p class="who">🎉 Owambe today · ⚽ 5-aside</p>' : ''}${W.day===SUN && W.slot===0 ? '<p class="who">🙏🏾 Service this morning · ⚽ 5-aside</p>' : ''}`;
+  const need = due() - Math.max(0, P.cash), when = `${DAYS[W.day][0] + DAYS[W.day].slice(1).toLowerCase()} ${SLOTS[W.slot].toLowerCase()}`;
+  const why = need > 0 ? `You need <b>${money(need)}</b> more by Sunday night.` : '✅ Sunday is covered. Anything more is savings.';
+  const done = workedToday() && gigToday() ? ' You have done your two jobs today.' : workedToday() ? ' Your main job is done today.' : '';
+  return `<h2>${when}</h2><p>${why}${done}</p>${W.energy < 25 ? '<p class="warn">⚠️ Exhausted. Working now risks your health and your pay.</p>' : ''}
+    <p class="eyebrow" style="margin:4px 0 0">WHERE ARE YOU HEADING?</p>
+    <div class="acts">${planOptions().map(([k, ic, l, t]) => `<button class="act" type="button" data-go="${k}"><span>${ic} ${l}</span><small>${t}</small></button>`).join('')}</div>
+    <p class="note" style="text-align:left">Or tap any place on the map.</p>`;
 }
 function visit(k){
+  if(visit.walking) return;
   if(!isOpen(k)){ toast(k==='pray' ? 'Wednesday night, Friday morning, or Sunday morning.' : k==='hall' ? 'The owambe is on Saturday. Aunty Funmi needs time to tie her gele.' : k==='pitch' ? '5-aside is at the weekend.' : k==='relax' ? 'Baba Sule only sets up the board after work.' : k==='work' ? 'Closed now.' : k==='school' ? 'Classes are at night.' : 'Closed at this hour.'); return; }
+  if(W.at !== k && !visit.walking){
+    const from = places[W.at] || places.home, to = places[k], why = ({earn: due() > P.cash ? `to earn toward ${missionFor(P.week).title.toLowerCase()}, due Sunday night` : 'to put something aside', home: k === 'home' ? 'to rest' : 'to eat', faith: k === 'hall' ? 'to celebrate' : 'to pray', play:'to relax', errand:'to sort something out', grow:'to build your future'})[KIND[k] || 'errand'];
+    visit.walking = true; W.at = k; hud(); SND.tap();
+    const ln = $('trail'); if(ln && from && to){ ln.setAttribute('x1', from.x); ln.setAttribute('y1', from.y); ln.setAttribute('x2', to.x); ln.setAttribute('y2', to.y); ln.parentNode.classList.remove('on'); void ln.parentNode.offsetWidth; ln.parentNode.classList.add('on'); }
+    sheet(`${youHTML('walk', 'on the way')}<h2>${me().walk} Heading to ${to.nm.toLowerCase()}</h2><p class="who">${why[0].toUpperCase() + why.slice(1)}.</p>`);
+    setTimeout(() => { visit.walking = false; visit(k); }, 1000);
+    return;
+  }
   W.at = k; hud(); const p = places[k], acts = actions(k);
   const kd = KINDS[KIND[k] || 'errand'];
   sheet(`${youHTML(k, (myName || 'You') + ' at ' + p.nm.toLowerCase())}<span class="kindtag" style="color:${kd[2]}">${kd[0]} ${kd[1].toUpperCase()}</span><h2>${p.ic} ${p.title}</h2><p class="who">${p.who}</p><div class="acts">${acts.map((a, i) => `<button class="act" type="button" data-i="${i}" ${a.dis ? 'disabled' : ''}><span>${a.l}</span><small>${a.tag || ''}</small></button>`).join('')}<button class="act" type="button" data-i="back"><span>Go somewhere else</span><small>free</small></button></div>`);

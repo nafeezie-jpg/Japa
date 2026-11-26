@@ -207,3 +207,8 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - Home: title, your details (only until set), the Today's Landing hero with one big button, a row of three (Leaderboard, How to play, Wahala Week), and a folded "➕ More" (#homemore) holding notifications, progress tiles, About, practice routes (#moredet), and the extras. The Wahala Week card and the four-meter strip are gone.
 - Result: verdict, score bar, four meter chips, the story progress card (story mode), "Share my result", a row of three (Leaderboard, Collection, Wahala Week), a rank line (#rankline, filled when the post returns), a done-for-today line with the countdown, and a folded "More" (.endmore) holding receipts, collection, cost, 30 days, tomorrow panel, tiles, lesson, leaderboard box (#lbbox), card image, text share, japa again, japada, new life, road, story link.
 - Tests open #homemore and #moredet with JS, open .endmore before clicking #pada, #move, or #again, and read #lbbox with text_content.
+
+### Wahala Week: a plan each part of the day, and the walk (26 Nov)
+- She found the free map confusing: leaving home should feel like heading somewhere, for a reason.
+- idle() now shows "Monday morning · You need ₦X more by Sunday night · WHERE ARE YOU HEADING?" with up to five options from planOptions() (work with its pay, Ryde all day, a hustle, owambe, service, 5-aside, buka when tired, Ayo or the match at night, class, rest), each with its reason. "Or tap any place on the map."
+- visit() first shows the walk: a dashed trail from where you are to the place, your walking avatar, and "Heading to 9 to 5 · To earn toward light and fuel, due Sunday night", then the place opens after a second (visit.walking guards double taps).
