@@ -238,7 +238,7 @@ canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="when" id="when"></div><button class="snd" id="addapp" type="button" aria-label="Add to home screen" hidden>📲</button><button class="snd" id="help" type="button" aria-label="How to play">❓</button><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
+  <div class="top"><div class="when" id="when"></div><button class="snd" id="addapp" type="button" aria-label="Add to home screen" hidden>📲</button><button class="snd" id="help" type="button" aria-label="About and how to play">❓</button><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
   <div class="logo">WAHALA WEEK</div>
   <header class="hud" aria-live="polite">
     <div class="mission"><span id="mtitle"></span><span class="due" id="mdue"></span></div>
@@ -1471,16 +1471,22 @@ const SND = (() => {
 document.addEventListener('visibilitychange', () => { if(!document.hidden) SND.init(); });
 $('snd').textContent = SND.on ? '🔊' : '🔇';
 $('help').onclick = () => {
-  const box = document.createElement('div'); box.className = 'overlay'; box.innerHTML = `<div class="box" style="text-align:left"><div class="eyebrow" style="text-align:center">HOW TO PLAY</div><div class="big plain" style="text-align:center;font-size:clamp(28px,8vw,40px)">WAHALA WEEK</div>
+  const box = document.createElement('div'); box.className = 'overlay'; box.innerHTML = `<div class="box" style="text-align:left"><div class="eyebrow" style="text-align:center">ABOUT AND HOW TO PLAY</div><div class="big plain" style="text-align:center;font-size:clamp(28px,8vw,40px)">WAHALA WEEK</div>
     <div class="recap" style="gap:10px">
-      <p>📅 <b>Each day is one week of your life.</b> Monday to Sunday, morning and night. The weekend is for 5-aside, the owambe, and the viewing centre.</p>
-      <p>🗺️ <b>Tap a place on the map</b> to work, take on a hustle, drive, cook, pray, play Ayo, watch football, borrow, or rest. You can do <b>one job a day</b>: your work, Ryde, one hustle, or a kitchen shift. The 🛠️ Hustles pin has a fresh set of small jobs every morning, afternoon, and night. Each visit uses part of the day and some energy. Rest at home when you are tired.</p>
-      <p>💸 <b>Pay the bill by Sunday night.</b> It changes every week, and food, transport, and data come out too. ${NG() ? 'In Nigeria the rent is yearly, so save for it. The countdown shows how close it is.' : 'Rent comes round every few weeks.'}</p>
-      <p>📱 <b>WhatsApp keeps buzzing.</b> Send money, send half and a voice note, or leave them on read. Ignoring people raises the ⭐ family pressure. Five stars and the whole family calls at once.</p>
-      <p>🎮 <b>Little games inside the week.</b> 🚗 Ryde: switch it on as you go to work or head home, then swipe to dodge traffic and collect fares. 🍲 Kitchen: tap the ingredients for each order before the customer walks out. 🎲 Ayo with Baba Sule, plus ludo and draft. ⚽ Saturday 5-aside and PES on the PS: take penalties and dive for saves. Every game has a skip button if you just want to relax.</p>
-      <p>📈 <b>Your life carries on.</b> Your money and progress move to next week. New places open as you go: the mechanic, evening classes, and your own business.</p>
-      <p>❌ <b>Miss a bill</b> and the gap rolls into next week with a late fee. Three misses and you start again on a cousin's sofa.</p>
-      <p>👥 <b>Everyone playing today</b> gets the same breakdowns, tips, messages, and road. Share your week and compare.</p>
+      <p class="eyebrow" style="margin:0">ABOUT</p>
+      <p>A free daily game about everyday life in Nigeria or abroad. You work, hustle, look after family, and try to save, while life keeps getting in the way. One week a day, about ten minutes. Created by Nafeezie.</p>
+      <p class="eyebrow" style="margin:6px 0 0">HOW TO PLAY</p>
+      <p>📅 <b>One day, one week.</b> Monday to Sunday, morning and night.</p>
+      <p>💸 <b>Pay the bill by Sunday night.</b> Food, transport, and data come out too.${NG() ? ' Save for the yearly rent as well.' : ''}</p>
+      <p>💰 <b>Earn.</b> One main job a day (your work or Ryde) and one hustle on the side. Switch on Ryde on the way for extra fares.</p>
+      <p>🗺️ <b>The map by colour.</b> 💰 Earn · 🍲 Food and home · 🙏🏾 Faith and parties · 🎲 Play · 🔧 Errands · 🌱 Grow.</p>
+      <p>⚡ <b>Energy.</b> Each morning gives some back. Below 25, tired work costs you pay. At zero, you collapse.</p>
+      <p>📱 <b>Family on WhatsApp.</b> Send, send half, or leave them on read. Ignored messages raise the ⭐ family pressure.</p>
+      <p>⚠️ <b>Surprises.</b> Once or twice a week, life gets in the way.</p>
+      <p>🎮 <b>Little games.</b> The Ryde run, the kitchen rush, Ayo, ludo, draft, 5-aside penalties, and PES.</p>
+      <p>📈 <b>Life carries on.</b> Your money moves to next week. Fix your car, take classes, open a stall.</p>
+      <p>❌ <b>Miss a bill</b> and the gap rolls over with a late fee. Three misses and you start again.</p>
+      <p>👥 <b>Same day, same week.</b> Everyone playing today gets the same surprises and roads. Share your week and compare.</p>
     </div><button class="go" type="button">Got it</button></div>`;
   box.querySelector('.go').insertAdjacentHTML('beforebegin', `${homeTipHTML(false)}<div class="hometip"><b class="t">🔁 MOVE MY WEEKS</b><p>Playing on a new phone, or from the home screen? Copy your code here and paste it there.</p><button class="ghost" type="button" id="copycode2">Copy my code</button><button class="ghost" type="button" id="pastecode">Paste a code</button></div>`);
   box.querySelector('.box').insertAdjacentHTML('beforeend', '<a class="small-link" href="/" style="text-align:center">Also from us: Now You Have Landed, a story game about life abroad</a>');
@@ -1519,10 +1525,12 @@ function welcome(){
     </div>
     <button class="go" type="button" id="wgo">Choose my city</button>
     <p class="note">About 10 minutes a day. Sound on is best. 🔊</p>
+    <button class="small-link" type="button" id="whow" style="background:none;border:0;text-decoration:underline">About and how to play</button>
     <button class="small-link" type="button" id="wcode" style="background:none;border:0;text-decoration:underline">Already playing somewhere else? Bring your weeks</button>`;
   $('over').hidden = false; track('welcome');
   $('wgo').onclick = () => { SND.init(); pickCity(); };
   $('wcode').onclick = () => pasteCodeBox();
+  $('whow').onclick = () => $('help').click();
 }
 function pickCity(){
   const guess = (() => { try{ const d = JSON.parse(localStorage.getItem('nyhl-daily')||'null'); return d && ({us:'houston', uk:'london', ca:'toronto'})[d.rk]; }catch(e){ return null; } })();
