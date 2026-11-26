@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126055324">
+<meta name="build" content="20261126060021">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -1531,13 +1531,15 @@ $('help').onclick = () => {
       <p>❌ <b>Miss a bill</b> and the gap rolls over with a late fee. Three misses and you start again.</p>
       <p>👥 <b>Same day, same week.</b> Everyone playing today gets the same surprises and roads. Share your week and compare.</p>
     </div><button class="go" type="button">Got it</button></div>`;
-  box.querySelector('.go').insertAdjacentHTML('beforebegin', `${homeTipHTML(false)}<div class="hometip"><b class="t">🔁 MOVE MY WEEKS</b><p>Playing on a new phone, or from the home screen? Copy your code here and paste it there.</p><button class="ghost" type="button" id="copycode2">Copy my code</button><button class="ghost" type="button" id="pastecode">Paste a code</button></div>`);
+  box.querySelector('.go').insertAdjacentHTML('beforebegin', `${homeTipHTML(false)}<div class="hometip"><b class="t">🔁 MOVE MY WEEKS</b><p>Playing on a new phone, or from the home screen? Copy your code here and paste it there.</p><button class="ghost" type="button" id="copycode2">Copy my code</button><button class="ghost" type="button" id="pastecode">Paste a code</button></div><div class="hometip"><b class="t">🔄 START OVER</b><p>Begin again from week 1, with a new place or person.</p><button class="ghost" type="button" id="restart">Start over</button><div id="restartok" hidden><p class="warn">This wipes your weeks, your money, and your progress.</p><button class="go" type="button" id="restartyes">Yes, start over</button></div></div>`);
   box.querySelector('.box').insertAdjacentHTML('beforeend', '<a class="small-link" href="/" style="text-align:center">Also from us: Now You Have Landed, a story game about life abroad</a>');
   document.body.appendChild(box); box.querySelector('.go').onclick = () => box.remove();
   wireHomeTip();
   const cc = box.querySelector('#copycode2');
   cc.onclick = async () => { const code = saveCode(); track('copy-code'); try{ await navigator.clipboard.writeText(code); cc.textContent = 'Copied ✓'; }catch(e){ cc.insertAdjacentHTML('afterend', `<textarea readonly>${code}</textarea>`); const ta = cc.nextElementSibling; ta.focus(); ta.select(); cc.textContent = 'Copy the code below'; } };
   box.querySelector('#pastecode').onclick = () => { box.remove(); pasteCodeBox(); };
+  box.querySelector('#restart').onclick = () => { box.querySelector('#restartok').hidden = false; };
+  box.querySelector('#restartyes').onclick = () => { track('restart'); try{ localStorage.removeItem(KEY); }catch(e){} location.reload(); };
 };
 if(!isStandalone()) $('addapp').hidden = false;
 $('addapp').onclick = () => {
@@ -1630,8 +1632,10 @@ function doneToday(){
     <div class="prog">${[['🏅 Forklift lead', P.promo], ['🚗 Car fixed', P.car==='fixed'], ['💼 Office job', P.office], ['🏪 Own stall', P.stall]].map(([t, on]) => `<span class="${on ? 'on' : ''}">${on ? '' : '🔒 '}${t}</span>`).join('')}</div>
     ${rec ? '<button class="go" type="button" id="share">Share my week</button><div class="note" id="sharemsg"></div>' : ''}
     ${homeTipHTML()}
+    <button class="small-link" type="button" id="restart2" style="background:none;border:0;text-decoration:underline">🔄 Start over from week 1</button>
     <a class="small-link" href="/">Also from us: Now You Have Landed, a story game about life abroad</a>`;
   $('over').hidden = false;
+  $('restart2').onclick = () => { $('help').click(); setTimeout(() => { const r = document.getElementById('restartok'); if(r){ r.hidden = false; r.scrollIntoView({block:'center'}); } }, 100); };
   wireHomeTip();
   const s = $('share'); if(s) s.onclick = async () => { const t = shareText(rec); try{ if(navigator.share){ await navigator.share({text:t}); return; } }catch(e){ if(e && e.name === 'AbortError') return; } try{ await navigator.clipboard.writeText(t); $('sharemsg').textContent = 'Copied. Paste it in your group chat.'; }catch(e){ $('sharemsg').textContent = t; } };
 }
