@@ -220,3 +220,8 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - Ajo removed (ajoDue is 0; no join option, payout, or intro line).
 - Map: work, Hustles, and Ryde across the top; your room at the bottom centre, so you walk up to work. LAYOUT holds all positions.
 - Hustles open as a grid of big icon tiles (.giggrid) with name, pay, and energy.
+
+### Your 9 to 5 (26 Nov)
+- Step 2 now also asks "YOUR 9 TO 5" (P.job). Nigeria (JOBS_NG): banker, civil servant, teacher, nurse, oil and gas, tech, sales, factory. Abroad (JOBS_ABROAD): warehouse, care worker, nurse, office admin, retail, IT support, security, teaching assistant.
+- Each job has its icon, workplace, pay multiplier (0.8 to 1.3 on the base day rate), energy cost, a one-line description, three everyday results, and its promotion title. Abroad jobs also say whether they work nights and weekends. Old saves get a job from their city (OLD_JOB) or warehouse abroad.
+- jobPay() and jobEnergy() drive the plan, the work pin, and the work action. Evening classes now lead to a senior role in your own line (P.office: pay x1.6, less energy). Civil servants see late salaries more often.

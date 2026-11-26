@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126061708">
+<meta name="build" content="20261126062551">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -136,6 +136,9 @@ a{color:var(--gold)}
 .whoami button:hover{border-color:var(--gold)}
 .whoami button.on{border-color:var(--gold);background:rgba(255,201,60,.12)}
 .whoami.fam{grid-template-columns:repeat(2,1fr)}
+.whoami.jobs{grid-template-columns:repeat(4,1fr);gap:6px}
+.whoami.jobs button{font-size:11px;padding:8px 4px}
+.whoami.jobs button span{font-size:26px}
 .whoami.fam button span{font-size:32px}
 .go:disabled{opacity:.45}
 @keyframes ping{from{opacity:.8;transform:scale(.6)}to{opacity:0;transform:scale(1.6)}}
@@ -591,7 +594,7 @@ function famRequests(){
 // what you look like at each place: [person, little badge]
 function pose(k){
   const m = me();
-  return ({home:['🛌🏾',''], work:[m.work, P.office ? '🏦' : '💼'], ryde:[m.base,'🚗'], mama:[m.base,'🍲'], loan:[m.base,'📲'], hall:[m.dance,'🎉'],
+  return ({home:['🛌🏾',''], work:[m.work, myJob().ic], ryde:[m.base,'🚗'], mama:[m.base,'🍲'], loan:[m.base,'📲'], hall:[m.dance,'🎉'],
     fuel:[m.base,'⛽'], mech:[m.mech,'🔧'], school:[m.school,'📚'], stall:[m.base,'🏧'], gigs:[m.work,'🛠️'], pray:[m.base,'🙏🏾'], view:[m.base,'⚽'], phone:[m.base,'📱'], walk:[m.walk,''], sick:['🤒','']})[k] || [m.base,''];
 }
 const youHTML = (k, caption) => { const [a, b] = pose(k); return `<div class="you" aria-hidden="true"><span class="yf">${a}</span>${b ? `<span class="yb">${b}</span>` : ''}${caption ? `<small>${caption}</small>` : ''}</div>`; };
@@ -604,13 +607,40 @@ function freshWeek(){
 }
 function save(){ store.set(P); }
 
+
+/* ---------- your 9 to 5: picked once, with its own place, pay, tiredness, and days ---------- */
+// [icon, name, workplace, pay multiplier, energy, what it is like, three ordinary days, promotion title, works nights?, works weekends?]
+const JOBS_NG = {
+  bank:['🏦','Banker',() => `Prime Trust Bank, ${C.area}`,1.1,-40,'Long queues, targets that move every month, and a manager who says "we move".',['Targets, targets, targets. You call forty customers and three pick up.','The network is down again. The customers shout at you, not at the network.','A big customer opens an account with you. Your manager almost smiles.'],'Relationship manager'],
+  civil:['🏛️','Civil servant',() => `the Secretariat, ${C.name}`,0.85,-25,'Files, tea, and a salary that comes "any moment from now".',['You move one file from one desk to another desk. Productive day.','The director is "on seat" for one hour. Everybody works very hard for that hour.','Nobody can find the key to the store, so work stops until 2pm.'],'Senior officer'],
+  teacher:['🧑🏾‍🏫','Teacher',() => `Unity Secondary School, ${C.area}`,0.8,-40,'Forty-five students, one chalkboard, and a fan that turns when it likes.',['You mark ninety scripts. Half of them copied from the same person.','A student says your class is the only one he understands. You stand taller.','The PTA chairman wants to "discuss his son\'s result".'],'Head of department'],
+  nurse:['🧑🏾‍⚕️','Nurse',() => `General Hospital, ${C.name}`,0.95,-50,'Long shifts, short staff, and patients who call you "doctor".',['A twelve-hour shift with two nurses for one ward.','A mother thanks you with a bag of oranges. Best pay today.','NEPA takes light in the ward, and the generator takes its time.'],'Senior nurse'],
+  oil:['🛢️','Oil and gas',() => `Deltastar Oil Services, ${C.name}`,1.25,-50,'Good pay, a hard hat, and a rotation that eats your weekends.',['Twelve hours in coverall at the yard. The pay helps you forget.','Safety meeting at 6am. Nobody is awake, and everybody signs.','The expat manager learns to say "how far". The whole team claps.'],'Site supervisor'],
+  tech:['💻','Tech',() => `a fintech startup in ${C.area}`,1.15,-35,'Laptops, light from the inverter, and stand-up meetings that sit down.',['The app crashes on payday. You fix it at midnight.','The stand-up meeting lasts two hours. Nobody stood.','Your code ships. The CEO tweets about it like he wrote it.'],'Team lead'],
+  sales:['📞','Sales',() => `a telecoms sales office, ${C.area}`,0.9,-40,'Targets, a branded polo, and customers who say "come back tomorrow".',['You sell three lines and one router. Your target was ten.','A customer says "come back tomorrow" for the fourth time.','You close a company deal. Commission is coming "end of month".'],'Area sales manager'],
+  factory:['🏭','Factory',() => `a bottling factory in ${C.name}`,0.8,-50,'Machines, hairnets, and a supervisor with a whistle.',['Twelve thousand bottles pass your hands. You dream of bottles.','The machine jams, and everybody gets an hour of rest.','The supervisor blows his whistle for lunch. Best sound of the day.'],'Line supervisor']
+};
+const JOBS_ABROAD = {
+  warehouse:['📦','Warehouse',() => C.ware,1.0,-45,'Boxes, a scanner, and a supervisor nobody knows the surname of.',['Eight hours of boxes. You now know exactly what people order at 3am.','A forklift almost reverses into you. You survive. The pay is the same.','You find a Nigerian in the next aisle and talk jollof for a whole break.'],'Forklift lead',1,1],
+  care:['🧓🏾','Care worker',() => 'Sunrise Care Home',1.0,-50,'Twelve residents, one rota, and tea every hour.',['You help Mrs Patel with her breakfast and her whole life story.','Two staff call in sick. You do the work of three.','A resident calls you "my darling" all shift. You needed that.'],'Senior carer',1,1],
+  nurse:['🧑🏾‍⚕️','Nurse',() => 'the city hospital',1.3,-50,'Twelve-hour shifts, good pay, and night rotations.',['Twelve hours on a busy ward. Your feet file a complaint.','A patient\'s family brings chocolates. You share them at handover.','You catch a mistake on a chart and quietly save the day.'],'Charge nurse',1,1],
+  office:['🗂️','Office admin',() => 'an insurance office downtown',1.05,-30,'A desk, a lanyard, and a coffee machine that judges you.',['Three meetings that could have been emails. You get paid either way.','Someone microwaves fish. Everyone looks at you. It was not you.','You fix the printer. You are now "the tech person". Forever.'],'Team lead',0,0],
+  retail:['🛍️','Retail',() => 'the big supermarket',0.85,-35,'Tills, shelves, and customers who want the manager.',['You fold the same jumper twelve times.','A customer asks for the manager. You are the manager today.','Your till balances to the penny. Small victories.'],'Shift manager',0,1],
+  it:['💻','IT support',() => 'a tech company',1.2,-30,'Tickets, passwords, and "have you tried turning it off and on?"',['Forty tickets, thirty of them passwords.','You fix the CEO\'s laptop. He now knows your name.','The Wi-Fi goes down, and you become the most important person in the building.'],'Senior engineer',0,0],
+  security:['🛡️','Security',() => 'a city-centre office block',0.9,-30,'Long quiet hours, a radio, and a flask of tea.',['Twelve quiet hours. You read half a book.','The alarm goes off. It is a pigeon.','A tenant brings you jollof leftovers. Respect.'],'Site supervisor',1,1],
+  ta:['🧑🏾‍🏫','Teaching assistant',() => 'a primary school',0.85,-35,'Thirty children, glue sticks, and a lot of noise.',['Glitter in your hair until Thursday.','A child says you are "the best grown-up". Worth it.','One school trip, thirty children, and zero lost. Hero.'],'Lead TA',0,0]
+};
+const JOBS = () => NG() ? JOBS_NG : JOBS_ABROAD;
+const OLD_JOB = {lagos:'bank', abuja:'civil', ph:'oil', ibadan:'factory', kano:'factory', enugu:'sales', ilorin:'factory'};
+const myJob = () => { const L = JOBS(), k = P.job && L[P.job] ? P.job : (NG() ? (OLD_JOB[P.city] || 'bank') : 'warehouse'); return Object.assign({key:k}, {ic:L[k][0], name:L[k][1], place:L[k][2](), mult:L[k][3], en:L[k][4], who:L[k][5], days:L[k][6], promo:L[k][7], nights:!!L[k][8], weekends:!!L[k][9]}); };
+const jobPay = (night) => { const j = myJob(), base = NG() ? 165 : (night ? 160 : 135); return Math.round(A(base * j.mult * (P.office ? 1.6 : 1)) / STEP()) * STEP() + (P.promo && !P.office ? A(NG() ? 40 : 50) : 0); };
+const jobEnergy = (night) => { const j = myJob(); return P.office ? Math.max(-30, j.en + 10) : j.en - (night ? 5 : 0); };
 /* ---------- map ---------- */
 // five rows by three columns: [18, 50, 82] x [11, 30, 49, 68, 87]
 const PL = () => NG() ? ({
   stall: P.week >= 5 && !P.stall ? {x:18,y:11,ic:'🏧',nm:'POS stand', title:'A POS stand by the junction', who:'Everybody needs cash. The buka owner will vouch for you if she trusts you.', fresh:P.week===5} : undefined,
   pray: muslim() ? {x:50,y:11,ic:'🕌',nm:'Mosque', title:'The mosque', who:'Wednesday night lesson and Friday Jumat.'} : {x:50,y:11,ic:'🙏🏾',nm:'Church/mosque', title:'Church or mosque', who:'Wednesday night service, Friday Jumat, and Sunday service.'},
-  work: P.office ? {x:82,y:11,ic:'🏦',nm:'New job', title:'Your new job at a bank', who:'Air conditioning that works, suits, and a real pension. Closed at weekends.'}
-                 : {x:82,y:11,ic:'💼',nm:'9 to 5', title:C.ware, who:`${C.boss} calls everyone "${C.bossWord}". Salary comes "by the grace of God". Closed at weekends.`},
+  work:{x:82,y:11,ic:myJob().ic,nm:'9 to 5', title:(P.office ? 'Senior ' + myJob().name + ', ' : myJob().name + ', ') + myJob().place, who:myJob().who},
   mama:{x:18,y:30,ic:'🍲',nm:'Buka', title:C.mkt, who:'Hot food, cold drinks, and the freshest gist. Your midday stop.'},
   view:{x:82,y:30,ic:'📺',nm:'Viewing centre', title:'Viewing centre and game centre', who:'Premier League on one big screen, PlayStation in the corner, one generator, and fifty men with opinions.'},
   school: P.week >= 3 && !P.office ? {x:18,y:49,ic:'🎓',nm:'ICAN class', title:'Professional exam class', who:`Four evening classes and the banks will look at your CV. You have done ${P.school} of 4.`, fresh:P.week===3} : undefined,
@@ -625,8 +655,7 @@ const PL = () => NG() ? ({
   gigs:{x:50,y:30,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'New jobs every morning and night.'}
 }) : ({
   stall: P.week >= 5 && !P.stall ? {x:18,y:11,ic:'🏪',nm:'Market stall', title:'A stall at the weekend market', who:'Your own small business. Mama Ngozi will only recommend you if she trusts you.', fresh:P.week===5} : undefined,
-  work: P.office ? {x:82,y:11,ic:'💼',nm:'Office', title:'Your new office job', who:'A desk, a lanyard, and a coffee machine that judges you.'}
-                 : {x:82,y:11,ic:'📦',nm:'Warehouse', title:C.ware, who:`Supervisor ${C.boss} calls everyone "${C.bossWord}". Nobody knows his surname.`},
+  work:{x:82,y:11,ic:myJob().ic,nm:'9 to 5', title:(P.office ? 'Senior ' + myJob().name + ', ' : myJob().name + ', ') + myJob().place, who:myJob().who},
   mama:{x:18,y:30,ic:'🛒',nm:'Naija shop', title:C.mkt, who:'Garri, gossip, Nollywood on a TV from 2006, and a kitchen at the back that is always busy.'},
   relax:{x:82,y:30,ic:'🎲',nm:'Naija hangout', title:"Uncle Sola's front porch", who:'Ayo board, ludo, draft, and pepper soup. The only place in the city where time slows down.'},
   school: P.week >= 3 && !P.office ? {x:18,y:49,ic:'🎓',nm:'Night class', title:'Community College, evening course', who:`Four classes and you can apply for office jobs. You have done ${P.school} of 4.`, fresh:P.week===3} : undefined,
@@ -650,11 +679,11 @@ function isOpen(k){
   if(k==='hall') return W.day===SAT && W.slot===0;
   if(k==='pitch') return W.day>=SAT && W.slot===0;
   if(k==='relax') return W.slot===NIGHT || W.day>=SAT;
-  if(k==='work' && (NG() || P.office) && W.day>=SAT) return false;
+  if(k==='work' && W.day>=SAT && (NG() || !myJob().weekends)) return false;
   if(k==='loan') return W.slot!==NIGHT;
   if(k==='mama') return W.slot!==NIGHT;
   if(k==='school') return W.slot===NIGHT && W.day<SAT;
-  if(k==='work' && (P.office || NG())) return W.slot!==NIGHT;
+  if(k==='work' && (NG() || !myJob().nights)) return W.slot!==NIGHT;
   if(k==='fuel') return W.slot!==NIGHT;
   if(k==='view') return W.slot===NIGHT || W.day>=SAT;
   if(k==='pray') return (W.day===2 && W.slot===NIGHT) || (W.day===4 && W.slot===0) || (!muslim() && W.day===SUN && W.slot===0);
@@ -744,9 +773,9 @@ function idle(){
 // a short plan: where you could head now, and why
 function planOptions(){
   const o = [], open = k => places[k] && isOpen(k), night = W.slot === NIGHT, weekend = W.day >= SAT;
-  const pay = NG() ? (P.office ? A(280) : A(165) + (P.promo ? A(40) : 0)) : P.office ? A(250) : (night ? A(160) : A(135)) + (P.promo ? A(50) : 0);
+  const pay = jobPay(night);
   if(!night){
-    if(!workedToday() && open('work')) o.push(['work', P.office ? '🏦' : '💼', P.office ? 'Go to the office' : 'Go to your 9 to 5', `about +${money(pay)}`]);
+    if(!workedToday() && open('work')) o.push(['work', myJob().ic, `Go to work · ${myJob().name}`, `about +${money(pay)}`]);
     if(!workedToday() && open('ryde')) o.push(['ryde', '🚗', 'Drive Ryde all day', 'fares and tips']);
     if(!gigToday() && open('gigs')) o.push(['gigs', '🛠️', 'Go to a hustle', 'pick from today\'s jobs']);
     if(weekend && open('hall')) o.push(['hall', '🎉', 'Go to the owambe', 'family pressure down']);
@@ -755,7 +784,7 @@ function planOptions(){
     o.push(['stay', '🏠', 'Stay home all day', 'rest, no pay']);
   } else {
     if(!gigToday() && open('gigs')) o.push(['gigs', '🛠️', 'Evening hustle', 'extra money']);
-    if(!workedToday() && open('work')) o.push(['work', '💼', 'Night shift', `about +${money(pay)}`]);
+    if(!workedToday() && open('work')) o.push(['work', myJob().ic, 'Night shift', `about +${money(pay)}`]);
     if(open('school')) o.push(['school', '🎓', 'Go to class', 'a better job later']);
     if(open('relax')) o.push(['relax', '🎲', 'Relax at the Ayo spot', 'peace']);
     if(open('view')) o.push(['view', '📺', 'Watch the match', 'peace']);
@@ -821,7 +850,7 @@ function rydeCommute(res, home){
 }   // luck is shared per moment of the week, so the same move gets the same outcome for everyone today
 function actions(k){
   const tired = W.energy < 20;
-  const shiftPay = () => NG() ? (P.office ? A(280) : A(165) + (P.promo ? A(40) : 0)) : P.office ? A(250) : (W.slot===NIGHT ? A(160) : A(135)) + (P.promo ? A(50) : 0);
+  const shiftPay = () => jobPay(W.slot === NIGHT);
   const busy = workedToday();
   const ng = NG();
   switch(k){
@@ -831,15 +860,15 @@ function actions(k){
       ...(fam() !== 'single' ? [{l: hasKids() ? 'Evening with the children' : `Evening with your ${spouse()}`, tag:'+peace', run:() => done({energy:10, peace:12}, hasKids() ? 'Homework, a small fight over the remote, and everybody asleep on the sofa by nine.' : 'Jollof, a Nollywood film, and no talk about money for one whole evening.')}] : []),
     ];
     case 'work': return [
-      {l: ng ? (P.office ? 'A day at the bank' : 'Go to work') : P.office ? 'Do a day at the office' : W.slot===NIGHT ? 'Night shift' : 'Day shift', tag: busy ? BUSY_TAG : `a full day · +${money(shiftPay())} · -${P.office ? 30 : ng ? 40 : W.slot===NIGHT ? 50 : 45} energy`, dis:tired || busy, run:() => startJob(() => {
-        W.log.shifts++; const pay = shiftPay(), en = P.office ? -30 : ng ? -40 : W.slot===NIGHT ? -50 : -45;
+      {l: W.slot===NIGHT ? 'Night shift' : 'Go to work', tag: busy ? BUSY_TAG : `a full day · +${money(shiftPay())} · ${jobEnergy(W.slot === NIGHT)} energy`, dis:tired || busy, run:() => startJob(() => {
+        W.log.shifts++; const pay = shiftPay(), en = jobEnergy(W.slot === NIGHT);
         if(ng) return ngWork(pay, en);
-        if(!P.office){ P.boss++; if(!P.promo && P.boss >= 8){ P.promo = true; return done({cash:pay, energy:en}, `${C.boss} calls you over. "${C.bossWord[0].toUpperCase() + C.bossWord.slice(1)}, you are the only one who shows up. Forklift lead. ${money(A(40))} more a shift." You did not even know you wanted it.`, '🏅 Promoted to forklift lead'); } }
+        if(!P.office){ P.boss++; if(!P.promo && P.boss >= 8){ P.promo = true; return done({cash:pay, energy:en}, `${C.boss} calls you over. "${C.bossWord[0].toUpperCase() + C.bossWord.slice(1)}, you are the only one who shows up. ${myJob().promo}. ${money(A(50))} more a shift." You did not even know you wanted it.`, `🏅 Promoted to ${myJob().promo.toLowerCase()}`); } }
         if(!P.office && roll('ot' + T(), .3)) return choice(`${C.boss} says "${C.bossWord}" twice, which means he wants something. Overtime?`, [
-          {l:'Yes, two more hours', run:() => done({cash:pay + A(80), energy:en - 20, peace:-4}, 'Two extra hours of boxes. Your back now has opinions.')},
+          {l:'Yes, two more hours', run:() => done({cash:pay + A(80), energy:en - 20, peace:-4}, 'Two extra hours. Your back now has opinions.')},
           {l:'No, I am done', run:() => done({cash:pay, energy:en}, `${C.boss} says "no worries, ${C.bossWord}" in the voice that means worries.`)}
         ]);
-        return done({cash:pay, energy:en}, P.office ? pickL('off' + T(), ['Three meetings that could have been emails. You get paid either way.','Someone microwaves fish. Everyone looks at you. It was not you this time.','You fix the printer. You are now "the tech person". Forever.']) : pickL('wh' + T(), ['Eight hours of boxes. You now know exactly what people order at 3am.','A forklift almost reverses into you. You survive. The pay is the same.','You find a Nigerian in the next aisle. You talk jollof for a whole break.']));
+        return done({cash:pay, energy:en}, pickL('job' + T(), myJob().days));
       })}
     ];
     case 'ryde': return [
@@ -895,7 +924,7 @@ function actions(k){
     case 'school': return [
       {l:'Go to class', tag:`-${money(A(60))} · -20 energy`, dis:tired, run:() => {
         P.school++;
-        if(P.school >= 4){ P.office = true; return ng ? done({cash:-A(60), energy:-20, peace:6}, `You pass the exam. A bank calls you for an interview and hires you. ${money(A(200))} a day and air conditioning.`, '🏦 New job at a bank: more pay, less stress') : done({cash:-A(60), energy:-20, peace:6}, `Final class. You pass. A week later, an office calls you back. ${money(A(210))} a day, no boxes.`, '💼 New job: the office pays more and costs less energy'); }
+        if(P.school >= 4){ P.office = true; return done({cash:-A(60), energy:-20, peace:6}, `You pass. A week later you are promoted to a senior ${myJob().name} role. ${money(jobPay(false))} a day, and less stress.`, `🎓 Senior ${myJob().name}: more pay, less stress`); }
         done({cash:-A(60), energy:-20, peace:2}, pickL('cls' + P.school, ng ? ['Accounting at night after work. The lecturer arrives an hour late and teaches for three.','NEPA takes light in the middle of class. Everyone finishes the lecture by phone torch.'] : ['Excel, at night, after work. You are the oldest person there and the only one taking notes.','The teacher asks where your accent is from. You say "home". She smiles.']), `🎓 Night class ${P.school} of 4`);
       }}
     ];
@@ -995,14 +1024,14 @@ function doGig(g){
 }
 // a working day in Nigeria: late salaries, a boss who says "we move", and go-slow both ways
 function ngWork(pay, en){
-  if(!P.office){ P.boss++; if(!P.promo && P.boss >= 8){ P.promo = true; return done({cash:pay, energy:en}, `${C.boss} calls you in. "${C.bossWord[0].toUpperCase() + C.bossWord.slice(1)}, you are the only one who comes early. Team lead." ${money(A(40))} more a day. You did not even know you wanted it.`, '🏅 Promoted to team lead'); } }
+  if(!P.office){ P.boss++; if(!P.promo && P.boss >= 8){ P.promo = true; return done({cash:pay, energy:en}, `${C.boss} calls you in. "${C.bossWord[0].toUpperCase() + C.bossWord.slice(1)}, you are the only one who comes early. ${myJob().promo}." ${money(A(40))} more a day. You did not even know you wanted it.`, `🏅 Promoted to ${myJob().promo.toLowerCase()}`); } }
   if(W.slot === 0 && roll('slow' + T(), .22)) return done({cash:pay - A(20), energy:en - 10, peace:-4}, `Go-slow on ${C.roads[0].toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}. The danfo conductor has no change, and you arrive at 11am. ${C.boss} deducts ${money(A(20))} "for lateness".`);
-  if(!P.office && roll('late' + T(), .15)) return done({cash:Math.round(pay / 2 / STEP()) * STEP(), energy:en, peace:-6}, `${C.boss} announces that salaries will be "a little late" this month. You get half today and a speech about loyalty.`);
+  if(!P.office && roll('late' + T(), myJob().key === 'civil' ? .3 : .12)) return done({cash:Math.round(pay / 2 / STEP()) * STEP(), energy:en, peace:-6}, `${C.boss} announces that salaries will be "a little late" this month. You get half today and a speech about loyalty.`);
   if(!P.office && roll('ot' + T(), .3)) return choice(`${C.boss} says the report must go out today. Stay late?`, [
     {l:'Yes, stay till 9pm', run:() => done({cash:pay + A(80), energy:en - 20, peace:-4}, 'You leave at 9pm into go-slow. You get home at 11 and eat standing up.')},
     {l:'No, I am going home', run:() => done({cash:pay, energy:en}, `${C.boss} says "no problem" in the voice that means problem.`)}
   ]);
-  done({cash:pay, energy:en}, P.office ? pickL('bank' + T(), ['The AC works all day. You almost cry.','A customer shouts because the network is down. It is always the network.','Your colleague brings small chops for her birthday. The whole floor is happy.']) : pickL('ngw' + T(), ['Three meetings, one power cut, and a manager who says "we move".','The office generator goes off at noon. Everybody fans themselves with files.','You spend the morning in traffic and the afternoon explaining why you were late.']));
+  done({cash:pay, energy:en}, pickL('job' + T(), myJob().days));
 }
 /* ---------- the Ryde run: 20 seconds of real driving ---------- */
 function rydeResult(res){
@@ -1624,20 +1653,25 @@ function pickCity(){
   });
 }
 function pickMe(){
-  let who = P.me || '', life = P.fam || 'single';
+  C = cityFor(P.city, P.place);
+  let who = P.me || '', life = P.fam || 'single', job = myJob().key;
   $('obox').innerHTML = `<div class="eyebrow">STEP 2 OF 2</div><div class="big plain" style="font-size:clamp(28px,8vw,40px)">WHO ARE YOU?</div>
     
     <div class="whoami">${Object.entries(ME).map(([k, m]) => `<button type="button" data-me="${k}"${k === who ? ' class="on"' : ''}><span aria-hidden="true">${m.base}</span>${m.label}</button>`).join('')}</div>
     <div class="eyebrow" style="text-align:left;margin-top:6px">YOUR HOME LIFE</div>
     <div class="whoami fam">${Object.entries(FAM).map(([k, [ic, l]]) => `<button type="button" data-fam="${k}"${k === life ? ' class="on"' : ''}><span aria-hidden="true">${ic}</span>${l}</button>`).join('')}</div>
     <p class="note" id="famnote"></p>
+    <div class="eyebrow" style="text-align:left;margin-top:6px">YOUR 9 TO 5</div>
+    <div class="whoami jobs">${Object.entries(JOBS()).map(([k, j]) => `<button type="button" data-job="${k}"${k === job ? ' class="on"' : ''}><span aria-hidden="true">${j[0]}</span>${j[1]}</button>`).join('')}</div>
+    <p class="note" id="jobnote"></p>
     <button class="go" type="button" id="mego"${who ? '' : ' disabled'}>Start my life</button>`;
   const NOTE = {single:'Just you. Your money is your own, mostly.', married:'Two incomes help a little. In-laws, anniversaries, and family meetings come with it.', kids:'School fees, school runs, excursions, and a house that is never quiet. Your partner chips in.', solo:'Everything on your shoulders: the children, the bills, and the school run.'};
-  const paint = () => { $('obox').querySelectorAll('[data-me]').forEach(b => b.classList.toggle('on', b.dataset.me === who)); $('obox').querySelectorAll('[data-fam]').forEach(b => b.classList.toggle('on', b.dataset.fam === life)); $('famnote').textContent = NOTE[life]; $('mego').disabled = !who; };
+  const paint = () => { $('obox').querySelectorAll('[data-job]').forEach(b => b.classList.toggle('on', b.dataset.job === job)); $('jobnote').textContent = JOBS()[job][5]; $('obox').querySelectorAll('[data-me]').forEach(b => b.classList.toggle('on', b.dataset.me === who)); $('obox').querySelectorAll('[data-fam]').forEach(b => b.classList.toggle('on', b.dataset.fam === life)); $('famnote').textContent = NOTE[life]; $('mego').disabled = !who; };
   $('over').hidden = false; paint();
   $('obox').querySelectorAll('[data-me]').forEach(b => b.onclick = () => { who = b.dataset.me; paint(); });
   $('obox').querySelectorAll('[data-fam]').forEach(b => b.onclick = () => { life = b.dataset.fam; paint(); });
-  $('mego').onclick = () => { if(!who) return; P.me = who; P.fam = life; save(); track('me-' + who + '-' + life); $('over').hidden = true; boot(); };
+  $('obox').querySelectorAll('[data-job]').forEach(b => b.onclick = () => { job = b.dataset.job; paint(); });
+  $('mego').onclick = () => { if(!who) return; P.me = who; P.fam = life; P.job = job; save(); track('me-' + who + '-' + life + '-' + job); $('over').hidden = true; boot(); };
 }
 function doneToday(){
   const rec = P.hist[P.hist.length - 1];
@@ -1648,7 +1682,7 @@ function doneToday(){
     ${rec ? `<div class="sub">Week ${rec.w}: ${rec.title}</div>` : ''}
     <p>Week ${P.week}, <b>${missionFor(P.week).title}</b> (${money(missionFor(P.week).amount + P.arrears)}), unlocks in <b>${h}h ${mm}m</b>.</p>
     <div class="recap"><div><span>Cash carried over</span><span>${money(P.cash)}</span></div><div><span>Weeks lived</span><span>${P.hist.length}</span></div><div><span>Passed</span><span>${P.hist.filter(r => r.pass).length}</span></div><div><span>Streak</span><span>🔥 ${P.streak || 1}</span></div></div>
-    <div class="prog">${[['🏅 Forklift lead', P.promo], ['🚗 Car fixed', P.car==='fixed'], ['💼 Office job', P.office], ['🏪 Own stall', P.stall]].map(([t, on]) => `<span class="${on ? 'on' : ''}">${on ? '' : '🔒 '}${t}</span>`).join('')}</div>
+    <div class="prog">${[['🏅 ' + myJob().promo, P.promo], ['🚗 Car fixed', P.car==='fixed'], ['🎓 Senior role', P.office], ['🏪 Own stall', P.stall]].map(([t, on]) => `<span class="${on ? 'on' : ''}">${on ? '' : '🔒 '}${t}</span>`).join('')}</div>
     ${rec ? '<button class="go" type="button" id="share">Share my week</button><div class="note" id="sharemsg"></div>' : ''}
     ${homeTipHTML()}
     <button class="small-link" type="button" id="restart2" style="background:none;border:0;text-decoration:underline">🔄 Start over from week 1</button>
