@@ -212,7 +212,7 @@ canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="when" id="when"></div><button class="snd" id="help" type="button" aria-label="How to play">❓</button><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
+  <div class="top"><div class="when" id="when"></div><button class="snd" id="addapp" type="button" aria-label="Add to home screen" hidden>📲</button><button class="snd" id="help" type="button" aria-label="How to play">❓</button><button class="snd" id="snd" type="button" aria-label="Sound on">🔊</button></div>
   <div class="logo">WAHALA WEEK</div>
   <header class="hud" aria-live="polite">
     <div class="mission"><span id="mtitle"></span><span class="due" id="mdue"></span></div>
@@ -1200,6 +1200,18 @@ $('help').onclick = () => {
   const cc = box.querySelector('#copycode2');
   cc.onclick = async () => { const code = saveCode(); track('copy-code'); try{ await navigator.clipboard.writeText(code); cc.textContent = 'Copied ✓'; }catch(e){ cc.insertAdjacentHTML('afterend', `<textarea readonly>${code}</textarea>`); const ta = cc.nextElementSibling; ta.focus(); ta.select(); cc.textContent = 'Copy the code below'; } };
   box.querySelector('#pastecode').onclick = () => { box.remove(); pasteCodeBox(); };
+};
+if(!isStandalone()) $('addapp').hidden = false;
+$('addapp').onclick = () => {
+  track('addapp');
+  if(installEvt && !isIOS()){ installEvt.prompt(); installEvt.userChoice.then(r => { if(r && r.outcome === 'accepted') $('addapp').hidden = true; }).catch(()=>{}); installEvt = null; return; }
+  const box = document.createElement('div'); box.className = 'overlay';
+  box.innerHTML = `<div class="box"><div style="font-size:56px;line-height:1" aria-hidden="true">📲</div><div class="big plain" style="font-size:clamp(26px,7vw,36px)">ADD TO YOUR PHONE</div>
+    ${isIOS() ? `<div class="welcome steps"><div><span>1</span><p>Tap the <b>Share</b> button at the bottom of Safari (the square with an arrow ⬆️).</p></div><div><span>2</span><p>Scroll down and tap <b>Add to Home Screen</b>.</p></div><div><span>3</span><p>Tap <b>Add</b>. Wahala Week now sits on your phone like an app.</p></div></div>`
+    : `<div class="welcome steps"><div><span>1</span><p>Tap the <b>⋮ menu</b> at the top of Chrome.</p></div><div><span>2</span><p>Tap <b>Add to Home screen</b> or <b>Install app</b>.</p></div><div><span>3</span><p>Tap <b>Add</b>. Wahala Week now sits on your phone like an app.</p></div></div>`}
+    ${homeTipHTML(true).includes('copycode') ? '<p class="note">Already played some weeks? Copy your code first, then paste it in the app.</p><button class="ghost" type="button" id="copycode">Copy my code</button>' : ''}
+    <button class="go" type="button" id="addok">Got it</button></div>`;
+  document.body.appendChild(box); box.querySelector('#addok').onclick = () => box.remove(); wireHomeTip();
 };
 $('snd').onclick = () => { const on = SND.toggle(); $('snd').textContent = on ? '🔊' : '🔇'; $('snd').setAttribute('aria-label', on ? 'Sound on' : 'Sound off'); };
 
