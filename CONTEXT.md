@@ -166,3 +166,12 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - Careful-bot weekly savings: Lagos single about ₦55k, Lagos with kids about ₦44k, Kano single parent about ₦23k, Texas with kids about $350.
 - Ryde is back as its own pin (x82, y87): "Drive all day" is a full day's job (A(80) + A(18) a fare, -45 energy), for players whose main hustle is Ryde. Commute Ryde still runs before and after other jobs.
 - No coaching (her call: let people choose, fewer words). coachPin and coachText return nothing, the week 1 guide line and "Where to?" hints are gone, and the welcome cards are one line each.
+
+### Two jobs a day, surprises, and a visible week (25 Nov)
+- Her model: you leave home in the morning, hustle all day, and go home. People (in the US too) work two jobs, and surprise costs keep eating the savings.
+- Each day: one main job (work, Ryde all day, kitchen shift, or caterer; W.jobDay) plus one hustle (W.gigDay). Ryde on the way is offered before the first job of the day; Ryde home once a day (W.rodeHome).
+- Pay now: NG work A(185), abroad A(175) day / A(210) night, office A(300)/A(280); hustles 1.1x base. 
+- Surprises: snagFor() gives a 35% chance each part of the day of an "Unexpected" cost card (SNAGS_HOME, SNAGS_ABROAD, plus SNAGS_KIDS).
+- No visiting parents. Home has sleep, Call Mummy (NG) or video call (abroad), and an evening with your spouse or children.
+- A Monday to Saturday strip sits under the bill bar with the part of the day (🌅 ☀️ 🌙). Each new day opens with a big day card ("MONDAY / MORNING").
+- Careful bot: Lagos single about ₦48k saved a week, Kano about ₦28k, Texas about $300.

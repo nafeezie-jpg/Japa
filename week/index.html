@@ -54,6 +54,11 @@ a{color:var(--gold)}
 .target i{display:block;height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,var(--gold),#ff8a3d);transition:width .5s}
 .target i.ok{background:var(--naija)}
 .tnote{font-size:13px;color:var(--dim)}
+.days{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:2px 0}
+.days span{display:grid;justify-items:center;gap:1px;padding:5px 0;border-radius:9px;background:var(--block);color:var(--dim);font:700 11px var(--body);letter-spacing:.05em}
+.days span.past{opacity:.4}
+.days span.now{background:linear-gradient(180deg,var(--sun),var(--pink));color:#1A0E14}
+.days span i{font-style:normal;font-size:13px;line-height:1}
 .tnote b{color:var(--gold);font-family:var(--mono)}
 .pin.coach .ic{border-color:var(--naija);animation:glow 1.1s ease-in-out infinite;transform:scale(1.12)}
 .coachline{background:rgba(37,211,102,.12);border:1px solid var(--naija);border-radius:12px;padding:10px 12px;font-weight:600}
@@ -144,6 +149,8 @@ a{color:var(--gold)}
 .recap p{margin:0}
 .recap .hr{border-top:1px solid var(--road);margin-top:4px;padding-top:8px}
 .daycard{position:fixed;inset:0;z-index:25;display:grid;place-items:center;pointer-events:none;background:rgba(10,7,22,.55);animation:fade .2s}
+.daycard .dw{display:block;text-align:center;font-size:.6em;text-shadow:none}
+.daycard small{display:block;font-size:.32em;text-align:center;color:var(--gold);text-shadow:none;letter-spacing:.2em}
 .daycard div{font-family:var(--display);font-size:clamp(44px,14vw,80px);color:var(--ink);text-shadow:0 5px 0 var(--pink);animation:slam .5s cubic-bezier(.2,1.6,.4,1)}
 @keyframes slam{from{transform:scale(2.4);opacity:0}to{transform:none;opacity:1}}
 @keyframes fade{from{opacity:0}}
@@ -223,6 +230,7 @@ canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%
   <header class="hud" aria-live="polite">
     <div class="mission"><span id="mtitle"></span><span class="due" id="mdue"></span></div>
     <div class="target"><i id="tbar"></i></div>
+    <div class="days" id="days" aria-label="Day of the week"></div>
     <div class="tnote" id="tnote"></div>
     <div class="rentline" id="rentline" hidden></div>
     <div class="lbl"><span>Cash</span><span>Energy</span><span>Family pressure</span></div>
@@ -654,6 +662,7 @@ const due = () => missionFor(P.week).amount + P.arrears + P.owed + living() + aj
 function hud(prev){
   const m = missionFor(P.week);
   $('when').textContent = `WEEK ${P.week} · ${DAYS[W.day].slice(0,3)} ${SLOTS[W.slot]}`;
+  $('days').innerHTML = DAYS.map((d, i) => `<span class="${i < W.day ? 'past' : i === W.day ? 'now' : ''}">${d.slice(0,3)}<i>${i === W.day ? ['🌅','☀️','🌙'][W.slot] : i < W.day ? '✓' : '·'}</i></span>`).join('');
   $('mtitle').innerHTML = `<b>${m.title}</b>${P.arrears ? ' + arrears' : ''}${P.owed ? ' + loan' : ''}`;
   const need = due(), have = Math.max(0, P.cash), pct = Math.min(100, Math.round(have / need * 100));
   $('mdue').textContent = money(have) + ' / ' + money(need);
@@ -697,11 +706,14 @@ function visit(k){
 }
 const T = () => W.day + '-' + W.slot;
 // one job a day: your work, one hustle, or a kitchen shift. Ryde runs on the way there or on the way home.
-const workedToday = () => W.jobDay === W.day;
-const BUSY_TAG = 'you already worked today';
-function startJob(job){
-  W.jobDay = W.day; W.offerHome = true;
-  if(W.energy < 30) return job();
+const workedToday = () => W.jobDay === W.day;          // your main job: work, Ryde all day, or a kitchen shift
+const gigToday = () => W.gigDay === W.day;              // plus one hustle on the side
+const BUSY_TAG = 'main job done today', GIG_TAG = 'one hustle a day';
+function startJob(job, kind){
+  const first = !workedToday() && !gigToday();
+  if(kind === 'gig') W.gigDay = W.day; else W.jobDay = W.day;
+  W.offerHome = W.rodeHome !== W.day;
+  if(W.energy < 30 || !first) return job();
   choice(`${youHTML('ryde', 'on the way')}Ryde on the way?`, [
     {l:'🚗 Turn on Ryde', run:() => { W.log.rides++; drive(res => { const r = rydeCommute(res, false), b = apply(r.fx); save(); hud(b);
       sheet(`<div class="mood" aria-hidden="true">${moodFx(r.fx)}</div><p>${r.text}</p>${chips(r.fx)}<button class="go" type="button" id="next">Continue</button>`); $('next').onclick = job; showSheet(); }); }},
@@ -721,14 +733,15 @@ function rydeCommute(res, home){
 }   // luck is shared per moment of the week, so the same move gets the same outcome for everyone today
 function actions(k){
   const tired = W.energy < 20;
-  const shiftPay = () => NG() ? (P.office ? A(320) : A(200) + (P.promo ? A(50) : 0)) : P.office ? A(340) : (W.slot===2 ? A(270) : A(220)) + (P.promo ? A(60) : 0);
+  const shiftPay = () => NG() ? (P.office ? A(300) : A(185) + (P.promo ? A(45) : 0)) : P.office ? A(280) : (W.slot===2 ? A(210) : A(175)) + (P.promo ? A(50) : 0);
   const busy = workedToday();
   const ng = NG();
   switch(k){
     case 'home': return [
       {l:'Sleep it off', tag:'+45 energy', run:() => done({energy:45, peace:6}, pickL('sleep'+T(), ['You sleep like someone who paid for the bed. Because you did.','The drummer next door takes a night off. A miracle.','You dream NEPA brought light for 24 hours. You wake up refreshed and confused.']))},
       ...(!NG() && W.slot === 2 ? [{l:'Play FIFA on your PS', tag:'+peace', run:() => penalties('ps', r => penResult('ps', r))}] : []),
-      ng ? {l:'Visit your parents', tag:'+peace · ★ down', run:() => done({energy:15, peace:12, stars:-1, cash:-A(15)}, 'Mummy cooks, Daddy reads the newspaper aloud, and nobody asks you for money for one whole hour. You leave with a cooler of stew.')}
+      ...(fam() !== 'single' ? [{l: hasKids() ? 'Evening with the children' : `Evening with your ${spouse()}`, tag:'+peace', run:() => done({energy:10, peace:12}, hasKids() ? 'Homework, a small fight over the remote, and everybody asleep on the sofa by nine.' : 'Jollof, a Nollywood film, and no talk about money for one whole evening.')}] : []),
+      ng ? {l:'Call Mummy', tag:'+peace · ★ down', run:() => done({peace:8, stars:-1}, 'Twenty minutes of prayers, gist, and one question about when you are getting married or having another child.')}
          : {l:'Video call home', tag:'+peace · ★ down', run:() => done({energy:20, peace:12, stars:-1}, 'Mummy shows you the new curtains, the dog, and a cousin you do not recognise. You feel held.')}
     ];
     case 'work': return [
@@ -746,7 +759,7 @@ function actions(k){
     case 'ryde': return [
       {l:'Drive all day', tag: workedToday() ? BUSY_TAG : `a full day · fares and tips · -45 energy`, dis:tired || workedToday(), run:() => { W.jobDay = W.day; W.log.rides++; drive(res => rydeResult(res)); }}
     ];
-    case 'gigs': return gigsNow().map(g => ({l:`${g[1]} ${g[2]}`, tag: workedToday() ? BUSY_TAG : `about +${money(A(g[4] * 1.7))} · ${gigEnergy(g)} energy`, dis:workedToday() || W.energy < Math.min(20, -gigEnergy(g)), run:() => startJob(() => doGig(g))}));
+    case 'gigs': return gigsNow().map(g => ({l:`${g[1]} ${g[2]}`, tag: gigToday() ? GIG_TAG : `about +${money(A(g[4] * GIG_X))} · ${gigEnergy(g)} energy`, dis:gigToday() || W.energy < Math.min(20, -gigEnergy(g)), run:() => startJob(() => doGig(g), 'gig')}));
     case 'ryde': return [
       {l:'Drive a few hours', tag:'you drive · fares, dodges, tips', dis:tired, run:() => { W.log.rides++; drive(res => rydeResult(res)); }}
     ];
@@ -856,11 +869,27 @@ const GIGS_ABROAD = [
   ['flat','🔧','Assemble flat-pack furniture',[1],100,-20,'One wardrobe, two shelves, and four screws left over. It stands.','The client books you to do her whole new flat next week.','Page six of the instructions is missing.']
 ];
 const GIGS = () => NG() ? GIGS_HOME : GIGS_ABROAD;
+// unexpected costs: the reason nobody ever saves as much as they planned
+const SNAGS_HOME = [['📱','Your phone screen cracked.',40],['🛞','Tyre puncture. The vulcanizer is waiting.',15],['🔌','Your generator packed up.',50],['💡','NEPA bill came. Estimated, of course.',30],['🚔','Checkpoint. "Something for the boys."',10],['🦷','Toothache. The dentist is not cheap.',35],['🏠','The caretaker: new security levy for the compound.',25],['👞','Your only good shoe tore on the way.',20],['💻','Your laptop charger died.',20],['🚰','The borehole pump spoilt. You buy water.',15],['📺','DSTV expired, and the match is tonight.',20],['🎁','A colleague\'s wedding. Gift and aso-ebi.',30],['⛽','Fuel price went up again overnight.',15],['🧾','Bank charges and SMS alerts, again.',5],['🦟','Malaria drugs for the whole house.',25]];
+const SNAGS_ABROAD = [['📱','Your phone screen cracked.',40],['🅿️','Parking ticket.',35],['🔋','The car battery died.',60],['🦷','Dentist. Insurance covers almost nothing.',50],['🔥','The boiler broke. Your share of the repair.',40],['📬','A bill you did not know about arrived.',45],['💻','Your laptop died. You need it for work.',70],['🧾','Phone bill is higher than you planned.',20],['🚗','Car insurance went up.',30],['🎁','A workmate\'s leaving collection.',10],['🧊','The fridge stopped. Everything inside went bad.',30],['💳','Overdraft fee.',15]];
+const SNAGS_KIDS = [['🩹','Your son fell at school. Clinic and drugs.',25],['👟','School shoes. Again. He grew.',30],['📚','New textbooks the school "forgot" to mention.',30]];
+function snagFor(day, slot){
+  const tag = 'snag' + P.week + '-' + day + '-' + slot;
+  if(!roll(tag, .35)) return null;
+  const L = (NG() ? SNAGS_HOME : SNAGS_ABROAD).concat(hasKids() ? SNAGS_KIDS : []);
+  return pickL(tag + 'w', L);
+}
+function showSnag(sn){
+  const fx = {cash:-A(sn[2]), peace:-3}, b = apply(fx); save(); pins(); hud(b);
+  sheet(`<div class="mood" aria-hidden="true">${sn[0]}</div><h2>Unexpected</h2><p>${sn[1]}</p>${chips(fx)}<button class="go" type="button" id="snagok">OK</button>`);
+  $('snagok').onclick = () => idle(); SND.cashOut(); showSheet();
+}
 // four or five hustles show at a time; they change every morning, afternoon, and night
 function gigsNow(){ return shuffleL('gigs' + P.week + '-' + T(), GIGS().filter(g => g[3].includes(W.slot))).slice(0, W.slot === 2 ? 4 : 5); }
-const gigEnergy = g => Math.round(g[5] * 1.3 / 5) * 5;
+const GIG_X = 1.1;
+const gigEnergy = g => Math.round(g[5] * 1.1 / 5) * 5;
 function doGig(g){
-  const [id, ic, name, , pay0, , ok, great, bad] = g, pay = pay0 * 1.7, en = gigEnergy(g), r = luck('gig' + id + P.week + T());
+  const [id, ic, name, , pay0, , ok, great, bad] = g, pay = pay0 * GIG_X, en = gigEnergy(g), r = luck('gig' + id + P.week + T());
   W.log.gigs = (W.log.gigs || 0) + 1;
   P.gigs = P.gigs || {}; P.gigs[id] = (P.gigs[id] || 0) + 1;
   const regular = P.gigs[id] === 3 ? `${ic} You are now a regular for "${name.toLowerCase()}"` : '';
@@ -1159,7 +1188,7 @@ function done(fx, text, unlock){
   const homeRyde = W.offerHome && W.energy >= 15; W.offerHome = false;
   sheet(`<div class="mood" aria-hidden="true">${moodFx(fx)}</div><p>${text}</p>${chips(fx)}${unlock ? `<p class="who" style="color:var(--naija)">${unlock}</p>` : ''}<button class="go" type="button" id="next">${last ? 'Saturday night. Time to pay.' : 'Next'}</button>${homeRyde ? '<button class="ghost" type="button" id="rydehome">🚗 Ryde on the way home</button>' : ''}`);
   $('next').onclick = advance;
-  if(homeRyde) $('rydehome').onclick = () => { W.log.rides++; drive(res => { const r = rydeCommute(res, true), b = apply(r.fx); W.at = 'home'; save(); hud(b);
+  if(homeRyde) $('rydehome').onclick = () => { W.log.rides++; W.rodeHome = W.day; drive(res => { const r = rydeCommute(res, true), b = apply(r.fx); W.at = 'home'; save(); hud(b);
     sheet(`<div class="mood" aria-hidden="true">${moodFx(r.fx)}</div><p>${r.text}</p>${chips(r.fx)}<button class="go" type="button" id="next">${last ? 'Saturday night. Time to pay.' : 'Next'}</button>`); $('next').onclick = advance; showSheet(); }); };
   if(unlock) toast(unlock);
   showSheet();
@@ -1167,7 +1196,7 @@ function done(fx, text, unlock){
 
 /* ---------- time moves ---------- */
 let busy = false;
-function dayCard(t, cb){ busy = true; SND.day(); const d = document.createElement('div'); d.className = 'daycard'; d.innerHTML = `<div>${P && P.me ? me().walk + ' ' : ''}${t}</div>`; document.body.appendChild(d); setTimeout(() => { d.remove(); busy = false; cb && cb(); }, 900); }
+function dayCard(t, cb){ busy = true; SND.day(); const d = document.createElement('div'); d.className = 'daycard'; d.innerHTML = `<div>${P && P.me ? `<span class="dw">${me().walk}</span>` : ''}${t}<small>MORNING</small></div>`; document.body.appendChild(d); setTimeout(() => { d.remove(); busy = false; cb && cb(); }, 1400); }
 function advance(){
   if(busy || W.over) return;
   const nx = $('next'); if(nx) nx.disabled = true;
@@ -1192,6 +1221,7 @@ function advance(){
     if(W.energy <= 0){ W.at = 'home'; pins(); hud(); apply({energy:40}); sheet(`<h2>You collapsed on the sofa</h2><p>Your body made the decision for you. You lose this part of the day sleeping.</p><button class="go" type="button" id="next">Wake up</button>`); $('next').onclick = advance; return; }
     if(W.stars >= 5) return raid();
     if(W.sickNow){ W.sickNow = false; W.sick = true; pins(); hud(); return malaria(); }
+    const sn = snagFor(W.day, W.slot); if(sn) return showSnag(sn);
     pins(); hud(); idle();
   };
   newDay ? dayCard(DAYS[W.day], go) : go();
