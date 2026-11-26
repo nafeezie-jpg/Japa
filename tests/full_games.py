@@ -36,6 +36,7 @@ async def run():
         if await pg.locator('#lbbox').count(): break
         if await pg.locator('.art.vn').count() and random.random()<.3: await pg.click('.art.vn')
         if await pg.locator('#back').count(): issues.append(f'game {g}: a back button is still showing'); break
+        if await pg.locator('#mskip').count(): await pg.click('#mskip'); continue
         ch=pg.locator('.choice')
         if await ch.count(): await ch.nth(random.randrange(await ch.count())).click(); steps+=1
         elif await pg.locator('#next').count(): await pg.click('#next')

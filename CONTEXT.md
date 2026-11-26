@@ -191,3 +191,10 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - FIFA on the PS (her choice over PES). Men can play it at home at night in Nigeria too.
 - Context: woman in hijab gets the Mosque (Wednesday night, Friday Jumat), Alfa Ibrahim in place of Pastor Sunday, the women's circle. "Bae" messages only for single players, and they differ for men and women. Ludo with the boys or the girls. Middle-belt states use Mama Put, Baba Landlord, and Oga Danjuma.
 - Home screen: besides the 📲 top-bar button, the welcome screen and the week 1 and 2 intros have an "Add to your home screen" link. Landed links to Wahala Week from its home card and from the done-for-today panel.
+
+### Landed gets Wahala Week's feel (25 Nov)
+- Her husband loved how interactive Wahala Week is (music, little reading). She chose: same story and leaderboard, WW feel.
+- Music: SFX now runs a soft highlife-Afrobeat loop (startGroove) under the whole game, muted with the same 🔊 button.
+- You as a person: youL() puts your avatar (woman, man, or neutral from S.gender) with a prop on every scene picture; moodL() shows a big happy, meh, or facepalm reaction on every result.
+- Fewer words: narration fades in line by line; the "about this landing" notes fold into one "ℹ️ About this landing" line; the result screen is just your reaction, the outcome, and the chips (no repeated picture, scene, or "You chose").
+- Three tap games in the 30-day game (MINIS, scenes with auto:'mini', so they never count toward the 15 questions): Day 1 baggage carousel (tap your two 🎀 bags), Day 8 run for the bus (tap fast for 5 seconds), Day 13 the African shop (tap only what is on your list). Each has a Skip with an average result. Tests click #mskip.

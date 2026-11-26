@@ -15,6 +15,7 @@ async def play_through(pg, tag):
     body = await pg.locator('#app').inner_text()
     for bad in ('undefined','NaN','[object','${'):
       if bad in body: issues.append(f'{tag}: "{bad}" on screen: {body[:160]!r}')
+    if await pg.locator('#mskip').count(): await pg.click('#mskip'); continue
     c = pg.locator('.choice')
     if await c.count(): await c.nth(random.randrange(await c.count())).click(); choices += 1
     elif await pg.locator('#next').count(): await pg.click('#next')

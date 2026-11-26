@@ -93,6 +93,42 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .scene{display:grid;gap:14px}
 .when{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .narr{font-size:18px;line-height:1.55;text-wrap:pretty}
+.narr .ln{opacity:0;animation:lnIn .45s ease forwards}
+@keyframes lnIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.artwrap{position:relative}
+.you-l{position:absolute;left:10px;bottom:-8px;display:flex;align-items:flex-end;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px 4px 6px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+.you-l span{font-size:34px;line-height:1}
+.you-l i{font-style:normal;font-size:20px;margin-left:-4px}
+.moodl{font-size:64px;line-height:1;text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+details.fold summary{cursor:pointer;font-weight:600}
+details.fold[open]{display:grid;gap:8px}
+.mini{display:grid;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.mini-head{display:flex;justify-content:space-between;align-items:center;font-size:14px;letter-spacing:.04em}
+.mini-head span{font-weight:700;color:var(--accent)}
+.mini-how{margin:0;font-size:16px}
+.mini-skip{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:14px}
+.mini-field{position:relative;height:220px;border-radius:12px;overflow:hidden;background:var(--bubble)}
+.mini-field.belt{background:repeating-linear-gradient(90deg,#3A4A44 0 18px,#33423C 18px 36px)}
+.bag{position:absolute;left:-60px;font-size:44px;background:none;border:0;padding:4px;transition:left 3.4s linear;line-height:1}
+.bag.go{left:110%}
+.bag i{position:absolute;right:-2px;top:-4px;font-size:20px;font-style:normal}
+.bag.got{animation:pop .3s reverse forwards;opacity:.2}
+.bag.nope{opacity:.4}
+.mini-field.road{background:linear-gradient(180deg,var(--bubble) 0 62%,#9AA59E 62% 64%,#C9CFC9 64%)}
+.runner{position:absolute;left:0;top:34%;font-size:46px;transition:left .12s}
+.busstop{position:absolute;right:4px;top:28%;font-size:58px}
+.tapzone{position:absolute;inset:auto 10px 10px;height:64px;border-radius:12px;border:0;background:var(--green);color:var(--green-ink);font-weight:800;letter-spacing:.2em;font-size:18px}
+.tapzone:active{transform:scale(.97)}
+.mini-field.shelf{height:auto;padding:10px;display:grid;gap:10px}
+.shoplist{display:flex;flex-wrap:wrap;gap:6px}
+.shoplist span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:14px}
+.shoplist span.got{background:var(--good);color:#fff;border-color:var(--good)}
+.cells{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cell{height:76px;border-radius:12px;border:1px dashed var(--line);background:var(--card);font-size:40px}
+.cell.show{animation:pop .25s}
+.cell.got{background:var(--good)}
+.cell.nope{background:var(--bad)}
 .thread{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px}
 .who{display:flex;align-items:center;gap:10px}
 .avatar{width:34px;height:34px;border-radius:50%;background:var(--green);color:var(--green-ink);display:grid;place-items:center;font-family:var(--display);font-size:13px;font-weight:800}
@@ -1964,7 +2000,7 @@ function scenes(){
   const alts = routeAlts();
   base.concat(alts).forEach(sc => { if(sc.day===1 && !sc.core){ const w = sc.when; sc.when = s => !arrived(s) && !lola(s) && (!w || w(s)); } });
   base.push(lolaScene(lola));
-  return base.concat(alts, pathScenes(), fundScenes(), guestStay(), [bidetScene(), convertScene(), urgent2k(), godWhen(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), livingLarge(), oldColleagues(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
+  return base.concat(alts, pathScenes(), fundScenes(), guestStay(), MINIS(), [bidetScene(), convertScene(), urgent2k(), godWhen(), familyGroup(), whatsapp(), mishap(), smallWin(), countryMoment(), livingLarge(), oldColleagues(), padaScene()]).map((sc,i)=>({sc,i})).sort((a,b)=>a.sc.day-b.sc.day || a.i-b.i).map(x=>x.sc);
 }
 
 function autoEvent(kind){
@@ -2190,9 +2226,37 @@ const SFX = (() => {
       if(!ensure.sil){ ensure.sil = 1; try{ const a = new Audio('data:audio/wav;base64,UklGRrQBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YZABAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA'); a.setAttribute('playsinline', ''); a.play().catch(()=>{}); }catch(e){} }
       // iPhones can leave audio 'suspended' or 'interrupted' after a notification or a locked screen
       if(ctx.state !== 'running') ctx.resume().catch(()=>{});
+      if(!groove) startGroove();
       return ctx;
     } catch(e) { return null; }
   };
+  // a soft highlife-Afrobeat loop: kick, shaker, a bass line, and a bright guitar figure
+  let groove = null, gStep = 0, gNext = 0, mus = null;
+  const GB = [65.4, 0, 0, 65.4, 0, 0, 98, 0, 87.3, 0, 0, 87.3, 0, 73.4, 0, 82.4];
+  const GG = [0, 659, 0, 784, 0, 659, 0, 0, 0, 587, 0, 698, 0, 587, 0, 0];
+  const gTone = (f, t, dur, type, vol, to) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if(to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(g); g.connect(mus); o.start(t); o.stop(t + dur + 0.05); };
+  const gHat = (t, vol) => { const n = Math.floor(ctx.sampleRate * 0.04), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for(let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); src.buffer = b; f.type = 'highpass'; f.frequency.value = 7000; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04); src.connect(f); f.connect(g); g.connect(mus); src.start(t); };
+  function startGroove(){
+    mus = ctx.createGain(); mus.gain.value = 0.16; mus.connect(master); gNext = ctx.currentTime + 0.1;
+    groove = setInterval(() => {
+      if(!ctx || ctx.state !== 'running') return;
+      const spb = 60 / 100 / 4;
+      if(gNext < ctx.currentTime) gNext = ctx.currentTime + 0.05;
+      while(gNext < ctx.currentTime + 0.25){
+        const i = gStep % 16, t = gNext;
+        if(on && !document.hidden){
+          if(i % 4 === 0) gTone(110, t, 0.18, 'sine', 0.45, 45);
+          if(i === 6 || i === 14) gTone(240, t, 0.1, 'sine', 0.14, 170);
+          gHat(t, i % 2 ? 0.04 : 0.08);
+          if(GB[i]) gTone(GB[i], t, 0.24, 'triangle', 0.26);
+          if(GG[i] && (gStep >> 4) % 2) gTone(GG[i], t, 0.12, 'triangle', 0.05);
+        }
+        gNext += spb; gStep++;
+      }
+    }, 60);
+  }
   const tone = (f, dur, {type='sine', vol=0.3, at=0, to=null, attack=0.005} = {}) => {
     const c = ensure(); if(!c) return; const t = c.currentTime + at;
     const o = c.createOscillator(), g = c.createGain(); o.type = type;
@@ -2289,6 +2353,11 @@ const SFX = (() => {
     }
   };
 })();
+const ME_L = () => S && S.gender==='woman' ? {base:'👩🏾', happy:'🙆🏾‍♀️', sad:'🤦🏾‍♀️', meh:'🤷🏾‍♀️', run:'🏃🏾‍♀️'} : S && S.gender==='man' ? {base:'👨🏾', happy:'🙆🏾‍♂️', sad:'🤦🏾‍♂️', meh:'🤷🏾‍♂️', run:'🏃🏾‍♂️'} : {base:'🧑🏾', happy:'🙆🏾', sad:'🤦🏾', meh:'🤷🏾', run:'🏃🏾'};
+const POSE_L = {plane:'🧳', phone:'📱', voice:'📱', chat:'📱', group:'📱', snow:'🥶', rain:'☔', sun:'🥵', card:'💳', food:'🍲', school:'📚', car:'🚌', house:'🏠', work:'💼', coins:'💵', farm:'📱', hall:'📱', pin:'📍', star:'⭐', globe:'🌍', goat:'📱'};
+function youL(sc){ const k = artKind(sc); return `<div class="you-l" aria-hidden="true"><span>${ME_L().base}</span>${POSE_L[k] ? `<i>${POSE_L[k]}</i>` : ''}</div>`; }
+function moodL(fx){ fx = fx || {}; const m = (fx.peace||0) + (fx.home||0) + (fx.future||0), c = fx.cash || 0, me = ME_L();
+  return (m >= 6 || (c > 0 && m >= 0)) ? me.happy : (m <= -6 || (c < 0 && m <= 0)) ? me.sad : me.meh; }
 function soundButton(){
   let b = document.getElementById('soundbtn');
   if(!b){ b = document.createElement('button'); b.id = 'soundbtn'; b.type = 'button'; document.body.appendChild(b);
@@ -2411,6 +2480,7 @@ function render(){
   if(phase==='end'){ return S.life ? renderLifeEnd(app) : renderEnd(app); }
   SCENES = scenes();
   const sc = SCENES[idx];
+  if(phase==='scene' && sc.mini) return playMini(sc, app);
   if(phase==='scene' && sc.auto){
     const ev = autoEvent(sc.auto);
     apply(ev.fx); last = {r:ev.text, fx:ev.fx, auto:true}; phase = 'result'; setTimeout(()=>SFX.result(ev.fx), 120);
@@ -2420,7 +2490,7 @@ function render(){
     const ord = list.map((c,i)=>i).sort((a,b)=> hashStr((S.seed||0)+'|'+sc.day+'|'+list[a].l) - hashStr((S.seed||0)+'|'+sc.day+'|'+list[b].l));
     const note = !inCh() && sc.day<=1 && !sc.from && idx===nextIndex(0) ? `${S.life ? `<div class="local"><b>📖 My Life Abroad · Month 1</b>This is the start of one long life. Your money, your meters, and the choices you make this month follow you into every chapter.</div>` : ''}${S.me ? '' : S.daily && S.landing===1 ? `<div class="local"><b>Today's Landing #${dailyNo(S.daily)} · your ${ordinal(myLandingNo())} landing</b>Everyone playing today lands here and meets the same surprises. Your score is compared with theirs at the end.</div>` : ''}${S.landing>1?`<div class="local"><b>Landing number ${S.landing}</b>You leave ${S.trail[S.trail.length-1].town} and start again. Your peace, family standing, and future come with you. Your savings reset to what you managed to bring.</div>`:''}<div class="local"><b>About ${L.name}</b>${localNote()}</div>` : '';
     const meNote = S.me && !S.cont && idx===nextIndex(0) ? `<div class="local"><b>📖 Chapter 1 of your story · Month 1</b>Your goal: ${GOALS[S.me.goal].icon} ${GOALS[S.me.goal].t}. Everything you choose this month follows you into every chapter.</div>` : '';
-    app.innerHTML = header(sc.day) + `<div class="scene fade">${art(sc)}${meNote}${intro(sc)}${note}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${!(S.q||0) ? `<p class="noundo">${FINAL_LINES[(S.seed||0) % FINAL_LINES.length]}</p>` : ''}${glossLink()}</div>`;
+    app.innerHTML = header(sc.day) + `<div class="scene fade"><div class="artwrap">${art(sc)}${youL(sc)}</div>${meNote}${intro(sc)}${note ? `<details class="local fold"><summary>ℹ️ About this landing</summary>${note}</details>` : ''}<div class="choices">${ord.map((i,pos)=>{ const c=list[i]; return `<button class="choice" data-i="${i}"><span class="k">${'ABCD'[pos]}</span><span class="cl">${c.l}</span><span class="arrow" aria-hidden="true">↗</span></button>`; }).join('')}</div>${!(S.q||0) ? `<p class="noundo">${FINAL_LINES[(S.seed||0) % FINAL_LINES.length]}</p>` : ''}</div>`;
     wireBack();
     SFX.ambient(ambientFor(sc));
     if(sc.from && !(S.landing===1 && sc.day===1 && !inCh())) setTimeout(()=> isCall(sc) ? SFX.ring() : SFX.ping(), 150);
@@ -2433,9 +2503,9 @@ function render(){
     });
     return;
   }
-  const picked = last.picked ? `<div class="when">You chose · ${last.picked}</div>` : '';
+
   const welcome = S.cont && last.auto && sc.auto==='fortnight' ? `<div class="local"><b>📖 ${S.cont.label} · chapter ${S.cont.n} of ${LIFE_LEN}</b>${S.cont.fin ? 'The last chapter of this story. Make it count.' : `Your life carries on in ${T()}, right where you left it.`}</div>${goalBarHTML(goalPct(), S.me||{}, true)}` : '';
-  const body = art(sc) + welcome + (last.auto ? `<div class="when">${sc.label || 'Day '+sc.day}</div>` : intro(sc,true)) + picked +
+  const body = welcome + `<div class="moodl" aria-hidden="true">${moodL(last.fx)}</div>` + `<div class="when">${sc.label || 'Day '+sc.day}${last.auto ? '' : ' · ' + esc(String(sc.from || '').split(' (')[0]) }</div>`.replace(' · </div>', '</div>') +
     `<div class="result">${last.r}</div><div class="chips">${chips(last.fx)}</div>
      <button class="primary" id="next">${nextIndex(idx+1)>=SCENES.length ? (S.life ? (inCh() ? '📖 Close this chapter' : '📖 See how your life begins') : (S.cont ? (S.cont.fin ? '🏁 See how your story ends' : `See how ${S.cont.label} went`) : S.me ? 'See how your first month went' : 'See how your 30 days went')) : 'Continue'}</button>`;
   app.innerHTML = header(sc.day) + `<div class="scene fade">${body}</div>`;
@@ -2445,6 +2515,79 @@ function render(){
     phase = idx>=SCENES.length ? 'end' : 'scene';
     render(); scrollTo(0,0);
   };
+}
+
+/* ---------- Little games: the baggage carousel, the bus, and the African shop ---------- */
+const MINIS = () => S.cont || inCh() ? [] : [
+  {day:1, auto:'mini', mini:'bags', art:'plane', label:'Day 1 · Baggage reclaim', when: s => s.landing===1},
+  {day:8, auto:'mini', mini:'bus', art:'car', label:'Day 8 · Your first commute'},
+  {day:13, auto:'mini', mini:'shop', art:'food', label:"Day 13 · The African shop"}
+];
+const MINI_INFO = {
+  bags:['🧳 BAGGAGE RECLAIM', 'Your bags have the 🎀 ribbon Mummy tied on. Tap them before they go round. Leave other people\'s bags alone.', 'Watch the belt'],
+  bus:['🚌 THE BUS IS LEAVING', 'Tap as fast as you can to run. Reach the doors before they close.', 'Run'],
+  shop:['🛒 THE AFRICAN SHOP', 'Tap only what is on your list. Everything else costs money you do not have.', 'Start shopping']
+};
+function playMini(sc, app){
+  const [title, how, go] = MINI_INFO[sc.mini];
+  app.innerHTML = header(sc.day) + `<div class="scene fade"><div class="when">${sc.label}</div><div class="mini" id="mini"><div class="mini-head"><b>${title}</b><span id="mstat"></span></div><div class="mini-field" id="mfield"></div><p class="mini-how" id="mhow">${how}</p><button class="primary" id="mgo" type="button">${go}</button><button class="mini-skip" id="mskip" type="button">Skip</button></div></div>`;
+  wireBack(); SFX.ambient(null);
+  const finish = (fx, r) => { apply(fx); last = {r, fx, auto:true}; phase = 'result'; setTimeout(() => SFX.result(fx), 120); render(); scrollTo(0,0); };
+  const skipFx = {bags:[{peace:-1}, 'You let a porter find your bags. He finds them, and he expects a tip.'], bus:[{cash:-A(10), peace:-1}, 'You let the bus go and wait for the next one. Forty minutes in the cold.'], shop:[{cash:-A(35), peace:1}, 'You buy the usual: rice, plantain, and pepper. Nothing exciting, nothing wasted.']}[sc.mini];
+  document.getElementById('mskip').onclick = () => { SFX.tap(); finish(skipFx[0], skipFx[1]); };
+  document.getElementById('mgo').onclick = () => { SFX.tap(); document.getElementById('mgo').remove(); document.getElementById('mskip').remove(); document.getElementById('mhow').remove(); ({bags:miniBags, bus:miniBus, shop:miniShop})[sc.mini](finish); };
+}
+function miniBags(finish){
+  const f = document.getElementById('mfield'), st = document.getElementById('mstat'); f.classList.add('belt');
+  const seed = String(S.seed) + (S.daily || ''), mine = [3 + hashStr(seed + 'b1') % 4, 8 + hashStr(seed + 'b2') % 4];
+  const KINDS = ['🧳','💼','🎒','👜','🧳','🎒'];
+  let caught = 0, wrong = 0, n = 0, shown = 0;
+  st.textContent = '🎀 0 of 2';
+  const spawn = () => {
+    if(n >= 13) return; const isMine = mine.includes(n), b = document.createElement('button'); b.type = 'button'; b.className = 'bag' + (isMine ? ' mine' : '');
+    b.innerHTML = (isMine ? '🧳' : KINDS[hashStr(seed + n) % KINDS.length]) + (isMine ? '<i>🎀</i>' : ''); b.style.top = (10 + (n % 3) * 30) + '%';
+    b.style.filter = isMine ? '' : `hue-rotate(${hashStr(seed + 'h' + n) % 360}deg)`;
+    b.onclick = () => { if(b.dataset.done) return; b.dataset.done = 1;
+      if(isMine){ caught++; SFX.coinIn(); b.classList.add('got'); st.textContent = `🎀 ${caught} of 2`; } else { wrong++; SFX.meh(); b.classList.add('nope'); vnToast('That is not your bag. An aunty is looking at you.'); } };
+    f.appendChild(b); requestAnimationFrame(() => b.classList.add('go')); setTimeout(() => b.remove(), 3600); n++;
+  };
+  spawn(); const iv = setInterval(spawn, 850);
+  setTimeout(() => { clearInterval(iv); setTimeout(() => {
+    const extra = wrong >= 2 ? ' And an aunty will tell everyone that you tried to take her Ghana-must-go.' : '';
+    if(caught >= 2) finish({peace:5 - (wrong >= 2 ? 2 : 0)}, "Both bags, ribbons and all. Mummy's ribbon trick works again." + extra);
+    else if(caught === 1) finish({cash:-A(15), peace:-3}, 'One bag. The other one is "being traced". You fill a form and buy a toothbrush.' + extra);
+    else finish({cash:-A(40), peace:-6}, 'Both bags went round and vanished. Your first evening goes on buying clothes you already own.' + extra);
+  }, 3700); }, 13 * 850);
+}
+function miniBus(finish){
+  const f = document.getElementById('mfield'), st = document.getElementById('mstat'); f.classList.add('road');
+  f.innerHTML = `<span class="runner" id="runner">${ME_L().run}</span><span class="busstop">🚌</span><button class="tapzone" id="tapz" type="button">TAP TAP TAP</button>`;
+  let pos = 0, left = 5.0, over = false; const r = document.getElementById('runner');
+  const end = won => { if(over) return; over = true; clearInterval(iv);
+    setTimeout(() => won ? finish({peace:4, future:1}, 'You jump on as the doors close. The driver nods at you. You are a local now.') : finish({cash:-A(18), peace:-3}, 'The doors close in your face. The next bus is in forty minutes, so you take an Uber and feel the money leave.'), 700); };
+  document.getElementById('tapz').onclick = () => { if(over) return; pos = Math.min(100, pos + 5); r.style.left = (pos * 0.78) + '%'; SFX.tap(); if(pos >= 100){ st.textContent = '🚪 Made it'; end(true); } };
+  const iv = setInterval(() => { left = Math.max(0, left - 0.1); st.textContent = `🚪 ${left.toFixed(1)}s`; if(left <= 0){ st.textContent = '🚪 Doors closed'; end(false); } }, 100);
+}
+function miniShop(finish){
+  const f = document.getElementById('mfield'), st = document.getElementById('mstat'); f.classList.add('shelf');
+  const LIST = [['🍚','Rice'],['🍌','Plantain'],['🌶️','Pepper'],['🐟','Stockfish']], OTHER = ['🍫','🥤','🍕','🧃','🍪','🥐'];
+  const seed = String(S.seed) + (S.daily || '');
+  f.innerHTML = `<div class="shoplist">${LIST.map(([e, l]) => `<span data-e="${e}">${e} ${l}</span>`).join('')}</div><div class="cells">${Array.from({length:6}, (_, i) => `<button class="cell" type="button" data-c="${i}"></button>`).join('')}</div>`;
+  const got = new Set(); let waste = 0, t = 0; st.textContent = '🛒 0 of 4';
+  const cells = [...f.querySelectorAll('.cell')];
+  cells.forEach(c => c.onclick = () => { const e = c.dataset.e; if(!e || c.dataset.done) return; c.dataset.done = 1;
+    if(LIST.some(x => x[0] === e)){ got.add(e); SFX.coinIn(); c.classList.add('got'); const li = f.querySelector(`.shoplist [data-e="${e}"]`); if(li) li.classList.add('got'); st.textContent = `🛒 ${got.size} of 4`; }
+    else { waste++; SFX.coinOut(); c.classList.add('nope'); } });
+  const iv = setInterval(() => {
+    cells.forEach(c => { c.textContent = ''; delete c.dataset.e; delete c.dataset.done; c.className = 'cell'; });
+    if(t >= 14){ clearInterval(iv); setTimeout(() => {
+      const extra = waste ? ` Plus ${waste} thing${waste === 1 ? '' : 's'} you did not need (${M(A(5) * waste)}).` : '';
+      const fx = got.size >= 4 ? {cash:-A(35) - A(5) * waste, peace:6, home:2} : got.size >= 2 ? {cash:-A(35) - A(5) * waste, peace:1} : {cash:-A(45) - A(5) * waste, peace:-3};
+      finish(fx, (got.size >= 4 ? 'Everything on the list. Your kitchen smells like home tonight.' : got.size >= 2 ? 'Half the list. Jollof without pepper is a sad jollof, but it is food.' : 'You leave with the wrong things and come back tomorrow for the right ones.') + extra);
+    }, 400); return; }
+    const k = hashStr(seed + 's' + t), c = cells[k % 6], wantIt = k % 5 < 2, e = wantIt ? LIST[(k >> 3) % 4][0] : OTHER[(k >> 3) % OTHER.length];
+    c.textContent = e; c.dataset.e = e; c.classList.add('show'); t++;
+  }, 800);
 }
 
 /* ---------- Scene illustrations ---------- */
@@ -2642,7 +2785,8 @@ function intro(sc, compact){
       <div class="thread chat${compact?' done':''}"><div class="who"><div class="avatar">${sc.from[0]}</div><div><b>${sc.from}</b><small>${compact ? (sc.sub||'') : status}</small></div><span class="chat-ic" aria-hidden="true">${call ? '📞' : '⋮'}</span></div>
       <div class="chat-body">${compact ? '' : '<div class="typing" aria-hidden="true"><i></i><i></i><i></i></div>'}${voice}<div class="bubble msg">${vn ? '<span class="vlab">Transcript</span>' : ''}${sc.text}<span class="meta">${time} <b>✓✓</b></span></div></div></div>`;
   }
-  return `<div class="when">${sc.label || 'Day '+sc.day}</div>${creditTag(sc)}${compact?'':`<div class="narr">${sc.text}</div>`}`;
+  const lines = String(sc.text).split(/(?<=[.!?…]["”']?)\s+(?=[A-Z"“'0-9])/);
+  return `<div class="when">${sc.label || 'Day '+sc.day}</div>${creditTag(sc)}${compact?'':`<div class="narr">${lines.map((l, i) => `<span class="ln" style="animation-delay:${Math.min(i, 5) * 0.45}s">${l}</span>`).join(' ')}</div>`}`;
 }
 
 // Every verdict has a score range, so the title always matches the number.
