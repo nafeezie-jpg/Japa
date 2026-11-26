@@ -148,3 +148,7 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - week/manifest.json (scope /week/, start /week/?source=homescreen) and its own icons (week/icon-192.png, icon-512.png, apple-touch-icon.png). Installs as "Wahala Week", separate from Landed.
 - A "Put Wahala Week on your phone" card shows on the end-of-week and played-today screens and in How to play. Android gets a real install button; iPhone gets Share, then Add to Home Screen.
 - iPhone home screen apps keep their own storage, so progress moves with a code (WW1. + base64 of the nyhl-week save). Copy it in How to play or on the iPhone tip card; paste it from the welcome screen link or How to play.
+
+### Hustles (25 Nov)
+- New 🛠️ Hustles pin (x82, y87), open from week 1, every slot. GIGS_HOME and GIGS_ABROAD hold 20+ small jobs each: [id, icon, name, slots, pay, energy, usual, great, wahala]. gigsNow() shows 5 (4 at night), reshuffled every slot by shared luck. doGig: 20% wahala (half pay), 20% great (+A(40)), else normal. P.gigs counts each job; the third time you become "a regular".
+- Pay per slot is close to the main job, so balance holds. The welcome card no longer lists jobs.

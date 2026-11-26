@@ -421,7 +421,7 @@ const me = () => ME[(P && P.me) || 'w'];
 function pose(k){
   const m = me();
   return ({home:['🛌🏾',''], work:[m.work, P.office ? '🏦' : '💼'], ryde:[m.base,'🚗'], mama:[m.base,'🍲'], loan:[m.base,'📲'], hall:[m.dance,'🎉'],
-    fuel:[m.base,'⛽'], mech:[m.mech,'🔧'], school:[m.school,'📚'], stall:[m.base,'🏧'], pray:[m.base,'🙏🏾'], view:[m.base,'⚽'], phone:[m.base,'📱'], sick:['🤒','']})[k] || [m.base,''];
+    fuel:[m.base,'⛽'], mech:[m.mech,'🔧'], school:[m.school,'📚'], stall:[m.base,'🏧'], gigs:[m.work,'🛠️'], pray:[m.base,'🙏🏾'], view:[m.base,'⚽'], phone:[m.base,'📱'], sick:['🤒','']})[k] || [m.base,''];
 }
 const youHTML = (k, caption) => { const [a, b] = pose(k); return `<div class="you" aria-hidden="true"><span class="yf">${a}</span>${b ? `<span class="yb">${b}</span>` : ''}${caption ? `<small>${caption}</small>` : ''}</div>`; };
 function moodFx(fx){ const m = me(), good = (fx.cash || 0) > 0 || (fx.peace || 0) >= 6, bad = (fx.peace || 0) <= -4 || (fx.stars || 0) > 0 || ((fx.cash || 0) < 0 && !(fx.peace > 0));
@@ -450,7 +450,8 @@ const PL = () => NG() ? ({
   relax:{x:50,y:68,ic:'🎲',nm:'Ayo spot', title:'Ayo under the mango tree', who:'Baba Sule and his Ayo board, a ludo set, a draft board, and cold zobo. Nobody here is in a hurry.'},
   fuel:{x:82,y:68,ic:'⛽',nm:'Filling station', title:'Filling station', who:'There is fuel today. There is also a queue to the next town.'},
   home:{x:18,y:87,ic:'🏠',nm:'Your room', title:`Your self-contain in ${C.area}`, who:'Shared compound, one tap, and a neighbour whose generator is louder than a church.'},
-  hall:{x:50,y:87,ic:'🎉',nm:'Owambe', title:C.hall, who:'Saturday afternoon. Aunty Funmi turns 60 again, and the caterer needs extra hands.'}
+  hall:{x:50,y:87,ic:'🎉',nm:'Owambe', title:C.hall, who:'Saturday afternoon. Aunty Funmi turns 60 again, and the caterer needs extra hands.'},
+  gigs:{x:82,y:87,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'Your phone is full of small jobs. Pick one. New ones come every morning, afternoon, and night.'}
 }) : ({
   stall: P.week >= 5 && !P.stall ? {x:18,y:11,ic:'🏪',nm:'Market stall', title:'A stall at the weekend market', who:'Your own small business. Mama Ngozi will only recommend you if she trusts you.', fresh:P.week===5} : undefined,
   work: P.office ? {x:82,y:11,ic:'💼',nm:'Office', title:'Your new office job', who:'A desk, a lanyard, and a coffee machine that judges you.'}
@@ -463,7 +464,8 @@ const PL = () => NG() ? ({
   loan:{x:82,y:49,ic:'💸',nm:'Loan shop', title:C.lender, who:'"Approved in 5 minutes. Regretted in 5 days."'},
   pitch:{x:18,y:68,ic:'⚽',nm:'5-aside', title:'Saturday 5-aside at the rec centre', who:'Naija boys versus everybody else. The Ghanaians say it is their pitch.'},
   home:{x:18,y:87,ic:'🏠',nm:'Your flat', title:`Your flat in ${C.area}`, who:'Shared wall with a man who plays the drums at midnight. Your PlayStation is under the TV.'},
-  hall:{x:50,y:87,ic:'🎉',nm:'Owambe', title:C.hall, who:'Saturday afternoon. Aunty Funmi turns 60 again, and the caterer needs extra hands.'}
+  hall:{x:50,y:87,ic:'🎉',nm:'Owambe', title:C.hall, who:'Saturday afternoon. Aunty Funmi turns 60 again, and the caterer needs extra hands.'},
+  gigs:{x:82,y:87,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'Your group chats are full of small jobs. Pick one. New ones come every morning, afternoon, and night.'}
 });
 let places = {};
 const SAT = 5;
@@ -500,7 +502,7 @@ function drawCity(){
   g.font = '9px Rubik, sans-serif'; g.fillStyle = '#5FA9B8'; g.textAlign = 'left'; g.fillText(C.water, 8, 236);
 }
 // a newcomer starts with four places; the rest of the city opens week by week
-const UNLOCK = {home:1, work:1, mama:1, ryde:1, hall:2, pray:2, fuel:2, loan:2, view:3, relax:3, pitch:3};
+const UNLOCK = {home:1, work:1, mama:1, ryde:1, gigs:1, hall:2, pray:2, fuel:2, loan:2, view:3, relax:3, pitch:3};
 const unlockWeek = k => UNLOCK[k] || 1;
 const newThisWeek = () => Object.entries(PL()).filter(([k, v]) => v && P.week > 1 && (unlockWeek(k) === P.week || v.fresh)).map(([, v]) => v);
 function pins(){
@@ -524,7 +526,7 @@ function coachText(){
   if(W.energy < 35 && W.slot < 2) return `🍲 Low energy. Tap the glowing ${NG() ? 'buka' : 'market'} to eat, or go home to sleep.`;
   if(!W.log.shifts && isOpen('work')) return '💼 Start here. Tap the glowing work pin to earn money for Saturday.';
   if(!W.log.shifts) return '🚗 Work is closed now. Tap Ryde to drive and earn.';
-  if(P.cash < due()) return '💸 Keep earning until the bar at the top is full. Work, Ryde, and the kitchen all pay.';
+  if(P.cash < due()) return '💸 Keep earning until the bar at the top is full. Work, Ryde, the kitchen, and the hustles all pay.';
   return '✅ You have enough for Saturday. Rest, enjoy the city, and keep some extra if you can.';
 }
 
@@ -603,6 +605,7 @@ function actions(k){
         done({cash:pay, energy:en}, P.office ? pickL('off' + T(), ['Three meetings that could have been emails. You get paid either way.','Someone microwaves fish. Everyone looks at you. It was not you this time.','You fix the printer. You are now "the tech person". Forever.']) : pickL('wh' + T(), ['Eight hours of boxes. You now know exactly what people order at 3am.','A forklift almost reverses into you. You survive. The pay is the same.','You find a Nigerian in the next aisle. You talk jollof for a whole break.']));
       }}
     ];
+    case 'gigs': return gigsNow().map(g => ({l:`${g[1]} ${g[2]}`, tag:`about +${money(A(g[4]))} · ${g[5]} energy`, dis:W.energy < Math.min(20, -g[5]), run:() => doGig(g)}));
     case 'ryde': return [
       {l:'Drive a few hours', tag:'you drive · fares, dodges, tips', dis:tired, run:() => { W.log.rides++; drive(res => rydeResult(res)); }}
     ];
@@ -663,6 +666,65 @@ function actions(k){
     ];
   }
   return [];
+}
+/* ---------- hustles: twenty-plus small jobs, a fresh handful every part of the day ---------- */
+// [id, icon, name, slots (0 morning, 1 afternoon, 2 night), pay, energy, usual line, great line, wahala line]
+const GIGS_HOME = [
+  ['braid','💇🏾‍♀️','Braid hair for a client',[0,1],110,-25,'Six hours of knotless braids. Your fingers are numb, and she loves them.','She posts the braids on her status and tags you. Two new clients message before you get home.','Halfway through, she says her husband will "send the balance". Her husband is in Dubai.'],
+  ['sew','🧵','Sew aso-ebi for an owambe',[0,1,2],120,-25,'Five iro and buba, all ready before the party. You did not sleep, but they fit.','The bride\'s mother sees your work and orders twelve more for the wedding.','The customer says the blouse is too tight. It is not the blouse.'],
+  ['pos','🏧','Run Mama Ada\'s POS stand',[0,1],90,-15,'Withdrawals, transfers, and one man who wants change for ₦1,000 in coins.','Network is up all day. You make every charge, and Mama Ada gives you a bonus.','Network goes down for three hours. Customers blame you personally.'],
+  ['lesson','📚','Lesson teacher for twins',[1,2],90,-20,'Long division with two eight-year-olds who would rather be anywhere else. You survive.','The twins both pass their test, and their mother gives you extra plus a plate of jollof.','The twins hide your marker and swear they never saw it. Their mother says "pay you next week".'],
+  ['photo','📸','Photograph a naming ceremony',[0],130,-25,'Three hundred photos of aunties in gele. Every single one wants a solo shot.','The father loves the photos so much that he books you for his brother\'s wedding.','Your battery dies during the cake cutting. The family is not amused.'],
+  ['chops','🍢','Fry small chops for an order',[1,2],100,-25,'Two hundred puff-puff, samosa, and spring rolls. Your whole house smells like a party.','The client adds a tip and says "my guests asked for your number".','The client collects the small chops and says "I will transfer". The transfer is still pending.'],
+  ['dispatch','🏍️','Dispatch rider deliveries',[0,1],110,-30,'Eight deliveries across town. One gate man asks for "something" before he opens the gate.','A customer is so happy with her parcel that she tips you more than the delivery fee.','The address says "opposite the big tree". There are many big trees.'],
+  ['phone','📱','Fix phone screens at the market',[0,1],120,-20,'Four cracked screens, one water-damaged phone, and a man who swears he never dropped it.','A big man\'s PA brings in three iPhones and pays without bargaining. A miracle.','You fix the screen, and the customer says the camera was working before. It was not.'],
+  ['makeup','💄','Bridal make-up',[0],140,-30,'The bride cries happy tears. The make-up survives. That is talent.','The bride\'s five friends book you for their own weddings. You are booked till December.','The bride arrives two hours late, and the whole day runs on African time.'],
+  ['mc','🎤','MC a birthday party',[2],130,-20,'You hype the celebrant, spray the dance floor, and remember everyone\'s name.','A guest grabs you after the party. "MC, you will do my wedding." Paid work, guaranteed.','The DJ and you disagree about the playlist. The DJ wins.'],
+  ['site','🧱','Labour at a building site',[0,1],100,-40,'Mixing cement in the sun. You come home grey from head to toe.','The engineer likes your work and pays you for a full day even though you finished early.','Rain stops work at noon. The foreman pays half and says "God dey".'],
+  ['status','🛒','Sell on your WhatsApp status',[0,1,2],60,-5,'Three people order hair cream from your status. Small money, no stress.','An aunty orders ten of everything for her shop. You refresh your status in shock.','Someone asks "how much" on every post and never buys anything.'],
+  ['flyer','💻','Design a flyer for a church program',[0,1,2],80,-15,'You design a flyer with five pastors\' faces and a lot of gold. Everybody is happy.','The pastor loves it so much that the whole denomination wants you for their programmes.','The secretary wants "one small change" eleven times.'],
+  ['move','🚚','Help a family pack and move',[0,1],100,-35,'Two wardrobes, one piano, and a grandmother who supervises everything.','The family gives you their old fan and a big tip. Moving day gold.','The truck driver disappears halfway and comes back three hours later.'],
+  ['clean','🧹','Clean a duplex after a party',[0],90,-30,'Jollof on the ceiling and confetti in places confetti should not be. Done.','The madam is so impressed that she makes you her weekly cleaner.','The madam says she found "one dirty spoon" and removes something from your pay.'],
+  ['bread','🍞','Hawk bread at the bus stop',[0],60,-20,'You sell all your bread before 9am. The danfo drivers know your face now.','A whole staff bus buys from you. Sold out in twenty minutes.','The rain comes, and soggy bread does not sell.'],
+  ['dj','🎧','DJ at a house party',[2],120,-25,'You play Asake, Wizkid, and one old Fela track. The aunties lose their minds.','The celebrant sprays you all night. Your pocket is full of new notes.','NEPA takes light. The generator comes on, and so do the complaints.'],
+  ['barb','✂️','Barb at a friend\'s shop',[1,2],90,-20,'Six haircuts, two beards, and one child who cries the whole time.','A footballer walks in for a cut and tips like a footballer.','A customer says his line is not straight. He leaves with a new line anyway.'],
+  ['usher','👔','Usher at a corporate event',[1],80,-20,'Five hours of smiling and pointing people to their seats.','The event planner adds you to her ushers group. More events coming.','The event runs two hours over, and nobody mentions overtime.'],
+  ['inverter','🔌','Wire a neighbour\'s inverter',[1],120,-25,'Batteries, cables, and a neighbour who keeps asking "is it working?". It is.','The whole street hears that you fixed his light. Three more neighbours call you.','The neighbour pays half and says he is waiting for salary.'],
+  ['corn','🌽','Roast corn and ube by the road',[2],70,-15,'Corn, ube, and gist with everybody who passes. A good night.','A wedding convoy stops and buys everything you have.','Smoke in your eyes all night, and the corn was not sweet.']
+];
+const GIGS_ABROAD = [
+  ['deliver','🛵','Food delivery shifts',[0,1,2],110,-30,'Ten deliveries, five flights of stairs, and one door that never opened.','A rainy night means surge pay and big tips. You love the rain today.','The app sends you across the city for one order of chips.'],
+  ['braid','💇🏾‍♀️','Braid hair from home',[0,1],130,-30,'Seven hours of box braids while Nollywood plays in the background.','Your client books her two sisters for next weekend.','The client\'s "small hair" is not small, and she still bargains.'],
+  ['care','🧓🏾','Agency care shift',[0,1,2],140,-40,'You help Mr Thompson eat, wash, and tell the same story twice. You are tired and kind.','Mr Thompson\'s daughter writes to the agency to praise you. Extra shifts are offered.','The shift is short-staffed, and you do the work of two people for one wage.'],
+  ['cleanoff','🧹','Clean offices',[0,2],100,-30,'Empty offices, full bins, and a vacuum with a personality.','The manager leaves you a card and a gift voucher. "You are the best cleaner we have had."','Someone left a whole birthday cake on the carpet.'],
+  ['sit','👶🏾','Babysit for a Naija family',[1,2],90,-15,'Two kids, one movie, and a lot of snacks. They fall asleep on you.','The parents come home happy and pay extra. They want you every weekend.','The baby refuses to sleep until the exact moment the parents come home.'],
+  ['tutor','📚','Tutor maths online',[1,2],100,-15,'Two students, one bad Wi-Fi connection, and fractions explained three ways.','A parent refers you to her whole WhatsApp group of mums.','A student turns off his camera and goes to play video games.'],
+  ['jollof','🍛','Cook jollof for a party order',[1],120,-25,'Two big pots of party jollof, smoky at the bottom the way it should be.','The guests ask whose jollof this is. You get five orders on the spot.','The client says the jollof was "a bit spicy" and pays less. Nigerians ate it all.'],
+  ['flex','📦','Parcel delivery block',[0,1],120,-30,'Forty parcels, one confused sat nav, and a dog who hates you personally.','You finish early and still get paid for the full block.','The sat nav sends you down a farm road. Twice.'],
+  ['retail','🛍️','Retail shift',[0,1],110,-25,'Folding the same jumper all day while customers unfold it.','The manager offers you more hours and a staff discount.','A customer shouts at you about a returns policy you did not write.'],
+  ['security','🛡️','Security night shift',[2],120,-30,'Twelve quiet hours and a flask of tea. You read half a book.','Nothing happens, and you still get paid double for the bank holiday.','The alarm goes off at 3am. It is a fox. You will not sleep again.'],
+  ['photo','📸','Photograph a Naija wedding',[0],150,-30,'Aso-ebi everywhere, money raining on the floor, and four hundred photos.','The couple loves the photos so much that they book you for the baby dedication too.','The groom\'s uncle stands in front of you during every important shot.'],
+  ['books','🧾','Bookkeeping for a small shop',[1],110,-15,'Receipts in a shoebox, turned into a tidy spreadsheet.','The owner tells three other shop owners about you. Regular clients now.','The owner pays you in "exposure" and a bag of plantain chips.'],
+  ['move','🧳','Help someone move flats',[0],110,-35,'Four flights of stairs, no lift, and a sofa that did not want to leave.','The client tips you and gives you a free microwave.','The van is two hours late, and you wait in the cold.'],
+  ['data','💻','Data entry from your phone',[0,1,2],60,-10,'Hundreds of spreadsheet rows on the bus. Small money, no stress.','The client gives you a bigger contract for next month.','The website crashes, and you lose an hour of work.'],
+  ['hype','🎤','Hype man at a birthday party',[2],120,-20,'You hype the celebrant until the whole room is dancing.','A guest wants you for her wedding next month.','The DJ\'s speaker dies, and you sing the last hour yourself.'],
+  ['porter','🍽️','Kitchen porter at a restaurant',[2],100,-35,'Pots, pans, and a chef who shouts in two languages.','The chef gives you a free meal and asks you to come back on Friday.','The dishwasher breaks, and you wash two hundred plates by hand.'],
+  ['airport','✈️','Airport pickup for an aunty',[0,2],90,-15,'Aunty arrives with four suitcases and a cooler of stockfish.','Aunty pays you and gives you a bag of Nigerian snacks. You feel like a child again.','The flight lands three hours late, and the airport parking is not free.'],
+  ['snacks','🛒','Sell chin chin and plantain chips online',[0,1,2],60,-5,'Five orders before lunch. You pack them with love and a sticker.','A Nigerian shop orders a big box to stock on their shelves.','Two parcels go missing in the post.'],
+  ['laundry','🧺','Laundry and ironing for neighbours',[1],70,-15,'Fourteen shirts, all ironed crisp. Your arm is tired.','The neighbour tells the whole block. You have a waiting list now.','You iron a hole into somebody\'s good shirt. You pay for it.'],
+  ['flat','🔧','Assemble flat-pack furniture',[1],100,-20,'One wardrobe, two shelves, and four screws left over. It stands.','The client books you to do her whole new flat next week.','Page six of the instructions is missing.']
+];
+const GIGS = () => NG() ? GIGS_HOME : GIGS_ABROAD;
+// four or five hustles show at a time; they change every morning, afternoon, and night
+function gigsNow(){ return shuffleL('gigs' + P.week + '-' + T(), GIGS().filter(g => g[3].includes(W.slot))).slice(0, W.slot === 2 ? 4 : 5); }
+function doGig(g){
+  const [id, ic, name, , pay, en, ok, great, bad] = g, r = luck('gig' + id + P.week + T());
+  W.log.gigs = (W.log.gigs || 0) + 1;
+  P.gigs = P.gigs || {}; P.gigs[id] = (P.gigs[id] || 0) + 1;
+  const regular = P.gigs[id] === 3 ? `${ic} You are now a regular for "${name.toLowerCase()}"` : '';
+  if(r < .2) return done({cash:Math.round(A(pay) / 2 / STEP()) * STEP(), energy:en, peace:-4}, bad, regular);
+  if(r > .8) return done({cash:A(pay) + A(40), energy:en, peace:8}, great, regular);
+  done({cash:A(pay), energy:en, peace:2}, ok, regular);
 }
 // a working day in Nigeria: late salaries, a boss who says "we move", and go-slow both ways
 function ngWork(pay, en){
@@ -1185,7 +1247,7 @@ $('help').onclick = () => {
   const box = document.createElement('div'); box.className = 'overlay'; box.innerHTML = `<div class="box" style="text-align:left"><div class="eyebrow" style="text-align:center">HOW TO PLAY</div><div class="big plain" style="text-align:center;font-size:clamp(28px,8vw,40px)">WAHALA WEEK</div>
     <div class="recap" style="gap:10px">
       <p>📅 <b>Each day is one week of your life.</b> Monday to Saturday, three parts a day: morning, afternoon, and night. Saturday is for 5-aside, the owambe, and the viewing centre.</p>
-      <p>🗺️ <b>Tap a place on the map</b> to work, drive, cook, pray, play Ayo, watch football, borrow, or rest. Each visit uses part of the day and some energy. Rest at home when you are tired.</p>
+      <p>🗺️ <b>Tap a place on the map</b> to work, take on a hustle, drive, cook, pray, play Ayo, watch football, borrow, or rest. The 🛠️ Hustles pin has a fresh set of small jobs every morning, afternoon, and night. Each visit uses part of the day and some energy. Rest at home when you are tired.</p>
       <p>💸 <b>Pay the bill by Saturday night.</b> It changes every week, and food, transport, and data come out too. ${NG() ? 'In Nigeria the rent is yearly, so save for it. The countdown shows how close it is.' : 'Rent comes round every few weeks.'}</p>
       <p>📱 <b>WhatsApp keeps buzzing.</b> Send money, send half and a voice note, or leave them on read. Ignoring people raises the ⭐ family pressure. Five stars and the whole family calls at once.</p>
       <p>🎮 <b>Little games inside the week.</b> 🚗 Ryde: swipe to dodge traffic and collect fares. 🍲 Kitchen: tap the ingredients for each order before the customer walks out. 🎲 Ayo with Baba Sule, plus ludo and draft. ⚽ Saturday 5-aside and FIFA on the PS: take penalties and dive for saves. Every game has a skip button if you just want to relax.</p>
@@ -1224,7 +1286,7 @@ function welcome(){
     <p style="font-size:17px">One week of everyday hustle, every day.</p>
     <div class="welcome steps">
       <div><span>🧾</span><p><b>A bill is due Saturday night.</b></p></div>
-      <div><span>💼</span><p><b>Tap places on your city map to earn.</b> Work, drive, cook, and more.</p></div>
+      <div><span>💼</span><p><b>Earn your way through the week.</b> Over twenty jobs and hustles on your city map, and new ones every day.</p></div>
       <div><span>📱</span><p><b>Answer your family on WhatsApp.</b> Ignore them and the stars climb.</p></div>
       <div><span>✅</span><p><b>Pay the bill, keep the change.</b> Next week your life carries on.</p></div>
     </div>
