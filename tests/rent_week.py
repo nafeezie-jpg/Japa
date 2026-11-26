@@ -38,7 +38,7 @@ async def run():
       await pg.click('#wgo'); NGS = {'lagos':'Lagos','abuja':'FCT','ph':'Rivers','ibadan':'Oyo','kano':'Kano','enugu':'Enugu','ilorin':'Kwara'}
       await pg.click('.city[data-c="ng"]' if city in NGS else f'.city[data-c="{city}"]')
       if city in NGS: await pg.select_option('#placesel', NGS[city])
-      await pg.click('#placego'); await pg.click('[data-me="' + 'whm'[ci % 3] + '"]'); await pg.wait_for_timeout(300)
+      await pg.click('#placego'); await pg.click('[data-me="' + 'whm'[ci % 3] + '"]'); await pg.click('[data-fam="' + ['single','married','kids','solo'][ci % 4] + '"]'); await pg.click('#mego'); await pg.wait_for_timeout(300)
       if SHOTS and ci == 0: await pg.screenshot(path='tests/shots/week-intro.png')
       for d in range(7 if ci < 4 else 3):
         if d: await pg.clock.set_fixed_time(day0 + datetime.timedelta(days=d)); await pg.goto(PAGE); await pg.wait_for_timeout(300)

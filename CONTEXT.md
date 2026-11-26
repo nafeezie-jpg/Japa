@@ -158,3 +158,9 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - P.place holds the pick. cityFor(key, place) reshapes the base city (Houston, London, Toronto): name becomes the main town, costs and rent scale by Landed's cost tier, and roads, river and hall become generic. Texas, Greater London and Ontario keep the original cities exactly, so old saves are unchanged.
 - Tests click #placego after .city for abroad picks.
 - Nigeria too (25 Nov): one "Nigeria" button with a dropdown of all 36 states and the FCT (NG_STATES, from Landed's ORIGIN_LIST). Lagos, FCT, Rivers, Oyo, Kano, Enugu and Kwara play their original cities exactly. Every other state plays on the nearest home city (NG_BASE) renamed to its main town, with its own price level (NG_K). Nigeria now sits above the abroad countries in the picker.
+
+### One job a day, Ryde on the way, and home life (25 Nov)
+- One earning job per day: work, one hustle, the buka kitchen shift, or the owambe caterer. W.jobDay marks it; the rest show "you already worked today". Pay is roughly a full day: NG work A(200), abroad A(220) day / A(270) night, office A(320)/A(340); hustles pay 1.7x their listed base; kitchen A(20)/A(28) a plate.
+- The Ryde pin is gone (Hustles took its spot at x50, y30). startJob() offers "Turn on Ryde on the way" before the job, and done() offers "Turn on Ryde on the way home" after it. rydeCommute(): A(3) a fare, -10 energy, knocks, checkpoint, fan belt if the car is old.
+- Step 2 now asks home life too (P.fam: single, married, kids, solo) and needs #mego to start. famCost() adds to living; famShare() is the partner's Saturday share; famRequests() adds in-law, spouse, and school messages; kids bring morning school-run hits; married players get the odd "talk about money" night.
+- Careful-bot weekly savings: Lagos single about ₦55k, Lagos with kids about ₦44k, Kano single parent about ₦23k, Texas with kids about $350.
