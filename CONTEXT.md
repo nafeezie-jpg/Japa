@@ -229,3 +229,6 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - Weekends (26 Nov): the 9 to 5 closes Saturday and Sunday for every job. Weekend plans offer hustles, Ryde, the owambe, service, 5-aside, and FUN outings (doFun): beach or park, shopping, movies at home all day (uses the whole day), cinema, lounge or friends' flat, visiting friends, plus the match and home at night.
 - Faith (26 Nov): one Church/mosque place for everyone, and players choose. Friday plan offers 🕌 Jumat prayers as an afternoon break (breakDone: no time lost, once a Friday, W.jumat). Sunday morning offers ⛪ church (uses the morning). Network after prayers on Friday and Sunday.
 - Goal line (26 Nov): every week intro opens with "🎯 This week: pay ₦X by Sunday night" (bill, living, arrears, loan) and, in Nigeria, "🏠 Rent fund: N% of ₦600,000 saved, due in week 12". The HUD's yearly-rent bar now shows from week 1.
+
+### Landed: passport stamps replace the collection (26 Nov)
+- She found the 10 verdicts and 7 badges stale and mostly out of reach. The Collection is now 'Your passport': 7 stamps for days played (1, 3, 7, 14, 30, 60, 100; STAMPS, daysPlayed() counts distinct days with a Today's Landing). Home tile and result button say Passport. Verdicts still name each game; badges are no longer shown.

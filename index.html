@@ -19,7 +19,7 @@
 <meta name="twitter:image" content="https://nowyouhavelanded.com/og.png">
 <link rel="canonical" href="https://nowyouhavelanded.com/">
 <link rel="manifest" href="/manifest.json">
-<meta name="build" content="20261126070513">
+<meta name="build" content="20261126173602">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -346,6 +346,13 @@ details.endmore > summary{font-weight:600}
 .coll-bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
 .coll-bar i{display:block;height:100%;background:var(--gold)}
 .coll-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stamps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.collection .coll-note{white-space:normal;overflow-wrap:anywhere}
+.stamp{display:grid;justify-items:center;gap:2px;padding:6px 2px;border:2px dashed var(--line);border-radius:50%;aspect-ratio:1;align-content:center;opacity:.45;text-align:center}
+.stamp span{font-size:24px;line-height:1}
+.stamp b{font-size:10px;line-height:1.15;letter-spacing:0;text-transform:none;font-weight:700}
+.stamp small{font-size:9px;color:var(--muted);letter-spacing:0;text-transform:none}
+.stamp.got{opacity:1;border-style:solid;border-color:var(--accent);transform:rotate(-6deg)}
 .vbadge{border-radius:10px;padding:10px;display:grid;gap:3px;position:relative;min-width:0}
 .vbadge b{font-family:var(--display);font-size:15px;line-height:1.2}
 .vbadge small{font-size:12px;color:var(--muted);line-height:1.35}
@@ -3349,19 +3356,15 @@ function roadHTML(){
 function loadVerdicts(){ try{ return JSON.parse(localStorage.getItem('nyhl-verdicts')||'[]'); }catch(e){ return []; } }
 function saveVerdict(t){ const v = loadVerdicts(); const isNew = !v.includes(t); if(isNew){ v.push(t); try{ localStorage.setItem('nyhl-verdicts', JSON.stringify(v)); }catch(e){} } return isNew; }
 function earnBadges(){ return BADGES.filter(([,,ok]) => ok && ok()).map(([t]) => [t, saveVerdict(t)]); }
-function collectionHTML(current, isNew, earned){
-  const got = loadVerdicts(), now = new Map(earned || []);
-  const card = ([t,h], cur, fresh) => { const has = got.includes(t);
-    return `<button type="button" class="vbadge ${has?'got':'locked'}${cur?' cur':''}${has && t==='Best Landing'?' crown':''}" data-hint="${esc(has ? t : 'Locked. Hint: '+h)}"><span class="vic" aria-hidden="true">${vIcon(t)}</span>${has ? `<b>${t}</b>` : '<b>🔒</b>'}${fresh ? '<span class="newtag">New!</span>' : ''}</button>`; };
-  const vGot = VERDICTS.filter(([t]) => got.includes(t)).length, bGot = BADGES.filter(([t]) => got.includes(t)).length;
+// Passport stamps: earned just by coming back. Simple, always within reach.
+const STAMPS = [[1,'First landing','🛬'],[3,'Three days','🧳'],[7,'One week','🗓️'],[14,'Two weeks','🔥'],[30,'One month','🏠'],[60,'Two months','🌍'],[100,'A hundred days','👑']];
+const daysPlayed = () => new Set(loadHistory().filter(g => g.daily).map(g => dayKey(g.t))).size;
+function collectionHTML(){
+  const n = daysPlayed(), next = STAMPS.find(([d]) => d > n), got = STAMPS.filter(([d]) => d <= n).length;
   return `<div class="collection">
-    <div class="coll-head"><div class="when">Verdicts · one per game</div><b>${vGot}/${VERDICTS.length}</b></div>
-    <div class="coll-bar"><i style="width:${Math.round(vGot/VERDICTS.length*100)}%"></i></div>
-    <div class="coll-grid">${VERDICTS.map(v => card(v, v[0]===current, v[0]===current && isNew)).join('')}</div>
-    <div class="coll-head coll-gap"><div class="when">Badges · earn several</div><b>${bGot}/${BADGES.length}</b></div>
-    <div class="coll-bar"><i style="width:${Math.round(bGot/BADGES.length*100)}%"></i></div>
-    <div class="coll-grid">${BADGES.map(v => card(v, now.has(v[0]), now.get(v[0]))).join('')}</div>
-    <p class="coll-note">Tap a 🔒 for a hint. Your collection is yours forever.</p>
+    <div class="coll-head"><div class="when">Your passport · days you played</div><b>${got}/${STAMPS.length}</b></div>
+    <div class="stamps">${STAMPS.map(([d, l, ic]) => `<div class="stamp ${d <= n ? 'got' : ''}"><span aria-hidden="true">${ic}</span><b>${l}</b><small>${d} day${d > 1 ? 's' : ''}</small></div>`).join('')}</div>
+    <p class="coll-note">${next ? `${n} day${n === 1 ? '' : 's'} played. Next stamp in ${next[0] - n} day${next[0] - n === 1 ? '' : 's'}: come back tomorrow.` : 'Every stamp collected. Respect.'}</p>
   </div>`;
 }
 document.addEventListener('click', e => { const v = e.target.closest && e.target.closest('.vbadge, .rc-m'); if(v && v.dataset.hint) vnToast(v.dataset.hint); });
@@ -3460,7 +3463,7 @@ function openHow(){
       <div><span>🎮</span><p><b>Little games.</b> The Ryde run, the kitchen rush, Ayo, ludo, draft, 5-aside, and FIFA.</p></div>
     <a class="primary" href="/week/" style="display:block;text-align:center;text-decoration:none;margin-top:8px">🌆 Play Wahala Week</a>
     <div class="howlist">
-      <div><span>🏅</span><p><b>Collect 10 verdicts and 7 badges.</b> Your verdict says how your month went. Badges reward what you did.</p></div>
+      <div><span>🛂</span><p><b>Collect passport stamps</b> just by coming back: 1, 3, 7, 14, 30, 60, and 100 days.</p></div>
       <div><span>🎮</span><p><b>Practice any route, anytime.</b> Pick your own country to practise or relive your JJC days. Those games do not count toward your title.</p></div>
     </div>
   </div>`);
@@ -3477,11 +3480,11 @@ function rentWeekCard(){
 /* ---------- Your progress, at a glance ---------- */
 function progressTilesHTML(){
   const h = loadHistory(); if(!h.length) return '';
-  const r = roadInfo(), got = loadVerdicts(), n = VERDICTS.filter(([t]) => got.includes(t)).length + BADGES.filter(([t]) => got.includes(t)).length;
+  const r = roadInfo(), n = STAMPS.filter(([d]) => d <= daysPlayed()).length;
   return `<div class="ptiles">
     <button type="button" onclick="openHow()"><span>${myRep(abroadMonths())[3]}</span><b>${myRep(abroadMonths())[2]}</b><small>${abroadMonths() ? abroadMonths()+' landing'+(abroadMonths()===1?'':'s')+' lived' : 'play Today\'s Landing'}</small></button>
     <button type="button" onclick="openJournal()"><span>📈</span><b>${r.level[1]}</b><small>avg ${r.avg} · ${h.length} game${h.length>1?'s':''}</small></button>
-    <button type="button" onclick="openCollection()"><span>🏅</span><b>${n}/${VERDICTS.length + BADGES.length}</b><small>collected</small></button>
+    <button type="button" onclick="openCollection()"><span>🛂</span><b>${n}/${STAMPS.length}</b><small>passport stamps</small></button>
     <button type="button" onclick="openBoard()"><span>🏆</span><b>Leaderboard</b><small>this week</small></button>
   </div>`;
 }
@@ -3489,7 +3492,7 @@ function openCollection(){
   let o = document.getElementById('collover');
   if(!o){ o = document.createElement('div'); o.id='collover'; o.className='overlay'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-label','Your collection');
     document.body.appendChild(o); o.addEventListener('click', e=>{ if(e.target===o) o.hidden=true; }); }
-  o.innerHTML = `<div class="sheet-panel journal"><div class="sheet-head"><b>Your collection</b><button class="xbtn" aria-label="Close">✕</button></div>${collectionHTML('', false, [])}</div>`;
+  o.innerHTML = `<div class="sheet-panel journal"><div class="sheet-head"><b>Your passport</b><button class="xbtn" aria-label="Close">✕</button></div>${collectionHTML('', false, [])}</div>`;
   o.querySelector('.xbtn').onclick = ()=>{ o.hidden=true; }; o.hidden = false; track('collection');
 }
 
@@ -3551,12 +3554,12 @@ function renderEnd(app){
     <div class="endchips"><span>💵 ${money(S.cash)}</span><span>🧘🏾 ${S.peace}</span><span>🏠 ${S.home}</span><span>🚀 ${S.future}</span></div>
     ${storyEndHTML()}
     <button class="primary" id="sharecard">Share my result</button>
-    <div class="endlinks"><button type="button" onclick="openBoard()">🏆 Leaderboard</button><button type="button" onclick="openCollection()">🏅 Collection</button><a href="/week/" onclick="track('end-ww')">🌆 Wahala Week</a></div>
+    <div class="endlinks"><button type="button" onclick="openBoard()">🏆 Leaderboard</button><button type="button" onclick="openCollection()">🛂 Passport</button><a href="/week/" onclick="track('end-ww')">🌆 Wahala Week</a></div>
     <p class="endnext" id="rankline"></p>
     <p class="endnext">${S.daily ? `✅ Done for today. Next one in <b id="cd">${untilMidnight()}</b>.` : '🎮 Practice game. Today\'s Landing is still waiting on the home page.'}</p>
     <details class="how endmore"><summary>More: what it cost you, your 30 days, share options</summary><div class="how-body">
       ${rec.length?`<div class="receipts">${rec.slice(0,2).map(r=>`<div>${r}</div>`).join('')}</div>`:''}
-    ${collectionHTML(title, isNewVerdict, earned)}
+    ${collectionHTML()}
     <div class="cost"><div class="when">💸 What it cost you</div><div class="cost-chips">${costParts().map(([i,t]) => `<span>${i} ${t}</span>`).join('')}</div></div>
     ${recapHTML()}
     ${tomorrowHTML({noCd:1, newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `New title! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
