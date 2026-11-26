@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126055028">
+<meta name="build" content="20261126055324">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -812,8 +812,6 @@ function actions(k){
       {l:'Sleep it off', tag:'+45 energy', run:() => done({energy:45, peace:6}, pickL('sleep'+T(), ['You sleep like someone who paid for the bed. Because you did.','The drummer next door takes a night off. A miracle.','You dream NEPA brought light for 24 hours. You wake up refreshed and confused.']))},
       ...(W.slot === NIGHT && isMan() ? [{l:'Play FIFA on your PS', tag:'+peace', run:() => penalties('ps', r => penResult('ps', r))}] : []),
       ...(fam() !== 'single' ? [{l: hasKids() ? 'Evening with the children' : `Evening with your ${spouse()}`, tag:'+peace', run:() => done({energy:10, peace:12}, hasKids() ? 'Homework, a small fight over the remote, and everybody asleep on the sofa by nine.' : 'Jollof, a Nollywood film, and no talk about money for one whole evening.')}] : []),
-      ng ? {l:'Call Mummy', tag:'+peace · ★ down', run:() => done({peace:8, stars:-1}, 'Twenty minutes of prayers, gist, and one question about when you are getting married or having another child.')}
-         : {l:'Video call home', tag:'+peace · ★ down', run:() => done({energy:20, peace:12, stars:-1}, 'Mummy shows you the new curtains, the dog, and a cousin you do not recognise. You feel held.')}
     ];
     case 'work': return [
       {l: ng ? (P.office ? 'A day at the bank' : 'Go to work') : P.office ? 'Do a day at the office' : W.slot===NIGHT ? 'Night shift' : 'Day shift', tag: busy ? BUSY_TAG : `a full day · +${money(shiftPay())} · -${P.office ? 30 : ng ? 40 : W.slot===NIGHT ? 50 : 45} energy`, dis:tired || busy, run:() => startJob(() => {
