@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126070034">
+<meta name="build" content="20261126070513">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -650,7 +650,7 @@ const PL = () => NG() ? ({
   pitch:{x:18,y:68,ic:'⚽',nm:'5-aside', title:'Weekend 5-aside', who:'Dusty pitch, two stones for goalposts, and a man in full Arsenal kit who has never scored.'},
   relax:{x:50,y:68,ic:'🎲',nm:'Ayo spot', title:'Ayo under the mango tree', who:'Baba Sule and his Ayo board, a ludo set, a draft board, and cold zobo. Nobody here is in a hurry.'},
   fuel:{x:82,y:68,ic:'⛽',nm:'Filling station', title:'Filling station', who:'There is fuel today. There is also a queue to the next town.'},
-  home:{x:18,y:87,ic:'🏠',nm:'Your room', title:`Your self-contain in ${C.area}`, who:'Shared compound, one tap, and a neighbour whose generator is louder than a church.'},
+  home:{x:18,y:87,ic:'🏠',nm:'Your room', title:`Your self-contain in ${C.area}`, who:'Shared compound, one tap, and a neighbour whose generator is louder than a party.'},
   hall:{x:50,y:87,ic:'🎉',nm:'Owambe', title:C.hall, who:'Saturday. Aunty Funmi turns 60 again, and the caterer needs extra hands.'},
   ryde:{x:82,y:87,ic:'🚗',nm:'Ryde', title:'Drive for Ryde', who: P.car==='fixed' ? 'Your car, freshly fixed.' : 'Your old car and a phone mount held on with prayer.'},
   gigs:{x:50,y:30,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'New jobs every morning and night.'}
@@ -980,7 +980,7 @@ function actions(k){
 // [id, icon, name, slots (0 morning, 1 afternoon, 2 night), pay, energy, usual line, great line, wahala line]
 const GIGS_HOME = [
   ['braid','💇🏾‍♀️','Braid hair for a client',[0,1],110,-25,'Six hours of knotless braids. Your fingers are numb, and she loves them.','She posts the braids on her status and tags you. Two new clients message before you get home.','Halfway through, she says her husband will "send the balance". Her husband is in Dubai.'],
-  ['sew','🧵','Tailoring',[0,1,2],120,-25,'Five outfits sewn and delivered on time. You did not sleep, but they fit.','A customer shows off your work at church, and twelve new orders come in.','The customer says the blouse is too tight. It is not the blouse.'],
+  ['sew','🧵','Tailoring',[0,1,2],120,-25,'Five outfits sewn and delivered on time. You did not sleep, but they fit.','A customer shows off your work at a party, and twelve new orders come in.','The customer says the blouse is too tight. It is not the blouse.'],
   ['pos','🏧','Run Mama Ada\'s POS stand',[0,1],90,-15,'Withdrawals, transfers, and one man who wants change for ₦1,000 in coins.','Network is up all day. You make every charge, and Mama Ada gives you a bonus.','Network goes down for three hours. Customers blame you personally.'],
   ['lesson','📚','Lesson teacher for twins',[1,2],90,-20,'Long division with two eight-year-olds who would rather be anywhere else. You survive.','The twins both pass their test, and their mother gives you extra plus a plate of jollof.','The twins hide your marker and swear they never saw it. Their mother says "pay you next week".'],
   ['photo','📸','Photograph a naming ceremony',[0],130,-25,'Three hundred photos of aunties in gele. Every single one wants a solo shot.','The father loves the photos so much that he books you for his brother\'s wedding.','Your battery dies during the cake cutting. The family is not amused.'],
@@ -991,7 +991,7 @@ const GIGS_HOME = [
   ['mc','🎤','MC a birthday party',[2],130,-20,'You hype the celebrant, spray the dance floor, and remember everyone\'s name.','A guest grabs you after the party. "MC, you will do my wedding." Paid work, guaranteed.','The DJ and you disagree about the playlist. The DJ wins.'],
   ['site','🧱','Labour at a building site',[0,1],100,-40,'Mixing cement in the sun. You come home grey from head to toe.','The engineer likes your work and pays you for a full day even though you finished early.','Rain stops work at noon. The foreman pays half and says "God dey".'],
   ['status','🛒','Sell on your WhatsApp status',[0,1,2],60,-5,'Three people order hair cream from your status. Small money, no stress.','An aunty orders ten of everything for her shop. You refresh your status in shock.','Someone asks "how much" on every post and never buys anything.'],
-  ['flyer','💻','Design a flyer for a church program',[0,1,2],80,-15,'You design a flyer with five pastors\' faces and a lot of gold. Everybody is happy.','The pastor loves it so much that the whole denomination wants you for their programmes.','The secretary wants "one small change" eleven times.'],
+  ['flyer','💻','Design flyers for an event',[0,1,2],80,-15,'You design a flyer with five big faces and a lot of gold. The client is happy.','The organiser loves it, and three more events book you.','The client wants "one small change" eleven times.'],
   ['move','🚚','Help a family pack and move',[0,1],100,-35,'Two wardrobes, one piano, and a grandmother who supervises everything.','The family gives you their old fan and a big tip. Moving day gold.','The truck driver disappears halfway and comes back three hours later.'],
   ['clean','🧹','Clean a duplex after a party',[0],90,-30,'Jollof on the ceiling and confetti in places confetti should not be. Done.','The madam is so impressed that she makes you her weekly cleaner.','The madam says she found "one dirty spoon" and removes something from your pay.'],
   ['bread','🍞','Hawk bread at the bus stop',[0],60,-20,'You sell all your bread before 9am. The danfo drivers know your face now.','A whole staff bus buys from you. Sold out in twenty minutes.','The rain comes, and soggy bread does not sell.'],
