@@ -13,6 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
+<meta name="build" content="20261126045802">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -235,6 +236,14 @@ a{color:var(--gold)}
 canvas.confetti{position:fixed;inset:0;z-index:21;pointer-events:none;width:100%;height:100%}
 @media (prefers-reduced-motion:reduce){.radio .tk span{animation:none;padding-left:0}.me{transition:none}.me::after,.phone,.pin.new .ic{animation:none}.big,.daycard div{animation:none}}
 </style>
+<script>
+// if a newer version of the game is online, load it (phones and home-screen apps can hold an old copy)
+(function(){ try{ const mine = (document.querySelector('meta[name="build"]')||{}).content; if(!mine || !window.fetch) return;
+  const check = () => fetch(location.pathname + '?b=' + Date.now(), {cache:'no-store'}).then(r => r.text()).then(t => { const m = /<meta name="build" content="([^"]+)"/.exec(t);
+    if(m && m[1] !== mine){ let n = 0; try{ n = +sessionStorage.getItem('nyhl-reload') || 0; }catch(e){} if(n < 2){ try{ sessionStorage.setItem('nyhl-reload', n + 1); }catch(e){} location.replace(location.pathname + '?v=' + m[1] + location.hash); } } }).catch(()=>{});
+  check(); document.addEventListener('visibilitychange', () => { if(!document.hidden) check(); });
+}catch(e){} })();
+</script>
 </head>
 <body>
 <div class="wrap">

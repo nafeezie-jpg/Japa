@@ -19,6 +19,7 @@
 <meta name="twitter:image" content="https://nowyouhavelanded.com/og.png">
 <link rel="canonical" href="https://nowyouhavelanded.com/">
 <link rel="manifest" href="/manifest.json">
+<meta name="build" content="20261126045802">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -638,6 +639,14 @@ details.custom summary{font-weight:700}
 </style>
 
 <script data-goatcounter="https://nowyouhavelanded.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script>
+// if a newer version of the game is online, load it (phones and home-screen apps can hold an old copy)
+(function(){ try{ const mine = (document.querySelector('meta[name="build"]')||{}).content; if(!mine || !window.fetch) return;
+  const check = () => fetch(location.pathname + '?b=' + Date.now(), {cache:'no-store'}).then(r => r.text()).then(t => { const m = /<meta name="build" content="([^"]+)"/.exec(t);
+    if(m && m[1] !== mine){ let n = 0; try{ n = +sessionStorage.getItem('nyhl-reload') || 0; }catch(e){} if(n < 2){ try{ sessionStorage.setItem('nyhl-reload', n + 1); }catch(e){} location.replace(location.pathname + '?v=' + m[1] + location.hash); } } }).catch(()=>{});
+  check(); document.addEventListener('visibilitychange', () => { if(!document.hidden) check(); });
+}catch(e){} })();
+</script>
 </head>
 <body>
 <div class="shell">
@@ -4535,6 +4544,7 @@ function contScenes(){
   const byKey = new Map(goal.concat(deps, chap, gen).map(sc => [sceneKey(sc), sc]));
   const out = [{day:1, auto:'fortnight', label, core:1}];
   S.cPick.forEach((k, i) => { const sc = byKey.get(k); if(sc) out.push(Object.assign({}, sc, {day:2 + i*2, label, core:1})); });
+  out.push({day:3, auto:'mini', mini:['shop','bus'][n % 2], art:'food', label, core:1});   // a little game in every chapter
   if(ending) out.push(Object.assign({}, ending, {day:2 + out.length*2, label, core:1}));
   CONT_MEMO = {id:memoId, pick:S.cPick.join('~'), out};
   return out;
