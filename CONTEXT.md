@@ -182,3 +182,11 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - Gender: GIG_SEX marks hustles as women's (braiding, make-up, small chops, bread, corn, babysitting, jollof, laundry, cleaning) or men's (dispatch, phone repair, site, moving, DJ, barbing, inverter, security, hype man, kitchen porter, flat-pack). Men don't get the buka kitchen shift or caterer cooking; they set up canopies at the owambe instead. Women don't see 5-aside, the viewing centre, or FIFA at home.
 - The drive's skip is now a small "Skip" link under "Start driving".
 - Pay now: NG work A(165), abroad A(135) day / A(160) night, office A(280)/A(250); hustles 0.75x base; commute Ryde A(2) a fare; surprises 40% a part of the day at 1.3x listed cost. Careful bot: Lagos about ₦47k saved a week, Kano about ₦27k, Texas about $240.
+
+### Organised map, energy has a price, rarer surprises, context checks (25 Nov)
+- Every place has one group (KIND) with a ring colour and a key under the map: Earn (work, Hustles, Ryde), Food and home (home, buka), Faith and parties (church or mosque, owambe), Play (Ayo spot, viewing centre, 5-aside), Errands (fuel, mechanic, loan), Grow (classes, stall). LAYOUT puts each group on its own row. Each place sheet shows its group tag.
+- The buka is food and gist only. The cooking game is now a women's hustle ("Kitchen shift at the buka") in Hustles.
+- Energy: the bar pulses red under 25 with a warning line. Working while exhausted costs 30% of the pay (W.tiredJob). Hitting zero triggers collapse(): a clinic bill (A(120) NG, A(150) abroad, doubling with each collapse that week), -15 peace, and the rest of the day lost.
+- Surprises: at most two a week (nextSnag). One comes when you first have enough for the bill ("Just when things were looking up", 2.5x cost); one when you are struggling from Wednesday on ("As if this week was not hard enough", 1.2x); a Friday-night one if none has come. NEPA 30% of nights, malaria 5%, school-run hits 15%.
+- PES (not FIFA). Men can play PES at home at night in Nigeria too.
+- Context: woman in hijab gets the Mosque (Wednesday night, Friday Jumat), Alfa Ibrahim in place of Pastor Sunday, the women's circle. "Bae" messages only for single players, and they differ for men and women. Ludo with the boys or the girls. Middle-belt states use Mama Put, Baba Landlord, and Oga Danjuma.
