@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126065015">
+<meta name="build" content="20261126070034">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -789,8 +789,9 @@ const FUN = {
 function doFun(k){
   const f = FUN[k], cost = f[2](), name = typeof f[1] === 'function' ? f[1]() : f[1];
   if(f[3]){ W.at = 'home'; W.slot = NIGHT; pins(); hud(); return done({energy:f[4], peace:f[5]}, f[6]()); }
-  sheet(`${youHTML('walk', 'on the way')}<h2>${me().walk} ${name}</h2><p class="who">Weekend. No 9 to 5 today.</p>`);
-  setTimeout(() => done({cash:-cost, energy:f[4], peace:f[5], stars: k === 'friends' ? -1 : 0}, f[6]()), 900);
+  visit.walking = true;
+  sheet(`${youHTML('walk', 'on the way')}<h2>${me().walk} Heading to ${name.replace(/^(Go to |Go |Hang out at |Hang out with )/, '').toLowerCase()}</h2><p class="who">Weekend. No 9 to 5 today.</p>`);
+  setTimeout(() => { visit.walking = false; done({cash:-cost, energy:f[4], peace:f[5], stars: k === 'friends' ? -1 : 0}, f[6]()); }, 900);
 }
 function planOptions(){
   const o = [], open = k => places[k] && isOpen(k), night = W.slot === NIGHT, weekend = W.day >= SAT;
