@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126063618">
+<meta name="build" content="20261126064033">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -679,7 +679,7 @@ function isOpen(k){
   if(k==='hall') return W.day===SAT && W.slot===0;
   if(k==='pitch') return W.day>=SAT && W.slot===0;
   if(k==='relax') return W.slot===NIGHT || W.day>=SAT;
-  if(k==='work' && W.day>=SAT && (NG() || !myJob().weekends)) return false;
+  if(k==='work' && W.day>=SAT) return false;   // the 9 to 5 rests at the weekend
   if(k==='loan') return W.slot!==NIGHT;
   if(k==='mama') return W.slot!==NIGHT;
   if(k==='school') return W.slot===NIGHT && W.day<SAT;
@@ -768,12 +768,44 @@ function stayHome(){
 function idle(){
   showMap();
   sheet(`${youHTML(W.at === 'home' ? 'home' : W.at, (myName || 'You') + (W.energy < 30 ? ', tired' : ''))}` + idleText());
-  $('sheet').querySelectorAll('[data-go]').forEach(b => b.onclick = () => { SND.tap(); b.dataset.go === 'stay' ? stayHome() : visit(b.dataset.go); });
+  $('sheet').querySelectorAll('[data-go]').forEach(b => b.onclick = () => { SND.tap(); const g = b.dataset.go; g === 'stay' ? stayHome() : g.startsWith('fun:') ? doFun(g.slice(4)) : visit(g); });
 }
 // a short plan: where you could head now, and why
+// weekend fun: no 9 to 5, so hustle or enjoy yourself
+const FUN = {
+  cinema:['🎬','Go to the cinema', () => A(NG() ? 50 : 30), 0, -10, 14, () => NG() ? 'Popcorn, a Nollywood blockbuster, and a whole hall that shouts at the screen together.' : 'A big film, a big popcorn, and two hours where nobody asks you for money.'],
+  movies:['🍿','Movies at home all day', () => 0, 1, 40, 12, () => 'Netflix, Nollywood, and a pot of stew within reach. You do not change out of your pyjamas.'],
+  lounge:['🍹', () => NG() ? 'Hang out at a lounge' : 'Hang out with friends', () => A(NG() ? 45 : 35), 0, -10, 14, () => NG() ? 'Suya, small chops, and loud gist with the old crew. Somebody else pays for the second round.' : 'Jollof at a friend\'s flat, music, and gist about home until late.'],
+  beach:['🏖️', () => NG() ? 'Go to the beach' : 'A day at the park', () => A(20), 0, -10, 12, () => NG() ? 'Sand, waves, roasted corn, and a horse ride you did not plan to pay for.' : 'Sunshine for once. You lie on the grass and do nothing at all.'],
+  market:['🛍️','Go shopping', () => A(40), 0, -10, 8, () => NG() ? 'Balogun on a Saturday. You haggle like a champion and buy one thing you did not need.' : 'The African shop and the mall. You find palm oil and a coat on sale.'],
+  friends:['👯','Visit friends', () => 0, 0, -5, 10, () => 'You visit friends you have not seen in months. Somebody\'s mother feeds you twice.']
+};
+function doFun(k){
+  const f = FUN[k], cost = f[2](), name = typeof f[1] === 'function' ? f[1]() : f[1];
+  if(f[3]){ W.at = 'home'; W.slot = NIGHT; pins(); hud(); return done({energy:f[4], peace:f[5]}, f[6]()); }
+  sheet(`${youHTML('walk', 'on the way')}<h2>${me().walk} ${name}</h2><p class="who">Weekend. No 9 to 5 today.</p>`);
+  setTimeout(() => done({cash:-cost, energy:f[4], peace:f[5], stars: k === 'friends' ? -1 : 0}, f[6]()), 900);
+}
 function planOptions(){
   const o = [], open = k => places[k] && isOpen(k), night = W.slot === NIGHT, weekend = W.day >= SAT;
   const pay = jobPay(night);
+  const fun = (k) => { const f = FUN[k], nm = typeof f[1] === 'function' ? f[1]() : f[1], c = f[2](); return ['fun:' + k, f[0], nm, c ? `-${money(c)} · +peace` : '+peace']; };
+  if(weekend){
+    if(!night){
+      if(!gigToday() && open('gigs')) o.push(['gigs', '🛠️', 'Go to a hustle', 'weekend money']);
+      if(open('hall')) o.push(['hall', '🎉', 'Attend the owambe', 'family pressure down']);
+      if(open('pray')) o.push(['pray', muslim() ? '🕌' : '🙏🏾', muslim() ? 'Go to the mosque' : 'Go to service', 'peace']);
+      if(open('pitch')) o.push(['pitch', '⚽', 'Play 5-aside', 'peace']);
+      o.push(fun('beach'), fun('market'), fun('movies'));
+      if(!workedToday() && open('ryde')) o.push(['ryde', '🚗', 'Drive Ryde all day', 'fares and tips']);
+    } else {
+      o.push(fun('cinema'), fun('lounge'), fun('friends'));
+      if(!gigToday() && open('gigs')) o.push(['gigs', '🛠️', 'Evening hustle', 'extra money']);
+      if(open('view')) o.push(['view', '📺', 'Watch the match', 'peace']);
+      o.push(['home', '🏠', 'Go home and rest', '+energy']);
+    }
+    return o.slice(0, 7);
+  }
   if(!night){
     if(!workedToday() && open('work')) o.push(['work', myJob().ic, `Go to work · ${myJob().name}`, `about +${money(pay)}`]);
     if(!workedToday() && open('ryde')) o.push(['ryde', '🚗', 'Drive Ryde all day', 'fares and tips']);
