@@ -188,5 +188,6 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - The buka is food and gist only. The cooking game is now a women's hustle ("Kitchen shift at the buka") in Hustles.
 - Energy: the bar pulses red under 25 with a warning line. Working while exhausted costs 30% of the pay (W.tiredJob). Hitting zero triggers collapse(): a clinic bill (A(120) NG, A(150) abroad, doubling with each collapse that week), -15 peace, and the rest of the day lost.
 - Surprises: at most two a week (nextSnag). One comes when you first have enough for the bill ("Just when things were looking up", 2.5x cost); one when you are struggling from Wednesday on ("As if this week was not hard enough", 1.2x); a Friday-night one if none has come. NEPA 30% of nights, malaria 5%, school-run hits 15%.
-- PES (not FIFA). Men can play PES at home at night in Nigeria too.
+- FIFA on the PS (her choice over PES). Men can play it at home at night in Nigeria too.
 - Context: woman in hijab gets the Mosque (Wednesday night, Friday Jumat), Alfa Ibrahim in place of Pastor Sunday, the women's circle. "Bae" messages only for single players, and they differ for men and women. Ludo with the boys or the girls. Middle-belt states use Mama Put, Baba Landlord, and Oga Danjuma.
+- Home screen: besides the 📲 top-bar button, the welcome screen and the week 1 and 2 intros have an "Add to your home screen" link. Landed links to Wahala Week from its home card and from the done-for-today panel.

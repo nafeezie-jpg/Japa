@@ -765,7 +765,7 @@ function actions(k){
   switch(k){
     case 'home': return [
       {l:'Sleep it off', tag:'+45 energy', run:() => done({energy:45, peace:6}, pickL('sleep'+T(), ['You sleep like someone who paid for the bed. Because you did.','The drummer next door takes a night off. A miracle.','You dream NEPA brought light for 24 hours. You wake up refreshed and confused.']))},
-      ...(W.slot === NIGHT && isMan() ? [{l:'Play PES on your PS', tag:'+peace', run:() => penalties('ps', r => penResult('ps', r))}] : []),
+      ...(W.slot === NIGHT && isMan() ? [{l:'Play FIFA on your PS', tag:'+peace', run:() => penalties('ps', r => penResult('ps', r))}] : []),
       ...(fam() !== 'single' ? [{l: hasKids() ? 'Evening with the children' : `Evening with your ${spouse()}`, tag:'+peace', run:() => done({energy:10, peace:12}, hasKids() ? 'Homework, a small fight over the remote, and everybody asleep on the sofa by nine.' : 'Jollof, a Nollywood film, and no talk about money for one whole evening.')}] : []),
       ng ? {l:'Call Mummy', tag:'+peace · ★ down', run:() => done({peace:8, stars:-1}, 'Twenty minutes of prayers, gist, and one question about when you are getting married or having another child.')}
          : {l:'Video call home', tag:'+peace · ★ down', run:() => done({energy:20, peace:12, stars:-1}, 'Mummy shows you the new curtains, the dog, and a cousin you do not recognise. You feel held.')}
@@ -823,7 +823,7 @@ function actions(k){
       {l:'Watch and talk tactics from the side', tag:'+peace', run:() => done({peace:6}, 'You tell everybody what they are doing wrong. Nobody listens. It is the best part of your week.')}
     ];
     case 'view': return [
-      {l:'Play PES on the PS', tag:`-${money(A(5))} · +peace`, run:() => penalties('ps', r => penResult('ps', r))},
+      {l:'Play FIFA on the PS', tag:`-${money(A(5))} · +peace`, run:() => penalties('ps', r => penResult('ps', r))},
       {l:'Watch the match', tag:`-${money(A(5))} · +peace`, run:() => { const won = roll('match' + P.week + W.day, .5); done({cash:-A(5), energy:-5, peace: won ? 12 : 5}, won ? pickL('vw' + T(), ['Your team scores in the 90th minute. Fifty grown men jump at once, and the bench breaks. Nobody cares.','Super Eagles win. Strangers hug you. Someone buys everyone suya.']) : pickL('vl' + T(), ['Your team loses, but the arguments afterwards are better than the match.','NEPA takes light at half time. The whole centre boos NEPA louder than the referee.'])); }},
       {l:'Argue about football till late', tag:'free · -energy', run:() => done({energy:-15, peace:8}, 'Two hours on whether Messi or Ronaldo is greater. Nobody changes their mind. Everyone goes home happy.')}
     ];
@@ -1168,10 +1168,10 @@ function ayoResult(r){
     : `Baba Sule wins, ${r.baba} to ${r.me}. "You young people play too fast." You buy the zobo, as the rule says.`);
 }
 
-/* ---------- penalties: for Saturday 5-aside and PES on the PlayStation ---------- */
+/* ---------- penalties: for Saturday 5-aside and FIFA on the PlayStation ---------- */
 function penalties(mode, cb){
   const ps = mode === 'ps', seed = 'pen' + mode + P.week + '-' + T();
-  const ov = mgFrame(ps ? '🎮 PES ON PS' : '⚽ 5-ASIDE PENALTIES', ps ? 'Winner stays on' : 'Weekend morning',
+  const ov = mgFrame(ps ? '🎮 FIFA ON PS' : '⚽ 5-ASIDE PENALTIES', ps ? 'Winner stays on' : 'Weekend morning',
     '<b>Five kicks each.</b> When you shoot, tap where to aim. When you keep goal, tap where to dive. Guess right and you are a hero.',
     'Kick off', ps ? 'Just watch the boys play' : 'Sit on the bench', () => next(), () => cb({us:2, them:2, skip:true}));
   let us = 0, them = 0, k = 0;
@@ -1483,7 +1483,7 @@ $('help').onclick = () => {
       <p>⚡ <b>Energy.</b> Each morning gives some back. Below 25, tired work costs you pay. At zero, you collapse.</p>
       <p>📱 <b>Family on WhatsApp.</b> Send, send half, or leave them on read. Ignored messages raise the ⭐ family pressure.</p>
       <p>⚠️ <b>Surprises.</b> Once or twice a week, life gets in the way.</p>
-      <p>🎮 <b>Little games.</b> The Ryde run, the kitchen rush, Ayo, ludo, draft, 5-aside penalties, and PES.</p>
+      <p>🎮 <b>Little games.</b> The Ryde run, the kitchen rush, Ayo, ludo, draft, 5-aside penalties, and FIFA.</p>
       <p>📈 <b>Life carries on.</b> Your money moves to next week. Fix your car, take classes, open a stall.</p>
       <p>❌ <b>Miss a bill</b> and the gap rolls over with a late fee. Three misses and you start again.</p>
       <p>👥 <b>Same day, same week.</b> Everyone playing today gets the same surprises and roads. Share your week and compare.</p>
@@ -1525,12 +1525,14 @@ function welcome(){
     </div>
     <button class="go" type="button" id="wgo">Choose my city</button>
     <p class="note">About 10 minutes a day. Sound on is best. 🔊</p>
+    <button class="small-link" type="button" id="wadd" style="background:none;border:0;text-decoration:underline">📲 Add to your home screen</button>
     <button class="small-link" type="button" id="whow" style="background:none;border:0;text-decoration:underline">About and how to play</button>
     <button class="small-link" type="button" id="wcode" style="background:none;border:0;text-decoration:underline">Already playing somewhere else? Bring your weeks</button>`;
   $('over').hidden = false; track('welcome');
   $('wgo').onclick = () => { SND.init(); pickCity(); };
   $('wcode').onclick = () => pasteCodeBox();
   $('whow').onclick = () => $('help').click();
+  $('wadd').onclick = () => $('addapp').click();
 }
 function pickCity(){
   const guess = (() => { try{ const d = JSON.parse(localStorage.getItem('nyhl-daily')||'null'); return d && ({us:'houston', uk:'london', ca:'toronto'})[d.rk]; }catch(e){ return null; } })();
@@ -1606,8 +1608,10 @@ function weekIntro(){
     </div>
     ${newThisWeek().length ? `<div class="newmap"><b>New on your map this week</b>${newThisWeek().map(v => `<span>${v.ic} ${v.nm}</span>`).join('')}</div>` : ''}
 
-    <button class="go" type="button" id="begin">Start Monday</button>`;
+    <button class="go" type="button" id="begin">Start Monday</button>
+    ${P.week <= 2 && !isStandalone() ? `<button class="small-link" type="button" id="addapp2" style="background:none;border:0;text-decoration:underline">📲 Add Wahala Week to your home screen</button>` : ''}`;
   $('over').hidden = false;
+  const a2 = $('addapp2'); if(a2) a2.onclick = () => $('addapp').click();
   $('begin').onclick = () => { $('over').hidden = true; track('play-w' + P.week); dayCard('MONDAY', () => { pins(); hud(); idle(); }); };
 }
 function boot(){

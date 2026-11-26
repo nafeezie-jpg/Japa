@@ -3227,6 +3227,7 @@ function tomorrowHTML(opts){
     <div class="tm-road"><span class="tm-rep">${myRep(days)[3]} You are: <b>${myRep(days)[2]}</b></span>${next ? `<div class="tm-bar"><i style="width:${Math.max(6,pct)}%"></i></div><span>Next title: ${next[3]} ${next[2]} · ${days}/${next[0]} landings</span>` : ''}</div>
     ${opts.newBadge ? `<p class="abnew">🎉 ${opts.newBadge}</p>` : ''}
     <div class="tm-btns">${btns}</div>
+    <a class="rwcard" href="/week/" onclick="track('tmrw-rentweek')" style="margin-top:8px"><span class="rw-ic" aria-hidden="true">🌆</span><span><b>Keep playing: Wahala Week</b><small>One week of everyday hustle, in Nigeria or abroad.</small></span><span class="rw-go" aria-hidden="true">▶</span></a>
     <p class="tm-msg" id="pushmsg"></p>
     ${opts.bottom || ''}
   </div>`;
@@ -3295,7 +3296,7 @@ function openHow(){
       <div><span>💰</span><p><b>Two jobs a day.</b> Your main job or Ryde, plus one of twenty-plus hustles.</p></div>
       <div><span>⚡</span><p><b>Mind your energy.</b> Work too hard and you collapse.</p></div>
       <div><span>⭐</span><p><b>Family on WhatsApp.</b> Ignore them and the stars climb.</p></div>
-      <div><span>🎮</span><p><b>Little games.</b> The Ryde run, the kitchen rush, Ayo, ludo, draft, 5-aside, and PES.</p></div>
+      <div><span>🎮</span><p><b>Little games.</b> The Ryde run, the kitchen rush, Ayo, ludo, draft, 5-aside, and FIFA.</p></div>
     <a class="primary" href="/week/" style="display:block;text-align:center;text-decoration:none;margin-top:8px">🌆 Play Wahala Week</a>
     <div class="howlist">
       <div><span>🏅</span><p><b>Collect 10 verdicts and 7 badges.</b> Your verdict says how your month went. Badges reward what you did.</p></div>
@@ -3309,7 +3310,7 @@ function rentWeekCard(){
   let w = null; try{ w = JSON.parse(localStorage.getItem('nyhl-week')||'null'); }catch(e){}
   const played = w && w.done === todayStr(), last = w && w.hist && w.hist[w.hist.length-1];
   const head = !w ? 'NEW · Wahala Week' : played ? `Wahala Week · week ${last.w} ${last.pass ? 'passed ✅' : 'failed ❌'}` : `Wahala Week · week ${w.week} is ready`;
-  const sub = !w ? 'One week of real life a day, abroad or at home in Nigeria. Work, hustle, pray, owambe, NEPA, and your aunties watching ★★★★★.' : played ? 'Next week unlocks tomorrow. Your money and your progress carry on.' : 'Your bill is due Friday night. Work, drive, hustle, and keep the Aunty Alert down.';
+  const sub = !w ? 'One week of real life a day, abroad or at home in Nigeria. Work, hustle, pray, owambe, NEPA, and your aunties watching ★★★★★.' : played ? 'Next week unlocks tomorrow. Your money and your progress carry on.' : 'Your bill is due Sunday night. Work, drive, hustle, and keep the Aunty Alert down.';
   return `<a class="rwcard" href="/week/" onclick="track('home-rentweek')"><span class="rw-ic" aria-hidden="true">🌆</span><span><b>${head}</b><small>${sub}</small></span><span class="rw-go" aria-hidden="true">${played ? '✓' : '▶'}</span></a>`;
 }
 /* ---------- Your progress, at a glance ---------- */
