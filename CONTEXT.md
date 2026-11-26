@@ -152,3 +152,8 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 ### Hustles (25 Nov)
 - New 🛠️ Hustles pin (x82, y87), open from week 1, every slot. GIGS_HOME and GIGS_ABROAD hold 20+ small jobs each: [id, icon, name, slots, pay, energy, usual, great, wahala]. gigsNow() shows 5 (4 at night), reshuffled every slot by shared luck. doGig: 20% wahala (half pay), 20% great (+A(40)), else normal. P.gigs counts each job; the third time you become "a regular".
 - Pay per slot is close to the main job, so balance holds. The welcome card no longer lists jobs.
+
+### Every state, county and province (25 Nov)
+- Abroad, the city picker now shows United States, United Kingdom and Canada. Tapping one opens a dropdown with every state (51), county (94, grouped by nation) or province and territory (13), copied from Landed's lists.
+- P.place holds the pick. cityFor(key, place) reshapes the base city (Houston, London, Toronto): name becomes the main town, costs and rent scale by Landed's cost tier, and roads, river and hall become generic. Texas, Greater London and Ontario keep the original cities exactly, so old saves are unchanged.
+- Tests click #placego after .city for abroad picks.

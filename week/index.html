@@ -150,6 +150,8 @@ a{color:var(--gold)}
 .city .fl{grid-row:span 2;font-size:30px}
 .city b{font-family:var(--display);font-weight:400;font-size:16px}
 .city small{color:var(--dim)}
+.placepanel{display:grid;gap:8px;padding:4px 2px 8px}
+.select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--deep);color:var(--ink);font:16px var(--body)}
 .prog{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .prog span{font-size:12px;padding:4px 9px;border-radius:999px;background:var(--block);color:var(--dim)}
 .prog span.on{color:var(--naija)}
@@ -304,6 +306,87 @@ const CITIES = {
   ilorin:{ng:1, name:'Ilorin', flag:'🇳🇬', cur:'₦', k:60, area:'Tanke', landlord:'Alhaji Ajao', mkt:"Iya Kudi's amala and gbegiri", hall:'Kwara Event Centre', water:'ASA RIVER', roads:['UNITY RD','TAIWO RD'], fm:'99.3', blurb:'State of Harmony, quiet streets, and a family that sees everything you do.', boss:'Oga Lukman', bossWord:'my dear', ware:'Kwara Agro Mills'}
 };
 for(const c of Object.values(CITIES)) if(c.ng){ c.rent = Math.round(6000 * c.k / 500) * 500; c.lender = 'SoftCredit loan app'; c.airport = 'the village'; }
+
+/* ---------- every state, county, and province abroad (the same lists as Now You Have Landed) ---------- */
+// [name, costTier 1-3, coldTier 0-2, needsCar 1/0, town, note]
+const US_PLACES = [
+ ["Alabama",1,0,1],["Alaska",3,2,1],["Arizona",2,0,1],["Arkansas",1,0,1],
+ ["California",3,0,1,"","California rent will humble you before your first job does."],
+ ["Colorado",2,1,1],["Connecticut",3,2,1],["Delaware",2,1,1],
+ ["District of Columbia",3,1,0,"Washington","DC is full of policy people. Your Nigerian experience finally makes sense to somebody."],
+ ["Florida",2,0,1,"","Florida is warm like home. The hurricanes are not."],
+ ["Georgia",2,0,1,"","Atlanta's Nigerian parties have better sound systems than most concerts."],
+ ["Hawaii",3,0,1],["Idaho",1,2,1],
+ ["Illinois",2,2,1,"","Chicago wind has strong opinions about your choices."],
+ ["Indiana",1,2,1],["Iowa",1,2,1],["Kansas",1,1,1],["Kentucky",1,1,1],["Louisiana",1,0,1],["Maine",2,2,1],
+ ["Maryland",3,1,1,"","Half the Nigerians you know already live here. The aunties will find you before your mail does."],
+ ["Massachusetts",3,2,1,"","Boston has many universities and many very cold mornings."],
+ ["Michigan",2,2,1],
+ ["Minnesota",2,2,1,"","Minnesota cold is a personality test that lasts until April."],
+ ["Mississippi",1,0,1],["Missouri",1,1,1],["Montana",1,2,1],["Nebraska",1,2,1],
+ ["Nevada",2,0,1,"","In Nevada the desert heat is free and everything else costs money."],
+ ["New Hampshire",2,2,1],
+ ["New Jersey",3,1,1,"","Close enough to New York to pay New York prices."],
+ ["New Mexico",1,1,1],
+ ["New York",3,2,0,"","Nobody needs a car here. Everybody needs patience on the subway."],
+ ["North Carolina",2,1,1],["North Dakota",1,2,1],["Ohio",1,2,1],["Oklahoma",1,1,1],["Oregon",2,1,1],
+ ["Pennsylvania",2,2,1],["Rhode Island",2,2,1],["South Carolina",2,0,1],["South Dakota",1,2,1],["Tennessee",1,1,1],
+ ["Texas",2,0,1,"","Houston has so many Nigerians that you will hear Yoruba at the grocery store before you hear English."],
+ ["Utah",2,1,1],["Vermont",2,2,1],["Virginia",2,1,1],["Washington",3,1,1],["West Virginia",1,1,1],["Wisconsin",1,2,1],["Wyoming",1,2,1]
+];
+const UK_GROUPS = {
+ "England":["Bedfordshire","Berkshire","Bristol","Buckinghamshire","Cambridgeshire","Cheshire","City of London","Cornwall","Cumbria","Derbyshire","Devon","Dorset","Durham","East Riding of Yorkshire","East Sussex","Essex","Gloucestershire","Greater London","Greater Manchester","Hampshire","Herefordshire","Hertfordshire","Isle of Wight","Kent","Lancashire","Leicestershire","Lincolnshire","Merseyside","Norfolk","North Yorkshire","Northamptonshire","Northumberland","Nottinghamshire","Oxfordshire","Rutland","Shropshire","Somerset","South Yorkshire","Staffordshire","Suffolk","Surrey","Tyne and Wear","Warwickshire","West Midlands","West Sussex","West Yorkshire","Wiltshire","Worcestershire"],
+ "Scotland":["Aberdeen City","Aberdeenshire","Angus","Argyll and Bute","City of Edinburgh","Clackmannanshire","Dumfries and Galloway","Dundee City","East Ayrshire","East Dunbartonshire","East Lothian","East Renfrewshire","Falkirk","Fife","Glasgow City","Highland","Inverclyde","Midlothian","Moray","Na h-Eileanan Siar","North Ayrshire","North Lanarkshire","Orkney Islands","Perth and Kinross","Renfrewshire","Scottish Borders","Shetland Islands","South Ayrshire","South Lanarkshire","Stirling","West Dunbartonshire","West Lothian"],
+ "Wales":["Clwyd","Dyfed","Gwent","Gwynedd","Mid Glamorgan","Powys","South Glamorgan","West Glamorgan"],
+ "Northern Ireland":["Antrim","Armagh","Down","Fermanagh","Londonderry","Tyrone"]
+};
+const UK_COST3 = ["Greater London","City of London","Surrey","Berkshire","Oxfordshire","Hertfordshire","Buckinghamshire","Cambridgeshire","City of Edinburgh"];
+const UK_COST1 = ["Durham","Tyne and Wear","Northumberland","Cumbria","Lincolnshire","Na h-Eileanan Siar","Orkney Islands","Shetland Islands","Dumfries and Galloway","Antrim","Armagh","Down","Fermanagh","Londonderry","Tyrone","Dyfed","Powys","Gwynedd","Mid Glamorgan"];
+const UK_TOWN = {"Highland":"Inverness","Fife":"Dunfermline","Kent":"Maidstone","Essex":"Chelmsford","Hampshire":"Southampton","Devon":"Exeter","Lancashire":"Preston","Surrey":"Guildford","Berkshire":"Reading","Oxfordshire":"Oxford","Cambridgeshire":"Cambridge","Suffolk":"Ipswich","East Sussex":"Brighton","Northamptonshire":"Northampton","Bedfordshire":"Luton","Hertfordshire":"Watford","Staffordshire":"Stoke","Derbyshire":"Derby","Cornwall":"Truro","North Yorkshire":"York","Wiltshire":"Swindon","Gloucestershire":"Gloucester","Greater London":"London","City of London":"London","Greater Manchester":"Manchester","West Midlands":"Birmingham","Norfolk":"Norwich","West Yorkshire":"Leeds","South Yorkshire":"Sheffield","Merseyside":"Liverpool","Tyne and Wear":"Newcastle","City of Edinburgh":"Edinburgh","Glasgow City":"Glasgow","South Glamorgan":"Cardiff","Antrim":"Belfast","Bristol":"Bristol","Leicestershire":"Leicester","Nottinghamshire":"Nottingham","Aberdeen City":"Aberdeen","Dundee City":"Dundee"};
+const UK_NOTE = {
+ "Greater London":"London rent costs a pound per breath, and the Nigerian parties never end.",
+ "Greater Manchester":"Manchester rain is a lifestyle you will adopt whether you like it or not.",
+ "West Midlands":"Birmingham has jollof, Nigerian parties every weekend, and a bus network you will learn the hard way.",
+ "Essex":"Essex has so many Nigerians that the aunties have their own economy.",
+ "Kent":"Kent is close enough to London for the prices and far enough for the train fares.",
+ "Norfolk":"Norwich is quiet, green, and very far from any jollof.",
+ "West Yorkshire":"Leeds is friendly, rainy, and full of students who all seem to be named Josh.",
+ "City of Edinburgh":"Edinburgh is beautiful, hilly, and windy enough to remove your gele.",
+ "Glasgow City":"Glasgow is warm in spirit and nothing else.",
+ "South Glamorgan":"Cardiff is calm and kind, and every road sign is in two languages.",
+ "Antrim":"Belfast is small, friendly, and you will meet the same three Nigerians everywhere."
+};
+const CA_PLACES = [
+ ["Alberta",2,2,1,"Calgary","Calgary has a Nigerian community big enough to throw an owambe at minus 30."],
+ ["British Columbia",3,1,0,"Vancouver","Vancouver rain will remind you of the UK. The rent will remind you of nothing you can afford."],
+ ["Manitoba",1,2,1,"Winnipeg","Winnipeg cold makes Maryland look like Lagos."],
+ ["New Brunswick",1,2,1],["Newfoundland and Labrador",1,2,1],["Northwest Territories",2,2,1],
+ ["Nova Scotia",2,2,1,"Halifax","Halifax is friendly, coastal, and windy enough to steal your cap."],
+ ["Nunavut",3,2,1,"","Groceries in Nunavut cost more than your flight."],
+ ["Ontario",3,2,0,"Toronto","Toronto and Brampton rents will make you miss your duplex back home."],
+ ["Prince Edward Island",1,2,1],
+ ["Quebec",2,2,0,"Montreal","Your French stops at bonjour, which gets you exactly one sentence into every conversation."],
+ ["Saskatchewan",1,2,1],["Yukon",2,2,1]
+];
+const COUNTRY = {
+  houston:{flag:'🇺🇸', label:'United States', ask:'Which state?', def:'Texas', list:() => US_PLACES.map(x => ({name:x[0], cost:x[1], town:x[4] || x[0], note:x[5] || ''})), roads:['INTERSTATE','MAIN ST'], water:'RIVER', airport:'the airport', area:t => t},
+  london:{flag:'🇬🇧', label:'United Kingdom', ask:'Which county?', def:'Greater London', list:() => Object.entries(UK_GROUPS).flatMap(([g, ns]) => ns.map(n => ({name:n, group:g, cost:UK_COST3.includes(n) ? 3 : UK_COST1.includes(n) ? 1 : 2, town:UK_TOWN[n] || n, note:UK_NOTE[n] || ''}))), roads:['A ROAD','HIGH ST'], water:'RIVER', airport:'the airport', area:t => t},
+  toronto:{flag:'🇨🇦', label:'Canada', ask:'Which province or territory?', def:'Ontario', list:() => CA_PLACES.map(x => ({name:x[0], cost:x[1], town:x[4] || x[0], note:x[5] || ''})), roads:['HIGHWAY 1','MAIN ST'], water:'RIVER', airport:'the airport', area:t => t}
+};
+const TIER = {1:.82, 2:1, 3:1.18};
+// the city a save lives in: the base city, reshaped for the state, county, or province the player picked
+function cityFor(key, place){
+  const base = CITIES[key], co = COUNTRY[key];
+  if(!co || !place || place === co.def) return base;
+  const pl = co.list().find(p => p.name === place); if(!pl) return base;
+  const basePl = co.list().find(p => p.name === co.def), k = base.k * TIER[pl.cost] / TIER[basePl.cost];
+  return {...base, name:pl.town, place:pl.name, k, rent:Math.round(base.rent * k / base.k / 5) * 5, area:pl.town, hall:`${pl.town} Events Hall`, mkt:`Mama Ngozi's African shop in ${pl.town}`, water:co.water, roads:co.roads, airport:co.airport, blurb:pl.note || base.blurb};
+}
+function placeOptionsW(key){
+  const co = COUNTRY[key], list = co.list(), opt = p => `<option${p.name === co.def ? ' selected' : ''}>${p.name}</option>`;
+  if(key !== 'london') return list.map(opt).join('');
+  return Object.keys(UK_GROUPS).map(g => `<optgroup label="${g}">${list.filter(p => p.group === g).map(opt).join('')}</optgroup>`).join('');
+}
 const NG = () => !!(C && C.ng);
 let C;
 const STEP = () => C.ng ? 500 : 5;
@@ -1300,10 +1383,18 @@ function welcome(){
 function pickCity(){
   const guess = (() => { try{ const d = JSON.parse(localStorage.getItem('nyhl-daily')||'null'); return d && ({us:'houston', uk:'london', ca:'toronto'})[d.rk]; }catch(e){ return null; } })();
   $('obox').innerHTML = `<div class="eyebrow">STEP 1 OF 2</div><div class="big plain" style="font-size:clamp(28px,8vw,40px)">WHERE DO YOU LIVE?</div>
-    <p>Pick your city. You can live abroad or at home in Nigeria.</p>
-    ${[['🌍 Abroad', ([k, c]) => !c.ng], ['🇳🇬 Home in Nigeria', ([k, c]) => c.ng]].map(([h, f]) => `<div class="eyebrow" style="text-align:left;margin-top:6px">${h}</div><div class="cities">${Object.entries(CITIES).filter(f).sort((a, b) => (b[0] === guess) - (a[0] === guess)).map(([k, c]) => `<button class="city" type="button" data-c="${k}"><span class="fl" aria-hidden="true">${c.flag}</span><b>${c.name}</b><small>${c.blurb}</small></button>`).join('')}</div>`).join('')}`;
+    <p>Abroad, pick your country, then your state, county, or province. At home, pick your Nigerian city.</p>
+    ${[['🌍 Abroad', ([k, c]) => !c.ng], ['🇳🇬 Home in Nigeria', ([k, c]) => c.ng]].map(([h, f]) => `<div class="eyebrow" style="text-align:left;margin-top:6px">${h}</div><div class="cities">${Object.entries(CITIES).filter(f).sort((a, b) => (b[0] === guess) - (a[0] === guess)).map(([k, c]) => `<button class="city" type="button" data-c="${k}"><span class="fl" aria-hidden="true">${c.flag}</span><b>${COUNTRY[k] ? COUNTRY[k].label : c.name}</b><small>${COUNTRY[k] ? ({houston:'Any state. Warehouse shifts, an old Corolla, and a car note.', london:'Any county. Care shifts, night buses, and rain that never stops.', toronto:'Any province. Factory shifts and winters at minus 20.'})[k] : c.blurb}</small></button>`).join('')}</div>`).join('')}`;
   $('over').hidden = false;
-  $('obox').querySelectorAll('.city').forEach(b => b.onclick = () => { P = freshLife(b.dataset.c); save(); track('start-' + b.dataset.c); pickMe(); });
+  const start = (key, place) => { P = freshLife(key); if(place){ P.place = place; const c = cityFor(key, place); P.cash = Math.round((c.ng ? 350 : 700) * c.k / 5) * 5; } save(); track('start-' + key); pickMe(); };
+  $('obox').querySelectorAll('.city').forEach(b => b.onclick = () => {
+    const key = b.dataset.c, co = COUNTRY[key];
+    if(!co) return start(key);
+    $('obox').querySelectorAll('.placepanel').forEach(x => x.remove());
+    b.insertAdjacentHTML('afterend', `<div class="placepanel"><label class="eyebrow" for="placesel" style="text-align:left">${co.ask}</label><select id="placesel" class="select">${placeOptionsW(key)}</select><button class="go" type="button" id="placego">Live in ${co.label === 'United Kingdom' ? 'the UK' : co.label === 'United States' ? 'the US' : 'Canada'}</button></div>`);
+    $('placego').onclick = () => start(key, $('placesel').value);
+    $('placesel').focus();
+  });
 }
 function pickMe(){
   $('obox').innerHTML = `<div class="eyebrow">STEP 2 OF 2</div><div class="big plain" style="font-size:clamp(28px,8vw,40px)">WHO ARE YOU?</div>
@@ -1350,9 +1441,9 @@ function weekIntro(){
   $('begin').onclick = () => { $('over').hidden = true; track('play-w' + P.week); dayCard('MONDAY', () => { pins(); hud(); idle(); }); };
 }
 function boot(){
-  C = CITIES[P.city];
+  C = cityFor(P.city, P.place);
   if(!P.me) return pickMe();
-  if(P.evicted){ const keep = {lives:(P.lives||1) + 1, hist:P.hist, streak:P.streak, done:P.done, city:P.city, me:P.me}; P = Object.assign(freshLife(P.city), keep); P.cash = A(200); save(); toast('New start on a cousin\'s sofa. Your lessons came with you.'); }
+  if(P.evicted){ const keep = {lives:(P.lives||1) + 1, hist:P.hist, streak:P.streak, done:P.done, city:P.city, place:P.place, me:P.me}; P = Object.assign(freshLife(P.city), keep); P.cash = A(200); save(); toast('New start on a cousin\'s sofa. Your lessons came with you.'); }
   $('fm').textContent = `📻 ${NG() ? 'NAIJA' : 'JAPA'} FM ${C.fm}`;
   $('radio').textContent = shuffleL('radio', RADIO()).join('   ·   ');
   drawCity();
