@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126060021">
+<meta name="build" content="20261126061708">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -103,6 +103,11 @@ a{color:var(--gold)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center;font-size:12px;color:var(--dim);margin:6px 0 2px}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 .legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.giggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.act.gig{display:grid;justify-items:center;align-content:start;gap:4px;text-align:center;padding:10px 6px}
+.act.gig .gi{font-size:34px;line-height:1.1}
+.act.gig b{font-size:13px;font-weight:600;line-height:1.25}
+.act.gig small{font-size:10px}
 .kindtag{display:inline-block;justify-self:start;width:max-content;font-size:11px;font-weight:700;letter-spacing:.08em;padding:3px 8px;border-radius:999px;border:1px solid currentColor;margin-bottom:4px}
 .pin{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:2px;background:none;border:0;padding:4px;z-index:2}
 .pin .ic{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:24px;background:var(--night);border:2px solid var(--gold);box-shadow:0 0 0 4px rgba(255,201,60,.15),0 6px 14px rgba(0,0,0,.4);transition:transform .15s}
@@ -606,7 +611,7 @@ const PL = () => NG() ? ({
   pray: muslim() ? {x:50,y:11,ic:'🕌',nm:'Mosque', title:'The mosque', who:'Wednesday night lesson and Friday Jumat.'} : {x:50,y:11,ic:'🙏🏾',nm:'Church/mosque', title:'Church or mosque', who:'Wednesday night service, Friday Jumat, and Sunday service.'},
   work: P.office ? {x:82,y:11,ic:'🏦',nm:'New job', title:'Your new job at a bank', who:'Air conditioning that works, suits, and a real pension. Closed at weekends.'}
                  : {x:82,y:11,ic:'💼',nm:'9 to 5', title:C.ware, who:`${C.boss} calls everyone "${C.bossWord}". Salary comes "by the grace of God". Closed at weekends.`},
-  mama:{x:18,y:30,ic:'🍲',nm:'Buka', title:C.mkt, who: P.ajo ? `Hot food, gist, and the ajo book. Your turn to collect is week ${P.ajo.turn}.` : 'Hot food, cold drinks, the freshest gist, and an ajo book under the counter.'},
+  mama:{x:18,y:30,ic:'🍲',nm:'Buka', title:C.mkt, who:'Hot food, cold drinks, and the freshest gist. Your midday stop.'},
   view:{x:82,y:30,ic:'📺',nm:'Viewing centre', title:'Viewing centre and game centre', who:'Premier League on one big screen, PlayStation in the corner, one generator, and fifty men with opinions.'},
   school: P.week >= 3 && !P.office ? {x:18,y:49,ic:'🎓',nm:'ICAN class', title:'Professional exam class', who:`Four evening classes and the banks will look at your CV. You have done ${P.school} of 4.`, fresh:P.week===3} : undefined,
   mech: P.week >= 2 && P.car !== 'fixed' ? {x:50,y:49,ic:'🔧',nm:'Mechanic', title:'Mechanic village', who:'Fourteen mechanics, one car, and everybody has an opinion.', fresh:P.week===2} : undefined,
@@ -617,7 +622,7 @@ const PL = () => NG() ? ({
   home:{x:18,y:87,ic:'🏠',nm:'Your room', title:`Your self-contain in ${C.area}`, who:'Shared compound, one tap, and a neighbour whose generator is louder than a church.'},
   hall:{x:50,y:87,ic:'🎉',nm:'Owambe', title:C.hall, who:'Saturday. Aunty Funmi turns 60 again, and the caterer needs extra hands.'},
   ryde:{x:82,y:87,ic:'🚗',nm:'Ryde', title:'Drive for Ryde', who: P.car==='fixed' ? 'Your car, freshly fixed.' : 'Your old car and a phone mount held on with prayer.'},
-  gigs:{x:50,y:30,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'New jobs every morning, afternoon, and night.'}
+  gigs:{x:50,y:30,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'New jobs every morning and night.'}
 }) : ({
   stall: P.week >= 5 && !P.stall ? {x:18,y:11,ic:'🏪',nm:'Market stall', title:'A stall at the weekend market', who:'Your own small business. Mama Ngozi will only recommend you if she trusts you.', fresh:P.week===5} : undefined,
   work: P.office ? {x:82,y:11,ic:'💼',nm:'Office', title:'Your new office job', who:'A desk, a lanyard, and a coffee machine that judges you.'}
@@ -631,14 +636,14 @@ const PL = () => NG() ? ({
   home:{x:18,y:87,ic:'🏠',nm:'Your flat', title:`Your flat in ${C.area}`, who:'Shared wall with a man who plays the drums at midnight. Your PlayStation is under the TV.'},
   hall:{x:50,y:87,ic:'🎉',nm:'Owambe', title:C.hall, who:'Saturday. Aunty Funmi turns 60 again, and the caterer needs extra hands.'},
   ryde:{x:82,y:87,ic:'🚗',nm:'Ryde', title:'Drive for Ryde', who: P.car==='fixed' ? 'Your car, freshly fixed.' : 'Your old car and a phone mount held on with prayer.'},
-  gigs:{x:50,y:30,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'New jobs every morning, afternoon, and night.'}
+  gigs:{x:50,y:30,ic:'🛠️',nm:'Hustles', title:'Today\'s hustles', who:'New jobs every morning and night.'}
 });
 let places = {};
 const SAT = 5, SUN = 6, NIGHT = 1;
 // every place belongs to one group, shown by its colour on the map
 const KIND = {work:'earn', gigs:'earn', ryde:'earn', stall:'grow', school:'grow', home:'home', mama:'home', pray:'faith', hall:'faith', relax:'play', view:'play', pitch:'play', fuel:'errand', mech:'errand', loan:'errand'};
 // one row per group: earn on top, then home and food, faith and parties, play, errands; growth sits on the right
-const LAYOUT = {work:[18,11], gigs:[50,11], ryde:[82,11], home:[18,30], mama:[50,30], school:[82,30], pray:[18,49], hall:[50,49], stall:[82,49], relax:[18,68], view:[50,68], pitch:[82,68], fuel:[18,87], mech:[50,87], loan:[82,87]};
+const LAYOUT = {work:[18,11], gigs:[50,11], ryde:[82,11], stall:[18,30], mama:[50,30], school:[82,30], pray:[18,49], hall:[50,49], loan:[82,49], relax:[18,68], view:[50,68], pitch:[82,68], fuel:[18,87], home:[50,87], mech:[82,87]};
 const KINDS = {earn:['💰','Earn','#FFC93C'], home:['🍲','Food and home','#2DBE6C'], faith:['🙏🏾','Faith and parties','#FF4F8B'], play:['🎲','Play','#5FA9F8'], errand:['🔧','Errands','#B4AACF'], grow:['🌱','Grow','#2DD4BF']};
 const lastSlot = () => W.day === SUN && W.slot === NIGHT;
 function isOpen(k){
@@ -695,7 +700,7 @@ const coachPin = () => '', coachText = () => '';
 const DAYS = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'], SLOTS = ['MORNING','NIGHT'];
 const SKY = ['linear-gradient(180deg,rgba(255,170,90,.18),rgba(255,170,90,0) 60%)','linear-gradient(180deg,rgba(255,230,170,.08),transparent)','linear-gradient(180deg,rgba(5,3,20,.55),rgba(5,3,20,.35))'];
 const living = () => A(NG() ? 230 : 280) + Math.min(5, Math.floor((P.week - 1) / 3)) * A(15) + famCost();   // food, bus, phone, slowly creeping up
-const ajoDue = () => P.ajo ? A(40) : 0;
+const ajoDue = () => 0;   // no ajo in the game
 const due = () => missionFor(P.week).amount + P.arrears + P.owed + living() + ajoDue();
 function hud(prev){
   const m = missionFor(P.week);
@@ -726,27 +731,38 @@ const sheet = html => { $('sheet').innerHTML = html; };
 // on a phone the choices sit below the map, so bring them into view
 const showSheet = () => setTimeout(() => { const el = $('sheet'), r = el.getBoundingClientRect(); if(r.top > innerHeight * 0.55) el.scrollIntoView({behavior:'smooth', block:'start'}); }, 60);
 const showMap = () => { const m = $('map'); if(m && m.getBoundingClientRect().top < 0) scrollTo({top:0, behavior:'smooth'}); };
+// a whole day at home: rest, no pay, and the night goes too
+function stayHome(){
+  W.at = 'home'; W.slot = NIGHT; pins(); hud();
+  done({energy:50, peace:10}, pickL('stay' + P.week + W.day, ['You stay home all day. Sleep, a long bath, and a film. Your body says thank you.','No work today. You cook, you clean, and you sleep in the afternoon like a child.','A day at home. The phone rings twice, and you let it.']));
+}
 function idle(){
   showMap();
   sheet(`${youHTML(W.at === 'home' ? 'home' : W.at, (myName || 'You') + (W.energy < 30 ? ', tired' : ''))}` + idleText());
-  $('sheet').querySelectorAll('[data-go]').forEach(b => b.onclick = () => { SND.tap(); visit(b.dataset.go); });
+  $('sheet').querySelectorAll('[data-go]').forEach(b => b.onclick = () => { SND.tap(); b.dataset.go === 'stay' ? stayHome() : visit(b.dataset.go); });
 }
 // a short plan: where you could head now, and why
 function planOptions(){
-  const o = [], open = k => places[k] && isOpen(k), night = W.slot === NIGHT;
+  const o = [], open = k => places[k] && isOpen(k), night = W.slot === NIGHT, weekend = W.day >= SAT;
   const pay = NG() ? (P.office ? A(280) : A(165) + (P.promo ? A(40) : 0)) : P.office ? A(250) : (night ? A(160) : A(135)) + (P.promo ? A(50) : 0);
-  if(!workedToday() && open('work')) o.push(['work', P.office ? '🏦' : '💼', night ? 'Night shift' : 'Go to work', `about +${money(pay)}`]);
-  if(!workedToday() && open('ryde') && !night) o.push(['ryde', '🚗', 'Drive Ryde all day', 'fares and tips']);
-  if(!gigToday() && open('gigs')) o.push(['gigs', '🛠️', night ? 'Evening hustle' : 'Pick a hustle', 'extra money on the side']);
-  if(open('hall')) o.push(['hall', '🎉', 'Go to the owambe', 'family pressure down']);
-  if(open('pray')) o.push(['pray', muslim() ? '🕌' : '🙏🏾', muslim() ? 'Go to the mosque' : 'Go to service', 'peace']);
-  if(open('pitch')) o.push(['pitch', '⚽', 'Play 5-aside', 'peace']);
-  if(W.energy < 60 && open('mama')) o.push(['mama', '🍲', NG() ? 'Eat at the buka' : 'Get food at the Naija shop', 'energy back']);
-  if(night && open('relax')) o.push(['relax', '🎲', 'Relax at the Ayo spot', 'peace']);
-  if(night && open('view')) o.push(['view', '📺', 'Watch the match', 'peace']);
-  if(open('school')) o.push(['school', '🎓', 'Go to class', 'a better job later']);
-  o.push(['home', '🏠', night ? 'Go home and rest' : 'Stay in and rest', '+energy']);
-  return o.slice(0, 5);
+  if(!night){
+    if(!workedToday() && open('work')) o.push(['work', P.office ? '🏦' : '💼', P.office ? 'Go to the office' : 'Go to your 9 to 5', `about +${money(pay)}`]);
+    if(!workedToday() && open('ryde')) o.push(['ryde', '🚗', 'Drive Ryde all day', 'fares and tips']);
+    if(!gigToday() && open('gigs')) o.push(['gigs', '🛠️', 'Go to a hustle', 'pick from today\'s jobs']);
+    if(weekend && open('hall')) o.push(['hall', '🎉', 'Go to the owambe', 'family pressure down']);
+    if(open('pray')) o.push(['pray', muslim() ? '🕌' : '🙏🏾', muslim() ? 'Go to the mosque' : 'Go to service', 'peace']);
+    if(weekend && open('pitch')) o.push(['pitch', '⚽', 'Play 5-aside', 'peace']);
+    o.push(['stay', '🏠', 'Stay home all day', 'rest, no pay']);
+  } else {
+    if(!gigToday() && open('gigs')) o.push(['gigs', '🛠️', 'Evening hustle', 'extra money']);
+    if(!workedToday() && open('work')) o.push(['work', '💼', 'Night shift', `about +${money(pay)}`]);
+    if(open('school')) o.push(['school', '🎓', 'Go to class', 'a better job later']);
+    if(open('relax')) o.push(['relax', '🎲', 'Relax at the Ayo spot', 'peace']);
+    if(open('view')) o.push(['view', '📺', 'Watch the match', 'peace']);
+    if(open('pray')) o.push(['pray', muslim() ? '🕌' : '🙏🏾', muslim() ? 'Mosque lesson' : 'Midweek service', 'peace']);
+    o.push(['home', '🏠', 'Go home and rest', '+energy']);
+  }
+  return o.slice(0, 6);
 }
 function idleText(){
   const need = due() - Math.max(0, P.cash), when = `${DAYS[W.day][0] + DAYS[W.day].slice(1).toLowerCase()} ${SLOTS[W.slot].toLowerCase()}`;
@@ -770,7 +786,8 @@ function visit(k){
   }
   W.at = k; hud(); const p = places[k], acts = actions(k);
   const kd = KINDS[KIND[k] || 'errand'];
-  sheet(`${youHTML(k, (myName || 'You') + ' at ' + p.nm.toLowerCase())}<span class="kindtag" style="color:${kd[2]}">${kd[0]} ${kd[1].toUpperCase()}</span><h2>${p.ic} ${p.title}</h2><p class="who">${p.who}</p><div class="acts">${acts.map((a, i) => `<button class="act" type="button" data-i="${i}" ${a.dis ? 'disabled' : ''}><span>${a.l}</span><small>${a.tag || ''}</small></button>`).join('')}<button class="act" type="button" data-i="back"><span>Go somewhere else</span><small>free</small></button></div>`);
+  const grid = k === 'gigs';
+  sheet(`${youHTML(k, (myName || 'You') + ' at ' + p.nm.toLowerCase())}<span class="kindtag" style="color:${kd[2]}">${kd[0]} ${kd[1].toUpperCase()}</span><h2>${p.ic} ${p.title}</h2><p class="who">${p.who}</p>${grid ? `<div class="giggrid">${acts.map((a, i) => { const [ic, ...nm] = a.l.split(' '); return `<button class="act gig" type="button" data-i="${i}" ${a.dis ? 'disabled' : ''}><span class="gi">${ic}</span><b>${nm.join(' ').replace(/ \(cooking game\)/, '')}</b><small>${a.tag || ''}</small></button>`; }).join('')}</div><div class="acts"><button class="act" type="button" data-i="back"><span>Go somewhere else</span><small>free</small></button></div>` : `<div class="acts">${acts.map((a, i) => `<button class="act" type="button" data-i="${i}" ${a.dis ? 'disabled' : ''}><span>${a.l}</span><small>${a.tag || ''}</small></button>`).join('')}<button class="act" type="button" data-i="back"><span>Go somewhere else</span><small>free</small></button></div>`}`);
   $('sheet').querySelectorAll('.act').forEach(b => b.onclick = () => { if(b.dataset.i === 'back'){ idle(); return; } const a = acts[+b.dataset.i]; if(!a.dis) a.run(); });
   showSheet();
 }
@@ -832,8 +849,7 @@ function actions(k){
       ...(!isMan() && W.slot === 0 ? [{l:`🍲 Kitchen shift at ${NG() ? 'the buka' : "Mama Ngozi's"} (cooking game)`, tag: gigToday() ? GIG_TAG : `${money(A(20))} a plate · -30 energy`, dis:gigToday() || W.energy < 20, run:() => startJob(() => cook('buka', r => cookResult('buka', r)), 'gig')}] : []),
       ...gigsNow().map(g => ({l:`${g[1]} ${g[2]}`, tag: gigToday() ? GIG_TAG : `about +${money(A(g[4] * GIG_X))} · ${gigEnergy(g)} energy`, dis:gigToday() || W.energy < Math.min(20, -gigEnergy(g)), run:() => startJob(() => doGig(g), 'gig')}))];
     case 'mama': return [
-      {l:'Buy food for the week', tag:`-${money(A(35))} · +energy`, run:() => { P.mama++; done({cash:-A(35), energy:15, peace:6}, pickL('food' + T(), ng ? ['Rice, beans, and a small tin of tomato paste that costs as much as the rice.','She adds extra meat "because you are a regular". Your heart sings.'] : ['Garri, rice, and stockfish that announces itself to the whole bus.','Mama adds free ugu "because you are too thin". You are not too thin.'])); }},
-      ...(NG() && !P.ajo ? [{l:'Join the ajo', tag:`${money(A(40))} every Sunday · collect ${money(A(240))}`, run:() => { P.ajo = {turn:P.week + 3}; done({peace:4}, `Iya writes your name in the ajo book. Every Saturday you put in ${money(A(40))}. In week ${P.ajo.turn}, the whole pot of ${money(A(240))} is yours.`, '🤝 You joined the ajo'); }}] : []),
+      {l:'Eat lunch', tag:`-${money(A(12))} · +20 energy`, run:() => { P.mama++; done({cash:-A(12), energy:20, peace:6}, pickL('food' + T(), ng ? ['Rice, beans, and a small tin of tomato paste that costs as much as the rice.','She adds extra meat "because you are a regular". Your heart sings.'] : ['Garri, rice, and stockfish that announces itself to the whole bus.','Mama adds free ugu "because you are too thin". You are not too thin.'])); }},
       {l:'Listen to the gossip', tag:'free', run:() => {
         P.mama++;
         if(!W.hustle){ W.hustle = true; return choice(ng ? `She leans in. "My son sells phone accessories at the computer market. Put ${money(A(80))} in, you can get ${money(A(200))} back by Friday. Or not. It is business."` : `Mama leans in. "My nephew sells shea butter online. Put ${money(A(80))} in, you can get ${money(A(200))} back by Friday. Or not. It is business."`, [
@@ -1270,8 +1286,12 @@ function done(fx, text, unlock){
   if(W.energy > 0 && W.energy < 20 && (fx.energy || 0) < 0) setTimeout(() => toast('⚠️ Your body is warning you. Rest before you crash.'), 600); save(); hud(before);
   const last = lastSlot();
   const homeRyde = W.offerHome && W.energy >= 15; W.offerHome = false;
-  sheet(`<div class="mood" aria-hidden="true">${moodFx(fx)}</div><p>${text}</p>${chips(fx)}${unlock ? `<p class="who" style="color:var(--naija)">${unlock}</p>` : ''}<button class="go" type="button" id="next">${last ? 'Sunday night. Time to pay.' : 'Next'}</button>${homeRyde ? '<button class="ghost" type="button" id="rydehome">🚗 Ryde on the way home</button>' : ''}`);
+  const lunch = (workedToday() || gigToday()) && W.lunchDay !== W.day && W.slot === 0 && places.mama && (fx.cash || 0) > 0;
+  sheet(`<div class="mood" aria-hidden="true">${moodFx(fx)}</div><p>${text}</p>${chips(fx)}${unlock ? `<p class="who" style="color:var(--naija)">${unlock}</p>` : ''}<button class="go" type="button" id="next">${last ? 'Sunday night. Time to pay.' : 'Next'}</button>${lunch ? `<button class="ghost" type="button" id="lunch">🍲 Lunch break at the ${NG() ? 'buka' : 'Naija shop'} · -${money(A(12))} · +20 energy</button>` : ''}${homeRyde ? '<button class="ghost" type="button" id="rydehome">🚗 Ryde on the way home</button>' : ''}`);
   $('next').onclick = advance;
+  if(lunch) $('lunch').onclick = () => { W.lunchDay = W.day; P.mama++; const back = W.at; W.at = 'mama'; const fx2 = {cash:-A(12), energy:20, peace:5}, b = apply(fx2); save(); hud(b); SND.tap();
+    sheet(`${youHTML('mama', 'lunch break')}<p>${pickL('lunch' + T(), NG() ? ['Amala, ewedu, and two pieces of meat. Iya asks after your family by name.','Rice and beans with dodo. The gist at the next table is better than the news.','A hot plate of jollof and a cold drink. Twenty minutes of peace.'] : ['Jollof and plantain from the back kitchen. It tastes like home.','Mama Ngozi gives you extra stew "because you are working too hard".','Twenty minutes, one plate of rice, and Nollywood on the old TV.'])}</p>${chips(fx2)}<button class="go" type="button" id="next">${last ? 'Sunday night. Time to pay.' : 'Back to the day'}</button>`);
+    $('next').onclick = advance; showSheet(); };
   if(homeRyde) $('rydehome').onclick = () => { W.log.rides++; W.rodeHome = W.day; drive(res => { const r = rydeCommute(res, true), b = apply(r.fx); W.at = 'home'; save(); hud(b);
     sheet(`<div class="mood" aria-hidden="true">${moodFx(r.fx)}</div><p>${r.text}</p>${chips(r.fx)}<button class="go" type="button" id="next">${last ? 'Sunday night. Time to pay.' : 'Next'}</button>`); $('next').onclick = advance; showSheet(); }); };
   if(unlock) toast(unlock);
@@ -1372,7 +1392,6 @@ function friday(){
   if(famShare()){ apply({cash:famShare()}); extra.push([`Your ${spouse()}'s share of the house`, famShare()]); }
   if(P.stall){ apply({cash:A(120)}); extra.push([NG() ? 'Your POS stand this week' : 'Your stall this week', A(120)]); }
   if(NG() && P.stall && roll('area' + P.week, .3)){ apply({cash:-A(30)}); extra.push(['Area boys came for "owo ile"', -A(30)]); }
-  if(P.ajo && P.week === P.ajo.turn){ apply({cash:A(240)}); extra.push(['🤝 Your ajo turn: the whole pot', A(240)]); P.ajo.turn += 6; }
   const owe = m.amount + P.arrears + living() + ajoDue(), loan = P.owed, before = P.cash;
   const pass = P.cash >= owe + loan;
   let title, line, big, cls;
@@ -1647,7 +1666,6 @@ function weekIntro(){
     <div class="recap">
       <div><span>Due Sunday night</span><span>${money(m.amount)}</span></div>
       <div><span>${livingLabel()}</span><span>${money(living())}</span></div>
-      ${P.ajo ? `<div><span>Ajo contribution</span><span>${money(ajoDue())}</span></div>` : ''}
       ${NG() && m.id !== 'renewal' && P.week >= 3 ? `<div><span>🏠 Yearly rent, week ${nextRenewal(P.week)}</span><span>${money(missionFor(nextRenewal(P.week)).amount)}</span></div>` : ''}
       ${P.arrears ? `<div><span>Arrears from last week</span><span>${money(P.arrears)}</span></div>` : ''}
       <div><span>You have</span><span>${money(P.cash)}</span></div>

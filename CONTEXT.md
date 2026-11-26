@@ -213,3 +213,10 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 - idle() now shows "Monday morning · You need ₦X more by Sunday night · WHERE ARE YOU HEADING?" with up to five options from planOptions() (work with its pay, Ryde all day, a hustle, owambe, service, 5-aside, buka when tired, Ayo or the match at night, class, rest), each with its reason. "Or tap any place on the map."
 - visit() first shows the walk: a dashed trail from where you are to the place, your walking avatar, and "Heading to 9 to 5 · To earn toward light and fuel, due Sunday night", then the place opens after a second (visit.walking guards double taps).
 - Start over (26 Nov): ❓ How to play has a START OVER card (asks once, then clears nyhl-week and reloads to the welcome). The played-today screen links to it.
+
+### Wahala Week: the shape of a day (26 Nov)
+- Morning plan: your 9 to 5, Ryde all day, a hustle, or "Stay home all day" (stayHome(): +50 energy, +10 peace, the night goes too). Weekend mornings add owambe, service, and 5-aside. Night plan: evening hustle, night shift, class, Ayo, the match, mosque or midweek service, go home.
+- The buka is lunch: after a morning job, the result screen offers "🍲 Lunch break at the buka" (-A(12), +20 energy, no time lost, once a day, W.lunchDay). The buka pin also sells lunch.
+- Ajo removed (ajoDue is 0; no join option, payout, or intro line).
+- Map: work, Hustles, and Ryde across the top; your room at the bottom centre, so you walk up to work. LAYOUT holds all positions.
+- Hustles open as a grid of big icon tiles (.giggrid) with name, pay, and energy.
