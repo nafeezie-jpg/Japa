@@ -13,7 +13,7 @@
 <link rel="icon" href="/week/icon-192.png">
 <link rel="apple-touch-icon" href="/week/apple-touch-icon.png">
 <link rel="manifest" href="/week/manifest.json">
-<meta name="build" content="20261126064602">
+<meta name="build" content="20261126064730">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wahala Week">
@@ -639,7 +639,7 @@ const jobEnergy = (night) => { const j = myJob(); return P.office ? Math.max(-30
 // five rows by three columns: [18, 50, 82] x [11, 30, 49, 68, 87]
 const PL = () => NG() ? ({
   stall: P.week >= 5 && !P.stall ? {x:18,y:11,ic:'🏧',nm:'POS stand', title:'A POS stand by the junction', who:'Everybody needs cash. The buka owner will vouch for you if she trusts you.', fresh:P.week===5} : undefined,
-  pray:{x:50,y:11,ic:'🙏🏾',nm:'Church/mosque', title:'Church and mosque', who:'Jumat on Friday, church on Sunday morning, and midweek service or lesson on Wednesday night.'},
+  pray:{x:50,y:11,ic:'🙏🏾',nm:'Church/mosque', title:'Church and mosque', who:'Jumat on Friday, and church on Sunday morning.'},
   work:{x:82,y:11,ic:myJob().ic,nm:'9 to 5', title:(P.office ? 'Senior ' + myJob().name + ', ' : myJob().name + ', ') + myJob().place, who:myJob().who},
   mama:{x:18,y:30,ic:'🍲',nm:'Buka', title:C.mkt, who:'Hot food, cold drinks, and the freshest gist. Your midday stop.'},
   view:{x:82,y:30,ic:'📺',nm:'Viewing centre', title:'Viewing centre and game centre', who:'Premier League on one big screen, PlayStation in the corner, one generator, and fifty men with opinions.'},
@@ -686,7 +686,7 @@ function isOpen(k){
   if(k==='work' && (NG() || !myJob().nights)) return W.slot!==NIGHT;
   if(k==='fuel') return W.slot!==NIGHT;
   if(k==='view') return W.slot===NIGHT || W.day>=SAT;
-  if(k==='pray') return (W.day===2 && W.slot===NIGHT) || (W.day===4 && W.slot===0) || (W.day===SUN && W.slot===0);   // midweek, Friday Jumat, Sunday service
+  if(k==='pray') return (W.day===4 && W.slot===0) || (W.day===SUN && W.slot===0);   // Friday Jumat, Sunday church
   if(k==='mech') return W.slot!==NIGHT;
   return true;
 }
@@ -825,7 +825,6 @@ function planOptions(){
     if(open('school')) o.push(['school', '🎓', 'Go to class', 'a better job later']);
     if(open('relax')) o.push(['relax', '🎲', 'Relax at the Ayo spot', 'peace']);
     if(open('view')) o.push(['view', '📺', 'Watch the match', 'peace']);
-    if(open('pray')) o.push(['pray', '🙏🏾', 'Midweek service or lesson', 'peace']);
     o.push(['home', '🏠', 'Go home and rest', '+energy']);
   }
   return o.slice(0, 6);
@@ -841,7 +840,7 @@ function idleText(){
 }
 function visit(k){
   if(visit.walking) return;
-  if(!isOpen(k)){ toast(k==='pray' ? 'Jumat is on Friday, church is on Sunday morning, and midweek service is Wednesday night.' : k==='hall' ? 'The owambe is on Saturday. Aunty Funmi needs time to tie her gele.' : k==='pitch' ? '5-aside is at the weekend.' : k==='relax' ? 'Baba Sule only sets up the board after work.' : k==='work' ? 'Closed now.' : k==='school' ? 'Classes are at night.' : 'Closed at this hour.'); return; }
+  if(!isOpen(k)){ toast(k==='pray' ? 'Jumat is on Friday, and church is on Sunday morning.' : k==='hall' ? 'The owambe is on Saturday. Aunty Funmi needs time to tie her gele.' : k==='pitch' ? '5-aside is at the weekend.' : k==='relax' ? 'Baba Sule only sets up the board after work.' : k==='work' ? 'Closed now.' : k==='school' ? 'Classes are at night.' : 'Closed at this hour.'); return; }
   if(W.at !== k && !visit.walking){
     const from = places[W.at] || places.home, to = places[k], why = ({earn: due() > P.cash ? `to earn toward ${missionFor(P.week).title.toLowerCase()}, due Sunday night` : 'to put something aside', home: k === 'home' ? 'to rest' : 'to eat', faith: k === 'hall' ? 'to celebrate' : 'to pray', play:'to relax', errand:'to sort something out', grow:'to build your future'})[KIND[k] || 'errand'];
     visit.walking = true; W.at = k; hud(); SND.tap();
@@ -940,7 +939,7 @@ function actions(k){
       const net = {l:'Network after prayers', tag:'maybe a lead', run:() => roll('net' + P.week + W.day, .45) ? go({cash:A(100), peace:6}, `${isMan() ? 'A brother' : 'A sister'} from ${fri ? 'the mosque' : 'church'} needs someone for a small job this week. ${money(A(100))}, cash, no wahala.`) : go({cash:-A(20), peace:-2, stars:-1}, `You are now on the building committee. That means a levy of ${money(A(20))}, starting today.`)};
       if(fri) return [{l:'🕌 Pray Jumat', tag:`-${money(A(10))} sadaqah · +peace · no time lost`, run:() => go({cash:-A(10), peace:12, stars:-1}, pickL('jum' + P.week, ['The khutbah is about patience. It feels like it was written for you.','You pray shoulder to shoulder with strangers and leave feeling light.','After Jumat, an elder asks after your parents by name. You feel seen.']))}, net];
       if(sun) return [{l:'⛪ Sunday service and offering', tag:`-${money(A(15))} · +peace · ★ down`, run:() => go({cash:-A(15), peace:12, stars:-1}, pickL('sun' + P.week, ['The sermon is long, but you leave lighter than you came.','The choir sings your mother\'s favourite hymn. You sing along without shame.','You pray for rent, for your family, and for NEPA. Two out of three would be fine.']))}, net];
-      return [{l:'⛪ Midweek service', tag:'+peace', run:() => done({peace:10, stars:-1}, 'A short service, a long prayer, and you go home calmer.')}, {l:'🕌 Islamic lesson', tag:'+peace', run:() => done({peace:10, stars:-1}, 'The lesson is on gratitude. You count what you have, and it is more than you thought.')}];
+      return [];
     }
     case 'relax': return [
       {l:'Play Ayo with Baba Sule', tag:'+peace · +energy', run:() => ayo(r => ayoResult(r))},
