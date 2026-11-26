@@ -374,8 +374,25 @@ const COUNTRY = {
   toronto:{flag:'🇨🇦', label:'Canada', ask:'Which province or territory?', def:'Ontario', list:() => CA_PLACES.map(x => ({name:x[0], cost:x[1], town:x[4] || x[0], note:x[5] || ''})), roads:['HIGHWAY 1','MAIN ST'], water:'RIVER', airport:'the airport', area:t => t}
 };
 const TIER = {1:.82, 2:1, 3:1.18};
+const NG_STATES = [["Abia","Aba"],["Adamawa","Yola","YOL"],["Akwa Ibom","Uyo","QUO"],["Anambra","Onitsha"],["Bauchi","Bauchi","BCU"],["Bayelsa","Yenagoa"],["Benue","Makurdi","MDI"],["Borno","Maiduguri","MIU"],["Cross River","Calabar","CBQ"],["Delta","Asaba","ABB"],["Ebonyi","Abakaliki"],["Edo","Benin City","BNI"],["Ekiti","Ado-Ekiti"],["Enugu","Enugu","ENU"],["FCT","Abuja","ABV"],["Gombe","Gombe","GMO"],["Imo","Owerri","QOW"],["Jigawa","Dutse"],["Kaduna","Kaduna","KAD"],["Kano","Kano","KAN"],["Katsina","Katsina","DKA"],["Kebbi","Birnin Kebbi"],["Kogi","Lokoja"],["Kwara","Ilorin","ILR"],["Lagos","Lagos","LOS"],["Nasarawa","Lafia"],["Niger","Minna","MXJ"],["Ogun","Abeokuta"],["Ondo","Akure","AKR"],["Osun","Osogbo"],["Oyo","Ibadan","IBA"],["Plateau","Jos","JOS"],["Rivers","Port Harcourt","PHC"],["Sokoto","Sokoto","SKO"],["Taraba","Jalingo"],["Yobe","Damaturu"],["Zamfara","Gusau"]];
+// every state plays on the nearest of the seven home cities, renamed and re-priced
+const NG_EXACT = {Lagos:'lagos', FCT:'abuja', Rivers:'ph', Oyo:'ibadan', Kano:'kano', Enugu:'enugu', Kwara:'ilorin'};
+const NG_BASE = {Ogun:'ibadan', Ondo:'ibadan', Ekiti:'ibadan', Osun:'ibadan', Kogi:'ilorin', Niger:'ilorin', Plateau:'ilorin', Benue:'ilorin', Nasarawa:'ilorin',
+  Kaduna:'kano', Katsina:'kano', Jigawa:'kano', Kebbi:'kano', Sokoto:'kano', Zamfara:'kano', Bauchi:'kano', Gombe:'kano', Yobe:'kano', Borno:'kano', Adamawa:'kano', Taraba:'kano',
+  Anambra:'enugu', Abia:'enugu', Imo:'enugu', Ebonyi:'enugu', Bayelsa:'ph', Delta:'ph', 'Edo':'ph', 'Akwa Ibom':'ph', 'Cross River':'ph'};
+const NG_K = {Ogun:80, Edo:80, Delta:80, 'Akwa Ibom':80, Anambra:75, Imo:70, Abia:70, Kaduna:70, Plateau:65, 'Cross River':70, Bayelsa:75,
+  Jigawa:50, Kebbi:50, Sokoto:55, Zamfara:50, Yobe:50, Borno:55, Taraba:50, Gombe:55, Ebonyi:55, Kogi:55, Niger:55, Benue:55, Nasarawa:55};
+COUNTRY.ng = {flag:'🇳🇬', label:'Nigeria', ask:'Which state?', def:'Lagos', list:() => NG_STATES.map(([n, t]) => ({name:n, town:t}))};
+function ngCity(state){
+  const exact = NG_EXACT[state]; if(exact) return {key:exact, city:CITIES[exact]};
+  const row = NG_STATES.find(r => r[0] === state), key = NG_BASE[state]; if(!row || !key) return {key:'lagos', city:CITIES.lagos};
+  const base = CITIES[key], town = row[1], k = NG_K[state] || base.k;
+  return {key, city:{...base, name:town, place:state, k, rent:Math.round(6000 * k / 500) * 500, area:town, hall:`${town} Event Centre`, water:'THE RIVER', roads:['EXPRESSWAY','MARKET RD'], ware:`A distribution company in ${town}`}};
+}
+
 // the city a save lives in: the base city, reshaped for the state, county, or province the player picked
 function cityFor(key, place){
+  if(CITIES[key] && CITIES[key].ng) return place ? ngCity(place).city : CITIES[key];
   const base = CITIES[key], co = COUNTRY[key];
   if(!co || !place || place === co.def) return base;
   const pl = co.list().find(p => p.name === place); if(!pl) return base;
@@ -384,6 +401,7 @@ function cityFor(key, place){
 }
 function placeOptionsW(key){
   const co = COUNTRY[key], list = co.list(), opt = p => `<option${p.name === co.def ? ' selected' : ''}>${p.name}</option>`;
+  if(key === 'ng') return list.map(p => `<option value="${p.name}"${p.name === co.def ? ' selected' : ''}>${p.name === 'FCT' ? 'FCT, Abuja' : p.name === p.town ? p.name : p.name + ' · ' + p.town}</option>`).join('');
   if(key !== 'london') return list.map(opt).join('');
   return Object.keys(UK_GROUPS).map(g => `<optgroup label="${g}">${list.filter(p => p.group === g).map(opt).join('')}</optgroup>`).join('');
 }
@@ -1382,18 +1400,27 @@ function welcome(){
 }
 function pickCity(){
   const guess = (() => { try{ const d = JSON.parse(localStorage.getItem('nyhl-daily')||'null'); return d && ({us:'houston', uk:'london', ca:'toronto'})[d.rk]; }catch(e){ return null; } })();
+  const btn = (k, flag, label, sub) => `<button class="city" type="button" data-c="${k}"><span class="fl" aria-hidden="true">${flag}</span><b>${label}</b><small>${sub}</small></button>`;
+  const abroad = ['houston','london','toronto'].sort((a, b) => (b === guess) - (a === guess));
+  const SUB = {houston:'Any state. Warehouse shifts, an old Corolla, and a car note.', london:'Any county. Care shifts, night buses, and rain that never stops.', toronto:'Any province. Factory shifts and winters at minus 20.'};
   $('obox').innerHTML = `<div class="eyebrow">STEP 1 OF 2</div><div class="big plain" style="font-size:clamp(28px,8vw,40px)">WHERE DO YOU LIVE?</div>
-    <p>Abroad, pick your country, then your state, county, or province. At home, pick your Nigerian city.</p>
-    ${[['🌍 Abroad', ([k, c]) => !c.ng], ['🇳🇬 Home in Nigeria', ([k, c]) => c.ng]].map(([h, f]) => `<div class="eyebrow" style="text-align:left;margin-top:6px">${h}</div><div class="cities">${Object.entries(CITIES).filter(f).sort((a, b) => (b[0] === guess) - (a[0] === guess)).map(([k, c]) => `<button class="city" type="button" data-c="${k}"><span class="fl" aria-hidden="true">${c.flag}</span><b>${COUNTRY[k] ? COUNTRY[k].label : c.name}</b><small>${COUNTRY[k] ? ({houston:'Any state. Warehouse shifts, an old Corolla, and a car note.', london:'Any county. Care shifts, night buses, and rain that never stops.', toronto:'Any province. Factory shifts and winters at minus 20.'})[k] : c.blurb}</small></button>`).join('')}</div>`).join('')}`;
+    <p>Pick your country, then your state, county, or province.</p>
+    <div class="eyebrow" style="text-align:left;margin-top:6px">🇳🇬 Home</div>
+    <div class="cities">${btn('ng', '🇳🇬', 'Nigeria', 'Any of the 36 states or Abuja. Go-slow, NEPA, owambe, and rent paid by the year.')}</div>
+    <div class="eyebrow" style="text-align:left;margin-top:6px">🌍 Abroad</div>
+    <div class="cities">${abroad.map(k => btn(k, COUNTRY[k].flag, COUNTRY[k].label, SUB[k])).join('')}</div>`;
   $('over').hidden = false;
-  const start = (key, place) => { P = freshLife(key); if(place){ P.place = place; const c = cityFor(key, place); P.cash = Math.round((c.ng ? 350 : 700) * c.k / 5) * 5; } save(); track('start-' + key); pickMe(); };
+  const start = (key, place) => {
+    if(key === 'ng'){ const nc = ngCity(place); key = nc.key; P = freshLife(key); if(!NG_EXACT[place]){ P.place = place; } }
+    else { P = freshLife(key); if(place && place !== COUNTRY[key].def){ P.place = place; const c = cityFor(key, place); P.cash = Math.round(700 * c.k / 5) * 5; } }
+    if(P.place && CITIES[key].ng){ const c = cityFor(key, P.place); P.cash = Math.round(350 * c.k / 500) * 500; }
+    save(); track('start-' + key + (P.place ? '-' + P.place : '')); pickMe();
+  };
   $('obox').querySelectorAll('.city').forEach(b => b.onclick = () => {
     const key = b.dataset.c, co = COUNTRY[key];
-    if(!co) return start(key);
     $('obox').querySelectorAll('.placepanel').forEach(x => x.remove());
-    b.insertAdjacentHTML('afterend', `<div class="placepanel"><label class="eyebrow" for="placesel" style="text-align:left">${co.ask}</label><select id="placesel" class="select">${placeOptionsW(key)}</select><button class="go" type="button" id="placego">Live in ${co.label === 'United Kingdom' ? 'the UK' : co.label === 'United States' ? 'the US' : 'Canada'}</button></div>`);
+    b.insertAdjacentHTML('afterend', `<div class="placepanel"><label class="eyebrow" for="placesel" style="text-align:left">${co.ask}</label><select id="placesel" class="select">${placeOptionsW(key)}</select><button class="go" type="button" id="placego">${key === 'ng' ? 'Live here' : 'Live in ' + ({houston:'the US', london:'the UK', toronto:'Canada'})[key]}</button></div>`);
     $('placego').onclick = () => start(key, $('placesel').value);
-    $('placesel').focus();
   });
 }
 function pickMe(){
