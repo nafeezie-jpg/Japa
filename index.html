@@ -19,7 +19,7 @@
 <meta name="twitter:image" content="https://nowyouhavelanded.com/og.png">
 <link rel="canonical" href="https://nowyouhavelanded.com/">
 <link rel="manifest" href="/manifest.json">
-<meta name="build" content="20261126173602">
+<meta name="build" content="20261127033026">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3008,9 +3008,6 @@ function journalHTML(){
   const date = t => new Date(t).toLocaleDateString('en-GB',{day:'numeric', month:'short'});
   return `${roadHTML()}<div class="j-tiles"><div><b>${Math.max(...h.map(scoreOf))}</b><span>best score</span></div><div><b>${h.length}</b><span>games</span></div><div><b>${avgRent}</b><span>months of rent saved, on average</span></div><div><b>${top[0]}</b><span>your most common verdict</span></div></div>
     <div class="lesson">${tip}</div>
-    ${meter('Peace','peace')}${meter('Home','home')}${meter('Future','future')}
-    <div class="j-meter"><div class="j-top"><b>Cash</b><span class="j-avg">avg ${avgRent} months of rent</span>${h.length>=4?trend('rent'):''}</div>${spark(last.map(g=>g.rent), SAFE_RENT, 0, Math.max(6, ...last.map(g=>g.rent)))}</div>
-    <p class="small">The line on each chart is the healthy mark. Charts show your last ${last.length} game${last.length>1?'s':''}.</p>
     <div class="when">Every game</div>
     <div class="j-list">${h.slice().reverse().map(g=>`<div class="j-row"><div><b>${g.v}</b><span>${date(g.t)} · ${g.trip}${g.daily?' · Today\'s Landing':''}</span></div><div class="j-nums"><b>${scoreOf(g)}</b>/100<br>${g.cur}${g.cash.toLocaleString('en-GB')} · P${g.peace} H${g.home} F${g.future}</div></div>`).join('')}</div>
     <p class="small">Saved on this phone only. Clearing your browser data deletes it.</p>`;
@@ -3561,7 +3558,6 @@ function renderEnd(app){
       ${rec.length?`<div class="receipts">${rec.slice(0,2).map(r=>`<div>${r}</div>`).join('')}</div>`:''}
     ${collectionHTML()}
     <div class="cost"><div class="when">💸 What it cost you</div><div class="cost-chips">${costParts().map(([i,t]) => `<span>${i} ${t}</span>`).join('')}</div></div>
-    ${recapHTML()}
     ${tomorrowHTML({noCd:1, newBadge: S.daily ? (() => { const n = abroadMonths(), firstToday = loadHistory().filter(g=>g.daily && dayKey(g.t)===dayKey(Date.now())).length===1, hit = ABROAD_BADGES.find(([k])=>k===n); return firstToday && hit ? `New title! You are now ${hit[2]==='JJC'?'a JJC':hit[2]} ${hit[3]}` : ''; })() : ''})}
     <div class="score">
       <div class="sc-top"><span class="when">Landing score</span><b>${nowScore()}<small>/100</small></b></div>

@@ -232,3 +232,4 @@ Continuity shipped early, on 3 Nov. The Return Ticket should now be a later-mont
 
 ### Landed: passport stamps replace the collection (26 Nov)
 - She found the 10 verdicts and 7 badges stale and mostly out of reach. The Collection is now 'Your passport': 7 stamps for days played (1, 3, 7, 14, 30, 60, 100; STAMPS, daysPlayed() counts distinct days with a Today's Landing). Home tile and result button say Passport. Verdicts still name each game; badges are no longer shown.
+- Removed (26 Nov): '30 days in pictures' from the result page, and the four progress charts from My games (the journal keeps its tiles, tip, and game list).
